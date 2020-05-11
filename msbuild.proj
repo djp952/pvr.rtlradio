@@ -1,0 +1,380 @@
+<!--
+ Copyright (c) 2020 Michael G. Brehm
+ 
+ Permission is hereby granted, free of charge, to any person obtaining a copy
+ of this software and associated documentation files (the "Software"), to deal
+ in the Software without restriction, including without limitation the rights
+ to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ copies of the Software, and to permit persons to whom the Software is
+ furnished to do so, subject to the following conditions:
+ 
+ The above copyright notice and this permission notice shall be included in all
+ copies or substantial portions of the Software.
+ 
+ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ SOFTWARE.
+-->
+
+<Project DefaultTargets="windows" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <PropertyGroup>
+    <AddonVersion></AddonVersion>             <!-- Set by AddonVersion Target; may override on the command line -->
+    <BashExe>$(WINDIR)\Sysnative\bash.exe</BashExe>
+    <Configuration>Release</Configuration>
+    <DisplayVersion></DisplayVersion>         <!-- Set by AddonVersion Target; may override on the command line -->
+    <KodiBaseline>leia</KodiBaseline>
+    <ZipperExe>depends\build\zuki.build.tools.zipper.exe</ZipperExe>
+  </PropertyGroup>
+
+  <!-- GetFileSize: Gets the size of a file -->
+  <UsingTask TaskName="GetFileSize" TaskFactory="CodeTaskFactory" AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.v4.0.dll">
+    <ParameterGroup>
+      <filename ParameterType="System.String" Required="true"/>
+      <size ParameterType="System.String" Output="true"/>
+    </ParameterGroup>
+    <Task>
+      <Reference Include="System.Core"/>
+      <Code Type="Fragment" Language="cs">
+        <![CDATA[FileInfo fi = new FileInfo(filename); size = fi.Length.ToString();]]>
+      </Code>
+    </Task>
+  </UsingTask>
+
+  <!-- Generates tmp\version\version.txt file and populates AddonVersion and DisplayVersion properties if not specified -->
+  <Target Name="AddonVersion">
+
+    <MSBuild Projects="src\version.vcxproj" Properties="Configuration=$(Configuration);Platform=Win32" Targets="Rebuild" ContinueOnError="false"/>
+    <CreateProperty Condition="'$(AddonVersion)'==''" Value="$([System.IO.File]::ReadAllText('tmp\version\version.txt'))">
+      <Output TaskParameter="Value" PropertyName="AddonVersion" />
+    </CreateProperty>
+    <CreateProperty Condition="'$(DisplayVersion)'==''" Value="$([System.Version]::Parse($(AddonVersion)).ToString(3))">
+      <Output TaskParameter="Value" PropertyName="DisplayVersion" />
+    </CreateProperty>
+
+    <Message Importance="high" Text="AddonVersion = $(AddonVersion)"/>
+    <Message Importance="high" Text="DisplayVersion = $(DisplayVersion)"/>
+
+  </Target>
+
+  <!-- BUILD: WINDOWS-WIN32 -->
+  <Target Name="windows-win32" DependsOnTargets="AddonVersion">
+
+    <MakeDir Directories="out\windows-win32" ContinueOnError="false"/>
+    <MakeDir Directories="out\repository" ContinueOnError="false"/>
+    <MSBuild Projects="src\windows.vcxproj" Properties="Configuration=$(Configuration);Platform=Win32" Targets="Build" ContinueOnError="false"/>
+    <Exec Command="TextTransform.exe template\addon.xml.tt -out tmp\addon-windows-win32.xml -a !!platform!windows-i686 -a !!libraryplatform!windx -a !!libraryname!zuki.pvr.rtlradio.dll -a !!changelogtxt!pvr.rtlradio\changelog.txt -a &quot;!!displayversion!$(DisplayVersion)&quot; -a &quot;!!repomanifest!windows-win32.xml.gz&quot;" ContinueOnError="false"/>
+    <XmlPeek XmlInputPath="tmp\addon-windows-win32.xml" Query="/addon/@version">
+      <Output TaskParameter="Result" PropertyName="PeekedDisplayVersion"/>
+    </XmlPeek>
+    <Error Condition="'$(PeekedDisplayVersion)' != '$(DisplayVersion)'" Text="DisplayVersion build property was not properly applied to the addon.xml text template"/>
+    <Exec Command="$(ZipperExe) create out\zuki.pvr.rtlradio-windows-win32-$(KodiBaseline)-$(AddonVersion).zip manifest\windows-win32.manifest -sha256" ContinueOnError="false"/>
+
+    <GetFileSize filename="out\zuki.pvr.rtlradio-windows-win32-$(KodiBaseline)-$(AddonVersion).zip">
+      <Output PropertyName="ZipFileSize" TaskParameter="size"/>
+    </GetFileSize>
+
+    <Exec Command="TextTransform.exe template\addons.xml.tt -out &quot;tmp\repo-windows-win32.xml&quot; -a !!platform!windows-i686 -a !!libraryplatform!windx -a !!libraryname!zuki.pvr.rtlradio.dll -a &quot;!!displayversion!$(DisplayVersion)&quot; -a !!zipfilesize!$(ZipFileSize) -a !!zipfilename!zuki.pvr.rtlradio-windows-win32-$(KodiBaseline)-$(AddonVersion).zip" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;gzip -cf tmp/repo-windows-win32.xml &gt; out/repository/windows-win32.xml.gz&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;pushd out/repository/ ; sha256sum windows-win32.xml.gz &gt; windows-win32.xml.gz.sha256 ; popd&quot;" ContinueOnError="false"/>
+
+  </Target>
+
+  <!-- BUILD: WINDOWS-X64 -->
+  <Target Name="windows-x64" DependsOnTargets="AddonVersion">
+
+    <MakeDir Directories="out\windows-x64" ContinueOnError="false"/>
+    <MakeDir Directories="out\repository" ContinueOnError="false"/>
+    <MSBuild Projects="src\windows.vcxproj" Properties="Configuration=$(Configuration);Platform=x64" Targets="Build" ContinueOnError="false"/>
+    <Exec Command="TextTransform.exe template\addon.xml.tt -out tmp\addon-windows-x64.xml -a !!platform!windows-x86_64 -a !!libraryplatform!windx -a !!libraryname!zuki.pvr.rtlradio.dll -a !!changelogtxt!pvr.rtlradio\changelog.txt -a &quot;!!displayversion!$(DisplayVersion)&quot; -a &quot;!!repomanifest!windows-x64.xml.gz&quot;" ContinueOnError="false"/>
+    <XmlPeek XmlInputPath="tmp\addon-windows-x64.xml" Query="/addon/@version">
+      <Output TaskParameter="Result" PropertyName="PeekedDisplayVersion"/>
+    </XmlPeek>
+    <Error Condition="'$(PeekedDisplayVersion)' != '$(DisplayVersion)'" Text="DisplayVersion build property was not properly applied to the addon.xml text template"/>
+    <Exec Command="$(ZipperExe) create out\zuki.pvr.rtlradio-windows-x64-$(KodiBaseline)-$(AddonVersion).zip manifest\windows-x64.manifest -sha256" ContinueOnError="false"/>
+
+    <GetFileSize filename="out\zuki.pvr.rtlradio-windows-x64-$(KodiBaseline)-$(AddonVersion).zip">
+      <Output PropertyName="ZipFileSize" TaskParameter="size"/>
+    </GetFileSize>
+
+    <Exec Command="TextTransform.exe template\addons.xml.tt -out &quot;tmp\repo-windows-x64.xml&quot; -a !!platform!windows-x86_64 -a !!libraryplatform!windx -a !!libraryname!zuki.pvr.rtlradio.dll -a &quot;!!displayversion!$(DisplayVersion)&quot; -a !!zipfilesize!$(ZipFileSize) -a !!zipfilename!zuki.pvr.rtlradio-windows-x64-$(KodiBaseline)-$(AddonVersion).zip" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;gzip -cf tmp/repo-windows-x64.xml &gt; out/repository/windows-x64.xml.gz&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;pushd out/repository/ ; sha256sum windows-x64.xml.gz &gt; windows-x64.xml.gz.sha256 ; popd&quot;" ContinueOnError="false"/>
+
+  </Target>
+
+  <!-- BUILD: LINUX-I686 -->
+  <Target Name="linux-i686" DependsOnTargets="AddonVersion">
+
+    <PropertyGroup>
+      <CPPFLAGS>-Wall -Wno-unknown-pragmas -I/usr/include/i386-linux-gnu -Idepends/xbmc/xbmc -Idepends/xbmc/xbmc/linux -Idepends/xbmc/xbmc/addons/kodi-addon-dev-kit/include/kodi -Idepends/libusb/linux-i686/include -Idepends/rtl-sdr/include -Itmp/version -L/usr/lib/gcc/i686-linux-gnu/4.9</CPPFLAGS>
+      <CFLAGS>-DNDEBUG -fPIC -m32</CFLAGS>
+      <CXXFLAGS>-DNDEBUG -fPIC -std=c++11 -m32</CXXFLAGS>
+    </PropertyGroup>
+
+    <MakeDir Directories="out\linux-i686" ContinueOnError="false"/>
+    <MakeDir Directories="out\repository" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;gcc-4.9 $(CPPFLAGS) $(CFLAGS) -Wno-unused-function -Wno-unused-variable -c depends/rtl-sdr/src/librtlsdr.c -o out/linux-i686/librtlsdr.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;gcc-4.9 $(CPPFLAGS) $(CFLAGS) -Wno-unused-function -Wno-unused-variable -c depends/rtl-sdr/src/tuner_e4k.c -o out/linux-i686/tuner_e4k.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;gcc-4.9 $(CPPFLAGS) $(CFLAGS) -Wno-unused-function -Wno-unused-variable -c depends/rtl-sdr/src/tuner_fc0012.c -o out/linux-i686/tuner_fc0012.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;gcc-4.9 $(CPPFLAGS) $(CFLAGS) -Wno-unused-function -Wno-unused-variable -c depends/rtl-sdr/src/tuner_fc0013.c -o out/linux-i686/tuner_fc0013.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;gcc-4.9 $(CPPFLAGS) $(CFLAGS) -Wno-unused-function -Wno-unused-variable -c depends/rtl-sdr/src/tuner_fc2580.c -o out/linux-i686/tuner_fc2580.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;gcc-4.9 $(CPPFLAGS) $(CFLAGS) -Wno-unused-function -Wno-unused-variable -c depends/rtl-sdr/src/tuner_r82xx.c -o out/linux-i686/tuner_r82xx.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;g++-4.9 $(CPPFLAGS) $(CXXFLAGS) -c src/pvr.cpp -o out/linux-i686/pvr.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;g++-4.9 $(CPPFLAGS) $(CXXFLAGS) -c src/rtldevice.cpp -o out/linux-i686/rtldevice.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;g++-4.9 $(CPPFLAGS) $(CXXFLAGS) -shared -Wl,--version-script=exportlist/exportlist.linux out/linux-i686/librtlsdr.o out/linux-i686/pvr.o out/linux-i686/rtldevice.o out/linux-i686/tuner_e4k.o out/linux-i686/tuner_fc0012.o out/linux-i686/tuner_fc0013.o out/linux-i686/tuner_fc2580.o out/linux-i686/tuner_r82xx.o depends/libusb/linux-i686/lib/libusb-1.0.a -ldl -lpthread -o out/linux-i686/zuki.pvr.rtlradio.so&quot;" ContinueOnError="false"/>
+    <Exec Command="TextTransform.exe template\addon.xml.tt -out tmp\addon-linux-i686.xml -a !!platform!linux -a !!libraryplatform!linux -a !!libraryname!zuki.pvr.rtlradio.so -a !!changelogtxt!pvr.rtlradio\changelog.txt -a &quot;!!displayversion!$(DisplayVersion)&quot; -a &quot;!!repomanifest!linux-i686.xml.gz&quot;" ContinueOnError="false"/>
+    <XmlPeek XmlInputPath="tmp\addon-linux-i686.xml" Query="/addon/@version">
+      <Output TaskParameter="Result" PropertyName="PeekedDisplayVersion"/>
+    </XmlPeek>
+    <Error Condition="'$(PeekedDisplayVersion)' != '$(DisplayVersion)'" Text="DisplayVersion build property was not properly applied to the addon.xml text template"/>
+    <Exec Command="$(ZipperExe) create out\zuki.pvr.rtlradio-linux-i686-$(KodiBaseline)-$(AddonVersion).zip manifest\linux-i686.manifest -sha256" ContinueOnError="false"/>
+
+    <GetFileSize filename="out\zuki.pvr.rtlradio-linux-i686-$(KodiBaseline)-$(AddonVersion).zip">
+      <Output PropertyName="ZipFileSize" TaskParameter="size"/>
+    </GetFileSize>
+
+    <Exec Command="TextTransform.exe template\addons.xml.tt -out &quot;tmp\repo-linux-i686.xml&quot; -a !!platform!linux -a !!libraryplatform!linux -a !!libraryname!zuki.pvr.rtlradio.so -a &quot;!!displayversion!$(DisplayVersion)&quot; -a !!zipfilesize!$(ZipFileSize) -a !!zipfilename!zuki.pvr.rtlradio-linux-i686-$(KodiBaseline)-$(AddonVersion).zip" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;gzip -cf tmp/repo-linux-i686.xml &gt; out/repository/linux-i686.xml.gz&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;pushd out/repository/ ; sha256sum linux-i686.xml.gz &gt; linux-i686.xml.gz.sha256 ; popd&quot;" ContinueOnError="false"/>
+
+  </Target>
+
+  <!-- BUILD: LINUX-X86_64 -->
+  <Target Name="linux-x86_64" DependsOnTargets="AddonVersion">
+
+    <PropertyGroup>
+      <CPPFLAGS>-Wall -Wno-unknown-pragmas -I/usr/include/x86_64-linux-gnu -Idepends/xbmc/xbmc -Idepends/xbmc/xbmc/linux -Idepends/xbmc/xbmc/addons/kodi-addon-dev-kit/include/kodi -Idepends/libusb/linux-x86_64/include -Idepends/rtl-sdr/include -Itmp/version -L/usr/lib/gcc/x86_64-linux-gnu/4.9</CPPFLAGS>
+      <CFLAGS>-DNDEBUG -fPIC</CFLAGS>
+      <CXXFLAGS>-DNDEBUG -fPIC -std=c++11</CXXFLAGS>
+    </PropertyGroup>
+
+    <MakeDir Directories="out\linux-x86_64" ContinueOnError="false"/>
+    <MakeDir Directories="out\repository" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;gcc-4.9 $(CPPFLAGS) $(CFLAGS) -Wno-unused-function -Wno-unused-variable -c depends/rtl-sdr/src/librtlsdr.c -o out/linux-x86_64/librtlsdr.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;gcc-4.9 $(CPPFLAGS) $(CFLAGS) -Wno-unused-function -Wno-unused-variable -c depends/rtl-sdr/src/tuner_e4k.c -o out/linux-x86_64/tuner_e4k.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;gcc-4.9 $(CPPFLAGS) $(CFLAGS) -Wno-unused-function -Wno-unused-variable -c depends/rtl-sdr/src/tuner_fc0012.c -o out/linux-x86_64/tuner_fc0012.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;gcc-4.9 $(CPPFLAGS) $(CFLAGS) -Wno-unused-function -Wno-unused-variable -c depends/rtl-sdr/src/tuner_fc0013.c -o out/linux-x86_64/tuner_fc0013.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;gcc-4.9 $(CPPFLAGS) $(CFLAGS) -Wno-unused-function -Wno-unused-variable -c depends/rtl-sdr/src/tuner_fc2580.c -o out/linux-x86_64/tuner_fc2580.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;gcc-4.9 $(CPPFLAGS) $(CFLAGS) -Wno-unused-function -Wno-unused-variable -c depends/rtl-sdr/src/tuner_r82xx.c -o out/linux-x86_64/tuner_r82xx.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;g++-4.9 $(CPPFLAGS) $(CXXFLAGS) -c src/pvr.cpp -o out/linux-x86_64/pvr.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;g++-4.9 $(CPPFLAGS) $(CXXFLAGS) -c src/rtldevice.cpp -o out/linux-x86_64/rtldevice.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;g++-4.9 $(CPPFLAGS) $(CXXFLAGS) -shared -Wl,--version-script=exportlist/exportlist.linux out/linux-x86_64/librtlsdr.o out/linux-x86_64/pvr.o out/linux-x86_64/rtldevice.o out/linux-x86_64/tuner_e4k.o out/linux-x86_64/tuner_fc0012.o out/linux-x86_64/tuner_fc0013.o out/linux-x86_64/tuner_fc2580.o out/linux-x86_64/tuner_r82xx.o depends/libusb/linux-x86_64/lib/libusb-1.0.a -ldl -lpthread -o out/linux-x86_64/zuki.pvr.rtlradio.so&quot;" ContinueOnError="false"/>
+    <Exec Command="TextTransform.exe template\addon.xml.tt -out tmp\addon-linux-x86_64.xml -a !!platform!linux -a !!libraryplatform!linux -a !!libraryname!zuki.pvr.rtlradio.so -a !!changelogtxt!pvr.rtlradio\changelog.txt -a &quot;!!displayversion!$(DisplayVersion)&quot; -a &quot;!!repomanifest!linux-x86_64.xml.gz&quot;" ContinueOnError="false"/>
+    <XmlPeek XmlInputPath="tmp\addon-linux-x86_64.xml" Query="/addon/@version">
+      <Output TaskParameter="Result" PropertyName="PeekedDisplayVersion"/>
+    </XmlPeek>
+    <Error Condition="'$(PeekedDisplayVersion)' != '$(DisplayVersion)'" Text="DisplayVersion build property was not properly applied to the addon.xml text template"/>
+    <Exec Command="$(ZipperExe) create out\zuki.pvr.rtlradio-linux-x86_64-$(KodiBaseline)-$(AddonVersion).zip manifest\linux-x86_64.manifest -sha256" ContinueOnError="false"/>
+
+    <GetFileSize filename="out\zuki.pvr.rtlradio-linux-x86_64-$(KodiBaseline)-$(AddonVersion).zip">
+      <Output PropertyName="ZipFileSize" TaskParameter="size"/>
+    </GetFileSize>
+
+    <Exec Command="TextTransform.exe template\addons.xml.tt -out &quot;tmp\repo-linux-x86_64.xml&quot; -a !!platform!linux -a !!libraryplatform!linux -a !!libraryname!zuki.pvr.rtlradio.so -a &quot;!!displayversion!$(DisplayVersion)&quot; -a !!zipfilesize!$(ZipFileSize) -a !!zipfilename!zuki.pvr.rtlradio-linux-x86_64-$(KodiBaseline)-$(AddonVersion).zip" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;gzip -cf tmp/repo-linux-x86_64.xml &gt; out/repository/linux-x86_64.xml.gz&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;pushd out/repository/ ; sha256sum linux-x86_64.xml.gz &gt; linux-x86_64.xml.gz.sha256 ; popd&quot;" ContinueOnError="false"/>
+
+  </Target>
+
+  <!-- BUILD: LINUX-ARMEL -->
+  <Target Name="linux-armel" DependsOnTargets="AddonVersion">
+
+    <PropertyGroup>
+      <CPPFLAGS>-Wall -Wno-unknown-pragmas -Idepends/xbmc/xbmc -Idepends/xbmc/xbmc/linux -Idepends/xbmc/xbmc/addons/kodi-addon-dev-kit/include/kodi -Idepends/libusb/linux-armel/include -Idepends/rtl-sdr/include -Itmp/version</CPPFLAGS>
+      <CFLAGS>-DNDEBUG -fPIC</CFLAGS>
+      <CXXFLAGS>-DNDEBUG -fPIC -std=c++11</CXXFLAGS>
+    </PropertyGroup>
+
+    <MakeDir Directories="out\linux-armel" ContinueOnError="false"/>
+    <MakeDir Directories="out\repository" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;arm-linux-gnueabi-gcc-4.9 $(CPPFLAGS) $(CFLAGS) -Wno-unused-function -Wno-unused-variable -c depends/rtl-sdr/src/librtlsdr.c -o out/linux-armel/librtlsdr.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;arm-linux-gnueabi-gcc-4.9 $(CPPFLAGS) $(CFLAGS) -Wno-unused-function -Wno-unused-variable -c depends/rtl-sdr/src/tuner_e4k.c -o out/linux-armel/tuner_e4k.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;arm-linux-gnueabi-gcc-4.9 $(CPPFLAGS) $(CFLAGS) -Wno-unused-function -Wno-unused-variable -c depends/rtl-sdr/src/tuner_fc0012.c -o out/linux-armel/tuner_fc0012.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;arm-linux-gnueabi-gcc-4.9 $(CPPFLAGS) $(CFLAGS) -Wno-unused-function -Wno-unused-variable -c depends/rtl-sdr/src/tuner_fc0013.c -o out/linux-armel/tuner_fc0013.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;arm-linux-gnueabi-gcc-4.9 $(CPPFLAGS) $(CFLAGS) -Wno-unused-function -Wno-unused-variable -c depends/rtl-sdr/src/tuner_fc2580.c -o out/linux-armel/tuner_fc2580.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;arm-linux-gnueabi-gcc-4.9 $(CPPFLAGS) $(CFLAGS) -Wno-unused-function -Wno-unused-variable -c depends/rtl-sdr/src/tuner_r82xx.c -o out/linux-armel/tuner_r82xx.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;arm-linux-gnueabi-g++-4.9 $(CPPFLAGS) $(CXXFLAGS) -c src/pvr.cpp -o out/linux-armel/pvr.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;arm-linux-gnueabi-g++-4.9 $(CPPFLAGS) $(CXXFLAGS) -c src/rtldevice.cpp -o out/linux-armel/rtldevice.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;arm-linux-gnueabi-g++-4.9 $(CPPFLAGS) $(CXXFLAGS) -shared -Wl,--version-script=exportlist/exportlist.linux out/linux-armel/librtlsdr.o out/linux-armel/pvr.o out/linux-armel/rtldevice.o out/linux-armel/tuner_e4k.o out/linux-armel/tuner_fc0012.o out/linux-armel/tuner_fc0013.o out/linux-armel/tuner_fc2580.o out/linux-armel/tuner_r82xx.o depends/libusb/linux-armel/lib/libusb-1.0.a -ldl -lpthread -o out/linux-armel/zuki.pvr.rtlradio.so&quot;" ContinueOnError="false"/>
+    <Exec Command="TextTransform.exe template\addon.xml.tt -out tmp\addon-linux-armel.xml -a !!platform!linux -a !!libraryplatform!linux -a !!libraryname!zuki.pvr.rtlradio.so -a !!changelogtxt!pvr.rtlradio\changelog.txt -a &quot;!!displayversion!$(DisplayVersion)&quot; -a &quot;!!repomanifest!linux-armel.xml.gz&quot;" ContinueOnError="false"/>
+    <XmlPeek XmlInputPath="tmp\addon-linux-armel.xml" Query="/addon/@version">
+      <Output TaskParameter="Result" PropertyName="PeekedDisplayVersion"/>
+    </XmlPeek>
+    <Error Condition="'$(PeekedDisplayVersion)' != '$(DisplayVersion)'" Text="DisplayVersion build property was not properly applied to the addon.xml text template"/>
+    <Exec Command="$(ZipperExe) create out\zuki.pvr.rtlradio-linux-armel-$(KodiBaseline)-$(AddonVersion).zip manifest\linux-armel.manifest -sha256" ContinueOnError="false"/>
+
+    <GetFileSize filename="out\zuki.pvr.rtlradio-linux-armel-$(KodiBaseline)-$(AddonVersion).zip">
+      <Output PropertyName="ZipFileSize" TaskParameter="size"/>
+    </GetFileSize>
+
+    <Exec Command="TextTransform.exe template\addons.xml.tt -out &quot;tmp\repo-linux-armel.xml&quot; -a !!platform!linux -a !!libraryplatform!linux -a !!libraryname!zuki.pvr.rtlradio.so -a &quot;!!displayversion!$(DisplayVersion)&quot; -a !!zipfilesize!$(ZipFileSize) -a !!zipfilename!zuki.pvr.rtlradio-linux-armel-$(KodiBaseline)-$(AddonVersion).zip" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;gzip -cf tmp/repo-linux-armel.xml &gt; out/repository/linux-armel.xml.gz&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;pushd out/repository/ ; sha256sum linux-armel.xml.gz &gt; linux-armel.xml.gz.sha256 ; popd&quot;" ContinueOnError="false"/>
+
+  </Target>
+
+  <!-- BUILD: LINUX-ARMHF -->
+  <Target Name="linux-armhf" DependsOnTargets="AddonVersion">
+
+    <PropertyGroup>
+      <CPPFLAGS>-Wall -Wno-unknown-pragmas -Idepends/xbmc/xbmc -Idepends/xbmc/xbmc/linux -Idepends/xbmc/xbmc/addons/kodi-addon-dev-kit/include/kodi -Idepends/libusb/linux-armhf/include -Idepends/rtl-sdr/include -Itmp/version</CPPFLAGS>
+      <CFLAGS>-DNDEBUG -fPIC</CFLAGS>
+      <CXXFLAGS>-DNDEBUG -fPIC -std=c++11</CXXFLAGS>
+    </PropertyGroup>
+
+    <MakeDir Directories="out\linux-armhf" ContinueOnError="false"/>
+    <MakeDir Directories="out\repository" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;arm-linux-gnueabihf-gcc-4.9 $(CPPFLAGS) $(CFLAGS) -Wno-unused-function -Wno-unused-variable -c depends/rtl-sdr/src/librtlsdr.c -o out/linux-armhf/librtlsdr.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;arm-linux-gnueabihf-gcc-4.9 $(CPPFLAGS) $(CFLAGS) -Wno-unused-function -Wno-unused-variable -c depends/rtl-sdr/src/tuner_e4k.c -o out/linux-armhf/tuner_e4k.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;arm-linux-gnueabihf-gcc-4.9 $(CPPFLAGS) $(CFLAGS) -Wno-unused-function -Wno-unused-variable -c depends/rtl-sdr/src/tuner_fc0012.c -o out/linux-armhf/tuner_fc0012.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;arm-linux-gnueabihf-gcc-4.9 $(CPPFLAGS) $(CFLAGS) -Wno-unused-function -Wno-unused-variable -c depends/rtl-sdr/src/tuner_fc0013.c -o out/linux-armhf/tuner_fc0013.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;arm-linux-gnueabihf-gcc-4.9 $(CPPFLAGS) $(CFLAGS) -Wno-unused-function -Wno-unused-variable -c depends/rtl-sdr/src/tuner_fc2580.c -o out/linux-armhf/tuner_fc2580.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;arm-linux-gnueabihf-gcc-4.9 $(CPPFLAGS) $(CFLAGS) -Wno-unused-function -Wno-unused-variable -c depends/rtl-sdr/src/tuner_r82xx.c -o out/linux-armhf/tuner_r82xx.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;arm-linux-gnueabihf-g++-4.9 $(CPPFLAGS) $(CXXFLAGS) -c src/pvr.cpp -o out/linux-armhf/pvr.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;arm-linux-gnueabihf-g++-4.9 $(CPPFLAGS) $(CXXFLAGS) -c src/rtldevice.cpp -o out/linux-armhf/rtldevice.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;arm-linux-gnueabihf-g++-4.9 $(CPPFLAGS) $(CXXFLAGS) -shared -Wl,--version-script=exportlist/exportlist.linux out/linux-armhf/librtlsdr.o out/linux-armhf/pvr.o out/linux-armhf/rtldevice.o out/linux-armhf/tuner_e4k.o out/linux-armhf/tuner_fc0012.o out/linux-armhf/tuner_fc0013.o out/linux-armhf/tuner_fc2580.o out/linux-armhf/tuner_r82xx.o depends/libusb/linux-armhf/lib/libusb-1.0.a -ldl -lpthread -o out/linux-armhf/zuki.pvr.rtlradio.so&quot;" ContinueOnError="false"/>
+    <Exec Command="TextTransform.exe template\addon.xml.tt -out tmp\addon-linux-armhf.xml -a !!platform!linux -a !!libraryplatform!linux -a !!libraryname!zuki.pvr.rtlradio.so -a !!changelogtxt!pvr.rtlradio\changelog.txt -a &quot;!!displayversion!$(DisplayVersion)&quot; -a &quot;!!repomanifest!linux-armhf.xml.gz&quot;" ContinueOnError="false"/>
+    <XmlPeek XmlInputPath="tmp\addon-linux-armhf.xml" Query="/addon/@version">
+      <Output TaskParameter="Result" PropertyName="PeekedDisplayVersion"/>
+    </XmlPeek>
+    <Error Condition="'$(PeekedDisplayVersion)' != '$(DisplayVersion)'" Text="DisplayVersion build property was not properly applied to the addon.xml text template"/>
+    <Exec Command="$(ZipperExe) create out\zuki.pvr.rtlradio-linux-armhf-$(KodiBaseline)-$(AddonVersion).zip manifest\linux-armhf.manifest -sha256" ContinueOnError="false"/>
+
+    <GetFileSize filename="out\zuki.pvr.rtlradio-linux-armhf-$(KodiBaseline)-$(AddonVersion).zip">
+      <Output PropertyName="ZipFileSize" TaskParameter="size"/>
+    </GetFileSize>
+
+    <Exec Command="TextTransform.exe template\addons.xml.tt -out &quot;tmp\repo-linux-armhf.xml&quot; -a !!platform!linux -a !!libraryplatform!linux -a !!libraryname!zuki.pvr.rtlradio.so -a &quot;!!displayversion!$(DisplayVersion)&quot; -a !!zipfilesize!$(ZipFileSize) -a !!zipfilename!zuki.pvr.rtlradio-linux-armhf-$(KodiBaseline)-$(AddonVersion).zip" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;gzip -cf tmp/repo-linux-armhf.xml &gt; out/repository/linux-armhf.xml.gz&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;pushd out/repository/ ; sha256sum linux-armhf.xml.gz &gt; linux-armhf.xml.gz.sha256 ; popd&quot;" ContinueOnError="false"/>
+
+  </Target>
+
+  <!-- BUILD: LINUX-AARCH64 -->
+  <Target Name="linux-aarch64" DependsOnTargets="AddonVersion">
+
+    <PropertyGroup>
+      <CPPFLAGS>-Wall -Wno-unknown-pragmas -Idepends/xbmc/xbmc -Idepends/xbmc/xbmc/linux -Idepends/xbmc/xbmc/addons/kodi-addon-dev-kit/include/kodi -Idepends/libusb/linux-aarch64/include -Idepends/rtl-sdr/include -Itmp/version</CPPFLAGS>
+      <CFLAGS>-DNDEBUG -fPIC</CFLAGS>
+      <CXXFLAGS>-DNDEBUG -fPIC -std=c++11</CXXFLAGS>
+    </PropertyGroup>
+
+    <MakeDir Directories="out\linux-aarch64" ContinueOnError="false"/>
+    <MakeDir Directories="out\repository" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;aarch64-linux-gnu-gcc-4.9 $(CPPFLAGS) $(CFLAGS) -Wno-unused-function -Wno-unused-variable -c depends/rtl-sdr/src/librtlsdr.c -o out/linux-aarch64/librtlsdr.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;aarch64-linux-gnu-gcc-4.9 $(CPPFLAGS) $(CFLAGS) -Wno-unused-function -Wno-unused-variable -c depends/rtl-sdr/src/tuner_e4k.c -o out/linux-aarch64/tuner_e4k.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;aarch64-linux-gnu-gcc-4.9 $(CPPFLAGS) $(CFLAGS) -Wno-unused-function -Wno-unused-variable -c depends/rtl-sdr/src/tuner_fc0012.c -o out/linux-aarch64/tuner_fc0012.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;aarch64-linux-gnu-gcc-4.9 $(CPPFLAGS) $(CFLAGS) -Wno-unused-function -Wno-unused-variable -c depends/rtl-sdr/src/tuner_fc0013.c -o out/linux-aarch64/tuner_fc0013.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;aarch64-linux-gnu-gcc-4.9 $(CPPFLAGS) $(CFLAGS) -Wno-unused-function -Wno-unused-variable -c depends/rtl-sdr/src/tuner_fc2580.c -o out/linux-aarch64/tuner_fc2580.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;aarch64-linux-gnu-gcc-4.9 $(CPPFLAGS) $(CFLAGS) -Wno-unused-function -Wno-unused-variable -c depends/rtl-sdr/src/tuner_r82xx.c -o out/linux-aarch64/tuner_r82xx.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;aarch64-linux-gnu-g++-4.9 $(CPPFLAGS) $(CXXFLAGS) -c src/pvr.cpp -o out/linux-aarch64/pvr.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;aarch64-linux-gnu-g++-4.9 $(CPPFLAGS) $(CXXFLAGS) -c src/rtldevice.cpp -o out/linux-aarch64/rtldevice.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;aarch64-linux-gnu-g++-4.9 $(CPPFLAGS) $(CXXFLAGS) -shared -Wl,--version-script=exportlist/exportlist.linux out/linux-aarch64/librtlsdr.o out/linux-aarch64/pvr.o out/linux-aarch64/rtldevice.o out/linux-aarch64/tuner_e4k.o out/linux-aarch64/tuner_fc0012.o out/linux-aarch64/tuner_fc0013.o out/linux-aarch64/tuner_fc2580.o out/linux-aarch64/tuner_r82xx.o depends/libusb/linux-aarch64/lib/libusb-1.0.a -ldl -lpthread -o out/linux-aarch64/zuki.pvr.rtlradio.so&quot;" ContinueOnError="false"/>
+    <Exec Command="TextTransform.exe template\addon.xml.tt -out tmp\addon-linux-aarch64.xml -a !!platform!linux -a !!libraryplatform!linux -a !!libraryname!zuki.pvr.rtlradio.so -a !!changelogtxt!pvr.rtlradio\changelog.txt -a &quot;!!displayversion!$(DisplayVersion)&quot; -a &quot;!!repomanifest!linux-aarch64.xml.gz&quot;" ContinueOnError="false"/>
+    <XmlPeek XmlInputPath="tmp\addon-linux-aarch64.xml" Query="/addon/@version">
+      <Output TaskParameter="Result" PropertyName="PeekedDisplayVersion"/>
+    </XmlPeek>
+    <Error Condition="'$(PeekedDisplayVersion)' != '$(DisplayVersion)'" Text="DisplayVersion build property was not properly applied to the addon.xml text template"/>
+    <Exec Command="$(ZipperExe) create out\zuki.pvr.rtlradio-linux-aarch64-$(KodiBaseline)-$(AddonVersion).zip manifest\linux-aarch64.manifest -sha256" ContinueOnError="false"/>
+
+    <GetFileSize filename="out\zuki.pvr.rtlradio-linux-aarch64-$(KodiBaseline)-$(AddonVersion).zip">
+      <Output PropertyName="ZipFileSize" TaskParameter="size"/>
+    </GetFileSize>
+
+    <Exec Command="TextTransform.exe template\addons.xml.tt -out &quot;tmp\repo-linux-aarch64.xml&quot; -a !!platform!linux -a !!libraryplatform!linux -a !!libraryname!zuki.pvr.rtlradio.so -a &quot;!!displayversion!$(DisplayVersion)&quot; -a !!zipfilesize!$(ZipFileSize) -a !!zipfilename!zuki.pvr.rtlradio-linux-aarch64-$(KodiBaseline)-$(AddonVersion).zip" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;gzip -cf tmp/repo-linux-aarch64.xml &gt; out/repository/linux-aarch64.xml.gz&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;pushd out/repository/ ; sha256sum linux-aarch64.xml.gz &gt; linux-aarch64.xml.gz.sha256 ; popd&quot;" ContinueOnError="false"/>
+
+  </Target>
+
+  <!-- BUILD: RASPBIAN-ARMHF -->
+  <Target Name="raspbian-armhf" DependsOnTargets="AddonVersion">
+
+    <PropertyGroup>
+      <ENV>PATH+=:~/raspberrypi/arm-bcm2708/gcc-linaro-arm-linux-gnueabihf-raspbian-x64/bin</ENV>
+      <CPPFLAGS>-Wall -Wno-unknown-pragmas -Idepends/xbmc/xbmc -Idepends/xbmc/xbmc/linux -Idepends/xbmc/xbmc/addons/kodi-addon-dev-kit/include/kodi -Idepends/libusb/raspbian-armhf/include -Idepends/rtl-sdr/include -Itmp/version</CPPFLAGS>
+      <CFLAGS>-DNDEBUG -fPIC</CFLAGS>
+      <CXXFLAGS>-DNDEBUG -fPIC -std=c++11</CXXFLAGS>
+    </PropertyGroup>
+
+    <MakeDir Directories="out\raspbian-armhf" ContinueOnError="false"/>
+    <MakeDir Directories="out\repository" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;$(ENV) arm-linux-gnueabihf-gcc $(CPPFLAGS) $(CFLAGS) -Wno-unused-function -Wno-unused-variable -c depends/rtl-sdr/src/librtlsdr.c -o out/raspbian-armhf/librtlsdr.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;$(ENV) arm-linux-gnueabihf-gcc $(CPPFLAGS) $(CFLAGS) -Wno-unused-function -Wno-unused-variable -c depends/rtl-sdr/src/tuner_e4k.c -o out/raspbian-armhf/tuner_e4k.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;$(ENV) arm-linux-gnueabihf-gcc $(CPPFLAGS) $(CFLAGS) -Wno-unused-function -Wno-unused-variable -c depends/rtl-sdr/src/tuner_fc0012.c -o out/raspbian-armhf/tuner_fc0012.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;$(ENV) arm-linux-gnueabihf-gcc $(CPPFLAGS) $(CFLAGS) -Wno-unused-function -Wno-unused-variable -c depends/rtl-sdr/src/tuner_fc0013.c -o out/raspbian-armhf/tuner_fc0013.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;$(ENV) arm-linux-gnueabihf-gcc $(CPPFLAGS) $(CFLAGS) -Wno-unused-function -Wno-unused-variable -c depends/rtl-sdr/src/tuner_fc2580.c -o out/raspbian-armhf/tuner_fc2580.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;$(ENV) arm-linux-gnueabihf-gcc $(CPPFLAGS) $(CFLAGS) -Wno-unused-function -Wno-unused-variable -c depends/rtl-sdr/src/tuner_r82xx.c -o out/raspbian-armhf/tuner_r82xx.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;$(ENV) arm-linux-gnueabihf-g++ $(CPPFLAGS) $(CXXFLAGS) -c src/pvr.cpp -o out/raspbian-armhf/pvr.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;$(ENV) arm-linux-gnueabihf-g++ $(CPPFLAGS) $(CXXFLAGS) -c src/rtldevice.cpp -o out/raspbian-armhf/rtldevice.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;$(ENV) arm-linux-gnueabihf-g++ $(CPPFLAGS) $(CXXFLAGS) -shared -Wl,--version-script=exportlist/exportlist.raspbian out/raspbian-armhf/librtlsdr.o out/raspbian-armhf/pvr.o out/raspbian-armhf/rtldevice.o out/raspbian-armhf/tuner_e4k.o out/raspbian-armhf/tuner_fc0012.o out/raspbian-armhf/tuner_fc0013.o out/raspbian-armhf/tuner_fc2580.o out/raspbian-armhf/tuner_r82xx.o depends/libusb/raspbian-armhf/lib/libusb-1.0.a -ldl -lpthread -o out/raspbian-armhf/zuki.pvr.rtlradio.so&quot;" ContinueOnError="false"/>
+    <Exec Command="TextTransform.exe template\addon.xml.tt -out tmp\addon-raspbian-armhf.xml -a !!platform!linux -a !!libraryplatform!linux -a !!libraryname!zuki.pvr.rtlradio.so -a !!changelogtxt!pvr.rtlradio\changelog.txt -a &quot;!!displayversion!$(DisplayVersion)&quot; -a &quot;!!repomanifest!raspbian-armhf.xml.gz&quot;" ContinueOnError="false"/>
+    <XmlPeek XmlInputPath="tmp\addon-raspbian-armhf.xml" Query="/addon/@version">
+      <Output TaskParameter="Result" PropertyName="PeekedDisplayVersion"/>
+    </XmlPeek>
+    <Error Condition="'$(PeekedDisplayVersion)' != '$(DisplayVersion)'" Text="DisplayVersion build property was not properly applied to the addon.xml text template"/>
+    <Exec Command="$(ZipperExe) create out\zuki.pvr.rtlradio-raspbian-armhf-$(KodiBaseline)-$(AddonVersion).zip manifest\raspbian-armhf.manifest -sha256" ContinueOnError="false"/>
+
+    <GetFileSize filename="out\zuki.pvr.rtlradio-raspbian-armhf-$(KodiBaseline)-$(AddonVersion).zip">
+      <Output PropertyName="ZipFileSize" TaskParameter="size"/>
+    </GetFileSize>
+
+    <Exec Command="TextTransform.exe template\addons.xml.tt -out &quot;tmp\repo-raspbian-armhf.xml&quot; -a !!platform!linux -a !!libraryplatform!linux -a !!libraryname!zuki.pvr.rtlradio.so -a &quot;!!displayversion!$(DisplayVersion)&quot; -a !!zipfilesize!$(ZipFileSize) -a !!zipfilename!zuki.pvr.rtlradio-raspbian-armhf-$(KodiBaseline)-$(AddonVersion).zip" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;gzip -cf tmp/repo-raspbian-armhf.xml &gt; out/repository/raspbian-armhf.xml.gz&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;pushd out/repository/ ; sha256sum raspbian-armhf.xml.gz &gt; raspbian-armhf.xml.gz.sha256 ; popd&quot;" ContinueOnError="false"/>
+
+  </Target>
+
+  <!-- BUILD: OSX-X86_64 -->
+  <Target Name="osx-x86_64" DependsOnTargets="AddonVersion">
+
+    <PropertyGroup>
+      <ENV>OSXCROSS_NO_EXTENSION_WARNINGS=1 PATH+=:~/osxcross/target/bin</ENV>
+      <CPPFLAGS>-mmacosx-version-min=10.9 -Wall -Wno-unknown-pragmas -Idepends/xbmc/xbmc -Idepends/xbmc/xbmc/linux -Idepends/xbmc/xbmc/addons/kodi-addon-dev-kit/include/kodi -Idepends/libusb/osx-x86_64/include -Idepends/rtl-sdr/include -Itmp/version</CPPFLAGS>
+      <CFLAGS>-DNDEBUG -fPIC -stdlib=libc++</CFLAGS>
+      <CXXFLAGS>-DNDEBUG -fPIC -std=c++11 -stdlib=libc++</CXXFLAGS>
+    </PropertyGroup>
+
+    <MakeDir Directories="out\osx-x86_64" ContinueOnError="false"/>
+    <MakeDir Directories="out\repository" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;$(ENV) x86_64-apple-darwin15-clang $(CPPFLAGS) $(CFLAGS) -Wno-unused-function -Wno-unused-variable -c depends/rtl-sdr/src/librtlsdr.c -o out/osx-x86_64/librtlsdr.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;$(ENV) x86_64-apple-darwin15-clang $(CPPFLAGS) $(CFLAGS) -Wno-unused-function -Wno-unused-variable -c depends/rtl-sdr/src/tuner_e4k.c -o out/osx-x86_64/tuner_e4k.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;$(ENV) x86_64-apple-darwin15-clang $(CPPFLAGS) $(CFLAGS) -Wno-unused-function -Wno-unused-variable -c depends/rtl-sdr/src/tuner_fc0012.c -o out/osx-x86_64/tuner_fc0012.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;$(ENV) x86_64-apple-darwin15-clang $(CPPFLAGS) $(CFLAGS) -Wno-unused-function -Wno-unused-variable -c depends/rtl-sdr/src/tuner_fc0013.c -o out/osx-x86_64/tuner_fc0013.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;$(ENV) x86_64-apple-darwin15-clang $(CPPFLAGS) $(CFLAGS) -Wno-unused-function -Wno-unused-variable -c depends/rtl-sdr/src/tuner_fc2580.c -o out/osx-x86_64/tuner_fc2580.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;$(ENV) x86_64-apple-darwin15-clang $(CPPFLAGS) $(CFLAGS) -Wno-unused-function -Wno-unused-variable -c depends/rtl-sdr/src/tuner_r82xx.c -o out/osx-x86_64/tuner_r82xx.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;$(ENV) x86_64-apple-darwin15-clang++ $(CPPFLAGS) $(CXXFLAGS) -c src/pvr.cpp -o out/osx-x86_64/pvr.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;$(ENV) x86_64-apple-darwin15-clang++ $(CPPFLAGS) $(CXXFLAGS) -c src/rtldevice.cpp -o out/osx-x86_64/rtldevice.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;$(ENV) x86_64-apple-darwin15-clang++ $(CPPFLAGS) $(CXXFLAGS) -dynamiclib -exported_symbols_list exportlist/exportlist.osx out/osx-x86_64/librtlsdr.o out/osx-x86_64/pvr.o out/osx-x86_64/rtldevice.o out/osx-x86_64/tuner_e4k.o out/osx-x86_64/tuner_fc0012.o out/osx-x86_64/tuner_fc0013.o out/osx-x86_64/tuner_fc2580.o out/osx-x86_64/tuner_r82xx.o depends/libusb/osx-x86_64/lib/libusb-1.0.a -ldl -lpthread -lobjc -framework CoreFoundation -framework IOKit -o out/osx-x86_64/zuki.pvr.rtlradio.dylib&quot;" ContinueOnError="false"/>
+    <Exec Command="TextTransform.exe template\addon.xml.tt -out tmp\addon-osx-x86_64.xml -a !!platform!osx-x86_64 -a !!libraryplatform!osx -a !!libraryname!zuki.pvr.rtlradio.dylib -a !!changelogtxt!pvr.rtlradio\changelog.txt -a &quot;!!displayversion!$(DisplayVersion)&quot; -a &quot;!!repomanifest!osx-x86_64.xml.gz&quot;" ContinueOnError="false"/>
+    <XmlPeek XmlInputPath="tmp\addon-osx-x86_64.xml" Query="/addon/@version">
+      <Output TaskParameter="Result" PropertyName="PeekedDisplayVersion"/>
+    </XmlPeek>
+    <Error Condition="'$(PeekedDisplayVersion)' != '$(DisplayVersion)'" Text="DisplayVersion build property was not properly applied to the addon.xml text template"/>
+    <Exec Command="$(ZipperExe) create out\zuki.pvr.rtlradio-osx-x86_64-$(KodiBaseline)-$(AddonVersion).zip manifest\osx-x86_64.manifest -sha256" ContinueOnError="false"/>
+
+    <GetFileSize filename="out\zuki.pvr.rtlradio-osx-x86_64-$(KodiBaseline)-$(AddonVersion).zip">
+      <Output PropertyName="ZipFileSize" TaskParameter="size"/>
+    </GetFileSize>
+
+    <Exec Command="TextTransform.exe template\addons.xml.tt -out &quot;tmp\repo-osx-x86_64.xml&quot; -a !!platform!osx-x86_64 -a !!libraryplatform!osx -a !!libraryname!zuki.pvr.rtlradio.dylib -a &quot;!!displayversion!$(DisplayVersion)&quot; -a !!zipfilesize!$(ZipFileSize) -a !!zipfilename!zuki.pvr.rtlradio-osx-x86_64-$(KodiBaseline)-$(AddonVersion).zip" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;gzip -cf tmp/repo-osx-x86_64.xml &gt; out/repository/osx-x86_64.xml.gz&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;pushd out/repository/ ; sha256sum osx-x86_64.xml.gz &gt; osx-x86_64.xml.gz.sha256 ; popd&quot;" ContinueOnError="false"/>
+
+  </Target>
+
+  <!-- BUILD: PLATFORMS -->
+  <Target Name="windows" DependsOnTargets="windows-win32;windows-x64"/>
+  <Target Name="linux" DependsOnTargets="linux-i686;linux-x86_64;linux-armel;linux-armhf;linux-aarch64"/>
+  <Target Name="raspbian" DependsOnTargets="raspbian-armhf"/>
+  <Target Name="osx" DependsOnTargets="osx-x86_64"/>
+
+  <!-- BUILD: ALL -->
+  <Target Name="all" DependsOnTargets="windows;linux;raspbian;osx"/>
+
+</Project>

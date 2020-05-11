@@ -1,0 +1,12 @@
+[submodule "build"]
+	path = depends/build
+	url = https://github.com/djp952/build.git
+[submodule "libusb"]
+	path = depends/libusb
+	url = https://github.com/djp952/prebuilt-libusb.git
+[submodule "rtl-sdr"]
+	path = depends/rtl-sdr
+	url = https://github.com/osmocom/rtl-sdr.git
+[submodule "xbmc"]
+	path = depends/xbmc
+	url = https://github.com/xbmc/xbmc.git
