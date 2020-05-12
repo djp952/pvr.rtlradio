@@ -26,17 +26,25 @@
 
 #include <memory>
 #include <string>
+#include <vector>
+
+#include <rtl-sdr.h>
 
 #pragma warning(push, 4)
 
 //---------------------------------------------------------------------------
 // Class rtldevice
 //
-// 
+// Interfaces with the RTL-SDR API to provide device management services
 
 class rtldevice
 {
 public:
+
+	// BANDWIDTH_AUTOMATIC
+	//
+	// Specifies that automatic bandwidth selection should be used
+	static uint32_t const BANDWIDTH_AUTOMATIC;
 
 	// Destructor
 	//
@@ -45,24 +53,89 @@ public:
 	//-----------------------------------------------------------------------
 	// Member Functions
 
+	// bandwidth
+	//
+	// Sets the bandwidth of the device
+	void bandwidth(uint32_t hz) const;
+
 	// create (static)
 	//
 	// Factory method, creates a new rtldevice instance
 	static std::unique_ptr<rtldevice> create(void);
+	static std::unique_ptr<rtldevice> create(uint32_t index);
+
+	// frequency
+	//
+	// Gets/sets the center frequency of the device
+	uint32_t frequency(void) const;
+	void frequency(uint32_t hz) const;
+
+	// frequencycorrection
+	//
+	// Gets/sets the frequency correction of the device
+	uint32_t frequencycorrection(void) const;
+	void frequencycorrection(int ppm) const;
+
+	// gain
+	//
+	// Gets/sets the gain value of the device
+	int gain(void) const;
+	void gain(int db) const;
+
+	// manufacturer
+	//
+	// Gets the manufacturer name of the device
+	char const* manufacturer(void) const;
 
 	// name
 	//
 	// Gets the name of the device
 	char const* name(void) const;
 
+	// product
+	//
+	// Gets the product name of the device
+	char const* product(void) const;
+
+	// read
+	//
+	// Reads data from the device
+	size_t read(uint8_t* buffer, size_t count) const;
+
+	// samplerate
+	//
+	// Gets/sets the sample rate of the device
+	uint32_t samplerate(void) const;
+	void samplerate(uint32_t hz) const;
+
+	// serialnumber
+	//
+	// Gets the serial number of the device
+	char const* serialnumber(void) const;
+
+	// testmode
+	//
+	// Enables/disables the test mode of the device
+	void testmode(bool enable) const;
+
+	// validgains
+	//
+	// Gets the valid tuner gain values for the device
+	void validgains(std::vector<int>& dbs) const;
+
 private:
 
 	rtldevice(rtldevice const&) = delete;
 	rtldevice& operator=(rtldevice const&) = delete;
 
+	// DEFAULT_DEVICE_INDEX
+	//
+	// Default device index number
+	static uint32_t const DEFAULT_DEVICE_INDEX;
+
 	// Instance Constructor
 	//
-	rtldevice();
+	rtldevice(uint32_t index);
 
 	//-----------------------------------------------------------------------
 	// Private Member Functions
@@ -70,7 +143,12 @@ private:
 	//-----------------------------------------------------------------------
 	// Member Variables
 
-	std::string				m_name;				// Device name
+	rtlsdr_dev_t*			m_device = nullptr;		// Device instance
+
+	std::string				m_name;					// Device name
+	std::string				m_manufacturer;			// Device manufacturer
+	std::string				m_product;				// Device product name
+	std::string				m_serialnumber;			// Device serial number
 };
 
 //-----------------------------------------------------------------------------
