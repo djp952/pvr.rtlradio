@@ -34,25 +34,14 @@
 // Arguments:
 //
 //	code		- SQLite error code
-
-libusb_exception::libusb_exception(int code) : libusb_exception(code, nullptr)
-{
-}
-
-//-----------------------------------------------------------------------------
-// libusb_exception Constructor
-//
-// Arguments:
-//
-//	code		- SQLite error code
 //	message		- Message to associate with the exception
 
-libusb_exception::libusb_exception(int code, char const* message)
+libusb_exception::libusb_exception(int code)
 {
 	char	what[512] = { '\0' };			// Formatted exception string
 
 	snprintf(what, std::extent<decltype(what)>::value, "%s (%d) : %s", 
-		(message) ? message : libusb_error_name(code), code, libusb_strerror(static_cast<libusb_error>(code)));
+		libusb_error_name(code), code, libusb_strerror(static_cast<libusb_error>(code)));
 
 	m_what.assign(what);
 }

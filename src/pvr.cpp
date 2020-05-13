@@ -33,6 +33,8 @@
 #include <libKODI_guilib.h>
 #include <libXBMC_pvr.h>
 
+#include "fmstream.h"
+#include "pvrstream.h"
 #include "string_exception.h"
 
 #pragma warning(push, 4)
@@ -80,7 +82,7 @@ static const PVR_ADDON_CAPABILITIES g_capabilities = {
 	false,			// bSupportsChannelGroups
 	false,			// bSupportsChannelScan
 	false,			// bSupportsChannelSettings
-	false,			// bHandlesInputStream
+	true,			// bHandlesInputStream
 	false,			// bHandlesDemuxing
 	false,			// bSupportsRecordingPlayCount
 	false,			// bSupportsLastPlayedPosition
@@ -102,6 +104,11 @@ static std::unique_ptr<CHelper_libKODI_guilib> g_gui;
 //
 // Kodi PVR add-on callbacks
 static std::unique_ptr<CHelper_libXBMC_pvr> g_pvr;
+
+// g_pvrstream
+//
+// DVR stream buffer instance
+static std::unique_ptr<pvrstream> g_pvrstream;
 
 // g_userpath
 //
@@ -572,7 +579,8 @@ PVR_ERROR OpenDialogChannelScan(void)
 
 int GetChannelsAmount(void)
 {
-	return -1;
+	// TODO: DUMMY DATA
+	return 1;
 }
 
 //---------------------------------------------------------------------------
@@ -585,8 +593,25 @@ int GetChannelsAmount(void)
 //	handle		- Handle to pass to the callback method
 //	radio		- True to get radio channels, false to get TV channels
 
-PVR_ERROR GetChannels(ADDON_HANDLE /*handle*/, bool /*radio*/)
+PVR_ERROR GetChannels(ADDON_HANDLE handle, bool radio)
 {
+	assert(g_pvr);
+
+	if(handle == nullptr) return PVR_ERROR::PVR_ERROR_INVALID_PARAMETERS;
+
+	// This PVR only supports radio channels
+	if(radio == false) return PVR_ERROR::PVR_ERROR_NO_ERROR;
+
+	// TODO: DUMMY DATA
+	PVR_CHANNEL dummyChannel = {};
+	dummyChannel.iUniqueId = 1;
+	dummyChannel.bIsRadio = true;
+	dummyChannel.iChannelNumber = 1;
+	dummyChannel.iSubChannelNumber = 0;
+	snprintf(dummyChannel.strChannelName, std::extent<decltype(dummyChannel.strChannelName)>::value, "RTLSDR");
+
+	g_pvr->TransferChannelEntry(handle, &dummyChannel);
+
 	return PVR_ERROR::PVR_ERROR_NO_ERROR;
 }
 
@@ -902,7 +927,13 @@ PVR_ERROR UpdateTimer(PVR_TIMER const& /*timer*/)
 
 bool OpenLiveStream(PVR_CHANNEL const& /*channel*/)
 {
-	return false;
+	// TODO: DUMMY OPERATION
+	//
+	try { g_pvrstream = fmstream::create(101900000);  }
+	catch(std::exception& ex) { return handle_stdexception(__func__, ex, false); } 
+	catch(...) { return handle_generalexception(__func__, false); }
+
+	return true;
 }
 
 //---------------------------------------------------------------------------
@@ -916,6 +947,9 @@ bool OpenLiveStream(PVR_CHANNEL const& /*channel*/)
 
 void CloseLiveStream(void)
 {
+	try { g_pvrstream.reset(); }
+	catch(std::exception& ex) { return handle_stdexception(__func__, ex); } 
+	catch(...) { return handle_generalexception(__func__); }
 }
 
 //---------------------------------------------------------------------------
@@ -928,9 +962,12 @@ void CloseLiveStream(void)
 //	buffer		- The buffer to store the data in
 //	size		- The number of bytes to read into the buffer
 
-int ReadLiveStream(unsigned char* /*buffer*/, unsigned int /*size*/)
+int ReadLiveStream(unsigned char* buffer, unsigned int size)
 {
-	return -1;
+	// TODO: DUMMY IMPLEMENTATION; WILL NOT PERSIST
+	try { return (g_pvrstream) ? static_cast<int>(g_pvrstream->read(buffer, size)) : -1; }
+	catch(std::exception& ex) { return handle_stdexception(__func__, ex, -1); }
+	catch(...) { return handle_generalexception(__func__, -1); }
 }
 
 //---------------------------------------------------------------------------
@@ -943,9 +980,11 @@ int ReadLiveStream(unsigned char* /*buffer*/, unsigned int /*size*/)
 //	position	- Delta within the stream to seek, relative to whence
 //	whence		- Starting position from which to apply the delta
 
-long long SeekLiveStream(long long /*position*/, int /*whence*/)
+long long SeekLiveStream(long long position, int whence)
 {
-	return -1;
+	try { return (g_pvrstream) ? g_pvrstream->seek(position, whence) : -1; } 
+	catch(std::exception& ex) { return handle_stdexception(__func__, ex, -1); }
+	catch(...) { return handle_generalexception(__func__, -1); }
 }
 
 //---------------------------------------------------------------------------
@@ -959,7 +998,10 @@ long long SeekLiveStream(long long /*position*/, int /*whence*/)
 
 long long PositionLiveStream(void)
 {
-	return -1;
+	// Don't report the position for a real-time stream
+	try { return (g_pvrstream && !g_pvrstream->realtime()) ? g_pvrstream->position() : -1; }
+	catch(std::exception& ex) { return handle_stdexception(__func__, ex, -1); }
+	catch(...) { return handle_generalexception(__func__, -1); }
 }
 
 //---------------------------------------------------------------------------
@@ -973,7 +1015,9 @@ long long PositionLiveStream(void)
 
 long long LengthLiveStream(void)
 {
-	return -1;
+	try { return (g_pvrstream) ? g_pvrstream->length() : -1; } 
+	catch(std::exception& ex) { return handle_stdexception(__func__, ex, -1); }
+	catch(...) { return handle_generalexception(__func__, -1); }
 }
 
 //---------------------------------------------------------------------------
@@ -1015,9 +1059,19 @@ PVR_ERROR GetDescrambleInfo(PVR_DESCRAMBLE_INFO* /*descrambleinfo*/)
 //	props		- Array of properties to be set for the stream
 //	numprops	- Number of properties returned by this function
 
-PVR_ERROR GetChannelStreamProperties(PVR_CHANNEL const* /*channel*/, PVR_NAMED_VALUE* /*props*/, unsigned int* /*numprops*/)
+PVR_ERROR GetChannelStreamProperties(PVR_CHANNEL const* /*channel*/, PVR_NAMED_VALUE* props, unsigned int* numprops)
 {
-	return PVR_ERROR::PVR_ERROR_NOT_IMPLEMENTED;
+	// PVR_STREAM_PROPERTY_MIMETYPE
+	snprintf(props[0].strName, std::extent<decltype(props[0].strName)>::value, PVR_STREAM_PROPERTY_MIMETYPE);
+	snprintf(props[0].strValue, std::extent<decltype(props[0].strName)>::value, "audio/wav");	// <-- TODO
+
+	// PVR_STREAM_PROPERTY_ISREALTIMESTREAM
+	snprintf(props[1].strName, std::extent<decltype(props[1].strName)>::value, PVR_STREAM_PROPERTY_ISREALTIMESTREAM);
+	snprintf(props[1].strValue, std::extent<decltype(props[1].strName)>::value, "true");
+
+	*numprops = 2;
+
+	return PVR_ERROR::PVR_ERROR_NO_ERROR;
 }
 
 //---------------------------------------------------------------------------
@@ -1059,9 +1113,15 @@ PVR_ERROR GetStreamProperties(PVR_STREAM_PROPERTIES* /*properties*/)
 //
 //	chunksize	- Set to the stream chunk size
 
-PVR_ERROR GetStreamReadChunkSize(int* /*chunksize*/)
+PVR_ERROR GetStreamReadChunkSize(int* chunksize)
 {
-	return PVR_ERROR::PVR_ERROR_NOT_IMPLEMENTED;
+	if(chunksize == nullptr) return PVR_ERROR::PVR_ERROR_INVALID_PARAMETERS;
+
+	if(!g_pvrstream) return PVR_ERROR::PVR_ERROR_NOT_IMPLEMENTED;
+
+	// Report the chunk size value reported by the stream instance
+	*chunksize = static_cast<int>(g_pvrstream->chunksize());
+	return PVR_ERROR::PVR_ERROR_NO_ERROR;
 }
 
 //---------------------------------------------------------------------------
@@ -1213,7 +1273,9 @@ bool CanPauseStream(void)
 
 bool CanSeekStream(void)
 {
-	return false;
+	try { return (g_pvrstream) ? g_pvrstream->canseek() : false; }
+	catch(std::exception& ex) { return handle_stdexception(__func__, ex, false); }
+	catch(...) { return handle_generalexception(__func__, false); }
 }
 
 //---------------------------------------------------------------------------
@@ -1297,7 +1359,9 @@ bool IsTimeshifting(void)
 
 bool IsRealTimeStream(void)
 {
-	return false;
+	try { return (g_pvrstream) ? g_pvrstream->realtime() : false; }
+	catch(std::exception& ex) { return handle_stdexception(__func__, ex, false); }
+	catch(...) { return handle_generalexception(__func__, false); }
 }
 
 //---------------------------------------------------------------------------

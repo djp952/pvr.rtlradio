@@ -1,5 +1,5 @@
 //-----------------------------------------------------------------------------
-// Copyright (c) 2016-2020 Michael G. Brehm
+// Copyright (c) 2020 Michael G. Brehm
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -41,10 +41,15 @@ class rtldevice
 {
 public:
 
-	// BANDWIDTH_AUTOMATIC
+	// AUTOMATIC_BANDWIDTH
 	//
 	// Specifies that automatic bandwidth selection should be used
-	static uint32_t const BANDWIDTH_AUTOMATIC;
+	static uint32_t const AUTOMATIC_BANDWIDTH;
+
+	// DEFAULT_DEVICE_INDEX
+	//
+	// Default device index number
+	static uint32_t const DEFAULT_DEVICE_INDEX;
 
 	// Destructor
 	//
@@ -52,6 +57,11 @@ public:
 
 	//-----------------------------------------------------------------------
 	// Member Functions
+
+	// agcmode
+	//
+	// Enables/disables the automatic gain control of the device
+	void agcmode(bool enable) const;
 
 	// bandwidth
 	//
@@ -127,11 +137,6 @@ private:
 
 	rtldevice(rtldevice const&) = delete;
 	rtldevice& operator=(rtldevice const&) = delete;
-
-	// DEFAULT_DEVICE_INDEX
-	//
-	// Default device index number
-	static uint32_t const DEFAULT_DEVICE_INDEX;
 
 	// Instance Constructor
 	//

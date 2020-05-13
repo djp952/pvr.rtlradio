@@ -41,7 +41,6 @@ public:
 	// Instance Constructors
 	//
 	libusb_exception(int code);
-	libusb_exception(int code, char const* message);
 
 	// Copy Constructor
 	//

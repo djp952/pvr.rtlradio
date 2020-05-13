@@ -190,7 +190,9 @@
     <ClInclude Include="..\depends\libusb\src\msvc\config.h" />
     <ClInclude Include="..\depends\rtl-sdr\include\rtl-sdr.h" />
     <ClInclude Include="..\tmp\version\version.h" />
+    <ClInclude Include="fmstream.h" />
     <ClInclude Include="libusb_exception.h" />
+    <ClInclude Include="pvrstream.h" />
     <ClInclude Include="rtldevice.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="string_exception.h" />
@@ -570,6 +572,7 @@
       <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(ProjectDir)..\depends\libusb\src\msvc;$(ProjectDir)..\depends\libusb\src\libusb;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(ProjectDir)..\depends\libusb\src\msvc;$(ProjectDir)..\depends\libusb\src\libusb;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
+    <ClCompile Include="fmstream.cpp" />
     <ClCompile Include="libusb_exception.cpp">
       <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(ProjectDir)..\depends\libusb\src\libusb;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(ProjectDir)..\depends\libusb\src\libusb;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>

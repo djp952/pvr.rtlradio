@@ -31,10 +31,10 @@
 
 #pragma warning(push, 4)
 
-// rtldevice::BANDWIDTH_AUTOMATIC (static)
+// rtldevice::AUTOMATIC_BANDWIDTH (static)
 //
 // Specifies that automatic bandwidth selection should be used
-uint32_t const rtldevice::BANDWIDTH_AUTOMATIC = 0;
+uint32_t const rtldevice::AUTOMATIC_BANDWIDTH = 0;
 
 // rtldevice::DEFAULT_DEVICE_INDEX (static)
 //
@@ -96,6 +96,22 @@ rtldevice::rtldevice(uint32_t index)
 rtldevice::~rtldevice()
 {
 	if(m_device != nullptr) rtlsdr_close(m_device);
+}
+
+//---------------------------------------------------------------------------
+// rtldevice::agcmode
+//
+// Enables/disables the automatic gain control mode of the device
+//
+// Arguments:
+//
+//	enable		- Flag to enable/disable test mode
+
+void rtldevice::agcmode(bool enable) const
+{
+	assert(m_device != nullptr);
+
+	rtlsdr_set_agc_mode(m_device, (enable) ? 1 : 0);
 }
 
 //---------------------------------------------------------------------------
@@ -302,7 +318,7 @@ size_t rtldevice::read(uint8_t* buffer, size_t count) const
 
 	// rtlsdr_read_sync returns the underlying libusb error code when it fails
 	int result = rtlsdr_read_sync(m_device, buffer, static_cast<int>(count), &bytesread);
-	if(result < 0) throw libusb_exception(result);
+	if(result < 0) throw string_exception(__func__, ": ", libusb_exception(result).what());
 
 	return static_cast<size_t>(bytesread);
 }
