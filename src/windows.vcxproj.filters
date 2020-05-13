@@ -42,6 +42,17 @@
     <Filter Include="External Libraries\rtl-sdr\Source Files">
       <UniqueIdentifier>{98748055-eaa8-490c-bfd9-0a3e3ef969c8}</UniqueIdentifier>
     </Filter>
+    <Filter Include="External Libraries\softfm">
+      <UniqueIdentifier>{1d042c6d-f5d8-41df-843b-57251b5de425}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="External Libraries\softfm\Header Files">
+      <UniqueIdentifier>{afcc663c-aaf7-49fc-a16f-d0c1227ac008}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="External Libraries\softfm\Source Files">
+      <UniqueIdentifier>{3b85fa7f-a710-49fb-9007-361ba3a09b56}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">
@@ -106,6 +117,15 @@
     </ClInclude>
     <ClInclude Include="pvrstream.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\depends\softfm\Filter.h">
+      <Filter>External Libraries\softfm\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\depends\softfm\FmDecode.h">
+      <Filter>External Libraries\softfm\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\depends\softfm\SoftFM.h">
+      <Filter>External Libraries\softfm\Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -174,6 +194,12 @@
     </ClCompile>
     <ClCompile Include="fmstream.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\softfm\Filter.cc">
+      <Filter>External Libraries\softfm\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\softfm\FmDecode.cc">
+      <Filter>External Libraries\softfm\Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

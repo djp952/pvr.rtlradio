@@ -23,6 +23,10 @@
 #include "stdafx.h"
 #include "fmstream.h"
 
+#pragma warning(disable:4267)
+#include <FmDecode.h>
+#pragma warning(default:4267)
+
 #pragma warning(push, 4)
 
 // devicestream::DEFAULT_CHUNK_SIZE (static)

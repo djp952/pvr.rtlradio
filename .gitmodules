@@ -7,6 +7,9 @@
 [submodule "rtl-sdr"]
 	path = depends/rtl-sdr
 	url = https://github.com/osmocom/rtl-sdr.git
+[submodule "softfm"]
+	path = depends/softfm
+	url = https://github.com/jorisvr/SoftFM.git
 [submodule "xbmc"]
 	path = depends/xbmc
 	url = https://github.com/xbmc/xbmc.git
