@@ -24,7 +24,16 @@
 #define __PVRSTREAM_H_
 #pragma once
 
+#include <functional>
+
+#include "DemuxPacket.h"
+
 #pragma warning(push, 4)
+
+// demuxallocator
+//
+// Declaration for demultiplexer packet allocator function
+using demuxallocator = std::function<DemuxPacket*(int)>;
 
 //---------------------------------------------------------------------------
 // Class pvrstream
@@ -57,6 +66,26 @@ public:
 	//
 	// Closes the stream
 	virtual void close(void) = 0;
+
+	// demuxabort
+	//
+	// Aborts the demultiplexer
+	virtual void demuxabort(void) = 0;
+
+	// demuxflush
+	//
+	// Flushes the demultiplexer
+	virtual void demuxflush(void) = 0;
+
+	// demuxread
+	//
+	// Reads the next packet from the demultiplexer
+	virtual DemuxPacket* demuxread(void) = 0;
+
+	// demuxreset
+	//
+	// Resets the demultiplexer
+	virtual void demuxreset(void) = 0;
 
 	// length
 	//

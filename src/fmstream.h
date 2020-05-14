@@ -70,8 +70,28 @@ public:
 	// create (static)
 	//
 	// Factory method, creates a new fmstream instance
-	static std::unique_ptr<fmstream> create(uint32_t frequency);
-	static std::unique_ptr<fmstream> create(uint32_t frequency, size_t chunksize);
+	static std::unique_ptr<fmstream> create(demuxallocator const& demuxalloc, uint32_t frequency);
+	static std::unique_ptr<fmstream> create(demuxallocator const& demuxalloc, uint32_t frequency, size_t chunksize);
+
+	// demuxabort
+	//
+	// Aborts the demultiplexer
+	void demuxabort(void);
+
+	// demuxflush
+	//
+	// Flushes the demultiplexer
+	void demuxflush(void);
+
+	// demuxread
+	//
+	// Reads the next packet from the demultiplexer
+	DemuxPacket* demuxread(void);
+
+	// demuxreset
+	//
+	// Resets the demultiplexer
+	void demuxreset(void);
 
 	// length
 	//
@@ -140,7 +160,7 @@ private:
 
 	// Instance Constructor
 	//
-	fmstream(uint32_t frequency, size_t chunksize);
+	fmstream(demuxallocator const& demuxalloc, uint32_t frequency, size_t chunksize);
 
 	//-----------------------------------------------------------------------
 	// Private Member Functions
@@ -153,7 +173,9 @@ private:
 	//-----------------------------------------------------------------------
 	// Member Variables
 
+	demuxallocator const		m_demuxalloc;			// Demux packet allocator
 	std::unique_ptr<rtldevice>	m_device;				// RTL-SDR device instance
+	std::unique_ptr<FmDecoder>	m_decoder;				// SoftFM decoder instance
 
 	// STREAM PROPERTIES
 	//

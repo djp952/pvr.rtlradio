@@ -25,6 +25,7 @@
 #include <memory>
 #include <string>
 
+#define USE_DEMUX
 #include <xbmc_addon_dll.h>
 #include <xbmc_pvr_dll.h>
 #include <version.h>
@@ -42,6 +43,10 @@
 //---------------------------------------------------------------------------
 // FUNCTION PROTOTYPES
 //---------------------------------------------------------------------------
+
+// API helpers
+//
+static DemuxPacket* demux_alloc(int size);
 
 // Exception helpers
 //
@@ -83,7 +88,7 @@ static const PVR_ADDON_CAPABILITIES g_capabilities = {
 	false,			// bSupportsChannelScan
 	false,			// bSupportsChannelSettings
 	true,			// bHandlesInputStream
-	false,			// bHandlesDemuxing
+	true,			// bHandlesDemuxing
 	false,			// bSupportsRecordingPlayCount
 	false,			// bSupportsLastPlayedPosition
 	false,			// bSupportsRecordingEdl
@@ -118,6 +123,15 @@ static std::string g_userpath;
 //---------------------------------------------------------------------------
 // HELPER FUNCTIONS
 //---------------------------------------------------------------------------
+
+// demux_alloc (local)
+//
+// Helper function to access PVR API demux packet allocator
+static DemuxPacket* demux_alloc(int size)
+{
+	assert(g_pvr);
+	return g_pvr->AllocateDemuxPacket(size);
+}
 
 // handle_generalexception (local)
 //
@@ -929,7 +943,7 @@ bool OpenLiveStream(PVR_CHANNEL const& /*channel*/)
 {
 	// TODO: DUMMY OPERATION
 	//
-	try { g_pvrstream = fmstream::create(101900000);  }
+	try { g_pvrstream = fmstream::create(demux_alloc, 101900000);  }
 	catch(std::exception& ex) { return handle_stdexception(__func__, ex, false); } 
 	catch(...) { return handle_generalexception(__func__, false); }
 
@@ -962,12 +976,9 @@ void CloseLiveStream(void)
 //	buffer		- The buffer to store the data in
 //	size		- The number of bytes to read into the buffer
 
-int ReadLiveStream(unsigned char* buffer, unsigned int size)
+int ReadLiveStream(unsigned char* /*buffer*/, unsigned int /*size*/)
 {
-	// TODO: DUMMY IMPLEMENTATION; WILL NOT PERSIST
-	try { return (g_pvrstream) ? static_cast<int>(g_pvrstream->read(buffer, size)) : -1; }
-	catch(std::exception& ex) { return handle_stdexception(__func__, ex, -1); }
-	catch(...) { return handle_generalexception(__func__, -1); }
+	return -1;
 }
 
 //---------------------------------------------------------------------------
@@ -1206,6 +1217,9 @@ long long LengthRecordedStream(void)
 
 void DemuxReset(void)
 {
+	try { if(g_pvrstream) g_pvrstream->demuxreset(); }
+	catch(std::exception& ex) { return handle_stdexception(__func__, ex); }
+	catch(...) { return handle_generalexception(__func__); }
 }
 
 //---------------------------------------------------------------------------
@@ -1219,6 +1233,9 @@ void DemuxReset(void)
 
 void DemuxAbort(void)
 {
+	try { if(g_pvrstream) g_pvrstream->demuxabort(); }
+	catch(std::exception& ex) { return handle_stdexception(__func__, ex); }
+	catch(...) { return handle_generalexception(__func__); }
 }
 
 //---------------------------------------------------------------------------
@@ -1232,6 +1249,9 @@ void DemuxAbort(void)
 
 void DemuxFlush(void)
 {
+	try { if(g_pvrstream) g_pvrstream->demuxflush(); }
+	catch(std::exception& ex) { return handle_stdexception(__func__, ex); } 
+	catch(...) { return handle_generalexception(__func__); }
 }
 
 //---------------------------------------------------------------------------
@@ -1245,7 +1265,9 @@ void DemuxFlush(void)
 
 DemuxPacket* DemuxRead(void)
 {
-	return nullptr;
+	try { return (g_pvrstream) ? g_pvrstream->demuxread() : nullptr; } 
+	catch(std::exception& ex) { return handle_stdexception(__func__, ex, nullptr); }
+	catch(...) { return handle_generalexception(__func__, nullptr); }
 }
 
 //---------------------------------------------------------------------------
