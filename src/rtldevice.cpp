@@ -80,10 +80,6 @@ rtldevice::rtldevice(uint32_t index)
 			m_product.assign(product);
 			m_serialnumber.assign(serialnumber);
 		}
-
-		// Reset the device buffer to start the streaming interface
-		result = rtlsdr_reset_buffer(m_device);
-		if(result < 0) throw string_exception(__func__, ": unable to reset RTL-SDR device buffer");
 	}
 
 	// Close the RTL-SDR device on any thrown exception
@@ -368,6 +364,24 @@ void rtldevice::samplerate(uint32_t hz) const
 char const* rtldevice::serialnumber(void) const
 {
 	return m_serialnumber.c_str();
+}
+
+//---------------------------------------------------------------------------
+// rtldevice::stream
+//
+// Starts streaming data from the device
+//
+// Arguments:
+//
+//	NONE
+
+void rtldevice::stream(void) const
+{
+	assert(m_device != nullptr);
+
+	// Reset the device buffer to start the streaming interface
+	int result = rtlsdr_reset_buffer(m_device);
+	if(result < 0) throw string_exception(__func__, ": unable to reset RTL-SDR device buffer");
 }
 
 //---------------------------------------------------------------------------

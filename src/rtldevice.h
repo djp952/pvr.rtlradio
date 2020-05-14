@@ -123,6 +123,11 @@ public:
 	// Gets the serial number of the device
 	char const* serialnumber(void) const;
 
+	// stream
+	//
+	// Starts streaming data from the device
+	void stream(void) const;
+
 	// testmode
 	//
 	// Enables/disables the test mode of the device

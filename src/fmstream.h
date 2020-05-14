@@ -26,10 +26,15 @@
 
 #pragma warning(push, 4)
 
+#include <atomic>
+#include <condition_variable>
 #include <memory>
+#include <mutex>
+#include <thread>
 
 #include "pvrstream.h"
 #include "rtldevice.h"
+#include "scalar_condition.h"
 
 //---------------------------------------------------------------------------
 // Class fmstream
@@ -103,25 +108,73 @@ private:
 	fmstream(fmstream const&) = delete;
 	fmstream& operator=(fmstream const&) = delete;
 
-	// DEFAULT_CHUNK_SIZE
+	// DEFAULT_DEVICE_BLOCK_SIZE
 	//
-	// Default stream chunk size
-	static size_t const DEFAULT_CHUNK_SIZE;
+	// Default device block size, in bytes
+	static size_t const DEFAULT_DEVICE_BLOCK_SIZE;
 
 	// DEFAULT_MEDIA_TYPE
 	//
 	// Default media type to report for the stream
 	static char const* DEFAULT_MEDIA_TYPE;
 
+	// DEFAULT_READ_MIN
+	//
+	// Default minimum amount of data to return from a read request
+	static size_t const DEFAULT_READ_MINCOUNT;
+
+	// DEFAULT_READ_TIMEOUT_MS
+	//
+	// Default amount of time for a read operation to succeed
+	static unsigned int const DEFAULT_READ_TIMEOUT_MS;
+
+	// DEFAULT_RINGBUFFER_SIZE
+	//
+	// Default ring buffer size, in bytes
+	static size_t const DEFAULT_RINGBUFFER_SIZE;
+
+	// DEFAULT_STREAM_CHUNK_SIZE
+	//
+	// Default stream chunk size
+	static size_t const DEFAULT_STREAM_CHUNK_SIZE;
+
 	// Instance Constructor
 	//
 	fmstream(uint32_t frequency, size_t chunksize);
 
 	//-----------------------------------------------------------------------
+	// Private Member Functions
+
+	// transfer
+	//
+	// Worker thread procedure used to transfer data into the ring buffer
+	void transfer(scalar_condition<bool>& started);
+
+	//-----------------------------------------------------------------------
 	// Member Variables
 
-	size_t const					m_chunksize;	// Stream chunk size
-	std::unique_ptr<rtldevice>		m_device;		// RTL-SDR device instance
+	std::unique_ptr<rtldevice>	m_device;				// RTL-SDR device instance
+
+	// STREAM PROPERTIES
+	//
+	size_t const				m_chunksize;			// Stream chunk size
+	size_t const				m_readmincount;			// Minimum read byte count
+	unsigned int const			m_readtimeout;			// Read timeout in milliseconds
+
+	// STREAM CONTROL
+	//
+	mutable std::mutex			m_lock;					// Synchronization object
+	std::condition_variable		m_cv;					// Transfer event condvar
+	std::thread					m_worker;				// Data transfer thread
+	scalar_condition<bool>		m_stop{ false };		// Condition to stop data transfer
+	std::atomic<bool>			m_stopped{ false };		// Data transfer stopped flag
+
+	// RING BUFFER
+	//
+	size_t const				m_buffersize;			// Size of the ring buffer
+	std::unique_ptr<uint8_t[]>	m_buffer;				// Ring buffer stroage
+	std::atomic<size_t>			m_bufferhead{ 0 };		// Head (write) buffer position
+	std::atomic<size_t>			m_buffertail{ 0 };		// Tail (read) buffer position
 };
 
 //-----------------------------------------------------------------------------

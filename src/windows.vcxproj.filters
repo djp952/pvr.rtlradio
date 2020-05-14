@@ -127,6 +127,9 @@
     <ClInclude Include="..\depends\softfm\SoftFM.h">
       <Filter>External Libraries\softfm\Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="scalar_condition.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
