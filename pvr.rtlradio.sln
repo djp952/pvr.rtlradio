@@ -62,6 +62,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "template", "template", "{44
 		template\addons.xml.tt = template\addons.xml.tt
 	EndProjectSection
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "rtl_test", "src\rtl_test.vcxproj", "{19BD98F9-DD76-49FB-910F-79F97C6BB646}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -86,6 +88,14 @@ Global
 		{3F7B8BC6-FA0C-4E08-8F7E-D6CD97E7581B}.Release|Win32.Build.0 = Release|Win32
 		{3F7B8BC6-FA0C-4E08-8F7E-D6CD97E7581B}.Release|x64.ActiveCfg = Release|Win32
 		{3F7B8BC6-FA0C-4E08-8F7E-D6CD97E7581B}.Release|x64.Build.0 = Release|Win32
+		{19BD98F9-DD76-49FB-910F-79F97C6BB646}.Debug|Win32.ActiveCfg = Debug|Win32
+		{19BD98F9-DD76-49FB-910F-79F97C6BB646}.Debug|Win32.Build.0 = Debug|Win32
+		{19BD98F9-DD76-49FB-910F-79F97C6BB646}.Debug|x64.ActiveCfg = Debug|x64
+		{19BD98F9-DD76-49FB-910F-79F97C6BB646}.Debug|x64.Build.0 = Debug|x64
+		{19BD98F9-DD76-49FB-910F-79F97C6BB646}.Release|Win32.ActiveCfg = Release|Win32
+		{19BD98F9-DD76-49FB-910F-79F97C6BB646}.Release|Win32.Build.0 = Release|Win32
+		{19BD98F9-DD76-49FB-910F-79F97C6BB646}.Release|x64.ActiveCfg = Release|x64
+		{19BD98F9-DD76-49FB-910F-79F97C6BB646}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
