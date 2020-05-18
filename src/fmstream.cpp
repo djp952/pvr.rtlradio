@@ -63,12 +63,12 @@ size_t const fmstream::DEFAULT_STREAM_CHUNK_SIZE = (4 KiB);
 //
 // Arguments:
 //
-//	demuxalloc	- Demultiplexer pack allocation function
+//	alloc		- Demultiplexer packet allocation functions
 //	chunksize	- Chunk size to use for the stream
 //	frequency	- Frequency of the FM stream, specified in hertz
 
-fmstream::fmstream(demuxallocator const& demuxalloc, uint32_t frequency, size_t chunksize) : 
-	m_demuxalloc(demuxalloc), m_chunksize(chunksize), m_readmincount(DEFAULT_READ_MINCOUNT), 
+fmstream::fmstream(struct pvrstream::allocator const& alloc, uint32_t frequency, size_t chunksize) :
+	m_alloc(alloc), m_chunksize(chunksize), m_readmincount(DEFAULT_READ_MINCOUNT), 
 	m_readtimeout(DEFAULT_READ_TIMEOUT_MS), m_buffersize(DEFAULT_RINGBUFFER_SIZE)
 {
 	// Allocate the ring buffer
@@ -147,12 +147,12 @@ void fmstream::close(void)
 //
 // Arguments:
 //
-//	demuxalloc	- Demultiplexer pack allocation function
+//	alloc		- Demultiplexer packet allocation functions
 //	frequency	- Frequency of the FM stream, specified in hertz
 
-std::unique_ptr<fmstream> fmstream::create(demuxallocator const& demuxalloc, uint32_t frequency)
+std::unique_ptr<fmstream> fmstream::create(struct pvrstream::allocator const& alloc, uint32_t frequency)
 {
-	return create(demuxalloc, frequency, DEFAULT_STREAM_CHUNK_SIZE);
+	return create(alloc, frequency, DEFAULT_STREAM_CHUNK_SIZE);
 }
 
 //---------------------------------------------------------------------------
@@ -162,13 +162,13 @@ std::unique_ptr<fmstream> fmstream::create(demuxallocator const& demuxalloc, uin
 //
 // Arguments:
 //
+//	alloc		- Demultiplexer packet allocation functions
 //	chunksize	- Chunk size to use for the stream
 //	frequency	- Frequency of the FM stream, specified in hertz
 
-//	demuxalloc	- Demultiplexer pack allocation function
-std::unique_ptr<fmstream> fmstream::create(demuxallocator const& demuxalloc, uint32_t frequency, size_t chunksize)
+std::unique_ptr<fmstream> fmstream::create(struct pvrstream::allocator const& alloc, uint32_t frequency, size_t chunksize)
 {
-	return std::unique_ptr<fmstream>(new fmstream(demuxalloc, frequency, chunksize));
+	return std::unique_ptr<fmstream>(new fmstream(alloc, frequency, chunksize));
 }
 
 //---------------------------------------------------------------------------
@@ -208,7 +208,7 @@ void fmstream::demuxflush(void)
 
 DemuxPacket* fmstream::demuxread(void)
 {
-	assert(m_demuxalloc);
+	assert(m_alloc.alloc && m_alloc.free);
 
 	return nullptr;
 }

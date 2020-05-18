@@ -47,6 +47,7 @@
 // API helpers
 //
 static DemuxPacket* demux_alloc(int size);
+static void demux_free(DemuxPacket* packet);
 
 // Exception helpers
 //
@@ -131,6 +132,15 @@ static DemuxPacket* demux_alloc(int size)
 {
 	assert(g_pvr);
 	return g_pvr->AllocateDemuxPacket(size);
+}
+
+// demux_free (local)
+//
+// Helper function to access PVR API demux packet deallocator
+static void demux_free(DemuxPacket* packet)
+{
+	assert(g_pvr);
+	g_pvr->FreeDemuxPacket(packet);
 }
 
 // handle_generalexception (local)
@@ -943,7 +953,7 @@ bool OpenLiveStream(PVR_CHANNEL const& /*channel*/)
 {
 	// TODO: DUMMY OPERATION
 	//
-	try { g_pvrstream = fmstream::create(demux_alloc, 101900000);  }
+	try { g_pvrstream = fmstream::create({ demux_alloc, demux_free }, 101900000); }
 	catch(std::exception& ex) { return handle_stdexception(__func__, ex, false); } 
 	catch(...) { return handle_generalexception(__func__, false); }
 

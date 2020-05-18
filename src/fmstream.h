@@ -70,8 +70,8 @@ public:
 	// create (static)
 	//
 	// Factory method, creates a new fmstream instance
-	static std::unique_ptr<fmstream> create(demuxallocator const& demuxalloc, uint32_t frequency);
-	static std::unique_ptr<fmstream> create(demuxallocator const& demuxalloc, uint32_t frequency, size_t chunksize);
+	static std::unique_ptr<fmstream> create(struct pvrstream::allocator const& alloc, uint32_t frequency);
+	static std::unique_ptr<fmstream> create(struct pvrstream::allocator const& alloc, uint32_t frequency, size_t chunksize);
 
 	// demuxabort
 	//
@@ -160,7 +160,7 @@ private:
 
 	// Instance Constructor
 	//
-	fmstream(demuxallocator const& demuxalloc, uint32_t frequency, size_t chunksize);
+	fmstream(struct pvrstream::allocator const& packetalloc, uint32_t frequency, size_t chunksize);
 
 	//-----------------------------------------------------------------------
 	// Private Member Functions
@@ -173,30 +173,30 @@ private:
 	//-----------------------------------------------------------------------
 	// Member Variables
 
-	demuxallocator const		m_demuxalloc;			// Demux packet allocator
-	std::unique_ptr<rtldevice>	m_device;				// RTL-SDR device instance
-	std::unique_ptr<FmDecoder>	m_decoder;				// SoftFM decoder instance
+	struct pvrstream::allocator const	m_alloc;				// Demux packet allocators
+	std::unique_ptr<rtldevice>			m_device;				// RTL-SDR device instance
+	std::unique_ptr<FmDecoder>			m_decoder;				// SoftFM decoder instance
 
 	// STREAM PROPERTIES
 	//
-	size_t const				m_chunksize;			// Stream chunk size
-	size_t const				m_readmincount;			// Minimum read byte count
-	unsigned int const			m_readtimeout;			// Read timeout in milliseconds
+	size_t const						m_chunksize;			// Stream chunk size
+	size_t const						m_readmincount;			// Minimum read byte count
+	unsigned int const					m_readtimeout;			// Read timeout in milliseconds
 
 	// STREAM CONTROL
 	//
-	mutable std::mutex			m_lock;					// Synchronization object
-	std::condition_variable		m_cv;					// Transfer event condvar
-	std::thread					m_worker;				// Data transfer thread
-	scalar_condition<bool>		m_stop{ false };		// Condition to stop data transfer
-	std::atomic<bool>			m_stopped{ false };		// Data transfer stopped flag
+	mutable std::mutex					m_lock;					// Synchronization object
+	std::condition_variable				m_cv;					// Transfer event condvar
+	std::thread							m_worker;				// Data transfer thread
+	scalar_condition<bool>				m_stop{ false };		// Condition to stop data transfer
+	std::atomic<bool>					m_stopped{ false };		// Data transfer stopped flag
 
 	// RING BUFFER
 	//
-	size_t const				m_buffersize;			// Size of the ring buffer
-	std::unique_ptr<uint8_t[]>	m_buffer;				// Ring buffer stroage
-	std::atomic<size_t>			m_bufferhead{ 0 };		// Head (write) buffer position
-	std::atomic<size_t>			m_buffertail{ 0 };		// Tail (read) buffer position
+	size_t const						m_buffersize;			// Size of the ring buffer
+	std::unique_ptr<uint8_t[]>			m_buffer;				// Ring buffer stroage
+	std::atomic<size_t>					m_bufferhead{ 0 };		// Head (write) buffer position
+	std::atomic<size_t>					m_buffertail{ 0 };		// Tail (read) buffer position
 };
 
 //-----------------------------------------------------------------------------

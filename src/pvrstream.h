@@ -30,11 +30,6 @@
 
 #pragma warning(push, 4)
 
-// demuxallocator
-//
-// Declaration for demultiplexer packet allocator function
-using demuxallocator = std::function<DemuxPacket*(int)>;
-
 //---------------------------------------------------------------------------
 // Class pvrstream
 //
@@ -43,6 +38,15 @@ using demuxallocator = std::function<DemuxPacket*(int)>;
 class pvrstream
 {
 public:
+
+	// allocator
+	//
+	// Declaration for demultiplexer packer alloc/free functions
+	struct allocator {
+
+		std::function<DemuxPacket*(int)>	alloc;
+		std::function<void(DemuxPacket*)>	free;
+	};
 
 	// Constructor / Destructor
 	//
