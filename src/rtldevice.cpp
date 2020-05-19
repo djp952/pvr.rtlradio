@@ -128,6 +128,22 @@ void rtldevice::bandwidth(uint32_t hz) const
 }
 
 //---------------------------------------------------------------------------
+// rtldevice::cancelasync
+//
+// Cancels any pending asynchronous read operations from the device
+//
+// Arguments:
+//
+//	NONE
+
+void rtldevice::cancelasync(void) const
+{
+	assert(m_device != nullptr);
+
+	rtlsdr_cancel_async(m_device);
+}
+
+//---------------------------------------------------------------------------
 // rtldevice::create (static)
 //
 // Factory method, creates a new rtldevice instance
@@ -317,6 +333,51 @@ size_t rtldevice::read(uint8_t* buffer, size_t count) const
 	if(result < 0) throw string_exception(__func__, ": ", libusb_exception(result).what());
 
 	return static_cast<size_t>(bytesread);
+}
+
+//---------------------------------------------------------------------------
+// rtldevice::readasync
+//
+// Asynchronously reads data from the device
+//
+// Arguments:
+//
+//	callback		- Asynchronous read callback function
+//	bufferlength	- Device buffer length, must be multiple of 512
+
+void rtldevice::readasync(asynccallback const& callback, uint32_t bufferlength) const
+{
+	return readasync(callback, 0, bufferlength);
+}
+
+//---------------------------------------------------------------------------
+// rtldevice::readasync
+//
+// Asynchronously reads data from the device
+//
+// Arguments:
+//
+//	callback		- Asynchronous read callback function
+//	numbuffers		- Number of device buffers
+//	bufferlength	- Device buffer length, must be multiple of 512
+
+void rtldevice::readasync(asynccallback const& callback, uint32_t numbuffers, uint32_t bufferlength) const
+{
+	assert(m_device != nullptr);
+
+	// rtlsdr_read_async_cb_t callback conversion function
+	auto callreadfunc = [](unsigned char* buf, uint32_t len, void* ctx) -> void {
+
+		asynccallback const* func = reinterpret_cast<asynccallback const*>(ctx);
+		if(func) (*func)(reinterpret_cast<uint8_t const*>(buf), static_cast<size_t>(len));
+	};
+
+	// Get the address of the callback std::function<> to pass as a context pointer
+	void const* pcallback = std::addressof(callback);
+
+	// rtlsdr_read_async returns the underlying libusb error code when it fails
+	int result = rtlsdr_read_async(m_device, callreadfunc, const_cast<void*>(pcallback), numbuffers, bufferlength);
+	if(result < 0) throw string_exception(__func__, ": ", libusb_exception(result).what());
 }
 
 //---------------------------------------------------------------------------

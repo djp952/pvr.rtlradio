@@ -39,15 +39,6 @@ class pvrstream
 {
 public:
 
-	// allocator
-	//
-	// Declaration for demultiplexer packer alloc/free functions
-	struct allocator {
-
-		std::function<DemuxPacket*(int)>	alloc;
-		std::function<void(DemuxPacket*)>	free;
-	};
-
 	// Constructor / Destructor
 	//
 	pvrstream() {}
@@ -60,11 +51,6 @@ public:
 	//
 	// Flag indicating if the stream allows seek operations
 	virtual bool canseek(void) const = 0;
-
-	// chunksize
-	//
-	// Gets the stream chunk size
-	virtual size_t chunksize(void) const = 0;
 
 	// close
 	//
@@ -84,7 +70,7 @@ public:
 	// demuxread
 	//
 	// Reads the next packet from the demultiplexer
-	virtual DemuxPacket* demuxread(void) = 0;
+	virtual DemuxPacket* demuxread(std::function<DemuxPacket*(int)> const& allocator) = 0;
 
 	// demuxreset
 	//
@@ -95,11 +81,6 @@ public:
 	//
 	// Gets the length of the stream
 	virtual long long length(void) const = 0;
-
-	// mediatype
-	//
-	// Gets the media type of the stream
-	virtual char const* mediatype(void) const = 0;
 
 	// position
 	//

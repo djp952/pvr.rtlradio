@@ -24,60 +24,73 @@
 #include "fmstream.h"
 
 #include <algorithm>
+#include <chrono>
 #include <memory.h>
+
+#include "align.h"
 
 #pragma warning(push, 4)
 
-// devicestream::DEFAULT_DEVICE_BLOCK_SIZE (static)
+// fmstream::DEFAULT_DEVICE_BLOCK_SIZE
 //
 // Default device block size
-size_t const fmstream::DEFAULT_DEVICE_BLOCK_SIZE = (64 KiB);
+size_t const fmstream::DEFAULT_DEVICE_BLOCK_SIZE = (32 KiB);
 
-// devicestream::DEFAULT_MEDIA_TYPE (static)
+// fmstream::DEFAULT_DEVICE_SAMPLE_RATE
 //
-// Default media type to report for the stream
-char const* fmstream::DEFAULT_MEDIA_TYPE = "audio/wav";		// <-- TODO
+// Default device sample rate
+uint32_t const fmstream::DEFAULT_DEVICE_SAMPLE_RATE = (1 MHz);
 
-// dvrstream::DEFAULT_READ_MIN (static)
+// fmstream::DEFAULT_OUTPUT_CHANNELS
 //
-// Default minimum amount of data to return from a read request
-size_t const fmstream::DEFAULT_READ_MINCOUNT = (1 KiB);
+// Default number of PCM output channels
+int const fmstream::DEFAULT_OUTPUT_CHANNELS = 1;
 
-// dvrstream::DEFAULT_READ_TIMEOUT_MS (static)
+// fmstream::DEFAULT_OUTPUT_SAMPLE_RATE
 //
-// Default amount of time for a read operation to succeed
-unsigned int const fmstream::DEFAULT_READ_TIMEOUT_MS = 2500;
+// Default PCM output sample rate
+double const fmstream::DEFAULT_OUTPUT_SAMPLE_RATE = (48.0 KHz);
 
-// httpstream::DEFAULT_RINGBUFFER_SIZE (static)
+// fmstream::DEFAULT_RINGBUFFER_SIZE
 //
-// Default ring buffer size, in bytes
-size_t const fmstream::DEFAULT_RINGBUFFER_SIZE = (2 MiB);
-
-// devicestream::DEFAULT_STREAM_CHUNK_SIZE (static)
-//
-// Default stream chunk size
-size_t const fmstream::DEFAULT_STREAM_CHUNK_SIZE = (4 KiB);
+// Default ring buffer size
+size_t const fmstream::DEFAULT_RINGBUFFER_SIZE = (1 MiB);
 
 //---------------------------------------------------------------------------
 // fmstream Constructor (private)
 //
 // Arguments:
 //
-//	alloc		- Demultiplexer packet allocation functions
 //	chunksize	- Chunk size to use for the stream
 //	frequency	- Frequency of the FM stream, specified in hertz
 
-fmstream::fmstream(struct pvrstream::allocator const& alloc, uint32_t frequency, size_t chunksize) :
-	m_alloc(alloc), m_chunksize(chunksize), m_readmincount(DEFAULT_READ_MINCOUNT), 
-	m_readtimeout(DEFAULT_READ_TIMEOUT_MS), m_buffersize(DEFAULT_RINGBUFFER_SIZE)
+fmstream::fmstream(uint32_t frequency) : m_blocksize(align::up(DEFAULT_DEVICE_BLOCK_SIZE, 16 KiB)),
+	m_samplerate(DEFAULT_DEVICE_SAMPLE_RATE), m_pcmsamplerate(DEFAULT_OUTPUT_SAMPLE_RATE),
+	m_buffersize(align::up(DEFAULT_RINGBUFFER_SIZE, 16 KiB))
 {
 	// Allocate the ring buffer
 	m_buffer = std::unique_ptr<uint8_t[]>(new uint8_t[m_buffersize]);
 	if(!m_buffer) throw std::bad_alloc();
 
-	// Create the RTL-SDR device instance and tune to the specified frequency
+	// Intentionally tune at a higher frequency to avoid DC offset
+	uint32_t devicefreq = frequency + static_cast<uint32_t>(0.25 * m_samplerate);
+
+	// Create and initialize the RTL-SDR device instance
 	m_device = rtldevice::create(rtldevice::DEFAULT_DEVICE_INDEX);
-	m_device->frequency(frequency);
+	m_device->samplerate(m_samplerate);
+	m_device->bandwidth(200 KHz);			// <--- TODO: Variable based on AM/FM/etc?
+	m_device->frequency(devicefreq);
+
+	// Retrieve the actual device sample rate and configure downsample/half bandwidth
+	double devicerate = static_cast<double>(m_device->samplerate());
+	unsigned int downsample = std::max(1, static_cast<int>(devicerate / 215.0e3));
+	double pcmbandwidth = std::min(FmDecoder::default_bandwidth_pcm, 0.45 * m_pcmsamplerate);
+
+	// Create and initialize the FmDecoder instance using calculated adjustments
+	m_decoder = std::unique_ptr<FmDecoder>(new FmDecoder(devicerate,
+		static_cast<double>(frequency - m_device->frequency()), m_pcmsamplerate,
+		true, FmDecoder::default_deemphasis, FmDecoder::default_bandwidth_if, 
+		FmDecoder::default_freq_dev, pcmbandwidth, downsample));
 
 	// Create a worker thread on which to perform the transfer operations
 	scalar_condition<bool> started{ false };
@@ -108,20 +121,6 @@ bool fmstream::canseek(void) const
 }
 
 //---------------------------------------------------------------------------
-// fmstream::chunksize
-//
-// Gets the stream chunk size
-//
-// Arguments:
-//
-//	NONE
-
-size_t fmstream::chunksize(void) const
-{
-	return m_chunksize;
-}
-
-//---------------------------------------------------------------------------
 // fmstream::close
 //
 // Closes the stream
@@ -132,12 +131,10 @@ size_t fmstream::chunksize(void) const
 
 void fmstream::close(void)
 {
-	// Signal the worker thread to stop and wait for it to do so
-	m_stop = true;
-	if(m_worker.joinable()) m_worker.join();
-
-	// Release the RTL-SDR device instance
-	m_device.reset();
+	m_stop = true;								// Signal worker thread to stop
+	if(m_device) m_device->cancelasync();		// Cancel any async read operations
+	if(m_worker.joinable()) m_worker.join();	// Wait for thread
+	m_device.reset();							// Release RTL-SDR device
 }
 
 //---------------------------------------------------------------------------
@@ -147,28 +144,11 @@ void fmstream::close(void)
 //
 // Arguments:
 //
-//	alloc		- Demultiplexer packet allocation functions
 //	frequency	- Frequency of the FM stream, specified in hertz
 
-std::unique_ptr<fmstream> fmstream::create(struct pvrstream::allocator const& alloc, uint32_t frequency)
+std::unique_ptr<fmstream> fmstream::create(uint32_t frequency)
 {
-	return create(alloc, frequency, DEFAULT_STREAM_CHUNK_SIZE);
-}
-
-//---------------------------------------------------------------------------
-// fmstream::create (static)
-//
-// Factory method, creates a new fmstream instance
-//
-// Arguments:
-//
-//	alloc		- Demultiplexer packet allocation functions
-//	chunksize	- Chunk size to use for the stream
-//	frequency	- Frequency of the FM stream, specified in hertz
-
-std::unique_ptr<fmstream> fmstream::create(struct pvrstream::allocator const& alloc, uint32_t frequency, size_t chunksize)
-{
-	return std::unique_ptr<fmstream>(new fmstream(alloc, frequency, chunksize));
+	return std::unique_ptr<fmstream>(new fmstream(frequency));
 }
 
 //---------------------------------------------------------------------------
@@ -204,13 +184,94 @@ void fmstream::demuxflush(void)
 //
 // Arguments:
 //
-//	NONE
+//	allocator		- Callback function to allocate the DemuxPacket
 
-DemuxPacket* fmstream::demuxread(void)
+DemuxPacket* fmstream::demuxread(std::function<DemuxPacket*(int)> const& allocator)
 {
-	assert(m_alloc.alloc && m_alloc.free);
+	size_t				head = 0;				// Current head position
+	size_t				tail = 0;				// Current tail position
+	size_t				available = 0;			// Available bytes to read
+	bool				stopped = false;		// Flag if data transfer has stopped
 
-	return nullptr;
+	// Determine the minimum allowable read size to generate the demux packet (2 byte alignment)
+	size_t const minreadsize = align::down(m_blocksize / 2, 2);
+
+	// Wait up to 10ms for there to be available data in the ring buffer
+	std::unique_lock<std::mutex> lock(m_lock);
+	if(m_cv.wait_until(lock, std::chrono::system_clock::now() + std::chrono::milliseconds(10), [&]() -> bool {
+
+		tail = m_buffertail.load();				// Copy the atomic<> tail position
+		head = m_bufferhead.load();				// Copy the atomic<> head position
+		stopped = m_stopped.load();				// Copy the atomic<> stopped flag
+
+		// Calculate the amount of space available in the buffer (2 byte alignment)
+		available = align::down((tail > head) ? (m_buffersize - tail) + head : head - tail, 2);
+
+		// The result from the predicate is true if data available or stopped
+		return ((available >= minreadsize) || (stopped));
+
+	}) == false) return 0;
+
+	// If the wait loop was broken by the worker thread stopping, make one more pass
+	// to ensure that no additional data was first written by the thread
+	if((available < minreadsize) && (stopped)) {
+
+		tail = m_buffertail.load();				// Copy the atomic<> tail position
+		head = m_bufferhead.load();				// Copy the atomic<> head position
+
+		// Calculate the amount of space available in the buffer (2 byte alignment)
+		available = align::down((tail > head) ? (m_buffersize - tail) + head : head - tail, 2);
+	}
+
+	// If there is still no data to be processed, return an empty demuxer packet
+	if(available == 0) return allocator(0);
+
+	// Convert the raw data into a vector<> of IQSamples for FmDecoder to process
+	assert(available % 2 == 0);
+	IQSampleVector samples(available / 2);
+	for(size_t index = 0; index < samples.size(); index++) {
+
+		int32_t re = m_buffer[tail];
+		int32_t im = m_buffer[tail + 1];
+		samples[index] = IQSample((re - 128) / IQSample::value_type(128), (im - 128) / IQSample::value_type(128));
+
+		tail += 2;								// Increment new tail position
+		if(tail >= m_buffersize) tail = 0;		// Handle buffer rollover
+	}
+
+	// Modify the atomic<> tail position to mark the ring buffer space as free
+	m_buffertail.store(tail);
+
+	//
+	// TODO: Augment FmDecoder to allow for direct access to the demux packet buffer; consider
+	// changing the logic above so that the ring buffer is of type IQSample again and the conversion
+	// from raw bytes to IQSample takes place on the writer thread; also requires changes to FmDecoder
+	//
+
+	SampleVector audio;							// vector<> of output audio samples
+	m_decoder->process(samples, audio);			// Decode the input I/Q data
+
+	// Determine the size of the demuxer packet data and allocate it
+	int size = static_cast<int>(audio.size() * sizeof(SampleVector::value_type));
+	DemuxPacket* packet = allocator(size);
+	if(packet == nullptr) return nullptr;
+
+	// Calculate the duration of the packet in microseconds
+	// TODO: handle monaural streams? currently streams are forced into stereo
+	double duration = ((static_cast<double>(audio.size() / 2) / m_pcmsamplerate) US);
+
+	packet->iStreamId = 1;						// Audio data stream identifier
+	packet->iSize = size;						// Audio data length
+	packet->duration = duration;				// Duration
+	packet->pts = m_pts;						// Program time stamp
+
+	// Copy the audio output data from the vector<> into the demux packet
+	memcpy(packet->pData, audio.data(), size);
+
+	// Increment the program time stamp value based on the calculated duration
+	m_pts += duration;
+
+	return packet;
 }
 
 //---------------------------------------------------------------------------
@@ -241,20 +302,6 @@ long long fmstream::length(void) const
 }
 
 //---------------------------------------------------------------------------
-// fmstream::mediatype
-//
-// Gets the media type of the stream
-//
-// Arguments:
-//
-//	NONE
-
-char const* fmstream::mediatype(void) const
-{
-	return DEFAULT_MEDIA_TYPE;
-}
-
-//---------------------------------------------------------------------------
 // fmstream::position
 //
 // Gets the current position of the stream
@@ -278,70 +325,9 @@ long long fmstream::position(void) const
 //	buffer		- Buffer to receive the live stream data
 //	count		- Size of the destination buffer in bytes
 
-size_t fmstream::read(uint8_t* buffer, size_t count)
+size_t fmstream::read(uint8_t* /*buffer*/, size_t /*count*/)
 {
-	size_t				bytesread = 0;			// Total bytes actually read
-	size_t				head = 0;				// Current head position
-	size_t				tail = 0;				// Current tail position
-	size_t				available = 0;			// Available bytes to read
-	bool				stopped = false;		// Flag if data transfer has stopped
-
-	// Verify that the read timeout has been set to at least one millisecond
-	assert(m_readtimeout >= 1U);
-
-	if(buffer == nullptr) throw std::invalid_argument("buffer");
-	if(count > m_buffersize) throw std::invalid_argument("count");
-	if(count == 0) return 0;
-
-	std::unique_lock<std::mutex> lock(m_lock);
-
-	// Wait up to the timeout for there to be the minimum amount of available data in the
-	// buffer, if there is not the condvar will be triggered on the next write or a thread stop.
-	if(m_cv.wait_until(lock, std::chrono::system_clock::now() + std::chrono::milliseconds(m_readtimeout), [&]() -> bool {
-
-		tail = m_buffertail.load();				// Copy the atomic<> tail position
-		head = m_bufferhead.load();				// Copy the atomic<> head position
-		stopped = m_stopped.load();				// Copy the atomic<> stopped flag
-
-		// Calculate the amount of space available in the buffer
-		available = (tail > head) ? (m_buffersize - tail) + head : head - tail;
-
-		// The result from the predicate is true if enough data or stopped
-		return ((available >= m_readmincount) || (stopped));
-
-	}) == false) return 0;
-
-	// If the wait loop was broken by the worker thread stopping, make one more pass
-	// to ensure that no additional data was first written by the thread
-	if((available < m_readmincount) && (stopped)) {
-
-		tail = m_buffertail.load();				// Copy the atomic<> tail position
-		head = m_bufferhead.load();				// Copy the atomic<> head position
-
-		// Calculate the amount of space available in the buffer
-		available = (tail > head) ? (m_buffersize - tail) + head : head - tail;
-	}
-
-	// Copy the available data into the destination buffer
-	count = std::min(available, count);
-	while(count) {
-
-		// If the tail is behind the head linearly, take the data between them otherwise
-		// take the data between the end of the buffer and the tail
-		size_t chunk = (tail < head) ? std::min(count, head - tail) : std::min(count, m_buffersize - tail);
-		memcpy(&buffer[bytesread], &m_buffer[tail], chunk);
-
-		tail += chunk;						// Increment the tail position
-		bytesread += chunk;					// Increment number of bytes read
-		count -= chunk;						// Decrement remaining bytes
-
-		// If the tail has reached the end of the buffer, reset it back to zero
-		if(tail >= m_buffersize) tail = 0;
-	}
-
-	m_buffertail.store(tail);				// Modify atomic<> tail position
-
-	return bytesread;
+	return 0;
 }
 
 //---------------------------------------------------------------------------
@@ -384,56 +370,50 @@ long long fmstream::seek(long long /*position*/, int /*whence*/)
 
 void fmstream::transfer(scalar_condition<bool>& started)
 {
-	std::vector<uint8_t> block(DEFAULT_DEVICE_BLOCK_SIZE);		// Device data block
-
 	assert(m_device);
 
 	m_device->stream();			// Begin streaming from the device
 	started = true;				// Signal that the thread has started
 
-	// Continue to write data from the device into the ring buffer until told to stop
+	// Loop until the worker thread has been signaled to stop
 	while(m_stop.test(false) == true) {
 
-		size_t		head = 0;					// Current ring buffer head position
-		size_t		tail = 0;					// Current ring buffer tail position
-		size_t		available = 0;				// Available ring buffer space
-		size_t		byteswritten = 0;			// Bytes written into the ring buffer
+		size_t		head = 0;				// Ring buffer head (write) position
+		size_t		tail = 0;				// Ring buffer tail (read) position
+		size_t		available = 0;			// Amount of available ring buffer space
 
-		// Read the next block of data from the device
-		size_t cb = m_device->read(block.data(), block.size());
-
+		// Wait up to 10ms for the ring buffer to have enough space to write the next block
 		do {
 
-			// Copy the current head and tail positions, this works without a lock by operating
-			// on the state of the buffer at the time of the request
-			head = m_bufferhead.load();
-			tail = m_buffertail.load();
+			head = m_bufferhead.load();			// Acquire the current buffer head position
+			tail = m_buffertail.load();			// Acquire the current buffer tail position
 
-			// Check to ensure that there is enough space in the ring buffer to hold the data
+			// Calculate the total amount of available free space in the ring buffer
 			available = (head < tail) ? tail - head : (m_buffersize - head) + tail;
 
-		} while((available < cb) && (m_stop.wait_until_equals(true, 10) == false));
+		} while((available < DEFAULT_DEVICE_BLOCK_SIZE) && (m_stop.wait_until_equals(true, 10) == false));
 
-		// Stop the thread if that was the reason the loop terminated
-		if(available < cb) break;
+		// If the wait loop was broken due to a stop signal, terminate the thread
+		if(available < DEFAULT_DEVICE_BLOCK_SIZE) break;
 
-		// Copy the device data into the ring buffer
-		while(cb) {
+		// Transfer the available data from the device into the ring buffer
+		size_t count = DEFAULT_DEVICE_BLOCK_SIZE;
+		while(count) {
 
-			// If the head is behind the tail linearly, take the data between them otherwise
+			// If the head is behind the tail linearly, take the data between them otherwise 
 			// take the data between the end of the buffer and the head
-			size_t chunk = (head < tail) ? std::min(cb, tail - head) : std::min(cb, m_buffersize - head);
-			memcpy(&m_buffer[head], &reinterpret_cast<uint8_t const*>(block.data())[byteswritten], chunk);
+			size_t chunk = (head < tail) ? std::min(count, tail - head) : std::min(count, m_buffersize - head);
+			size_t bytesread = m_device->read(&m_buffer[head], chunk);
+			if(bytesread < chunk) { /* TODO - SHORT READ ERROR */ }
 
-			head += chunk;					// Increment the head position
-			byteswritten += chunk;			// Increment number of bytes written
-			cb -= chunk;					// Decrement remaining bytes
+			head += chunk;				// Increment the head position
+			count -= chunk;				// Decrement remaining bytes to be transferred
 
 			// If the head has reached the end of the buffer, reset it back to zero
 			if(head >= m_buffersize) head = 0;
 		}
 
-		// Adjust the atomic<> head position and notify that data has been written
+		// Adjust the atomic<> head position and notify that new data is available
 		m_bufferhead.store(head);
 		m_cv.notify_all();
 	}

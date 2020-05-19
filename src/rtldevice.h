@@ -24,6 +24,7 @@
 #define __RTLDEVICE_H_
 #pragma once
 
+#include <functional>
 #include <memory>
 #include <string>
 #include <vector>
@@ -39,6 +40,11 @@
 
 class rtldevice
 {
+	// asynccallback
+	//
+	// Callback function passed to readasync
+	using asynccallback = std::function<void(uint8_t const*, size_t)>;
+
 public:
 
 	// AUTOMATIC_BANDWIDTH
@@ -67,6 +73,11 @@ public:
 	//
 	// Sets the bandwidth of the device
 	void bandwidth(uint32_t hz) const;
+
+	// cancelasync
+	//
+	// Cancels any pending asynchronous read operations from the device
+	void cancelasync(void) const;
 
 	// create (static)
 	//
@@ -111,6 +122,12 @@ public:
 	//
 	// Reads data from the device
 	size_t read(uint8_t* buffer, size_t count) const;
+
+	// readasync
+	//
+	// Asynchronously reads data from the device
+	void readasync(asynccallback const& callback, uint32_t bufferlength) const;
+	void readasync(asynccallback const& callback, uint32_t numbuffers, uint32_t bufferlength) const;
 
 	// samplerate
 	//

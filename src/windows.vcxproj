@@ -189,6 +189,7 @@
     <ClInclude Include="..\depends\softfm\FmDecode.h" />
     <ClInclude Include="..\depends\softfm\SoftFM.h" />
     <ClInclude Include="..\tmp\version\version.h" />
+    <ClInclude Include="align.h" />
     <ClInclude Include="fmstream.h" />
     <ClInclude Include="libusb_exception.h" />
     <ClInclude Include="pvrstream.h" />

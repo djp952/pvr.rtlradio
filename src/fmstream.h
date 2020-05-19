@@ -57,11 +57,6 @@ public:
 	// Flag indicating if the stream allows seek operations
 	bool canseek(void) const;
 
-	// chunksize
-	//
-	// Gets the stream chunk size
-	size_t chunksize(void) const;
-
 	// close
 	//
 	// Closes the stream
@@ -70,8 +65,7 @@ public:
 	// create (static)
 	//
 	// Factory method, creates a new fmstream instance
-	static std::unique_ptr<fmstream> create(struct pvrstream::allocator const& alloc, uint32_t frequency);
-	static std::unique_ptr<fmstream> create(struct pvrstream::allocator const& alloc, uint32_t frequency, size_t chunksize);
+	static std::unique_ptr<fmstream> create(uint32_t frequency);
 
 	// demuxabort
 	//
@@ -86,7 +80,7 @@ public:
 	// demuxread
 	//
 	// Reads the next packet from the demultiplexer
-	DemuxPacket* demuxread(void);
+	DemuxPacket* demuxread(std::function<DemuxPacket*(int)> const& allocator);
 
 	// demuxreset
 	//
@@ -97,11 +91,6 @@ public:
 	//
 	// Gets the length of the stream
 	long long length(void) const;
-
-	// mediatype
-	//
-	// Gets the media type of the stream
-	char const* mediatype(void) const;
 
 	// position
 	//
@@ -130,37 +119,32 @@ private:
 
 	// DEFAULT_DEVICE_BLOCK_SIZE
 	//
-	// Default device block size, in bytes
+	// Default device block size
 	static size_t const DEFAULT_DEVICE_BLOCK_SIZE;
 
-	// DEFAULT_MEDIA_TYPE
+	// DEFAULT_DEVICE_SAMPLE_RATE
 	//
-	// Default media type to report for the stream
-	static char const* DEFAULT_MEDIA_TYPE;
+	// Default device sample rate
+	static uint32_t const DEFAULT_DEVICE_SAMPLE_RATE;
 
-	// DEFAULT_READ_MIN
+	// DEFAULT_OUTPUT_CHANNELS
 	//
-	// Default minimum amount of data to return from a read request
-	static size_t const DEFAULT_READ_MINCOUNT;
+	// Default number of PCM output channels
+	static int const DEFAULT_OUTPUT_CHANNELS;
 
-	// DEFAULT_READ_TIMEOUT_MS
+	// DEFAULT_OUTPUT_SAMPLE_RATE
 	//
-	// Default amount of time for a read operation to succeed
-	static unsigned int const DEFAULT_READ_TIMEOUT_MS;
+	// Default PCM output sample rate
+	static double const DEFAULT_OUTPUT_SAMPLE_RATE;
 
 	// DEFAULT_RINGBUFFER_SIZE
 	//
-	// Default ring buffer size, in bytes
+	// Default ring buffer size
 	static size_t const DEFAULT_RINGBUFFER_SIZE;
-
-	// DEFAULT_STREAM_CHUNK_SIZE
-	//
-	// Default stream chunk size
-	static size_t const DEFAULT_STREAM_CHUNK_SIZE;
 
 	// Instance Constructor
 	//
-	fmstream(struct pvrstream::allocator const& packetalloc, uint32_t frequency, size_t chunksize);
+	fmstream(uint32_t frequency);
 
 	//-----------------------------------------------------------------------
 	// Private Member Functions
@@ -173,15 +157,13 @@ private:
 	//-----------------------------------------------------------------------
 	// Member Variables
 
-	struct pvrstream::allocator const	m_alloc;				// Demux packet allocators
 	std::unique_ptr<rtldevice>			m_device;				// RTL-SDR device instance
 	std::unique_ptr<FmDecoder>			m_decoder;				// SoftFM decoder instance
 
-	// STREAM PROPERTIES
-	//
-	size_t const						m_chunksize;			// Stream chunk size
-	size_t const						m_readmincount;			// Minimum read byte count
-	unsigned int const					m_readtimeout;			// Read timeout in milliseconds
+	size_t const						m_blocksize;			// Device block size
+	uint32_t const						m_samplerate;			// Device sample rate
+	double const						m_pcmsamplerate;		// Output sample rate
+	double								m_pts{ 1 US };			// Current program time stamp
 
 	// STREAM CONTROL
 	//

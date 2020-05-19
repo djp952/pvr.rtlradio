@@ -47,7 +47,6 @@
 // API helpers
 //
 static DemuxPacket* demux_alloc(int size);
-static void demux_free(DemuxPacket* packet);
 
 // Exception helpers
 //
@@ -132,15 +131,6 @@ static DemuxPacket* demux_alloc(int size)
 {
 	assert(g_pvr);
 	return g_pvr->AllocateDemuxPacket(size);
-}
-
-// demux_free (local)
-//
-// Helper function to access PVR API demux packet deallocator
-static void demux_free(DemuxPacket* packet)
-{
-	assert(g_pvr);
-	g_pvr->FreeDemuxPacket(packet);
 }
 
 // handle_generalexception (local)
@@ -953,7 +943,7 @@ bool OpenLiveStream(PVR_CHANNEL const& /*channel*/)
 {
 	// TODO: DUMMY OPERATION
 	//
-	try { g_pvrstream = fmstream::create({ demux_alloc, demux_free }, 101900000); }
+	try { g_pvrstream = fmstream::create(95100000); }
 	catch(std::exception& ex) { return handle_stdexception(__func__, ex, false); } 
 	catch(...) { return handle_generalexception(__func__, false); }
 
@@ -1080,19 +1070,9 @@ PVR_ERROR GetDescrambleInfo(PVR_DESCRAMBLE_INFO* /*descrambleinfo*/)
 //	props		- Array of properties to be set for the stream
 //	numprops	- Number of properties returned by this function
 
-PVR_ERROR GetChannelStreamProperties(PVR_CHANNEL const* /*channel*/, PVR_NAMED_VALUE* props, unsigned int* numprops)
+PVR_ERROR GetChannelStreamProperties(PVR_CHANNEL const* /*channel*/, PVR_NAMED_VALUE* /*props*/, unsigned int* /*numprops*/)
 {
-	// PVR_STREAM_PROPERTY_MIMETYPE
-	snprintf(props[0].strName, std::extent<decltype(props[0].strName)>::value, PVR_STREAM_PROPERTY_MIMETYPE);
-	snprintf(props[0].strValue, std::extent<decltype(props[0].strName)>::value, "audio/wav");	// <-- TODO
-
-	// PVR_STREAM_PROPERTY_ISREALTIMESTREAM
-	snprintf(props[1].strName, std::extent<decltype(props[1].strName)>::value, PVR_STREAM_PROPERTY_ISREALTIMESTREAM);
-	snprintf(props[1].strValue, std::extent<decltype(props[1].strName)>::value, "true");
-
-	*numprops = 2;
-
-	return PVR_ERROR::PVR_ERROR_NO_ERROR;
+	return PVR_ERROR::PVR_ERROR_NOT_IMPLEMENTED;
 }
 
 //---------------------------------------------------------------------------
@@ -1120,9 +1100,32 @@ PVR_ERROR GetRecordingStreamProperties(PVR_RECORDING const* /*recording*/, PVR_N
 //
 //	properties	- The properties of the currently playing stream
 
-PVR_ERROR GetStreamProperties(PVR_STREAM_PROPERTIES* /*properties*/)
+PVR_ERROR GetStreamProperties(PVR_STREAM_PROPERTIES* properties)
 {
-	return PVR_ERROR::PVR_ERROR_NOT_IMPLEMENTED;
+	unsigned int streamcount = 0;
+
+	xbmc_codec_t codecid = g_pvr->GetCodecByName("pcm_f64le");
+	if(codecid.codec_type == XBMC_CODEC_TYPE_AUDIO) {
+
+		streamcount++;
+
+		properties->stream[0].iPID = 1;
+		properties->stream[0].iCodecType = codecid.codec_type;
+		properties->stream[0].iCodecId = codecid.codec_id;
+		properties->stream[0].iChannels = 2;
+		properties->stream[0].iSampleRate = 48000;		// <-- TODO: constant
+		properties->stream[0].iBitsPerSample = 32;
+		properties->stream[0].iBitRate = properties->stream[0].iSampleRate * properties->stream[0].iChannels * properties->stream[0].iBitsPerSample;
+		properties->stream[0].strLanguage[0] = 0;
+		properties->stream[0].strLanguage[1] = 0;
+		properties->stream[0].strLanguage[2] = 0;
+		properties->stream[0].strLanguage[3] = 0;
+
+	}
+
+	properties->iStreamCount = streamcount;
+
+	return PVR_ERROR::PVR_ERROR_NO_ERROR;
 }
 
 //---------------------------------------------------------------------------
@@ -1134,15 +1137,9 @@ PVR_ERROR GetStreamProperties(PVR_STREAM_PROPERTIES* /*properties*/)
 //
 //	chunksize	- Set to the stream chunk size
 
-PVR_ERROR GetStreamReadChunkSize(int* chunksize)
+PVR_ERROR GetStreamReadChunkSize(int* /*chunksize*/)
 {
-	if(chunksize == nullptr) return PVR_ERROR::PVR_ERROR_INVALID_PARAMETERS;
-
-	if(!g_pvrstream) return PVR_ERROR::PVR_ERROR_NOT_IMPLEMENTED;
-
-	// Report the chunk size value reported by the stream instance
-	*chunksize = static_cast<int>(g_pvrstream->chunksize());
-	return PVR_ERROR::PVR_ERROR_NO_ERROR;
+	return PVR_ERROR::PVR_ERROR_NOT_IMPLEMENTED;
 }
 
 //---------------------------------------------------------------------------
@@ -1275,7 +1272,7 @@ void DemuxFlush(void)
 
 DemuxPacket* DemuxRead(void)
 {
-	try { return (g_pvrstream) ? g_pvrstream->demuxread() : nullptr; } 
+	try { return (g_pvrstream) ? g_pvrstream->demuxread(demux_alloc) : nullptr; } 
 	catch(std::exception& ex) { return handle_stdexception(__func__, ex, nullptr); }
 	catch(...) { return handle_generalexception(__func__, nullptr); }
 }
