@@ -107,6 +107,11 @@ public:
 	// Gets a flag indicating if the stream is real-time
 	bool realtime(void) const;
 
+	// samplerate
+	//
+	// Gets the sample rate of the stream
+	int samplerate(void) const;
+
 	// seek
 	//
 	// Sets the stream pointer to a specific position

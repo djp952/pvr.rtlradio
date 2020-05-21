@@ -1102,28 +1102,47 @@ PVR_ERROR GetRecordingStreamProperties(PVR_RECORDING const* /*recording*/, PVR_N
 
 PVR_ERROR GetStreamProperties(PVR_STREAM_PROPERTIES* properties)
 {
-	unsigned int streamcount = 0;
+	assert(g_pvrstream);
 
+	properties->iStreamCount = 0;
+
+	// AUDIO STREAM
+	//
 	xbmc_codec_t codecid = g_pvr->GetCodecByName("pcm_f64le");
-	if(codecid.codec_type == XBMC_CODEC_TYPE_AUDIO) {
-
-		streamcount++;
+	if((g_pvrstream) && (codecid.codec_type == XBMC_CODEC_TYPE_AUDIO)) {
 
 		properties->stream[0].iPID = 1;
 		properties->stream[0].iCodecType = codecid.codec_type;
 		properties->stream[0].iCodecId = codecid.codec_id;
 		properties->stream[0].iChannels = 2;
-		properties->stream[0].iSampleRate = 48000;		// <-- TODO: constant
-		properties->stream[0].iBitsPerSample = 32;
+		properties->stream[0].iSampleRate = g_pvrstream->samplerate();
+		properties->stream[0].iBitsPerSample = 64;
 		properties->stream[0].iBitRate = properties->stream[0].iSampleRate * properties->stream[0].iChannels * properties->stream[0].iBitsPerSample;
 		properties->stream[0].strLanguage[0] = 0;
 		properties->stream[0].strLanguage[1] = 0;
 		properties->stream[0].strLanguage[2] = 0;
 		properties->stream[0].strLanguage[3] = 0;
-
+		properties->iStreamCount++;
 	}
 
-	properties->iStreamCount = streamcount;
+	// RDS STREAM
+	//
+	codecid = g_pvr->GetCodecByName("rds");
+	if((g_pvrstream) && (codecid.codec_type == XBMC_CODEC_TYPE_RDS)) {
+
+		properties->stream[1].iPID = 2;
+		properties->stream[1].iCodecType = codecid.codec_type;
+		properties->stream[1].iCodecId = codecid.codec_id;
+		properties->stream[1].iChannels = 2;
+		properties->stream[1].iSampleRate = g_pvrstream->samplerate();
+		properties->stream[1].iBitsPerSample = 32;
+		properties->stream[1].iBitRate = properties->stream[1].iSampleRate * properties->stream[1].iChannels * properties->stream[1].iBitsPerSample;
+		properties->stream[1].strLanguage[0] = 0;
+		properties->stream[1].strLanguage[1] = 0;
+		properties->stream[1].strLanguage[2] = 0;
+		properties->stream[1].strLanguage[3] = 0;
+		properties->iStreamCount++;
+	}
 
 	return PVR_ERROR::PVR_ERROR_NO_ERROR;
 }

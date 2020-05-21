@@ -78,7 +78,7 @@ fmstream::fmstream(uint32_t frequency) : m_blocksize(align::up(DEFAULT_DEVICE_BL
 	// Create and initialize the RTL-SDR device instance
 	m_device = rtldevice::create(rtldevice::DEFAULT_DEVICE_INDEX);
 	m_device->samplerate(m_samplerate);
-	m_device->bandwidth(200 KHz);			// <--- TODO: Variable based on AM/FM/etc?
+	m_device->bandwidth(200 KHz);
 	m_device->frequency(devicefreq);
 
 	// Retrieve the actual device sample rate and configure downsample/half bandwidth
@@ -231,9 +231,9 @@ DemuxPacket* fmstream::demuxread(std::function<DemuxPacket*(int)> const& allocat
 	IQSampleVector samples(available / 2);
 	for(size_t index = 0; index < samples.size(); index++) {
 
-		int32_t re = m_buffer[tail];
-		int32_t im = m_buffer[tail + 1];
-		samples[index] = IQSample((re - 128) / IQSample::value_type(128), (im - 128) / IQSample::value_type(128));
+		int32_t real = m_buffer[tail];
+		int32_t imaginary = m_buffer[tail + 1];
+		samples[index] = IQSample((real - 128) / IQSample::value_type(128), (imaginary - 128) / IQSample::value_type(128));
 
 		tail += 2;								// Increment new tail position
 		if(tail >= m_buffersize) tail = 0;		// Handle buffer rollover
@@ -241,12 +241,6 @@ DemuxPacket* fmstream::demuxread(std::function<DemuxPacket*(int)> const& allocat
 
 	// Modify the atomic<> tail position to mark the ring buffer space as free
 	m_buffertail.store(tail);
-
-	//
-	// TODO: Augment FmDecoder to allow for direct access to the demux packet buffer; consider
-	// changing the logic above so that the ring buffer is of type IQSample again and the conversion
-	// from raw bytes to IQSample takes place on the writer thread; also requires changes to FmDecoder
-	//
 
 	SampleVector audio;							// vector<> of output audio samples
 	m_decoder->process(samples, audio);			// Decode the input I/Q data
@@ -257,12 +251,11 @@ DemuxPacket* fmstream::demuxread(std::function<DemuxPacket*(int)> const& allocat
 	if(packet == nullptr) return nullptr;
 
 	// Calculate the duration of the packet in microseconds
-	// TODO: handle monaural streams? currently streams are forced into stereo
 	double duration = ((static_cast<double>(audio.size() / 2) / m_pcmsamplerate) US);
 
 	packet->iStreamId = 1;						// Audio data stream identifier
 	packet->iSize = size;						// Audio data length
-	packet->duration = duration;				// Duration
+	packet->duration = duration;				// Duration in microseconds
 	packet->pts = m_pts;						// Program time stamp
 
 	// Copy the audio output data from the vector<> into the demux packet
@@ -345,6 +338,20 @@ bool fmstream::realtime(void) const
 }
 
 //---------------------------------------------------------------------------
+// fmstream::samplerate
+//
+// Gets the sample rate of the stream
+//
+// Arguments:
+//
+//	NONE
+
+int fmstream::samplerate(void) const
+{
+	return static_cast<int>(m_pcmsamplerate);
+}
+
+//---------------------------------------------------------------------------
 // fmstream::seek
 //
 // Sets the stream pointer to a specific position
@@ -403,8 +410,9 @@ void fmstream::transfer(scalar_condition<bool>& started)
 			// If the head is behind the tail linearly, take the data between them otherwise 
 			// take the data between the end of the buffer and the head
 			size_t chunk = (head < tail) ? std::min(count, tail - head) : std::min(count, m_buffersize - head);
-			size_t bytesread = m_device->read(&m_buffer[head], chunk);
-			if(bytesread < chunk) { /* TODO - SHORT READ ERROR */ }
+
+			// Read the chunk directly into the ring buffer
+			chunk = m_device->read(&m_buffer[head], chunk);
 
 			head += chunk;				// Increment the head position
 			count -= chunk;				// Decrement remaining bytes to be transferred
