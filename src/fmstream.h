@@ -32,6 +32,8 @@
 #include <mutex>
 #include <thread>
 
+#include <FmDecode.h>
+
 #include "pvrstream.h"
 #include "rtldevice.h"
 #include "scalar_condition.h"

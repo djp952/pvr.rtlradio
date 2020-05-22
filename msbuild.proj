@@ -129,8 +129,8 @@
     <Exec Command="$(BashExe) -c &quot;gcc-4.9 $(CPPFLAGS) $(CFLAGS) -Wno-unused-function -Wno-unused-variable -c depends/rtl-sdr/src/convenience/convenience.c -o out/linux-i686/convenience.o&quot;" ContinueOnError="false"/>
     <Exec Command="$(BashExe) -c &quot;gcc-4.9 $(CPPFLAGS) $(CFLAGS) -Wno-unused-function -Wno-unused-variable -c depends/rtl-sdr/src/getopt/getopt.c -o out/linux-i686/getopt.o&quot;" ContinueOnError="false"/>
     <Exec Command="$(BashExe) -c &quot;gcc-4.9 $(CPPFLAGS) $(CFLAGS) -Wno-unused-function -Wno-unused-variable -c depends/rtl-sdr/src/rtl_test.c -o out/linux-i686/rtl_test.o&quot;" ContinueOnError="false"/>
-    <Exec Command="$(BashExe) -c &quot;g++-4.9 $(CPPFLAGS) $(CXXFLAGS) -Wno-unused-function -c depends/softfm/Filter.cc -o out/linux-i686/Filter.o&quot;" ContinueOnError="false"/>
-    <Exec Command="$(BashExe) -c &quot;g++-4.9 $(CPPFLAGS) $(CXXFLAGS) -Wno-unused-function -c depends/softfm/FmDecode.cc -o out/linux-i686/FmDecode.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;g++-4.9 $(CPPFLAGS) $(CXXFLAGS) -c depends/softfm/Filter.cc -o out/linux-i686/Filter.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;g++-4.9 $(CPPFLAGS) $(CXXFLAGS) -c depends/softfm/FmDecode.cc -o out/linux-i686/FmDecode.o&quot;" ContinueOnError="false"/>
     <Exec Command="$(BashExe) -c &quot;g++-4.9 $(CPPFLAGS) $(CXXFLAGS) -c src/fmstream.cpp -o out/linux-i686/fmstream.o&quot;" ContinueOnError="false"/>
     <Exec Command="$(BashExe) -c &quot;g++-4.9 $(CPPFLAGS) $(CXXFLAGS) -c src/libusb_exception.cpp -o out/linux-i686/libusb_exception.o&quot;" ContinueOnError="false"/>
     <Exec Command="$(BashExe) -c &quot;g++-4.9 $(CPPFLAGS) $(CXXFLAGS) -c src/pvr.cpp -o out/linux-i686/pvr.o&quot;" ContinueOnError="false"/>
@@ -174,8 +174,8 @@
     <Exec Command="$(BashExe) -c &quot;gcc-4.9 $(CPPFLAGS) $(CFLAGS) -Wno-unused-function -Wno-unused-variable -c depends/rtl-sdr/src/convenience/convenience.c -o out/linux-x86_64/convenience.o&quot;" ContinueOnError="false"/>
     <Exec Command="$(BashExe) -c &quot;gcc-4.9 $(CPPFLAGS) $(CFLAGS) -Wno-unused-function -Wno-unused-variable -c depends/rtl-sdr/src/getopt/getopt.c -o out/linux-x86_64/getopt.o&quot;" ContinueOnError="false"/>
     <Exec Command="$(BashExe) -c &quot;gcc-4.9 $(CPPFLAGS) $(CFLAGS) -Wno-unused-function -Wno-unused-variable -c depends/rtl-sdr/src/rtl_test.c -o out/linux-x86_64/rtl_test.o&quot;" ContinueOnError="false"/>
-    <Exec Command="$(BashExe) -c &quot;g++-4.9 $(CPPFLAGS) $(CXXFLAGS) -Wno-unused-function -c depends/softfm/Filter.cc -o out/linux-x86_64/Filter.o&quot;" ContinueOnError="false"/>
-    <Exec Command="$(BashExe) -c &quot;g++-4.9 $(CPPFLAGS) $(CXXFLAGS) -Wno-unused-function -c depends/softfm/FmDecode.cc -o out/linux-x86_64/FmDecode.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;g++-4.9 $(CPPFLAGS) $(CXXFLAGS) -c depends/softfm/Filter.cc -o out/linux-x86_64/Filter.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;g++-4.9 $(CPPFLAGS) $(CXXFLAGS) -c depends/softfm/FmDecode.cc -o out/linux-x86_64/FmDecode.o&quot;" ContinueOnError="false"/>
     <Exec Command="$(BashExe) -c &quot;g++-4.9 $(CPPFLAGS) $(CXXFLAGS) -c src/fmstream.cpp -o out/linux-x86_64/fmstream.o&quot;" ContinueOnError="false"/>
     <Exec Command="$(BashExe) -c &quot;g++-4.9 $(CPPFLAGS) $(CXXFLAGS) -c src/libusb_exception.cpp -o out/linux-x86_64/libusb_exception.o&quot;" ContinueOnError="false"/>
     <Exec Command="$(BashExe) -c &quot;g++-4.9 $(CPPFLAGS) $(CXXFLAGS) -c src/pvr.cpp -o out/linux-x86_64/pvr.o&quot;" ContinueOnError="false"/>
@@ -219,8 +219,8 @@
     <Exec Command="$(BashExe) -c &quot;arm-linux-gnueabi-gcc-4.9 $(CPPFLAGS) $(CFLAGS) -Wno-unused-function -Wno-unused-variable -c depends/rtl-sdr/src/convenience/convenience.c -o out/linux-armel/convenience.o&quot;" ContinueOnError="false"/>
     <Exec Command="$(BashExe) -c &quot;arm-linux-gnueabi-gcc-4.9 $(CPPFLAGS) $(CFLAGS) -Wno-unused-function -Wno-unused-variable -c depends/rtl-sdr/src/getopt/getopt.c -o out/linux-armel/getopt.o&quot;" ContinueOnError="false"/>
     <Exec Command="$(BashExe) -c &quot;arm-linux-gnueabi-gcc-4.9 $(CPPFLAGS) $(CFLAGS) -Wno-unused-function -Wno-unused-variable -c depends/rtl-sdr/src/rtl_test.c -o out/linux-armel/rtl_test.o&quot;" ContinueOnError="false"/>
-    <Exec Command="$(BashExe) -c &quot;arm-linux-gnueabi-g++-4.9 $(CPPFLAGS) $(CXXFLAGS) -Wno-unused-function -c depends/softfm/Filter.cc -o out/linux-armel/Filter.o&quot;" ContinueOnError="false"/>
-    <Exec Command="$(BashExe) -c &quot;arm-linux-gnueabi-g++-4.9 $(CPPFLAGS) $(CXXFLAGS) -Wno-unused-function -c depends/softfm/FmDecode.cc -o out/linux-armel/FmDecode.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;arm-linux-gnueabi-g++-4.9 $(CPPFLAGS) $(CXXFLAGS) -c depends/softfm/Filter.cc -o out/linux-armel/Filter.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;arm-linux-gnueabi-g++-4.9 $(CPPFLAGS) $(CXXFLAGS) -c depends/softfm/FmDecode.cc -o out/linux-armel/FmDecode.o&quot;" ContinueOnError="false"/>
     <Exec Command="$(BashExe) -c &quot;arm-linux-gnueabi-g++-4.9 $(CPPFLAGS) $(CXXFLAGS) -c src/fmstream.cpp -o out/linux-armel/fmstream.o&quot;" ContinueOnError="false"/>
     <Exec Command="$(BashExe) -c &quot;arm-linux-gnueabi-g++-4.9 $(CPPFLAGS) $(CXXFLAGS) -c src/libusb_exception.cpp -o out/linux-armel/libusb_exception.o&quot;" ContinueOnError="false"/>
     <Exec Command="$(BashExe) -c &quot;arm-linux-gnueabi-g++-4.9 $(CPPFLAGS) $(CXXFLAGS) -c src/pvr.cpp -o out/linux-armel/pvr.o&quot;" ContinueOnError="false"/>
@@ -264,8 +264,8 @@
     <Exec Command="$(BashExe) -c &quot;arm-linux-gnueabihf-gcc-4.9 $(CPPFLAGS) $(CFLAGS) -Wno-unused-function -Wno-unused-variable -c depends/rtl-sdr/src/convenience/convenience.c -o out/linux-armhf/convenience.o&quot;" ContinueOnError="false"/>
     <Exec Command="$(BashExe) -c &quot;arm-linux-gnueabihf-gcc-4.9 $(CPPFLAGS) $(CFLAGS) -Wno-unused-function -Wno-unused-variable -c depends/rtl-sdr/src/getopt/getopt.c -o out/linux-armhf/getopt.o&quot;" ContinueOnError="false"/>
     <Exec Command="$(BashExe) -c &quot;arm-linux-gnueabihf-gcc-4.9 $(CPPFLAGS) $(CFLAGS) -Wno-unused-function -Wno-unused-variable -c depends/rtl-sdr/src/rtl_test.c -o out/linux-armhf/rtl_test.o&quot;" ContinueOnError="false"/>
-    <Exec Command="$(BashExe) -c &quot;arm-linux-gnueabihf-g++-4.9 $(CPPFLAGS) $(CXXFLAGS) -Wno-unused-function -c depends/softfm/Filter.cc -o out/linux-armhf/Filter.o&quot;" ContinueOnError="false"/>
-    <Exec Command="$(BashExe) -c &quot;arm-linux-gnueabihf-g++-4.9 $(CPPFLAGS) $(CXXFLAGS) -Wno-unused-function -c depends/softfm/FmDecode.cc -o out/linux-armhf/FmDecode.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;arm-linux-gnueabihf-g++-4.9 $(CPPFLAGS) $(CXXFLAGS) -c depends/softfm/Filter.cc -o out/linux-armhf/Filter.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;arm-linux-gnueabihf-g++-4.9 $(CPPFLAGS) $(CXXFLAGS) -c depends/softfm/FmDecode.cc -o out/linux-armhf/FmDecode.o&quot;" ContinueOnError="false"/>
     <Exec Command="$(BashExe) -c &quot;arm-linux-gnueabihf-g++-4.9 $(CPPFLAGS) $(CXXFLAGS) -c src/fmstream.cpp -o out/linux-armhf/fmstream.o&quot;" ContinueOnError="false"/>
     <Exec Command="$(BashExe) -c &quot;arm-linux-gnueabihf-g++-4.9 $(CPPFLAGS) $(CXXFLAGS) -c src/libusb_exception.cpp -o out/linux-armhf/libusb_exception.o&quot;" ContinueOnError="false"/>
     <Exec Command="$(BashExe) -c &quot;arm-linux-gnueabihf-g++-4.9 $(CPPFLAGS) $(CXXFLAGS) -c src/pvr.cpp -o out/linux-armhf/pvr.o&quot;" ContinueOnError="false"/>
@@ -309,8 +309,8 @@
     <Exec Command="$(BashExe) -c &quot;aarch64-linux-gnu-gcc-4.9 $(CPPFLAGS) $(CFLAGS) -Wno-unused-function -Wno-unused-variable -c depends/rtl-sdr/src/getopt/getopt.c -o out/linux-aarch64/getopt.o&quot;" ContinueOnError="false"/>
     <Exec Command="$(BashExe) -c &quot;aarch64-linux-gnu-gcc-4.9 $(CPPFLAGS) $(CFLAGS) -Wno-unused-function -Wno-unused-variable -c depends/rtl-sdr/src/rtl_test.c -o out/linux-aarch64/rtl_test.o&quot;" ContinueOnError="false"/>
     <Exec Command="$(BashExe) -c &quot;aarch64-linux-gnu-gcc-4.9 $(CPPFLAGS) $(CFLAGS) -Wno-unused-function -Wno-unused-variable -c depends/rtl-sdr/src/tuner_r82xx.c -o out/linux-aarch64/tuner_r82xx.o&quot;" ContinueOnError="false"/>
-    <Exec Command="$(BashExe) -c &quot;aarch64-linux-gnu-g++-4.9 $(CPPFLAGS) $(CXXFLAGS) -Wno-unused-function -c depends/softfm/Filter.cc -o out/linux-aarch64/Filter.o&quot;" ContinueOnError="false"/>
-    <Exec Command="$(BashExe) -c &quot;aarch64-linux-gnu-g++-4.9 $(CPPFLAGS) $(CXXFLAGS) -Wno-unused-function -c depends/softfm/FmDecode.cc -o out/linux-aarch64/FmDecode.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;aarch64-linux-gnu-g++-4.9 $(CPPFLAGS) $(CXXFLAGS) -c depends/softfm/Filter.cc -o out/linux-aarch64/Filter.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;aarch64-linux-gnu-g++-4.9 $(CPPFLAGS) $(CXXFLAGS) -c depends/softfm/FmDecode.cc -o out/linux-aarch64/FmDecode.o&quot;" ContinueOnError="false"/>
     <Exec Command="$(BashExe) -c &quot;aarch64-linux-gnu-g++-4.9 $(CPPFLAGS) $(CXXFLAGS) -c src/fmstream.cpp -o out/linux-aarch64/fmstream.o&quot;" ContinueOnError="false"/>
     <Exec Command="$(BashExe) -c &quot;aarch64-linux-gnu-g++-4.9 $(CPPFLAGS) $(CXXFLAGS) -c src/libusb_exception.cpp -o out/linux-aarch64/libusb_exception.o&quot;" ContinueOnError="false"/>
     <Exec Command="$(BashExe) -c &quot;aarch64-linux-gnu-g++-4.9 $(CPPFLAGS) $(CXXFLAGS) -c src/pvr.cpp -o out/linux-aarch64/pvr.o&quot;" ContinueOnError="false"/>
@@ -355,8 +355,8 @@
     <Exec Command="$(BashExe) -c &quot;$(ENV) arm-linux-gnueabihf-gcc $(CPPFLAGS) $(CFLAGS) -Wno-unused-function -Wno-unused-variable -c depends/rtl-sdr/src/convenience/convenience.c -o out/raspbian-armhf/convenience.o&quot;" ContinueOnError="false"/>
     <Exec Command="$(BashExe) -c &quot;$(ENV) arm-linux-gnueabihf-gcc $(CPPFLAGS) $(CFLAGS) -Wno-unused-function -Wno-unused-variable -c depends/rtl-sdr/src/getopt/getopt.c -o out/raspbian-armhf/getopt.o&quot;" ContinueOnError="false"/>
     <Exec Command="$(BashExe) -c &quot;$(ENV) arm-linux-gnueabihf-gcc $(CPPFLAGS) $(CFLAGS) -Wno-unused-function -Wno-unused-variable -c depends/rtl-sdr/src/rtl_test.c -o out/raspbian-armhf/rtl_test.o&quot;" ContinueOnError="false"/>
-    <Exec Command="$(BashExe) -c &quot;$(ENV) arm-linux-gnueabihf-g++ $(CPPFLAGS) $(CXXFLAGS) -Wno-unused-function -c depends/softfm/Filter.cc -o out/raspbian-armhf/Filter.o&quot;" ContinueOnError="false"/>
-    <Exec Command="$(BashExe) -c &quot;$(ENV) arm-linux-gnueabihf-g++ $(CPPFLAGS) $(CXXFLAGS) -Wno-unused-function -c depends/softfm/FmDecode.cc -o out/raspbian-armhf/FmDecode.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;$(ENV) arm-linux-gnueabihf-g++ $(CPPFLAGS) $(CXXFLAGS) -c depends/softfm/Filter.cc -o out/raspbian-armhf/Filter.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;$(ENV) arm-linux-gnueabihf-g++ $(CPPFLAGS) $(CXXFLAGS) -c depends/softfm/FmDecode.cc -o out/raspbian-armhf/FmDecode.o&quot;" ContinueOnError="false"/>
     <Exec Command="$(BashExe) -c &quot;$(ENV) arm-linux-gnueabihf-g++ $(CPPFLAGS) $(CXXFLAGS) -c src/fmstream.cpp -o out/raspbian-armhf/fmstream.o&quot;" ContinueOnError="false"/>
     <Exec Command="$(BashExe) -c &quot;$(ENV) arm-linux-gnueabihf-g++ $(CPPFLAGS) $(CXXFLAGS) -c src/libusb_exception.cpp -o out/raspbian-armhf/libusb_exception.o&quot;" ContinueOnError="false"/>
     <Exec Command="$(BashExe) -c &quot;$(ENV) arm-linux-gnueabihf-g++ $(CPPFLAGS) $(CXXFLAGS) -c src/pvr.cpp -o out/raspbian-armhf/pvr.o&quot;" ContinueOnError="false"/>
@@ -401,8 +401,8 @@
     <Exec Command="$(BashExe) -c &quot;$(ENV) x86_64-apple-darwin15-clang $(CPPFLAGS) $(CFLAGS) -Wno-unused-function -Wno-unused-variable -c depends/rtl-sdr/src/convenience/convenience.c -o out/osx-x86_64/convenience.o&quot;" ContinueOnError="false"/>
     <Exec Command="$(BashExe) -c &quot;$(ENV) x86_64-apple-darwin15-clang $(CPPFLAGS) $(CFLAGS) -Wno-unused-function -Wno-unused-variable -c depends/rtl-sdr/src/getopt/getopt.c -o out/osx-x86_64/getopt.o&quot;" ContinueOnError="false"/>
     <Exec Command="$(BashExe) -c &quot;$(ENV) x86_64-apple-darwin15-clang $(CPPFLAGS) $(CFLAGS) -Wno-unused-function -Wno-unused-variable -c depends/rtl-sdr/src/rtl_test.c -o out/osx-x86_64/rtl_test.o&quot;" ContinueOnError="false"/>
-    <Exec Command="$(BashExe) -c &quot;$(ENV) x86_64-apple-darwin15-clang++ $(CPPFLAGS) $(CXXFLAGS) -Wno-unused-function -c depends/softfm/Filter.cc -o out/osx-x86_64/Filter.o&quot;" ContinueOnError="false"/>
-    <Exec Command="$(BashExe) -c &quot;$(ENV) x86_64-apple-darwin15-clang++ $(CPPFLAGS) $(CXXFLAGS) -Wno-unused-function -c depends/softfm/FmDecode.cc -o out/osx-x86_64/FmDecode.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;$(ENV) x86_64-apple-darwin15-clang++ $(CPPFLAGS) $(CXXFLAGS) -c depends/softfm/Filter.cc -o out/osx-x86_64/Filter.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;$(ENV) x86_64-apple-darwin15-clang++ $(CPPFLAGS) $(CXXFLAGS) -c depends/softfm/FmDecode.cc -o out/osx-x86_64/FmDecode.o&quot;" ContinueOnError="false"/>
     <Exec Command="$(BashExe) -c &quot;$(ENV) x86_64-apple-darwin15-clang++ $(CPPFLAGS) $(CXXFLAGS) -c src/fmstream.cpp -o out/osx-x86_64/fmstream.o&quot;" ContinueOnError="false"/>
     <Exec Command="$(BashExe) -c &quot;$(ENV) x86_64-apple-darwin15-clang++ $(CPPFLAGS) $(CXXFLAGS) -c src/libusb_exception.cpp -o out/osx-x86_64/libusb_exception.o&quot;" ContinueOnError="false"/>
     <Exec Command="$(BashExe) -c &quot;$(ENV) x86_64-apple-darwin15-clang++ $(CPPFLAGS) $(CXXFLAGS) -c src/pvr.cpp -o out/osx-x86_64/pvr.o&quot;" ContinueOnError="false"/>
