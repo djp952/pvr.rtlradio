@@ -95,40 +95,25 @@ rtldevice::~rtldevice()
 }
 
 //---------------------------------------------------------------------------
-// rtldevice::agcmode
+// rtldevice::begin_stream
 //
-// Enables/disables the automatic gain control mode of the device
-//
-// Arguments:
-//
-//	enable		- Flag to enable/disable test mode
-
-void rtldevice::agcmode(bool enable) const
-{
-	assert(m_device != nullptr);
-
-	rtlsdr_set_agc_mode(m_device, (enable) ? 1 : 0);
-}
-
-//---------------------------------------------------------------------------
-// rtldevice::bandwidth
-//
-// Sets the bandwidth of the device
+// Starts streaming data from the device
 //
 // Arguments:
 //
-//	hz		- Bandwidth to set, specified in hertz
+//	NONE
 
-void rtldevice::bandwidth(uint32_t hz) const
+void rtldevice::begin_stream(void) const
 {
 	assert(m_device != nullptr);
 
-	int result = rtlsdr_set_tuner_bandwidth(m_device, hz);
-	if(result < 0) throw string_exception(__func__, ": failed to set device bandwidth to ", hz, "Hz");
+	// Reset the device buffer to start the streaming interface
+	int result = rtlsdr_reset_buffer(m_device);
+	if(result < 0) throw string_exception(__func__, ": unable to reset RTL-SDR device buffer");
 }
 
 //---------------------------------------------------------------------------
-// rtldevice::cancelasync
+// rtldevice::cancel_async
 //
 // Cancels any pending asynchronous read operations from the device
 //
@@ -136,7 +121,7 @@ void rtldevice::bandwidth(uint32_t hz) const
 //
 //	NONE
 
-void rtldevice::cancelasync(void) const
+void rtldevice::cancel_async(void) const
 {
 	assert(m_device != nullptr);
 
@@ -172,7 +157,7 @@ std::unique_ptr<rtldevice> rtldevice::create(uint32_t index)
 }
 
 //---------------------------------------------------------------------------
-// rtldevice::frequency
+// rtldevice::get_center_frequency
 //
 // Gets the center frequency of the device
 //
@@ -180,7 +165,7 @@ std::unique_ptr<rtldevice> rtldevice::create(uint32_t index)
 //
 //	NONE
 
-uint32_t rtldevice::frequency(void) const
+uint32_t rtldevice::get_center_frequency(void) const
 {
 	assert(m_device != nullptr);
 
@@ -188,104 +173,7 @@ uint32_t rtldevice::frequency(void) const
 }
 
 //---------------------------------------------------------------------------
-// rtldevice::frequency
-//
-// Sets the center frequency of the device
-//
-// Arguments:
-//
-//	hz		- Frequency to set, specified in hertz
-
-void rtldevice::frequency(uint32_t hz) const
-{
-	assert(m_device != nullptr);
-
-	int result = rtlsdr_set_center_freq(m_device, hz);
-	if(result < 0) throw string_exception(__func__, ": failed to set device frequency to ", hz, "Hz");
-}
-
-//---------------------------------------------------------------------------
-// rtldevice::frequencycorrection
-//
-// Gets the frequency correction of the device
-//
-// Arguments:
-//
-//	NONE
-
-uint32_t rtldevice::frequencycorrection(void) const
-{
-	assert(m_device != nullptr);
-
-	return rtlsdr_get_freq_correction(m_device);
-}
-
-//---------------------------------------------------------------------------
-// rtldevice::frequencycorrection
-//
-// Sets the frequency correction of the device
-//
-// Arguments:
-//
-//	ppm		- Frequency correction to set, specified in parts per million
-
-void rtldevice::frequencycorrection(int ppm) const
-{
-	assert(m_device != nullptr);
-
-	int result = rtlsdr_set_freq_correction(m_device, ppm);
-	if(result < 0) throw string_exception(__func__, ": failed to set device frequency correction to ", ppm, "ppm");
-}
-
-//---------------------------------------------------------------------------
-// rtldevice::gain
-//
-// Gets the gain of the device
-//
-// Arguments:
-//
-//	NONE
-
-int rtldevice::gain(void) const
-{
-	assert(m_device != nullptr);
-
-	return rtlsdr_get_tuner_gain(m_device);
-}
-
-//---------------------------------------------------------------------------
-// rtldevice::gain
-//
-// Sets the gain of the device
-//
-// Arguments:
-//
-//	db			- Gain to set, specified in tenths of a decibel
-
-void rtldevice::gain(int db) const
-{
-	assert(m_device != nullptr);
-
-	int result = rtlsdr_set_tuner_gain(m_device, db);
-	if(result < 0) throw string_exception(__func__, ": failed to set device gain to ", db, "dB/10");
-}
-
-//---------------------------------------------------------------------------
-// rtldevice::manufacturer
-//
-// Gets the manufacturer name of the device
-//
-// Arguments:
-//
-//	NONE
-
-char const* rtldevice::manufacturer(void) const
-{
-	return m_manufacturer.c_str();
-}
-
-//---------------------------------------------------------------------------
-// rtldevice::name
+// rtldevice::get_device_name
 //
 // Gets the name of the device
 //
@@ -293,13 +181,59 @@ char const* rtldevice::manufacturer(void) const
 //
 //	NONE
 
-char const* rtldevice::name(void) const
+char const* rtldevice::get_device_name(void) const
 {
 	return m_name.c_str();
 }
 
 //---------------------------------------------------------------------------
-// rtldevice::product
+// rtldevice::get_frequency_correction
+//
+// Gets the frequency correction of the device
+//
+// Arguments:
+//
+//	NONE
+
+uint32_t rtldevice::get_frequency_correction(void) const
+{
+	assert(m_device != nullptr);
+
+	return rtlsdr_get_freq_correction(m_device);
+}
+
+//---------------------------------------------------------------------------
+// rtldevice::get_gain
+//
+// Gets the gain of the device
+//
+// Arguments:
+//
+//	NONE
+
+int rtldevice::get_gain(void) const
+{
+	assert(m_device != nullptr);
+
+	return rtlsdr_get_tuner_gain(m_device);
+}
+
+//---------------------------------------------------------------------------
+// rtldevice::get_manufacturer_name
+//
+// Gets the manufacturer name of the device
+//
+// Arguments:
+//
+//	NONE
+
+char const* rtldevice::get_manufacturer_name(void) const
+{
+	return m_manufacturer.c_str();
+}
+
+//---------------------------------------------------------------------------
+// rtldevice::get_product_name
 //
 // Gets the product name of the device
 //
@@ -307,9 +241,65 @@ char const* rtldevice::name(void) const
 //
 //	NONE
 
-char const* rtldevice::product(void) const
+char const* rtldevice::get_product_name(void) const
 {
 	return m_product.c_str();
+}
+
+//---------------------------------------------------------------------------
+// rtldevice::get_sample_rate
+//
+// Gets the sample rate of the device
+//
+// Arguments:
+//
+//	NONE
+
+uint32_t rtldevice::get_sample_rate(void) const
+{
+	assert(m_device != nullptr);
+
+	return rtlsdr_get_sample_rate(m_device);
+}
+
+//---------------------------------------------------------------------------
+// rtldevice::get_serial_number
+//
+// Gets the serial number of the device
+//
+// Arguments:
+//
+//	NONE
+
+char const* rtldevice::get_serial_number(void) const
+{
+	return m_serialnumber.c_str();
+}
+
+//---------------------------------------------------------------------------
+// rtldevice::get_valid_gains
+//
+// Gets the valid tuner gain values for the device
+//
+// Arguments:
+//
+//	dbs			- vector<> to retrieve the valid gain values
+
+void rtldevice::get_valid_gains(std::vector<int>& dbs) const
+{
+	assert(m_device != nullptr);
+
+	dbs.clear();
+
+	// Determine the number of valid gain values for the tuner device
+	int numgains = rtlsdr_get_tuner_gains(m_device, nullptr);
+	if(numgains < 0) throw string_exception(__func__, ": unable to determine valid tuner gain values");
+	else if(numgains == 0) return;
+
+	// Reallocate the vector<> to hold all of the values and execute the operation again
+	dbs.resize(numgains);
+	if(rtlsdr_get_tuner_gains(m_device, dbs.data()) != numgains)
+		throw string_exception(__func__, ": size mismatch reading valid tuner gain values");
 }
 
 //---------------------------------------------------------------------------
@@ -336,7 +326,7 @@ size_t rtldevice::read(uint8_t* buffer, size_t count) const
 }
 
 //---------------------------------------------------------------------------
-// rtldevice::readasync
+// rtldevice::read_async
 //
 // Asynchronously reads data from the device
 //
@@ -345,13 +335,13 @@ size_t rtldevice::read(uint8_t* buffer, size_t count) const
 //	callback		- Asynchronous read callback function
 //	bufferlength	- Device buffer length, must be multiple of 512
 
-void rtldevice::readasync(asynccallback const& callback, uint32_t bufferlength) const
+void rtldevice::read_async(asynccallback const& callback, uint32_t bufferlength) const
 {
-	return readasync(callback, 0, bufferlength);
+	return read_async(callback, 0, bufferlength);
 }
 
 //---------------------------------------------------------------------------
-// rtldevice::readasync
+// rtldevice::read_async
 //
 // Asynchronously reads data from the device
 //
@@ -361,7 +351,7 @@ void rtldevice::readasync(asynccallback const& callback, uint32_t bufferlength) 
 //	numbuffers		- Number of device buffers
 //	bufferlength	- Device buffer length, must be multiple of 512
 
-void rtldevice::readasync(asynccallback const& callback, uint32_t numbuffers, uint32_t bufferlength) const
+void rtldevice::read_async(asynccallback const& callback, uint32_t numbuffers, uint32_t bufferlength) const
 {
 	assert(m_device != nullptr);
 
@@ -381,23 +371,110 @@ void rtldevice::readasync(asynccallback const& callback, uint32_t numbuffers, ui
 }
 
 //---------------------------------------------------------------------------
-// rtldevice::samplerate
+// rtldevice::set_automatic_gain_control
 //
-// Gets the sample rate of the device
+// Enables/disables the automatic gain control mode of the device
 //
 // Arguments:
 //
-//	NONE
+//	enable		- Flag to enable/disable test mode
 
-uint32_t rtldevice::samplerate(void) const
+void rtldevice::set_automatic_gain_control(bool enable) const
 {
 	assert(m_device != nullptr);
 
-	return rtlsdr_get_sample_rate(m_device);
+	rtlsdr_set_agc_mode(m_device, (enable) ? 1 : 0);
 }
 
 //---------------------------------------------------------------------------
-// rtldevice::samplerate
+// rtldevice::set_bandwidth
+//
+// Sets the bandwidth of the device
+//
+// Arguments:
+//
+//	hz		- Bandwidth to set, specified in hertz
+
+void rtldevice::set_bandwidth(uint32_t hz) const
+{
+	assert(m_device != nullptr);
+
+	int result = rtlsdr_set_tuner_bandwidth(m_device, hz);
+	if(result < 0) throw string_exception(__func__, ": failed to set device bandwidth to ", hz, "Hz");
+}
+
+//---------------------------------------------------------------------------
+// rtldevice::set_center_frequency
+//
+// Sets the center frequency of the device
+//
+// Arguments:
+//
+//	hz		- Frequency to set, specified in hertz
+
+uint32_t rtldevice::set_center_frequency(uint32_t hz) const
+{
+	assert(m_device != nullptr);
+
+	int result = rtlsdr_set_center_freq(m_device, hz);
+	if(result < 0) throw string_exception(__func__, ": failed to set device frequency to ", hz, "Hz");
+
+	return rtlsdr_get_center_freq(m_device);
+}
+
+//---------------------------------------------------------------------------
+// rtldevice::set_frequency_correction
+//
+// Sets the frequency correction of the device
+//
+// Arguments:
+//
+//	ppm		- Frequency correction to set, specified in parts per million
+
+uint32_t rtldevice::set_frequency_correction(int ppm) const
+{
+	assert(m_device != nullptr);
+
+	int result = rtlsdr_set_freq_correction(m_device, ppm);
+	if(result < 0) throw string_exception(__func__, ": failed to set device frequency correction to ", ppm, "ppm");
+
+	return rtlsdr_get_freq_correction(m_device);
+}
+
+//---------------------------------------------------------------------------
+// rtldevice::set_gain
+//
+// Sets the gain of the device
+//
+// Arguments:
+//
+//	db			- Gain to set, specified in tenths of a decibel
+
+int rtldevice::set_gain(int db) const
+{
+	std::vector<int>	validgains;			// Gains allowed by the device
+
+	assert(m_device != nullptr);
+
+	// Get the list of valid gain values for the device
+	get_valid_gains(validgains);
+	if(validgains.size() == 0) throw string_exception(__func__, ": failed to retrieve valid device gain values");
+
+	// Select the gain value that's closest to what has been requested
+	int nearest = validgains[0];
+	for(int index = 0; index < validgains.size(); index++)
+		if(std::abs(db - validgains[index]) < std::abs(db - nearest)) nearest = validgains[index];
+
+	// Attempt to set the gain to the detected nearest gain value
+	int result = rtlsdr_set_tuner_gain(m_device, nearest);
+	if(result < 0) throw string_exception(__func__, ": failed to set device gain to ", db, "dB/10");
+
+	// Return the gain value that was actually used
+	return nearest;
+}
+
+//---------------------------------------------------------------------------
+// rtldevice::set_sample_rate
 //
 // Sets the sample rate of the device
 //
@@ -405,48 +482,18 @@ uint32_t rtldevice::samplerate(void) const
 //
 //	hz		- Sample rate to set, specified in hertz
 
-void rtldevice::samplerate(uint32_t hz) const
+uint32_t rtldevice::set_sample_rate(uint32_t hz) const
 {
 	assert(m_device != nullptr);
 
 	int result = rtlsdr_set_sample_rate(m_device, hz);
 	if(result < 0) throw string_exception(__func__, ": failed to set device sample rate to ", hz, "Hz");
+
+	return rtlsdr_get_sample_rate(m_device);
 }
 
 //---------------------------------------------------------------------------
-// rtldevice::serialnumber
-//
-// Gets the serial number of the device
-//
-// Arguments:
-//
-//	NONE
-
-char const* rtldevice::serialnumber(void) const
-{
-	return m_serialnumber.c_str();
-}
-
-//---------------------------------------------------------------------------
-// rtldevice::stream
-//
-// Starts streaming data from the device
-//
-// Arguments:
-//
-//	NONE
-
-void rtldevice::stream(void) const
-{
-	assert(m_device != nullptr);
-
-	// Reset the device buffer to start the streaming interface
-	int result = rtlsdr_reset_buffer(m_device);
-	if(result < 0) throw string_exception(__func__, ": unable to reset RTL-SDR device buffer");
-}
-
-//---------------------------------------------------------------------------
-// rtldevice::testmode
+// rtldevice::set_test_mode
 //
 // Enables/disables the test mode of the device
 //
@@ -454,37 +501,11 @@ void rtldevice::stream(void) const
 //
 //	enable		- Flag to enable/disable test mode
 
-void rtldevice::testmode(bool enable) const
+void rtldevice::set_test_mode(bool enable) const
 {
 	assert(m_device != nullptr);
 
 	rtlsdr_set_testmode(m_device, (enable) ? 1 : 0);
-}
-
-//---------------------------------------------------------------------------
-// rtldevice::validgains
-//
-// Gets the valid tuner gain values for the device
-//
-// Arguments:
-//
-//	dbs			- vector<> to retrieve the valid gain values
-
-void rtldevice::validgains(std::vector<int>& dbs) const
-{
-	assert(m_device != nullptr);
-
-	dbs.clear();
-
-	// Determine the number of valid gain values for the tuner device
-	int numgains = rtlsdr_get_tuner_gains(m_device, nullptr);
-	if(numgains < 0) throw string_exception(__func__, ": unable to determine valid tuner gain values");
-	else if(numgains == 0) return;
-
-	// Reallocate the vector<> to hold all of the values and execute the operation again
-	dbs.resize(numgains);
-	if(rtlsdr_get_tuner_gains(m_device, dbs.data()) != numgains)
-		throw string_exception(__func__, ": size mismatch reading valid tuner gain values");
 }
 
 //---------------------------------------------------------------------------

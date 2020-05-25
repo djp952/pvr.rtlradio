@@ -197,6 +197,7 @@
     <ClInclude Include="scalar_condition.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="string_exception.h" />
+    <ClInclude Include="streamparams.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\depends\libusb\src\libusb\core.c">

@@ -37,6 +37,7 @@
 #include "pvrstream.h"
 #include "rtldevice.h"
 #include "scalar_condition.h"
+#include "streamparams.h"
 
 //---------------------------------------------------------------------------
 // Class fmstream
@@ -67,7 +68,7 @@ public:
 	// create (static)
 	//
 	// Factory method, creates a new fmstream instance
-	static std::unique_ptr<fmstream> create(uint32_t frequency);
+	static std::unique_ptr<fmstream> create(struct streamparams const& params);
 
 	// demuxabort
 	//
@@ -82,7 +83,7 @@ public:
 	// demuxread
 	//
 	// Reads the next packet from the demultiplexer
-	DemuxPacket* demuxread(std::function<DemuxPacket*(int)> const& allocator);
+	DemuxPacket* demuxread(void);
 
 	// demuxreset
 	//
@@ -151,7 +152,7 @@ private:
 
 	// Instance Constructor
 	//
-	fmstream(uint32_t frequency);
+	fmstream(struct streamparams const& params);
 
 	//-----------------------------------------------------------------------
 	// Private Member Functions
@@ -163,6 +164,8 @@ private:
 
 	//-----------------------------------------------------------------------
 	// Member Variables
+
+	struct streamparams	const			m_params;				// Stream parameters
 
 	std::unique_ptr<rtldevice>			m_device;				// RTL-SDR device instance
 	std::unique_ptr<FmDecoder>			m_decoder;				// SoftFM decoder instance

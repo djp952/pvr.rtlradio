@@ -64,20 +64,15 @@ public:
 	//-----------------------------------------------------------------------
 	// Member Functions
 
-	// agcmode
+	// begin_stream
 	//
-	// Enables/disables the automatic gain control of the device
-	void agcmode(bool enable) const;
+	// Starts streaming data from the device
+	void begin_stream(void) const;
 
-	// bandwidth
-	//
-	// Sets the bandwidth of the device
-	void bandwidth(uint32_t hz) const;
-
-	// cancelasync
+	// cancel_async
 	//
 	// Cancels any pending asynchronous read operations from the device
-	void cancelasync(void) const;
+	void cancel_async(void) const;
 
 	// create (static)
 	//
@@ -85,75 +80,96 @@ public:
 	static std::unique_ptr<rtldevice> create(void);
 	static std::unique_ptr<rtldevice> create(uint32_t index);
 
-	// frequency
+	// get_center_frequency
 	//
-	// Gets/sets the center frequency of the device
-	uint32_t frequency(void) const;
-	void frequency(uint32_t hz) const;
+	// Gets the center frequency of the device
+	uint32_t get_center_frequency(void) const;
 
-	// frequencycorrection
-	//
-	// Gets/sets the frequency correction of the device
-	uint32_t frequencycorrection(void) const;
-	void frequencycorrection(int ppm) const;
-
-	// gain
-	//
-	// Gets/sets the gain value of the device
-	int gain(void) const;
-	void gain(int db) const;
-
-	// manufacturer
-	//
-	// Gets the manufacturer name of the device
-	char const* manufacturer(void) const;
-
-	// name
+	// get_device_name
 	//
 	// Gets the name of the device
-	char const* name(void) const;
+	char const* get_device_name(void) const;
 
-	// product
+	// get_frequency_correction
+	//
+	// Gets the frequency correction of the device
+	uint32_t get_frequency_correction(void) const;
+
+	// get_gain
+	//
+	// Gets the gain value of the device
+	int get_gain(void) const;
+
+	// get_manufacturer_name
+	//
+	// Gets the manufacturer name of the device
+	char const* get_manufacturer_name(void) const;
+
+	// get_product_name
 	//
 	// Gets the product name of the device
-	char const* product(void) const;
+	char const* get_product_name(void) const;
+
+	// get_sample_rate
+	//
+	// Gets the sample rate of the device
+	uint32_t get_sample_rate(void) const;
+
+	// get_serial_number
+	//
+	// Gets the serial number of the device
+	char const* get_serial_number(void) const;
+
+	// get_valid_gains
+	//
+	// Gets the valid tuner gain values for the device
+	void get_valid_gains(std::vector<int>& dbs) const;
 
 	// read
 	//
 	// Reads data from the device
 	size_t read(uint8_t* buffer, size_t count) const;
 
-	// readasync
+	// read_async
 	//
 	// Asynchronously reads data from the device
-	void readasync(asynccallback const& callback, uint32_t bufferlength) const;
-	void readasync(asynccallback const& callback, uint32_t numbuffers, uint32_t bufferlength) const;
+	void read_async(asynccallback const& callback, uint32_t bufferlength) const;
+	void read_async(asynccallback const& callback, uint32_t numbuffers, uint32_t bufferlength) const;
 
-	// samplerate
+	// set_automatic_gain_control
 	//
-	// Gets/sets the sample rate of the device
-	uint32_t samplerate(void) const;
-	void samplerate(uint32_t hz) const;
+	// Enables/disables the automatic gain control of the device
+	void set_automatic_gain_control(bool enable) const;
 
-	// serialnumber
+	// set_bandwidth
 	//
-	// Gets the serial number of the device
-	char const* serialnumber(void) const;
+	// Sets the bandwidth of the device
+	void set_bandwidth(uint32_t hz) const;
 
-	// stream
+	// set_center_frequency
 	//
-	// Starts streaming data from the device
-	void stream(void) const;
+	// Sets the center frequency of the device
+	uint32_t set_center_frequency(uint32_t hz) const;
 
-	// testmode
+	// set_frequency_correction
+	//
+	// Sets the frequency correction of the device
+	uint32_t set_frequency_correction(int ppm) const;
+
+	// set_gain
+	//
+	// Sets the gain value of the device
+	int set_gain(int db) const;
+
+	// set_sample_rate
+	//
+	// Sets the sample rate of the device
+	uint32_t set_sample_rate(uint32_t hz) const;
+
+	// set_test_mode
 	//
 	// Enables/disables the test mode of the device
-	void testmode(bool enable) const;
-
-	// validgains
-	//
-	// Gets the valid tuner gain values for the device
-	void validgains(std::vector<int>& dbs) const;
+	void set_test_mode(bool enable) const;
 
 private:
 

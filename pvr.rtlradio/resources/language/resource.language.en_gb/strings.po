@@ -15,3 +15,20 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Language: en\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+msgctxt "#30000"
+msgid "Tuner"
+msgstr ""
+
+msgctxt "#30100"
+msgid "Enable automatic gain control (AGC)"
+msgstr ""
+
+msgctxt "#30101"
+msgid "Gain level"
+msgstr ""
+
+msgctxt "#30200"
+msgid "None"
+msgstr ""
+

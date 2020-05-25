@@ -133,6 +133,9 @@
     <ClInclude Include="align.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="streamparams.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">

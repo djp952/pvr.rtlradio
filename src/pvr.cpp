@@ -64,6 +64,26 @@ template<typename... _args>	static void log_message(ADDON::addon_log_t level, _a
 template<typename... _args> static void log_notice(_args&&... args);
 
 //---------------------------------------------------------------------------
+// TYPE DECLARATIONS
+//---------------------------------------------------------------------------
+
+// addon_settings
+//
+// Defines all of the configurable addon settings
+struct addon_settings {
+
+	// tuner_enable_automatic_gain_control
+	//
+	// Flag to enable tuner-based automatic gain control
+	bool tuner_enable_automatic_gain_control;
+
+	// tuner_manual_gain_db
+	//
+	// Specifies the tuner-based manual gain value in decibels
+	int tuner_manual_gain_db;
+};
+
+//---------------------------------------------------------------------------
 // GLOBAL VARIABLES
 //---------------------------------------------------------------------------
 
@@ -115,6 +135,20 @@ static std::unique_ptr<CHelper_libXBMC_pvr> g_pvr;
 // DVR stream buffer instance
 static std::unique_ptr<pvrstream> g_pvrstream;
 
+// g_settings
+//
+// Global addon settings instance
+static addon_settings g_settings = {
+
+	false,				// tuner_enable_automatic_gain_control
+	0,					// tuner_manual_gain_db
+};
+
+// g_settings_lock
+//
+// Synchronization object to serialize access to addon settings
+static std::mutex g_settings_lock;
+
 // g_userpath
 //
 // Set to the input PVR user path string
@@ -124,6 +158,15 @@ static std::string g_userpath;
 // HELPER FUNCTIONS
 //---------------------------------------------------------------------------
 
+// copy_settings (inline)
+//
+// Atomically creates a copy of the global addon_settings structure
+inline struct addon_settings copy_settings(void)
+{
+	std::unique_lock<std::mutex> settings_lock(g_settings_lock);
+	return g_settings;
+}
+
 // demux_alloc (local)
 //
 // Helper function to access PVR API demux packet allocator
@@ -131,6 +174,15 @@ static DemuxPacket* demux_alloc(int size)
 {
 	assert(g_pvr);
 	return g_pvr->AllocateDemuxPacket(size);
+}
+
+// demux_free (local)
+//
+// Helper function to access PVR API demux packet release
+static void demux_free(DemuxPacket* packet)
+{
+	assert(g_pvr);
+	return g_pvr->FreeDemuxPacket(packet);
 }
 
 // handle_generalexception (local)
@@ -245,6 +297,9 @@ static void log_notice(_args&&... args)
 
 ADDON_STATUS ADDON_Create(void* handle, void* props)
 {
+	bool					bvalue = false;					// Setting value
+	int						nvalue = 0;						// Setting value
+
 	if((handle == nullptr) || (props == nullptr)) return ADDON_STATUS::ADDON_STATUS_PERMANENT_FAILURE;
 
 	// Copy anything relevant from the provided parameters
@@ -269,6 +324,10 @@ ADDON_STATUS ADDON_Create(void* handle, void* props)
 				if(!g_addon->CreateDirectory(g_userpath.c_str())) throw string_exception(__func__, ": unable to create addon user data directory");
 				log_notice(__func__, ": user data directory ", g_userpath.c_str(), " created");
 			}
+
+			// Load the tuner settings
+			if(g_addon->GetSetting("tuner_enable_automatic_gain_control", &bvalue)) g_settings.tuner_enable_automatic_gain_control = bvalue;
+			if(g_addon->GetSetting("tuner_manual_gain_db", &nvalue)) g_settings.tuner_manual_gain_db = nvalue;
 
 			// Create the global gui callbacks instance
 			g_gui.reset(new CHelper_libKODI_guilib());
@@ -347,8 +406,34 @@ ADDON_STATUS ADDON_GetStatus(void)
 //	name		- Name of the setting to change
 //	value		- New value of the setting to apply
 
-ADDON_STATUS ADDON_SetSetting(char const* /*name*/, void const* /*value*/)
+ADDON_STATUS ADDON_SetSetting(char const* name, void const* value)
 {
+	std::unique_lock<std::mutex> settings_lock(g_settings_lock);
+
+	// tuner_enable_automatic_gain_control
+	//
+	if(strcmp(name, "tuner_enable_automatic_gain_control") == 0) {
+
+		bool bvalue = *reinterpret_cast<bool const*>(value);
+		if(bvalue != g_settings.tuner_enable_automatic_gain_control) {
+
+			g_settings.tuner_enable_automatic_gain_control = bvalue;
+			log_notice(__func__, ": setting tuner_enable_automatic_gain_control changed to ", (bvalue) ? "true" : "false");
+		}
+	}
+
+	// tuner_manual_gain_db
+	//
+	else if(strcmp(name, "tuner_manual_gain_db") == 0) {
+
+		int nvalue = *reinterpret_cast<int const*>(value);
+		if(nvalue != g_settings.tuner_manual_gain_db) {
+
+			g_settings.tuner_manual_gain_db = nvalue;
+			log_notice(__func__, ": setting tuner_manual_gain_db changed to ", nvalue, " decibels");
+		}
+	}
+
 	return ADDON_STATUS_OK;
 }
 
@@ -943,7 +1028,20 @@ bool OpenLiveStream(PVR_CHANNEL const& /*channel*/)
 {
 	// TODO: DUMMY OPERATION
 	//
-	try { g_pvrstream = fmstream::create(95100000); }
+	struct streamparams params {};
+
+	// Create a copy of the current addon settings structure
+	struct addon_settings settings = copy_settings();
+
+	params.frequency = 95100000;
+	
+	params.agc = settings.tuner_enable_automatic_gain_control;
+	params.gain = settings.tuner_manual_gain_db;
+
+	params.demuxalloc = demux_alloc;
+	params.demuxfree = demux_free;
+
+	try { g_pvrstream = fmstream::create(params); }
 	catch(std::exception& ex) { return handle_stdexception(__func__, ex, false); } 
 	catch(...) { return handle_generalexception(__func__, false); }
 
@@ -1291,7 +1389,7 @@ void DemuxFlush(void)
 
 DemuxPacket* DemuxRead(void)
 {
-	try { return (g_pvrstream) ? g_pvrstream->demuxread(demux_alloc) : nullptr; } 
+	try { return (g_pvrstream) ? g_pvrstream->demuxread() : nullptr; } 
 	catch(std::exception& ex) { return handle_stdexception(__func__, ex, nullptr); }
 	catch(...) { return handle_generalexception(__func__, nullptr); }
 }

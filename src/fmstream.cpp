@@ -61,34 +61,40 @@ size_t const fmstream::DEFAULT_RINGBUFFER_SIZE = (1 MiB);
 //
 // Arguments:
 //
-//	chunksize	- Chunk size to use for the stream
-//	frequency	- Frequency of the FM stream, specified in hertz
+//	params		- Stream creation parameters
 
-fmstream::fmstream(uint32_t frequency) : m_blocksize(align::up(DEFAULT_DEVICE_BLOCK_SIZE, 16 KiB)),
+fmstream::fmstream(struct streamparams const& params) : m_params(params), 
+	m_blocksize(align::up(DEFAULT_DEVICE_BLOCK_SIZE, 16 KiB)),
 	m_samplerate(DEFAULT_DEVICE_SAMPLE_RATE), m_pcmsamplerate(DEFAULT_OUTPUT_SAMPLE_RATE),
 	m_buffersize(align::up(DEFAULT_RINGBUFFER_SIZE, 16 KiB))
 {
+	assert(params.demuxalloc && params.demuxfree);
+
 	// Allocate the ring buffer
 	m_buffer = std::unique_ptr<uint8_t[]>(new uint8_t[m_buffersize]);
 	if(!m_buffer) throw std::bad_alloc();
 
 	// Intentionally tune at a higher frequency to avoid DC offset
-	uint32_t devicefreq = frequency + static_cast<uint32_t>(0.25 * m_samplerate);
+	uint32_t devicefreq = params.frequency + static_cast<uint32_t>(0.25 * m_samplerate);
 
 	// Create and initialize the RTL-SDR device instance
 	m_device = rtldevice::create(rtldevice::DEFAULT_DEVICE_INDEX);
-	m_device->samplerate(m_samplerate);
-	m_device->bandwidth(200 KHz);
-	m_device->frequency(devicefreq);
+	uint32_t sample_rate = m_device->set_sample_rate(m_samplerate);
+	m_device->set_bandwidth(250 KHz);
+	uint32_t frequency = m_device->set_center_frequency(devicefreq);
+	
+	// Adjust the device gain as specified by the stream parameters
+	m_device->set_automatic_gain_control(params.agc);
+	if(params.agc == false) m_device->set_gain(params.gain * 10);
 
 	// Retrieve the actual device sample rate and configure downsample/half bandwidth
-	double devicerate = static_cast<double>(m_device->samplerate());
+	double devicerate = static_cast<double>(sample_rate);
 	unsigned int downsample = std::max(1, static_cast<int>(devicerate / 215.0e3));
 	double pcmbandwidth = std::min(FmDecoder::default_bandwidth_pcm, 0.45 * m_pcmsamplerate);
 
 	// Create and initialize the FmDecoder instance using calculated adjustments
 	m_decoder = std::unique_ptr<FmDecoder>(new FmDecoder(devicerate,
-		static_cast<double>(frequency - m_device->frequency()), m_pcmsamplerate,
+		static_cast<double>(m_params.frequency - frequency), m_pcmsamplerate,
 		true, FmDecoder::default_deemphasis, FmDecoder::default_bandwidth_if, 
 		FmDecoder::default_freq_dev, pcmbandwidth, downsample));
 
@@ -132,7 +138,7 @@ bool fmstream::canseek(void) const
 void fmstream::close(void)
 {
 	m_stop = true;								// Signal worker thread to stop
-	if(m_device) m_device->cancelasync();		// Cancel any async read operations
+	if(m_device) m_device->cancel_async();		// Cancel any async read operations
 	if(m_worker.joinable()) m_worker.join();	// Wait for thread
 	m_device.reset();							// Release RTL-SDR device
 }
@@ -144,11 +150,11 @@ void fmstream::close(void)
 //
 // Arguments:
 //
-//	frequency	- Frequency of the FM stream, specified in hertz
+//	params		- Stream creation parameters
 
-std::unique_ptr<fmstream> fmstream::create(uint32_t frequency)
+std::unique_ptr<fmstream> fmstream::create(struct streamparams const& params)
 {
-	return std::unique_ptr<fmstream>(new fmstream(frequency));
+	return std::unique_ptr<fmstream>(new fmstream(params));
 }
 
 //---------------------------------------------------------------------------
@@ -184,9 +190,9 @@ void fmstream::demuxflush(void)
 //
 // Arguments:
 //
-//	allocator		- Callback function to allocate the DemuxPacket
+//	NONE
 
-DemuxPacket* fmstream::demuxread(std::function<DemuxPacket*(int)> const& allocator)
+DemuxPacket* fmstream::demuxread(void)
 {
 	size_t				head = 0;				// Current head position
 	size_t				tail = 0;				// Current tail position
@@ -224,7 +230,7 @@ DemuxPacket* fmstream::demuxread(std::function<DemuxPacket*(int)> const& allocat
 	}
 
 	// If there is still no data to be processed, return an empty demuxer packet
-	if(available == 0) return allocator(0);
+	if(available == 0) return m_params.demuxalloc(0);
 
 	// Convert the raw data into a vector<> of IQSamples for FmDecoder to process
 	assert(available % 2 == 0);
@@ -247,7 +253,7 @@ DemuxPacket* fmstream::demuxread(std::function<DemuxPacket*(int)> const& allocat
 
 	// Determine the size of the demuxer packet data and allocate it
 	int size = static_cast<int>(audio.size() * sizeof(SampleVector::value_type));
-	DemuxPacket* packet = allocator(size);
+	DemuxPacket* packet = m_params.demuxalloc(size);
 	if(packet == nullptr) return nullptr;
 
 	// Calculate the duration of the packet in microseconds
@@ -379,8 +385,8 @@ void fmstream::transfer(scalar_condition<bool>& started)
 {
 	assert(m_device);
 
-	m_device->stream();			// Begin streaming from the device
-	started = true;				// Signal that the thread has started
+	m_device->begin_stream();		// Begin streaming from the device
+	started = true;					// Signal that the thread has started
 
 	// Loop until the worker thread has been signaled to stop
 	while(m_stop.test(false) == true) {
