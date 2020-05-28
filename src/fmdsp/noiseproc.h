@@ -66,7 +66,7 @@ private:
 
 	TYPECPX* m_DelayBuf;
 	TYPEREAL* m_MagBuf;
-	TYPECPX* m_TestBenchDataBuf;
+
 	int m_Dptr;
 	int m_Mptr;
 	int m_BlankCounter;

@@ -195,14 +195,12 @@ void CDemodulator::SetDemod(int Mode, tDemodInfo CurrentDemodInfo)
 				m_DemodOutputRate = m_DownConverterOutputRate;
 				break;
 			case DEMOD_PSK:
-//qDebug()<<"Desired MaxOutputBW="<<m_DesiredMaxOutputBandwidth;
 				m_DownConverterOutputRate = m_DownConvert.SetDataRate(m_InputRate, m_DesiredMaxOutputBandwidth);
 				m_pPskDemod = new CPskDemod();
 				m_pPskDemod->SetPskParams(m_DownConverterOutputRate, m_PskRate, BPSK_MODE);
 				m_DemodOutputRate = m_DownConverterOutputRate;
 				break;
 			case DEMOD_FSK:
-//qDebug()<<"Desired MaxOutputBW="<<m_DesiredMaxOutputBandwidth;
 				m_DownConverterOutputRate = m_DownConvert.SetDataRate(m_InputRate, m_DesiredMaxOutputBandwidth);
 				m_pFskDemod = new CFskDemod(m_DownConverterOutputRate);
 				m_DemodOutputRate = m_DownConverterOutputRate;
@@ -274,7 +272,6 @@ bool SquelchState = false;
 				}
 				//perform AGC
 				m_Agc.ProcessData(n, m_pDemodTmpBuf, m_pDemodTmpBuf );
-//				g_pTestBench->DisplayData(n, 1.0, m_pDemodTmpBuf, m_DemodOutputRate, PROFILE_3);
 			}
 			else
 			{

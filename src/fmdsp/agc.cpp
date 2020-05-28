@@ -144,7 +144,6 @@ void CAgc::SetParameters(bool AgcOn,  bool UseHang, int Threshold, int ManualGai
 	m_Knee = (TYPEREAL)m_Threshold/20.0;
 	m_GainSlope = m_SlopeFactor/(100.0);
 	m_FixedGain = AGC_OUTSCALE * MPOW(10.0, m_Knee*(m_GainSlope - 1.0) );	//fixed gain value used below knee threshold
-//qDebug()<<"m_Knee = "<<m_Knee<<" m_GainSlope = "<<m_GainSlope<< "m_FixedGain = "<<m_FixedGain;
 
 	m_HangTime = (int)(m_SampleRate * (TYPEREAL)m_Decay * .001);
 

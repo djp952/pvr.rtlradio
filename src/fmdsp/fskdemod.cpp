@@ -170,7 +170,6 @@ TYPEREAL OscGn;
 TYPECPX Osc;
 	//lowpass Filter +/-250Hz
 	m_Fir.ProcessFilter(InLength, pInData, pInData);
-//g_pTestBench->DisplayData(InLength, pInData, m_SampleRate, PROFILE_2);
 
 	for(int i=0; i<InLength; i++)
 	{
@@ -276,7 +275,6 @@ TYPECPX Osc;
 		pOutData[i].im = m_Outbuf[i]/10.0;	//use pInData as debug output buf for display
 		pOutData[i].re = m_SyncSignal[i]/3.0;	//use pInData as debug output buf for display
 	}
-//g_pTestBench->DisplayData(InLength, pOutData, m_SampleRate, PROFILE_3);
 
 	//for testing, create 1700Hz shifted copy of IQ data to get sent to soundcard
 	for(int i=0; i<InLength; i++)
@@ -310,7 +308,6 @@ TYPEREAL OscGn;
 TYPECPX Osc;
 	//lowpass Filter +/-250Hz
 	m_Fir.ProcessFilter(InLength, pInData, pInData);
-//g_pTestBench->DisplayData(InLength, pInData, m_SampleRate, PROFILE_2);
 
 	for(int i=0; i<InLength; i++)
 	{
@@ -414,8 +411,6 @@ TYPECPX Osc;
 		m_LastData = m_Outbuf[i];
 
 	}
-//g_pTestBench->DisplayData(InLength, pOutData, m_SampleRate, PROFILE_3);
-
 
 	for(int i=0; i<InLength; i++)
 	{
@@ -470,7 +465,6 @@ int rxphzcnt = 0;
 
 	if( (rxphzcnt>=3) || ((rxphzcnt==2)&&(dxphzcnt>=1)) || ((rxphzcnt==1)&&(dxphzcnt>=2)))
 	{
-//qDebug()<<"Got Phase Sequence pattern";
 		m_DxBufIndex = 0;
 		m_RxBufIndex = 0;
 		m_DxBuf[m_DxBufIndex++] = CHARTBL[ m_ShiftReg[12] ];	//read in first A Dx field

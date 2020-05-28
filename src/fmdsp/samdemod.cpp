@@ -88,9 +88,6 @@ TYPECPX tmp;
 		//find current sample phase after being shifted by NCO frequency
 		TYPEREAL phzerror = -MATAN2(tmp.im, tmp.re);
 
-//TYPEREAL test = phzerror*100.0;
-//g_pTestBench->DisplayData(1, 1.0, &test, m_SampleRate,PROFILE_6);
-
 		m_NcoFreq += (m_PllBeta * phzerror);		//  radians per sampletime
 		//clamp NCO frequency so doesn't drift out of lock range
 		if(m_NcoFreq > m_NcoHLimit)
@@ -124,9 +121,6 @@ TYPECPX tmp;
 		tmp.im = Cos * pInData[i].im + Sin * pInData[i].re;
 		//find current sample phase error after being shifted by NCO frequency
 		TYPEREAL phzerror = -MATAN2(tmp.im, tmp.re);
-
-//TYPEREAL test = phzerror*100.0;
-//g_pTestBench->DisplayData(1, 1.0, &test, m_SampleRate,PROFILE_6);
 
 		m_NcoFreq += (m_PllBeta * phzerror);		//  radians per sampletime
 		//clamp NCO frequency so doesn't drift out of lock range

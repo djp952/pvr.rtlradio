@@ -114,25 +114,6 @@ TYPEREAL window;
 
 	}
 	m_FloatTime = 0.0;		//init floating point time accumulator
-
-#if 0		//debug hack to write m_pSinc to a file for analysis
-	QDir::setCurrent("d:/");
-	QFile File;
-	File.setFileName("Sinc.txt");
-	if(File.open(QIODevice::WriteOnly))
-	{
-		qDebug()<<"file Opened OK";
-		char Buf[30000];
-		for( i=0; i<SINC_LENGTH; i++)
-		{
-			sprintf( Buf, "%19.12g\r\n", m_pSinc[i]);
-			File.write(Buf);
-		}
-	}
-	else
-		qDebug()<<"file Failed to Open";
-
-#endif
 }
 
 //////////////////////////////////////////////////////////////////////

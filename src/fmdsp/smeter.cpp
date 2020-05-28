@@ -66,7 +66,7 @@ void CSMeter::ProcessData(int length, TYPECPX* pInData, TYPEREAL SampleRate)
 		m_SampleRate = SampleRate;
 		m_AttackAlpha = (1.0-MEXP(-1.0/(m_SampleRate*ATTACK_TIMECONST)) );
 		m_DecayAlpha = (1.0-MEXP(-1.0/(m_SampleRate*DECAY_TIMECONST)) );
-//qDebug()<<"SMeter vals "<<m_AttackAlpha << m_DecayAlpha << SampleRate;
+
 	}
 	for(int i=0; i<length; i++)
 	{
@@ -107,7 +107,6 @@ TYPEREAL CSMeter::GetPeak()
 ////////////////////////////////////////////////////////////////////////////////////
 TYPEREAL CSMeter::GetAve()
 {
-//    qDebug()<<m_AverageMag << m_CalibrationOffset;
 	return m_AverageMag + SMETER_CALIBRATION + m_CalibrationOffset;
 }
 

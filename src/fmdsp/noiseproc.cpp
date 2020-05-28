@@ -58,7 +58,6 @@ CNoiseProc::CNoiseProc()
 {
 	m_DelayBuf = new TYPECPX[MAX_DELAY];
 	m_MagBuf = new TYPEREAL[MAX_AVE];
-	m_TestBenchDataBuf = new TYPECPX[4096];
 	SetupBlanker(false, 50.0, 2.0, 1000.0);
 }
 
@@ -68,8 +67,6 @@ CNoiseProc::~CNoiseProc()
 		delete m_DelayBuf;
 	if(m_MagBuf)
 		delete m_MagBuf;
-	if(m_TestBenchDataBuf)
-		delete m_TestBenchDataBuf;
 }
 
 void CNoiseProc::SetupBlanker(bool On, TYPEREAL Threshold, TYPEREAL Width, TYPEREAL SampleRate)
@@ -102,8 +99,6 @@ void CNoiseProc::SetupBlanker(bool On, TYPEREAL Threshold, TYPEREAL Width, TYPER
 	m_Ratio = .005*(m_Threshold)*(TYPEREAL)m_MagSamples;
 
 	m_DelaySamples = m_WidthSamples/2;
-
-//	qDebug()<<"m_DelaySamples="<<m_DelaySamples << m_Ratio;
 
 	m_Dptr = 0;
 	m_Mptr = 0;
@@ -140,7 +135,6 @@ TYPECPX oldest;
 		TYPEREAL mim = MFABS(newsamp.im);
 		TYPEREAL mag = (mre>mim) ? mre : mim;
 
-//m_TestBenchDataBuf[i].im = mag;
 		//calc moving average of "m_MagSamples"
 		m_MagAveSum -= m_MagBuf[m_Mptr];	//subtract oldest sample
 		m_MagAveSum += mag;					//add new sample
@@ -158,17 +152,14 @@ TYPECPX oldest;
 		{
 			m_BlankCounter = m_WidthSamples;
 		}
-m_TestBenchDataBuf[i].im = oldest.re + oldest.im;
 		if(m_BlankCounter)
 		{
 			m_BlankCounter--;
-m_TestBenchDataBuf[i].re = 0.0;
 			pOutData[i].re = 0.0;
 			pOutData[i].im = 0.0;
 		}
 		else
 		{
-m_TestBenchDataBuf[i].re = m_MagAveSum/m_Ratio;
 			pOutData[i] = oldest;
 		}
 	}

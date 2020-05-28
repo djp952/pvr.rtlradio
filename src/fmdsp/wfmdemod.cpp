@@ -724,7 +724,6 @@ void CWFmDemod::ProcessNewRdsBit(int bit)
 							m_RdsQHead = 0;
 						m_CurrentBlock = BLOCK_A;
 						m_BlockErrors = 0;
-//qDebug("Grp %X %X %X %X",m_BlockData[BLOCK_A],m_BlockData[BLOCK_B],m_BlockData[BLOCK_C],m_BlockData[BLOCK_D]);
 						//here with complete good group
 					}
 				}
@@ -740,7 +739,6 @@ void CWFmDemod::ProcessNewRdsBit(int bit)
 				{
 					m_CurrentBlock = BLOCK_A;
 					m_DecodeState = STATE_GROUPDECODE;
-//qDebug()<<"Grp Resync";
 				}
 			}
 			break;
@@ -795,10 +793,6 @@ quint32 CWFmDemod::CheckBlock(quint32 SyndromeOffset, int UseFec)
 			correctmask >>= 1;	//advance correctable bit position
 		}
 		syndrome &= 0x3FF;	//isolate syndrome bits if non-zero then still an error
-		if(correctedbits && !syndrome)
-		{
-//			qDebug()<<"corrected bits "<<correctedbits;
-		}
 	}
 	return syndrome;
 }

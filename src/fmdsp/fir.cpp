@@ -320,27 +320,6 @@ TYPEREAL Beta;
 	}
 	m_State = 0;
 
-
-#if 0		//debug hack to write m_Coef to a file for analysis
-	QDir::setCurrent("d:/");
-	QFile File;
-	File.setFileName("BPSKcoef.txt");
-	if(File.open(QIODevice::WriteOnly))
-	{
-		qDebug()<<"file Opened OK";
-		char Buf[256];
-		for(n=0; n<m_NumTaps; n++)
-		{
-			sprintf( Buf, "%g\r\n", m_Coef[n]);
-			File.write(Buf);
-		}
-	}
-	else
-		qDebug()<<"file Failed to Open";
-
-	qDebug()<<"LP taps="<<m_NumTaps;
-#endif
-
 	return m_NumTaps;
 
 }
@@ -435,24 +414,6 @@ TYPEREAL Beta;
 	}
 	m_State = 0;
 
-#if 0		//debug hack to write m_Coef to a file for analysis
-	QDir::setCurrent("d:/");
-	QFile File;
-	File.setFileName("hpcoef.txt");
-	if(File.open(QIODevice::WriteOnly))
-	{
-		qDebug()<<"file Opened OK";
-		char Buf[256];
-		for(n=0; n<m_NumTaps; n++)
-		{
-			sprintf( Buf, "%g\r\n", m_Coef[n]);
-			File.write(Buf);
-		}
-	}
-	else
-		qDebug()<<"file Failed to Open";
-	qDebug()<<"HP taps="<<m_NumTaps;
-#endif
 	return m_NumTaps;
 }
 
@@ -476,24 +437,6 @@ int n;
 		m_ICoef[n+m_NumTaps] = m_ICoef[n];
 		m_QCoef[n+m_NumTaps] = m_QCoef[n];
 	}
-#if 0		//debug hack to write m_Coef's to a file for analysis
-	QDir::setCurrent("d:/");
-	QFile File;
-	File.setFileName("hbpcoef.txt");
-	if(File.open(QIODevice::WriteOnly))
-	{
-		qDebug()<<"file Opened OK";
-		char Buf[256];
-		for( n=0; n<m_NumTaps; n++)
-		{
-			sprintf( Buf, "%19.12g %19.12g\r\n", m_ICoef[n], m_QCoef[n]);
-			File.write(Buf);
-		}
-	}
-	else
-		qDebug()<<"file Failed to Open";
-	qDebug()<<"HBP taps="<<m_NumTaps << m_SampleRate;
-#endif
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -517,7 +460,7 @@ TYPEREAL tmp;
 		sum += ds;
 		di += 1.0;
 	}while(ds >= errorlimit*sum);
-//qDebug()<<"x="<<x<<" I0="<<sum;
+
 	return(sum);
 }
 

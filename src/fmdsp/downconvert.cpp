@@ -102,7 +102,6 @@ TYPEREAL tmpf = NcoFreq + m_CW_Offset;
 	m_NcoInc = K_2PI*m_NcoFreq/m_InRate;
 	m_OscCos = MCOS(m_NcoInc);
 	m_OscSin = MSIN(m_NcoInc);
-//qDebug()<<"NCO "<<m_NcoFreq;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -334,7 +333,6 @@ int j;
 int numoutsamples = 0;
 	if(InLength<m_FirLength)	//safety net to make sure InLength is large enough to process
 		return InLength/2;
-//StartPerformance();
 	//copy input samples into buffer starting at position m_FirLength-1
 	for(i=0,j = m_FirLength - 1; i<InLength; i++)
 		m_pHBFirBuf[j++] = pInData[i];
@@ -359,7 +357,7 @@ int numoutsamples = 0;
 	// for FIR wrap around management
 	for(i=0,j = InLength-m_FirLength+1; i<m_FirLength - 1; i++)
 		m_pHBFirBuf[i] = pInData[j++];
-//StopPerformance(InLength);
+
 	return numoutsamples;
 }
 
@@ -391,7 +389,6 @@ CDownConvert::CHalfBand11TapDecimateBy2::CHalfBand11TapDecimateBy2()
 //////////////////////////////////////////////////////////////////////
 int CDownConvert::CHalfBand11TapDecimateBy2::DecBy2(int InLength, TYPECPX* pInData, TYPECPX* pOutData)
 {
-//StartPerformance();
 	//first calculate beginning 10 samples using previous samples in delay buffer
 	TYPECPX tmpout[9];	//use temp buffer so outbuf can be same as inbuf
 	tmpout[0].re = H0*d0.re + H2*d2.re + H4*d4.re + H5*d5.re + H6*d6.re + H8*d8.re
@@ -462,7 +459,7 @@ int CDownConvert::CHalfBand11TapDecimateBy2::DecBy2(int InLength, TYPECPX* pInDa
 	d9 = *pIn--; d8 = *pIn--; d7 = *pIn--;
 	d6 = *pIn--; d5 = *pIn--; d4 = *pIn--;
 	d3 = *pIn--; d2 = *pIn--; d1 = *pIn--; d0 = *pIn;
-//StopPerformance(InLength);
+
 	return InLength/2;
 }
 
@@ -489,7 +486,7 @@ int CDownConvert::CCicN3DecimateBy2::DecBy2(int InLength, TYPECPX* pInData, TYPE
 {
 int i,j;
 TYPECPX even,odd;
-//StartPerformance();
+
 	for(i=0,j=0; i<InLength; i+=2,j++)
 	{	//mag gn=8
 		even = pInData[i];
@@ -499,6 +496,6 @@ TYPECPX even,odd;
 		m_Xodd = odd;
 		m_Xeven = even;
 	}
-//StopPerformance(InLength);
+
 	return j;
 }

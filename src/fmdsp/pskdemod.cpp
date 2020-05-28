@@ -250,11 +250,9 @@ void CPskDemod::ManageSquelch(quint8 ch)
 		m_AveEnergy = 5.0;
 	else if(0xFFFF == m_BitAcc)	//if ones force off
 		m_AveEnergy = 0.0;
-//qDebug()<<m_AveEnergy;
+
 	if(m_AveEnergy<SQ_THRESHOLD)
 		ch = 0;
-	//if(ch != 0)
-	//	emit g_pChatDialog->SendChatData(ch);
 }
 
 //////////////////////////////////////////////////////////////////////
