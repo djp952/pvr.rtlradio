@@ -20,25 +20,65 @@
 // SOFTWARE.
 //-----------------------------------------------------------------------------
 
-#ifndef __STREAMPARAMS_H_
-#define __STREAMPARAMS_H_
+#ifndef __RDSDECODER_H_
+#define __RDSDECODER_H_
 #pragma once
+
+#include <queue>
+#include <vector>
+
+#include "fmdsp/demodulator.h"
 
 #pragma warning(push, 4)
 
-// streamparams
+//---------------------------------------------------------------------------
+// Class rdsdecoder
 //
-// Parameters required to start a radio stream
-struct streamparams {
+// Implements TODO
 
-	uint32_t				frequency;		// Target frequency, in hertz
+class rdsdecoder
+{
+public:
 
-	bool					agc;			// Automatic gain control
-	int						gain;			// Manual gain value
+	using uecp_packet = std::vector<uint8_t>;
+
+	// Instance Constructor
+	//
+	rdsdecoder();
+
+	// Destructor
+	//
+	~rdsdecoder();
+
+	//-----------------------------------------------------------------------
+	// Member Functions
+
+	// decode_rdsgroup
+	//
+	// Decodes the next RDS group
+	void decode_rdsgroup(tRDS_GROUPS const& rdsgroup);
+
+	// pop_uecp_packet
+	//
+	// Pops the topmost UECP data packet from the queue
+	bool pop_uecp_packet(uecp_packet& packet);
+
+private:
+
+	rdsdecoder(rdsdecoder const&) = delete;
+	rdsdecoder& operator=(rdsdecoder const&) = delete;
+
+	//-----------------------------------------------------------------------
+	// Private Member Functions
+
+	//-----------------------------------------------------------------------
+	// Member Variables
+
+	std::queue<uecp_packet>		m_uecppackets;		// Queued UECP packets
 };
 
 //-----------------------------------------------------------------------------
 
 #pragma warning(pop)
 
-#endif	// __STREAMPARAMS_H_
+#endif	// __RDSDECODER_H_

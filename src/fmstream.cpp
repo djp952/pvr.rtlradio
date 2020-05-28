@@ -68,8 +68,6 @@ fmstream::fmstream(struct streamparams const& params) : m_params(params),
 	m_samplerate(DEFAULT_DEVICE_SAMPLE_RATE), m_pcmsamplerate(DEFAULT_OUTPUT_SAMPLE_RATE),
 	m_buffersize(align::up(DEFAULT_RINGBUFFER_SIZE, 16 KiB))
 {
-	assert(params.demuxalloc && params.demuxfree);
-
 	// Allocate the ring buffer
 	m_buffer = std::unique_ptr<uint8_t[]>(new uint8_t[m_buffersize]);
 	if(!m_buffer) throw std::bad_alloc();
@@ -103,7 +101,7 @@ fmstream::fmstream(struct streamparams const& params) : m_params(params),
 
 	// VARIABLE SETTINGS
 	//
-	// TODO: These should come in via configuration parameters
+	// TODO: These should come in via the stream parameters
 	t.HiCut = 5000;
 	t.LowCut = -5000;
 	t.FreqClickResolution = t.DefFreqClickResolution;
@@ -218,14 +216,32 @@ void fmstream::demuxflush(void)
 //
 // Arguments:
 //
-//	NONE
+//	allocator		- DemuxPacket allocation function
 
-DemuxPacket* fmstream::demuxread(void)
+DemuxPacket* fmstream::demuxread(std::function<DemuxPacket*(int)> const& allocator)
 {
 	size_t				head = 0;				// Current head position
 	size_t				tail = 0;				// Current tail position
 	size_t				available = 0;			// Available bytes to read
 	bool				stopped = false;		// Flag if data transfer has stopped
+
+	// If there is an RDS UECP packet available, handle it before demodulating more audio
+	rdsdecoder::uecp_packet uecp_packet;
+	if(m_rdsdecoder.pop_uecp_packet(uecp_packet) && (!uecp_packet.empty())) {
+
+		// Allocate and initialize the demultiplexer packet
+		int packetsize = static_cast<int>(uecp_packet.size());
+		DemuxPacket* packet = allocator(packetsize);
+		if(packet == nullptr) return nullptr;
+
+		packet->iStreamId = 2;
+		packet->iSize = packetsize;
+		packet->pts = m_pts;
+
+		// Copy the UECP data into the demultiplexer packet and return it
+		memcpy(packet->pData, uecp_packet.data(), uecp_packet.size());
+		return packet;
+	}
 
 	// Use a constant read size of 20K (10Khz worth of I/Q samples), the demodulator
 	// is designed to work with about 1/10th of a second of data, and this typically
@@ -261,7 +277,7 @@ DemuxPacket* fmstream::demuxread(void)
 	}
 
 	// If there is still not enough data to be processed, return an empty demuxer packet
-	if(available < minreadsize) return m_params.demuxalloc(0);
+	if(available < minreadsize) return allocator(0);
 
 	// Convert the raw data into a vector<> of I/Q samples for the demodulator
 	assert(available % 2 == 0);
@@ -271,7 +287,7 @@ DemuxPacket* fmstream::demuxread(void)
 	for(size_t index = 0; index < samples.size(); index++) {
 
 		// TODO: Performance here.  Demodulator seems to work just as well without converting the
-		// -1/+1 value to -32767/+32767 and the double cast may be too much for slow systems
+		// -1/+1 value to -32767/+32767 and the casting may be too much for slow systems
 		samples[index].re = ((static_cast<TYPEREAL>(m_buffer[tail]) - TYPEREAL(127.5)) / TYPEREAL(127.5)) * TYPEREAL(32767.0);
 		samples[index].im = ((static_cast<TYPEREAL>(m_buffer[tail + 1]) - TYPEREAL(127.5)) / TYPEREAL(127.5)) * TYPEREAL(32767.0);
 
@@ -285,9 +301,13 @@ DemuxPacket* fmstream::demuxread(void)
 	// Process the raw I/Q data, the original sample vector<> can be reused/overwritten as it's processed
 	int audiopackets = m_demodulator->ProcessData(static_cast<int>(samples.size()), samples.data(), samples.data());
 
-	// Determine the size of the demuxer packet data and allocate it
+	// Process any RDS group data that was collected during demodulation
+	tRDS_GROUPS rdsgroup{};
+	while(m_demodulator->GetNextRdsGroupData(&rdsgroup)) m_rdsdecoder.decode_rdsgroup(rdsgroup);
+
+	// Determine the size of the demultiplexer packet data and allocate it
 	int packetsize = audiopackets * sizeof(TYPESTEREO16);
-	DemuxPacket* packet = m_params.demuxalloc(packetsize);
+	DemuxPacket* packet = allocator(packetsize);
 	if(packet == nullptr) return nullptr;
 
 	// Resample the audio data directly into the packet buffer
@@ -300,7 +320,7 @@ DemuxPacket* fmstream::demuxread(void)
 	double duration = ((stereopackets / m_pcmsamplerate) US);
 
 	// Set up the demultiplexer packet with the proper packet size and duration
-	// TODO: Use constant for stream ID
+	// TODO: Use constant for stream IDs (also above for stream 2)
 	packet->iStreamId = 1;
 	packet->iSize = stereopackets * sizeof(TYPESTEREO16);
 	packet->duration = duration;

@@ -36,6 +36,7 @@
 #include "fmdsp/fractresampler.h"
 
 #include "pvrstream.h"
+#include "rdsdecoder.h"
 #include "rtldevice.h"
 #include "scalar_condition.h"
 #include "streamparams.h"
@@ -84,7 +85,7 @@ public:
 	// demuxread
 	//
 	// Reads the next packet from the demultiplexer
-	DemuxPacket* demuxread(void);
+	DemuxPacket* demuxread(std::function<DemuxPacket*(int)> const& allocator);
 
 	// demuxreset
 	//
@@ -171,6 +172,7 @@ private:
 	std::unique_ptr<rtldevice>			m_device;				// RTL-SDR device instance
 	std::unique_ptr<CDemodulator>		m_demodulator;			// CuteSDR demodulator instance
 	std::unique_ptr<CFractResampler>	m_resampler;			// CuteSDR resampler instance
+	rdsdecoder							m_rdsdecoder;			// RDS decoder instance
 
 	size_t const						m_blocksize;			// Device block size
 	uint32_t const						m_samplerate;			// Device sample rate

@@ -191,6 +191,9 @@
     <ClInclude Include="fmdsp\wfmdemod.h">
       <Filter>Header Files\fmdsp</Filter>
     </ClInclude>
+    <ClInclude Include="rdsdecoder.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -312,6 +315,9 @@
     </ClCompile>
     <ClCompile Include="fmdsp\wfmdemod.cpp">
       <Filter>Source Files\fmdsp</Filter>
+    </ClCompile>
+    <ClCompile Include="rdsdecoder.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

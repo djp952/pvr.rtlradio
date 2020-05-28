@@ -24,6 +24,8 @@
 #define __PVRSTREAM_H_
 #pragma once
 
+#include <functional>
+
 #include "DemuxPacket.h"
 
 #pragma warning(push, 4)
@@ -68,7 +70,7 @@ public:
 	// demuxread
 	//
 	// Reads the next packet from the demultiplexer
-	virtual DemuxPacket* demuxread(void) = 0;
+	virtual DemuxPacket* demuxread(std::function<DemuxPacket*(int)> const& allocator) = 0;
 
 	// demuxreset
 	//

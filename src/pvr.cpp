@@ -176,15 +176,6 @@ static DemuxPacket* demux_alloc(int size)
 	return g_pvr->AllocateDemuxPacket(size);
 }
 
-// demux_free (local)
-//
-// Helper function to access PVR API demux packet release
-static void demux_free(DemuxPacket* packet)
-{
-	assert(g_pvr);
-	return g_pvr->FreeDemuxPacket(packet);
-}
-
 // handle_generalexception (local)
 //
 // Handler for thrown generic exceptions
@@ -1038,9 +1029,6 @@ bool OpenLiveStream(PVR_CHANNEL const& /*channel*/)
 	params.agc = settings.tuner_enable_automatic_gain_control;
 	params.gain = settings.tuner_manual_gain_db;
 
-	params.demuxalloc = demux_alloc;
-	params.demuxfree = demux_free;
-
 	try { g_pvrstream = fmstream::create(params); }
 	catch(std::exception& ex) { return handle_stdexception(__func__, ex, false); } 
 	catch(...) { return handle_generalexception(__func__, false); }
@@ -1390,7 +1378,7 @@ void DemuxFlush(void)
 
 DemuxPacket* DemuxRead(void)
 {
-	try { return (g_pvrstream) ? g_pvrstream->demuxread() : nullptr; } 
+	try { return (g_pvrstream) ? g_pvrstream->demuxread(demux_alloc) : nullptr; } 
 	catch(std::exception& ex) { return handle_stdexception(__func__, ex, nullptr); }
 	catch(...) { return handle_generalexception(__func__, nullptr); }
 }

@@ -213,6 +213,7 @@
     <ClInclude Include="fmstream.h" />
     <ClInclude Include="libusb_exception.h" />
     <ClInclude Include="pvrstream.h" />
+    <ClInclude Include="rdsdecoder.h" />
     <ClInclude Include="rtldevice.h" />
     <ClInclude Include="scalar_condition.h" />
     <ClInclude Include="stdafx.h" />
@@ -782,6 +783,7 @@
       <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(ProjectDir)..\depends\libusb\src\libusb;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <ClCompile Include="pvr.cpp" />
+    <ClCompile Include="rdsdecoder.cpp" />
     <ClCompile Include="rtldevice.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
