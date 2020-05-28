@@ -113,29 +113,48 @@
   <Target Name="linux-i686" DependsOnTargets="AddonVersion">
 
     <PropertyGroup>
-      <CPPFLAGS>-Wall -Wno-unknown-pragmas -I/usr/include/i386-linux-gnu -Idepends/xbmc/xbmc -Idepends/xbmc/xbmc/linux -Idepends/xbmc/xbmc/addons/kodi-addon-dev-kit/include/kodi -Idepends/xbmc/xbmc/cores/VideoPlayer/Interface/Addon -Idepends/libusb/linux-i686/include -Idepends/rtl-sdr/include -Idepends/softfm -Itmp/version -L/usr/lib/gcc/i686-linux-gnu/4.9</CPPFLAGS>
-      <CFLAGS>-DNDEBUG -fPIC -m32</CFLAGS>
+      <CPPFLAGS>-Wall -Wno-unknown-pragmas -I/usr/include/i386-linux-gnu -Idepends/xbmc/xbmc -Idepends/xbmc/xbmc/linux -Idepends/xbmc/xbmc/addons/kodi-addon-dev-kit/include/kodi -Idepends/xbmc/xbmc/cores/VideoPlayer/Interface/Addon -Idepends/libusb/linux-i686/include -Idepends/rtl-sdr/include -Itmp/version -L/usr/lib/gcc/i686-linux-gnu/4.9</CPPFLAGS>
+      <CFLAGS>-DNDEBUG -fPIC -m32 -Wno-unused-function -Wno-unused-variable</CFLAGS>
       <CXXFLAGS>-DNDEBUG -fPIC -std=c++11 -m32</CXXFLAGS>
     </PropertyGroup>
 
     <MakeDir Directories="out\linux-i686" ContinueOnError="false"/>
     <MakeDir Directories="out\repository" ContinueOnError="false"/>
-    <Exec Command="$(BashExe) -c &quot;gcc-4.9 $(CPPFLAGS) $(CFLAGS) -Wno-unused-function -Wno-unused-variable -c depends/rtl-sdr/src/librtlsdr.c -o out/linux-i686/librtlsdr.o&quot;" ContinueOnError="false"/>
-    <Exec Command="$(BashExe) -c &quot;gcc-4.9 $(CPPFLAGS) $(CFLAGS) -Wno-unused-function -Wno-unused-variable -c depends/rtl-sdr/src/tuner_e4k.c -o out/linux-i686/tuner_e4k.o&quot;" ContinueOnError="false"/>
-    <Exec Command="$(BashExe) -c &quot;gcc-4.9 $(CPPFLAGS) $(CFLAGS) -Wno-unused-function -Wno-unused-variable -c depends/rtl-sdr/src/tuner_fc0012.c -o out/linux-i686/tuner_fc0012.o&quot;" ContinueOnError="false"/>
-    <Exec Command="$(BashExe) -c &quot;gcc-4.9 $(CPPFLAGS) $(CFLAGS) -Wno-unused-function -Wno-unused-variable -c depends/rtl-sdr/src/tuner_fc0013.c -o out/linux-i686/tuner_fc0013.o&quot;" ContinueOnError="false"/>
-    <Exec Command="$(BashExe) -c &quot;gcc-4.9 $(CPPFLAGS) $(CFLAGS) -Wno-unused-function -Wno-unused-variable -c depends/rtl-sdr/src/tuner_fc2580.c -o out/linux-i686/tuner_fc2580.o&quot;" ContinueOnError="false"/>
-    <Exec Command="$(BashExe) -c &quot;gcc-4.9 $(CPPFLAGS) $(CFLAGS) -Wno-unused-function -Wno-unused-variable -c depends/rtl-sdr/src/tuner_r82xx.c -o out/linux-i686/tuner_r82xx.o&quot;" ContinueOnError="false"/>
-    <Exec Command="$(BashExe) -c &quot;gcc-4.9 $(CPPFLAGS) $(CFLAGS) -Wno-unused-function -Wno-unused-variable -c depends/rtl-sdr/src/convenience/convenience.c -o out/linux-i686/convenience.o&quot;" ContinueOnError="false"/>
-    <Exec Command="$(BashExe) -c &quot;gcc-4.9 $(CPPFLAGS) $(CFLAGS) -Wno-unused-function -Wno-unused-variable -c depends/rtl-sdr/src/getopt/getopt.c -o out/linux-i686/getopt.o&quot;" ContinueOnError="false"/>
-    <Exec Command="$(BashExe) -c &quot;gcc-4.9 $(CPPFLAGS) $(CFLAGS) -Wno-unused-function -Wno-unused-variable -c depends/rtl-sdr/src/rtl_test.c -o out/linux-i686/rtl_test.o&quot;" ContinueOnError="false"/>
-    <Exec Command="$(BashExe) -c &quot;g++-4.9 $(CPPFLAGS) $(CXXFLAGS) -c depends/softfm/Filter.cc -o out/linux-i686/Filter.o&quot;" ContinueOnError="false"/>
-    <Exec Command="$(BashExe) -c &quot;g++-4.9 $(CPPFLAGS) $(CXXFLAGS) -c depends/softfm/FmDecode.cc -o out/linux-i686/FmDecode.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;gcc-4.9 $(CPPFLAGS) $(CFLAGS) -c depends/rtl-sdr/src/librtlsdr.c -o out/linux-i686/librtlsdr.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;gcc-4.9 $(CPPFLAGS) $(CFLAGS) -c depends/rtl-sdr/src/tuner_e4k.c -o out/linux-i686/tuner_e4k.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;gcc-4.9 $(CPPFLAGS) $(CFLAGS) -c depends/rtl-sdr/src/tuner_fc0012.c -o out/linux-i686/tuner_fc0012.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;gcc-4.9 $(CPPFLAGS) $(CFLAGS) -c depends/rtl-sdr/src/tuner_fc0013.c -o out/linux-i686/tuner_fc0013.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;gcc-4.9 $(CPPFLAGS) $(CFLAGS) -c depends/rtl-sdr/src/tuner_fc2580.c -o out/linux-i686/tuner_fc2580.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;gcc-4.9 $(CPPFLAGS) $(CFLAGS) -c depends/rtl-sdr/src/tuner_r82xx.c -o out/linux-i686/tuner_r82xx.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;gcc-4.9 $(CPPFLAGS) $(CFLAGS) -c depends/rtl-sdr/src/convenience/convenience.c -o out/linux-i686/convenience.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;gcc-4.9 $(CPPFLAGS) $(CFLAGS) -c depends/rtl-sdr/src/getopt/getopt.c -o out/linux-i686/getopt.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;gcc-4.9 $(CPPFLAGS) $(CFLAGS) -c depends/rtl-sdr/src/rtl_test.c -o out/linux-i686/rtl_test.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;g++-4.9 $(CPPFLAGS) $(CXXFLAGS) -c src/fmdsp/agc.cpp -o out/linux-i686/agc.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;g++-4.9 $(CPPFLAGS) $(CXXFLAGS) -c src/fmdsp/amdemod.cpp -o out/linux-i686/amdemod.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;g++-4.9 $(CPPFLAGS) $(CXXFLAGS) -c src/fmdsp/datamodifier.cpp -o out/linux-i686/datamodifier.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;g++-4.9 $(CPPFLAGS) $(CXXFLAGS) -c src/fmdsp/demodulator.cpp -o out/linux-i686/demodulator.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;g++-4.9 $(CPPFLAGS) $(CXXFLAGS) -c src/fmdsp/downconvert.cpp -o out/linux-i686/downconvert.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;g++-4.9 $(CPPFLAGS) $(CXXFLAGS) -c src/fmdsp/fastfir.cpp -o out/linux-i686/fastfir.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;g++-4.9 $(CPPFLAGS) $(CXXFLAGS) -c src/fmdsp/fft.cpp -o out/linux-i686/fft.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;g++-4.9 $(CPPFLAGS) $(CXXFLAGS) -c src/fmdsp/fir.cpp -o out/linux-i686/fir.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;g++-4.9 $(CPPFLAGS) $(CXXFLAGS) -c src/fmdsp/fmdemod.cpp -o out/linux-i686/fmdemod.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;g++-4.9 $(CPPFLAGS) $(CXXFLAGS) -c src/fmdsp/fractresampler.cpp -o out/linux-i686/fractresampler.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;g++-4.9 $(CPPFLAGS) $(CXXFLAGS) -c src/fmdsp/fskdemod.cpp -o out/linux-i686/fskdemod.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;g++-4.9 $(CPPFLAGS) $(CXXFLAGS) -c src/fmdsp/fskmod.cpp -o out/linux-i686/fskmod.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;g++-4.9 $(CPPFLAGS) $(CXXFLAGS) -c src/fmdsp/iir.cpp -o out/linux-i686/iir.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;g++-4.9 $(CPPFLAGS) $(CXXFLAGS) -c src/fmdsp/noiseproc.cpp -o out/linux-i686/noiseproc.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;g++-4.9 $(CPPFLAGS) $(CXXFLAGS) -c src/fmdsp/pskdemod.cpp -o out/linux-i686/pskdemod.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;g++-4.9 $(CPPFLAGS) $(CXXFLAGS) -c src/fmdsp/pskmod.cpp -o out/linux-i686/pskmod.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;g++-4.9 $(CPPFLAGS) $(CXXFLAGS) -c src/fmdsp/samdemod.cpp -o out/linux-i686/samdemod.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;g++-4.9 $(CPPFLAGS) $(CXXFLAGS) -c src/fmdsp/smeter.cpp -o out/linux-i686/smeter.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;g++-4.9 $(CPPFLAGS) $(CXXFLAGS) -c src/fmdsp/ssbdemod.cpp -o out/linux-i686/ssbdemod.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;g++-4.9 $(CPPFLAGS) $(CXXFLAGS) -c src/fmdsp/wfmdemod.cpp -o out/linux-i686/wfmdemod.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;g++-4.9 $(CPPFLAGS) $(CXXFLAGS) -c src/fmdsp/wfmmod.cpp -o out/linux-i686/wfmmod.o&quot;" ContinueOnError="false"/>
     <Exec Command="$(BashExe) -c &quot;g++-4.9 $(CPPFLAGS) $(CXXFLAGS) -c src/fmstream.cpp -o out/linux-i686/fmstream.o&quot;" ContinueOnError="false"/>
     <Exec Command="$(BashExe) -c &quot;g++-4.9 $(CPPFLAGS) $(CXXFLAGS) -c src/libusb_exception.cpp -o out/linux-i686/libusb_exception.o&quot;" ContinueOnError="false"/>
     <Exec Command="$(BashExe) -c &quot;g++-4.9 $(CPPFLAGS) $(CXXFLAGS) -c src/pvr.cpp -o out/linux-i686/pvr.o&quot;" ContinueOnError="false"/>
     <Exec Command="$(BashExe) -c &quot;g++-4.9 $(CPPFLAGS) $(CXXFLAGS) -c src/rtldevice.cpp -o out/linux-i686/rtldevice.o&quot;" ContinueOnError="false"/>
-    <Exec Command="$(BashExe) -c &quot;g++-4.9 $(CPPFLAGS) $(CXXFLAGS) -shared -Wl,--version-script=exportlist/exportlist.linux out/linux-i686/Filter.o out/linux-i686/FmDecode.o out/linux-i686/fmstream.o out/linux-i686/librtlsdr.o out/linux-i686/libusb_exception.o out/linux-i686/pvr.o out/linux-i686/rtldevice.o out/linux-i686/tuner_e4k.o out/linux-i686/tuner_fc0012.o out/linux-i686/tuner_fc0013.o out/linux-i686/tuner_fc2580.o out/linux-i686/tuner_r82xx.o depends/libusb/linux-i686/lib/libusb-1.0.a -ldl -lpthread -o out/linux-i686/zuki.pvr.rtlradio.so&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;g++-4.9 $(CPPFLAGS) $(CXXFLAGS) -shared -Wl,--version-script=exportlist/exportlist.linux out/linux-i686/agc.o out/linux-i686/amdemod.o out/linux-i686/datamodifier.o out/linux-i686/demodulator.o out/linux-i686/downconvert.o out/linux-i686/fastfir.o out/linux-i686/fft.o out/linux-i686/fir.o out/linux-i686/fmdemod.o out/linux-i686/fractresampler.o out/linux-i686/fskdemod.o out/linux-i686/fskmod.o out/linux-i686/iir.o out/linux-i686/noiseproc.o out/linux-i686/pskdemod.o out/linux-i686/pskmod.o out/linux-i686/samdemod.o out/linux-i686/smeter.o out/linux-i686/ssbdemod.o out/linux-i686/wfmdemod.o out/linux-i686/wfmmod.o out/linux-i686/fmstream.o out/linux-i686/librtlsdr.o out/linux-i686/libusb_exception.o out/linux-i686/pvr.o out/linux-i686/rtldevice.o out/linux-i686/tuner_e4k.o out/linux-i686/tuner_fc0012.o out/linux-i686/tuner_fc0013.o out/linux-i686/tuner_fc2580.o out/linux-i686/tuner_r82xx.o depends/libusb/linux-i686/lib/libusb-1.0.a -ldl -lpthread -o out/linux-i686/zuki.pvr.rtlradio.so&quot;" ContinueOnError="false"/>
     <Exec Command="$(BashExe) -c &quot;g++-4.9 $(CPPFLAGS) $(CXXFLAGS) out/linux-i686/librtlsdr.o out/linux-i686/tuner_e4k.o out/linux-i686/tuner_fc0012.o out/linux-i686/tuner_fc0013.o out/linux-i686/tuner_fc2580.o out/linux-i686/tuner_r82xx.o out/linux-i686/convenience.o out/linux-i686/getopt.o out/linux-i686/rtl_test.o  depends/libusb/linux-i686/lib/libusb-1.0.a -ldl -lpthread -o out/linux-i686/rtl_test&quot;" ContinueOnError="false"/>
     <Exec Command="TextTransform.exe template\addon.xml.tt -out tmp\addon-linux-i686.xml -a !!platform!linux -a !!libraryplatform!linux -a !!libraryname!zuki.pvr.rtlradio.so -a !!changelogtxt!pvr.rtlradio\changelog.txt -a &quot;!!displayversion!$(DisplayVersion)&quot; -a &quot;!!repomanifest!linux-i686.xml.gz&quot;" ContinueOnError="false"/>
     <XmlPeek XmlInputPath="tmp\addon-linux-i686.xml" Query="/addon/@version">
@@ -158,29 +177,48 @@
   <Target Name="linux-x86_64" DependsOnTargets="AddonVersion">
 
     <PropertyGroup>
-      <CPPFLAGS>-Wall -Wno-unknown-pragmas -I/usr/include/x86_64-linux-gnu -Idepends/xbmc/xbmc -Idepends/xbmc/xbmc/linux -Idepends/xbmc/xbmc/addons/kodi-addon-dev-kit/include/kodi -Idepends/xbmc/xbmc/cores/VideoPlayer/Interface/Addon -Idepends/libusb/linux-x86_64/include -Idepends/rtl-sdr/include -Idepends/softfm -Itmp/version -L/usr/lib/gcc/x86_64-linux-gnu/4.9</CPPFLAGS>
-      <CFLAGS>-DNDEBUG -fPIC</CFLAGS>
+      <CPPFLAGS>-Wall -Wno-unknown-pragmas -I/usr/include/x86_64-linux-gnu -Idepends/xbmc/xbmc -Idepends/xbmc/xbmc/linux -Idepends/xbmc/xbmc/addons/kodi-addon-dev-kit/include/kodi -Idepends/xbmc/xbmc/cores/VideoPlayer/Interface/Addon -Idepends/libusb/linux-x86_64/include -Idepends/rtl-sdr/include -Itmp/version -L/usr/lib/gcc/x86_64-linux-gnu/4.9</CPPFLAGS>
+      <CFLAGS>-DNDEBUG -fPIC -Wno-unused-function -Wno-unused-variable </CFLAGS>
       <CXXFLAGS>-DNDEBUG -fPIC -std=c++11</CXXFLAGS>
     </PropertyGroup>
 
     <MakeDir Directories="out\linux-x86_64" ContinueOnError="false"/>
     <MakeDir Directories="out\repository" ContinueOnError="false"/>
-    <Exec Command="$(BashExe) -c &quot;gcc-4.9 $(CPPFLAGS) $(CFLAGS) -Wno-unused-function -Wno-unused-variable -c depends/rtl-sdr/src/librtlsdr.c -o out/linux-x86_64/librtlsdr.o&quot;" ContinueOnError="false"/>
-    <Exec Command="$(BashExe) -c &quot;gcc-4.9 $(CPPFLAGS) $(CFLAGS) -Wno-unused-function -Wno-unused-variable -c depends/rtl-sdr/src/tuner_e4k.c -o out/linux-x86_64/tuner_e4k.o&quot;" ContinueOnError="false"/>
-    <Exec Command="$(BashExe) -c &quot;gcc-4.9 $(CPPFLAGS) $(CFLAGS) -Wno-unused-function -Wno-unused-variable -c depends/rtl-sdr/src/tuner_fc0012.c -o out/linux-x86_64/tuner_fc0012.o&quot;" ContinueOnError="false"/>
-    <Exec Command="$(BashExe) -c &quot;gcc-4.9 $(CPPFLAGS) $(CFLAGS) -Wno-unused-function -Wno-unused-variable -c depends/rtl-sdr/src/tuner_fc0013.c -o out/linux-x86_64/tuner_fc0013.o&quot;" ContinueOnError="false"/>
-    <Exec Command="$(BashExe) -c &quot;gcc-4.9 $(CPPFLAGS) $(CFLAGS) -Wno-unused-function -Wno-unused-variable -c depends/rtl-sdr/src/tuner_fc2580.c -o out/linux-x86_64/tuner_fc2580.o&quot;" ContinueOnError="false"/>
-    <Exec Command="$(BashExe) -c &quot;gcc-4.9 $(CPPFLAGS) $(CFLAGS) -Wno-unused-function -Wno-unused-variable -c depends/rtl-sdr/src/tuner_r82xx.c -o out/linux-x86_64/tuner_r82xx.o&quot;" ContinueOnError="false"/>
-    <Exec Command="$(BashExe) -c &quot;gcc-4.9 $(CPPFLAGS) $(CFLAGS) -Wno-unused-function -Wno-unused-variable -c depends/rtl-sdr/src/convenience/convenience.c -o out/linux-x86_64/convenience.o&quot;" ContinueOnError="false"/>
-    <Exec Command="$(BashExe) -c &quot;gcc-4.9 $(CPPFLAGS) $(CFLAGS) -Wno-unused-function -Wno-unused-variable -c depends/rtl-sdr/src/getopt/getopt.c -o out/linux-x86_64/getopt.o&quot;" ContinueOnError="false"/>
-    <Exec Command="$(BashExe) -c &quot;gcc-4.9 $(CPPFLAGS) $(CFLAGS) -Wno-unused-function -Wno-unused-variable -c depends/rtl-sdr/src/rtl_test.c -o out/linux-x86_64/rtl_test.o&quot;" ContinueOnError="false"/>
-    <Exec Command="$(BashExe) -c &quot;g++-4.9 $(CPPFLAGS) $(CXXFLAGS) -c depends/softfm/Filter.cc -o out/linux-x86_64/Filter.o&quot;" ContinueOnError="false"/>
-    <Exec Command="$(BashExe) -c &quot;g++-4.9 $(CPPFLAGS) $(CXXFLAGS) -c depends/softfm/FmDecode.cc -o out/linux-x86_64/FmDecode.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;gcc-4.9 $(CPPFLAGS) $(CFLAGS) -c depends/rtl-sdr/src/librtlsdr.c -o out/linux-x86_64/librtlsdr.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;gcc-4.9 $(CPPFLAGS) $(CFLAGS) -c depends/rtl-sdr/src/tuner_e4k.c -o out/linux-x86_64/tuner_e4k.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;gcc-4.9 $(CPPFLAGS) $(CFLAGS) -c depends/rtl-sdr/src/tuner_fc0012.c -o out/linux-x86_64/tuner_fc0012.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;gcc-4.9 $(CPPFLAGS) $(CFLAGS) -c depends/rtl-sdr/src/tuner_fc0013.c -o out/linux-x86_64/tuner_fc0013.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;gcc-4.9 $(CPPFLAGS) $(CFLAGS) -c depends/rtl-sdr/src/tuner_fc2580.c -o out/linux-x86_64/tuner_fc2580.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;gcc-4.9 $(CPPFLAGS) $(CFLAGS) -c depends/rtl-sdr/src/tuner_r82xx.c -o out/linux-x86_64/tuner_r82xx.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;gcc-4.9 $(CPPFLAGS) $(CFLAGS) -c depends/rtl-sdr/src/convenience/convenience.c -o out/linux-x86_64/convenience.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;gcc-4.9 $(CPPFLAGS) $(CFLAGS) -c depends/rtl-sdr/src/getopt/getopt.c -o out/linux-x86_64/getopt.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;gcc-4.9 $(CPPFLAGS) $(CFLAGS) -c depends/rtl-sdr/src/rtl_test.c -o out/linux-x86_64/rtl_test.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;g++-4.9 $(CPPFLAGS) $(CXXFLAGS) -c src/fmdsp/agc.cpp -o out/linux-x86_64/agc.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;g++-4.9 $(CPPFLAGS) $(CXXFLAGS) -c src/fmdsp/amdemod.cpp -o out/linux-x86_64/amdemod.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;g++-4.9 $(CPPFLAGS) $(CXXFLAGS) -c src/fmdsp/datamodifier.cpp -o out/linux-x86_64/datamodifier.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;g++-4.9 $(CPPFLAGS) $(CXXFLAGS) -c src/fmdsp/demodulator.cpp -o out/linux-x86_64/demodulator.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;g++-4.9 $(CPPFLAGS) $(CXXFLAGS) -c src/fmdsp/downconvert.cpp -o out/linux-x86_64/downconvert.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;g++-4.9 $(CPPFLAGS) $(CXXFLAGS) -c src/fmdsp/fastfir.cpp -o out/linux-x86_64/fastfir.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;g++-4.9 $(CPPFLAGS) $(CXXFLAGS) -c src/fmdsp/fft.cpp -o out/linux-x86_64/fft.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;g++-4.9 $(CPPFLAGS) $(CXXFLAGS) -c src/fmdsp/fir.cpp -o out/linux-x86_64/fir.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;g++-4.9 $(CPPFLAGS) $(CXXFLAGS) -c src/fmdsp/fmdemod.cpp -o out/linux-x86_64/fmdemod.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;g++-4.9 $(CPPFLAGS) $(CXXFLAGS) -c src/fmdsp/fractresampler.cpp -o out/linux-x86_64/fractresampler.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;g++-4.9 $(CPPFLAGS) $(CXXFLAGS) -c src/fmdsp/fskdemod.cpp -o out/linux-x86_64/fskdemod.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;g++-4.9 $(CPPFLAGS) $(CXXFLAGS) -c src/fmdsp/fskmod.cpp -o out/linux-x86_64/fskmod.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;g++-4.9 $(CPPFLAGS) $(CXXFLAGS) -c src/fmdsp/iir.cpp -o out/linux-x86_64/iir.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;g++-4.9 $(CPPFLAGS) $(CXXFLAGS) -c src/fmdsp/noiseproc.cpp -o out/linux-x86_64/noiseproc.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;g++-4.9 $(CPPFLAGS) $(CXXFLAGS) -c src/fmdsp/pskdemod.cpp -o out/linux-x86_64/pskdemod.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;g++-4.9 $(CPPFLAGS) $(CXXFLAGS) -c src/fmdsp/pskmod.cpp -o out/linux-x86_64/pskmod.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;g++-4.9 $(CPPFLAGS) $(CXXFLAGS) -c src/fmdsp/samdemod.cpp -o out/linux-x86_64/samdemod.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;g++-4.9 $(CPPFLAGS) $(CXXFLAGS) -c src/fmdsp/smeter.cpp -o out/linux-x86_64/smeter.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;g++-4.9 $(CPPFLAGS) $(CXXFLAGS) -c src/fmdsp/ssbdemod.cpp -o out/linux-x86_64/ssbdemod.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;g++-4.9 $(CPPFLAGS) $(CXXFLAGS) -c src/fmdsp/wfmdemod.cpp -o out/linux-x86_64/wfmdemod.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;g++-4.9 $(CPPFLAGS) $(CXXFLAGS) -c src/fmdsp/wfmmod.cpp -o out/linux-x86_64/wfmmod.o&quot;" ContinueOnError="false"/>
     <Exec Command="$(BashExe) -c &quot;g++-4.9 $(CPPFLAGS) $(CXXFLAGS) -c src/fmstream.cpp -o out/linux-x86_64/fmstream.o&quot;" ContinueOnError="false"/>
     <Exec Command="$(BashExe) -c &quot;g++-4.9 $(CPPFLAGS) $(CXXFLAGS) -c src/libusb_exception.cpp -o out/linux-x86_64/libusb_exception.o&quot;" ContinueOnError="false"/>
     <Exec Command="$(BashExe) -c &quot;g++-4.9 $(CPPFLAGS) $(CXXFLAGS) -c src/pvr.cpp -o out/linux-x86_64/pvr.o&quot;" ContinueOnError="false"/>
     <Exec Command="$(BashExe) -c &quot;g++-4.9 $(CPPFLAGS) $(CXXFLAGS) -c src/rtldevice.cpp -o out/linux-x86_64/rtldevice.o&quot;" ContinueOnError="false"/>
-    <Exec Command="$(BashExe) -c &quot;g++-4.9 $(CPPFLAGS) $(CXXFLAGS) -shared -Wl,--version-script=exportlist/exportlist.linux out/linux-x86_64/Filter.o out/linux-x86_64/FmDecode.o out/linux-x86_64/fmstream.o out/linux-x86_64/librtlsdr.o out/linux-x86_64/libusb_exception.o out/linux-x86_64/pvr.o out/linux-x86_64/rtldevice.o out/linux-x86_64/tuner_e4k.o out/linux-x86_64/tuner_fc0012.o out/linux-x86_64/tuner_fc0013.o out/linux-x86_64/tuner_fc2580.o out/linux-x86_64/tuner_r82xx.o depends/libusb/linux-x86_64/lib/libusb-1.0.a -ldl -lpthread -o out/linux-x86_64/zuki.pvr.rtlradio.so&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;g++-4.9 $(CPPFLAGS) $(CXXFLAGS) -shared -Wl,--version-script=exportlist/exportlist.linux out/linux-x86_64/agc.o out/linux-x86_64/amdemod.o out/linux-x86_64/datamodifier.o out/linux-x86_64/demodulator.o out/linux-x86_64/downconvert.o out/linux-x86_64/fastfir.o out/linux-x86_64/fft.o out/linux-x86_64/fir.o out/linux-x86_64/fmdemod.o out/linux-x86_64/fractresampler.o out/linux-x86_64/fskdemod.o out/linux-x86_64/fskmod.o out/linux-x86_64/iir.o out/linux-x86_64/noiseproc.o out/linux-x86_64/pskdemod.o out/linux-x86_64/pskmod.o out/linux-x86_64/samdemod.o out/linux-x86_64/smeter.o out/linux-x86_64/ssbdemod.o out/linux-x86_64/wfmdemod.o out/linux-x86_64/wfmmod.o out/linux-x86_64/fmstream.o out/linux-x86_64/librtlsdr.o out/linux-x86_64/libusb_exception.o out/linux-x86_64/pvr.o out/linux-x86_64/rtldevice.o out/linux-x86_64/tuner_e4k.o out/linux-x86_64/tuner_fc0012.o out/linux-x86_64/tuner_fc0013.o out/linux-x86_64/tuner_fc2580.o out/linux-x86_64/tuner_r82xx.o depends/libusb/linux-x86_64/lib/libusb-1.0.a -ldl -lpthread -o out/linux-x86_64/zuki.pvr.rtlradio.so&quot;" ContinueOnError="false"/>
     <Exec Command="$(BashExe) -c &quot;g++-4.9 $(CPPFLAGS) $(CXXFLAGS) out/linux-x86_64/librtlsdr.o out/linux-x86_64/tuner_e4k.o out/linux-x86_64/tuner_fc0012.o out/linux-x86_64/tuner_fc0013.o out/linux-x86_64/tuner_fc2580.o out/linux-x86_64/tuner_r82xx.o out/linux-x86_64/convenience.o out/linux-x86_64/getopt.o out/linux-x86_64/rtl_test.o  depends/libusb/linux-x86_64/lib/libusb-1.0.a -ldl -lpthread -o out/linux-x86_64/rtl_test&quot;" ContinueOnError="false"/>
     <Exec Command="TextTransform.exe template\addon.xml.tt -out tmp\addon-linux-x86_64.xml -a !!platform!linux -a !!libraryplatform!linux -a !!libraryname!zuki.pvr.rtlradio.so -a !!changelogtxt!pvr.rtlradio\changelog.txt -a &quot;!!displayversion!$(DisplayVersion)&quot; -a &quot;!!repomanifest!linux-x86_64.xml.gz&quot;" ContinueOnError="false"/>
     <XmlPeek XmlInputPath="tmp\addon-linux-x86_64.xml" Query="/addon/@version">
@@ -203,29 +241,48 @@
   <Target Name="linux-armel" DependsOnTargets="AddonVersion">
 
     <PropertyGroup>
-      <CPPFLAGS>-Wall -Wno-unknown-pragmas -Idepends/xbmc/xbmc -Idepends/xbmc/xbmc/linux -Idepends/xbmc/xbmc/addons/kodi-addon-dev-kit/include/kodi -Idepends/xbmc/xbmc/cores/VideoPlayer/Interface/Addon -Idepends/libusb/linux-armel/include -Idepends/rtl-sdr/include -Idepends/softfm -Itmp/version</CPPFLAGS>
-      <CFLAGS>-DNDEBUG -fPIC</CFLAGS>
+      <CPPFLAGS>-Wall -Wno-unknown-pragmas -Idepends/xbmc/xbmc -Idepends/xbmc/xbmc/linux -Idepends/xbmc/xbmc/addons/kodi-addon-dev-kit/include/kodi -Idepends/xbmc/xbmc/cores/VideoPlayer/Interface/Addon -Idepends/libusb/linux-armel/include -Idepends/rtl-sdr/include -Itmp/version</CPPFLAGS>
+      <CFLAGS>-DNDEBUG -fPIC -Wno-unused-function -Wno-unused-variable</CFLAGS>
       <CXXFLAGS>-DNDEBUG -fPIC -std=c++11</CXXFLAGS>
     </PropertyGroup>
 
     <MakeDir Directories="out\linux-armel" ContinueOnError="false"/>
     <MakeDir Directories="out\repository" ContinueOnError="false"/>
-    <Exec Command="$(BashExe) -c &quot;arm-linux-gnueabi-gcc-4.9 $(CPPFLAGS) $(CFLAGS) -Wno-unused-function -Wno-unused-variable -c depends/rtl-sdr/src/librtlsdr.c -o out/linux-armel/librtlsdr.o&quot;" ContinueOnError="false"/>
-    <Exec Command="$(BashExe) -c &quot;arm-linux-gnueabi-gcc-4.9 $(CPPFLAGS) $(CFLAGS) -Wno-unused-function -Wno-unused-variable -c depends/rtl-sdr/src/tuner_e4k.c -o out/linux-armel/tuner_e4k.o&quot;" ContinueOnError="false"/>
-    <Exec Command="$(BashExe) -c &quot;arm-linux-gnueabi-gcc-4.9 $(CPPFLAGS) $(CFLAGS) -Wno-unused-function -Wno-unused-variable -c depends/rtl-sdr/src/tuner_fc0012.c -o out/linux-armel/tuner_fc0012.o&quot;" ContinueOnError="false"/>
-    <Exec Command="$(BashExe) -c &quot;arm-linux-gnueabi-gcc-4.9 $(CPPFLAGS) $(CFLAGS) -Wno-unused-function -Wno-unused-variable -c depends/rtl-sdr/src/tuner_fc0013.c -o out/linux-armel/tuner_fc0013.o&quot;" ContinueOnError="false"/>
-    <Exec Command="$(BashExe) -c &quot;arm-linux-gnueabi-gcc-4.9 $(CPPFLAGS) $(CFLAGS) -Wno-unused-function -Wno-unused-variable -c depends/rtl-sdr/src/tuner_fc2580.c -o out/linux-armel/tuner_fc2580.o&quot;" ContinueOnError="false"/>
-    <Exec Command="$(BashExe) -c &quot;arm-linux-gnueabi-gcc-4.9 $(CPPFLAGS) $(CFLAGS) -Wno-unused-function -Wno-unused-variable -c depends/rtl-sdr/src/tuner_r82xx.c -o out/linux-armel/tuner_r82xx.o&quot;" ContinueOnError="false"/>
-    <Exec Command="$(BashExe) -c &quot;arm-linux-gnueabi-gcc-4.9 $(CPPFLAGS) $(CFLAGS) -Wno-unused-function -Wno-unused-variable -c depends/rtl-sdr/src/convenience/convenience.c -o out/linux-armel/convenience.o&quot;" ContinueOnError="false"/>
-    <Exec Command="$(BashExe) -c &quot;arm-linux-gnueabi-gcc-4.9 $(CPPFLAGS) $(CFLAGS) -Wno-unused-function -Wno-unused-variable -c depends/rtl-sdr/src/getopt/getopt.c -o out/linux-armel/getopt.o&quot;" ContinueOnError="false"/>
-    <Exec Command="$(BashExe) -c &quot;arm-linux-gnueabi-gcc-4.9 $(CPPFLAGS) $(CFLAGS) -Wno-unused-function -Wno-unused-variable -c depends/rtl-sdr/src/rtl_test.c -o out/linux-armel/rtl_test.o&quot;" ContinueOnError="false"/>
-    <Exec Command="$(BashExe) -c &quot;arm-linux-gnueabi-g++-4.9 $(CPPFLAGS) $(CXXFLAGS) -c depends/softfm/Filter.cc -o out/linux-armel/Filter.o&quot;" ContinueOnError="false"/>
-    <Exec Command="$(BashExe) -c &quot;arm-linux-gnueabi-g++-4.9 $(CPPFLAGS) $(CXXFLAGS) -c depends/softfm/FmDecode.cc -o out/linux-armel/FmDecode.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;arm-linux-gnueabi-gcc-4.9 $(CPPFLAGS) $(CFLAGS) -c depends/rtl-sdr/src/librtlsdr.c -o out/linux-armel/librtlsdr.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;arm-linux-gnueabi-gcc-4.9 $(CPPFLAGS) $(CFLAGS) -c depends/rtl-sdr/src/tuner_e4k.c -o out/linux-armel/tuner_e4k.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;arm-linux-gnueabi-gcc-4.9 $(CPPFLAGS) $(CFLAGS) -c depends/rtl-sdr/src/tuner_fc0012.c -o out/linux-armel/tuner_fc0012.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;arm-linux-gnueabi-gcc-4.9 $(CPPFLAGS) $(CFLAGS) -c depends/rtl-sdr/src/tuner_fc0013.c -o out/linux-armel/tuner_fc0013.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;arm-linux-gnueabi-gcc-4.9 $(CPPFLAGS) $(CFLAGS) -c depends/rtl-sdr/src/tuner_fc2580.c -o out/linux-armel/tuner_fc2580.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;arm-linux-gnueabi-gcc-4.9 $(CPPFLAGS) $(CFLAGS) -c depends/rtl-sdr/src/tuner_r82xx.c -o out/linux-armel/tuner_r82xx.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;arm-linux-gnueabi-gcc-4.9 $(CPPFLAGS) $(CFLAGS) -c depends/rtl-sdr/src/convenience/convenience.c -o out/linux-armel/convenience.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;arm-linux-gnueabi-gcc-4.9 $(CPPFLAGS) $(CFLAGS) -c depends/rtl-sdr/src/getopt/getopt.c -o out/linux-armel/getopt.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;arm-linux-gnueabi-gcc-4.9 $(CPPFLAGS) $(CFLAGS) -c depends/rtl-sdr/src/rtl_test.c -o out/linux-armel/rtl_test.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;arm-linux-gnueabi-gcc-4.9 $(CPPFLAGS) $(CXXFLAGS) -c src/fmdsp/agc.cpp -o out/linux-armel/agc.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;arm-linux-gnueabi-gcc-4.9 $(CPPFLAGS) $(CXXFLAGS) -c src/fmdsp/amdemod.cpp -o out/linux-armel/amdemod.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;arm-linux-gnueabi-gcc-4.9 $(CPPFLAGS) $(CXXFLAGS) -c src/fmdsp/datamodifier.cpp -o out/linux-armel/datamodifier.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;arm-linux-gnueabi-gcc-4.9 $(CPPFLAGS) $(CXXFLAGS) -c src/fmdsp/demodulator.cpp -o out/linux-armel/demodulator.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;arm-linux-gnueabi-gcc-4.9 $(CPPFLAGS) $(CXXFLAGS) -c src/fmdsp/downconvert.cpp -o out/linux-armel/downconvert.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;arm-linux-gnueabi-gcc-4.9 $(CPPFLAGS) $(CXXFLAGS) -c src/fmdsp/fastfir.cpp -o out/linux-armel/fastfir.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;arm-linux-gnueabi-gcc-4.9 $(CPPFLAGS) $(CXXFLAGS) -c src/fmdsp/fft.cpp -o out/linux-armel/fft.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;arm-linux-gnueabi-gcc-4.9 $(CPPFLAGS) $(CXXFLAGS) -c src/fmdsp/fir.cpp -o out/linux-armel/fir.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;arm-linux-gnueabi-gcc-4.9 $(CPPFLAGS) $(CXXFLAGS) -c src/fmdsp/fmdemod.cpp -o out/linux-armel/fmdemod.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;arm-linux-gnueabi-gcc-4.9 $(CPPFLAGS) $(CXXFLAGS) -c src/fmdsp/fractresampler.cpp -o out/linux-armel/fractresampler.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;arm-linux-gnueabi-gcc-4.9 $(CPPFLAGS) $(CXXFLAGS) -c src/fmdsp/fskdemod.cpp -o out/linux-armel/fskdemod.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;arm-linux-gnueabi-gcc-4.9 $(CPPFLAGS) $(CXXFLAGS) -c src/fmdsp/fskmod.cpp -o out/linux-armel/fskmod.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;arm-linux-gnueabi-gcc-4.9 $(CPPFLAGS) $(CXXFLAGS) -c src/fmdsp/iir.cpp -o out/linux-armel/iir.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;arm-linux-gnueabi-gcc-4.9 $(CPPFLAGS) $(CXXFLAGS) -c src/fmdsp/noiseproc.cpp -o out/linux-armel/noiseproc.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;arm-linux-gnueabi-gcc-4.9 $(CPPFLAGS) $(CXXFLAGS) -c src/fmdsp/pskdemod.cpp -o out/linux-armel/pskdemod.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;arm-linux-gnueabi-gcc-4.9 $(CPPFLAGS) $(CXXFLAGS) -c src/fmdsp/pskmod.cpp -o out/linux-armel/pskmod.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;arm-linux-gnueabi-gcc-4.9 $(CPPFLAGS) $(CXXFLAGS) -c src/fmdsp/samdemod.cpp -o out/linux-armel/samdemod.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;arm-linux-gnueabi-gcc-4.9 $(CPPFLAGS) $(CXXFLAGS) -c src/fmdsp/smeter.cpp -o out/linux-armel/smeter.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;arm-linux-gnueabi-gcc-4.9 $(CPPFLAGS) $(CXXFLAGS) -c src/fmdsp/ssbdemod.cpp -o out/linux-armel/ssbdemod.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;arm-linux-gnueabi-gcc-4.9 $(CPPFLAGS) $(CXXFLAGS) -c src/fmdsp/wfmdemod.cpp -o out/linux-armel/wfmdemod.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;arm-linux-gnueabi-gcc-4.9 $(CPPFLAGS) $(CXXFLAGS) -c src/fmdsp/wfmmod.cpp -o out/linux-armel/wfmmod.o&quot;" ContinueOnError="false"/>
     <Exec Command="$(BashExe) -c &quot;arm-linux-gnueabi-g++-4.9 $(CPPFLAGS) $(CXXFLAGS) -c src/fmstream.cpp -o out/linux-armel/fmstream.o&quot;" ContinueOnError="false"/>
     <Exec Command="$(BashExe) -c &quot;arm-linux-gnueabi-g++-4.9 $(CPPFLAGS) $(CXXFLAGS) -c src/libusb_exception.cpp -o out/linux-armel/libusb_exception.o&quot;" ContinueOnError="false"/>
     <Exec Command="$(BashExe) -c &quot;arm-linux-gnueabi-g++-4.9 $(CPPFLAGS) $(CXXFLAGS) -c src/pvr.cpp -o out/linux-armel/pvr.o&quot;" ContinueOnError="false"/>
     <Exec Command="$(BashExe) -c &quot;arm-linux-gnueabi-g++-4.9 $(CPPFLAGS) $(CXXFLAGS) -c src/rtldevice.cpp -o out/linux-armel/rtldevice.o&quot;" ContinueOnError="false"/>
-    <Exec Command="$(BashExe) -c &quot;arm-linux-gnueabi-g++-4.9 $(CPPFLAGS) $(CXXFLAGS) -shared -Wl,--version-script=exportlist/exportlist.linux out/linux-armel/Filter.o out/linux-armel/FmDecode.o out/linux-armel/fmstream.o out/linux-armel/librtlsdr.o out/linux-armel/libusb_exception.o out/linux-armel/pvr.o out/linux-armel/rtldevice.o out/linux-armel/tuner_e4k.o out/linux-armel/tuner_fc0012.o out/linux-armel/tuner_fc0013.o out/linux-armel/tuner_fc2580.o out/linux-armel/tuner_r82xx.o depends/libusb/linux-armel/lib/libusb-1.0.a -ldl -lpthread -o out/linux-armel/zuki.pvr.rtlradio.so&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;arm-linux-gnueabi-g++-4.9 $(CPPFLAGS) $(CXXFLAGS) -shared -Wl,--version-script=exportlist/exportlist.linux out/linux-armel/agc.o out/linux-armel/amdemod.o out/linux-armel/datamodifier.o out/linux-armel/demodulator.o out/linux-armel/downconvert.o out/linux-armel/fastfir.o out/linux-armel/fft.o out/linux-armel/fir.o out/linux-armel/fmdemod.o out/linux-armel/fractresampler.o out/linux-armel/fskdemod.o out/linux-armel/fskmod.o out/linux-armel/iir.o out/linux-armel/noiseproc.o out/linux-armel/pskdemod.o out/linux-armel/pskmod.o out/linux-armel/samdemod.o out/linux-armel/smeter.o out/linux-armel/ssbdemod.o out/linux-armel/wfmdemod.o out/linux-armel/wfmmod.o out/linux-armel/fmstream.o out/linux-armel/librtlsdr.o out/linux-armel/libusb_exception.o out/linux-armel/pvr.o out/linux-armel/rtldevice.o out/linux-armel/tuner_e4k.o out/linux-armel/tuner_fc0012.o out/linux-armel/tuner_fc0013.o out/linux-armel/tuner_fc2580.o out/linux-armel/tuner_r82xx.o depends/libusb/linux-armel/lib/libusb-1.0.a -ldl -lpthread -o out/linux-armel/zuki.pvr.rtlradio.so&quot;" ContinueOnError="false"/>
     <Exec Command="$(BashExe) -c &quot;arm-linux-gnueabi-g++-4.9 $(CPPFLAGS) $(CXXFLAGS) out/linux-armel/librtlsdr.o out/linux-armel/tuner_e4k.o out/linux-armel/tuner_fc0012.o out/linux-armel/tuner_fc0013.o out/linux-armel/tuner_fc2580.o out/linux-armel/tuner_r82xx.o out/linux-armel/convenience.o out/linux-armel/getopt.o out/linux-armel/rtl_test.o  depends/libusb/linux-armel/lib/libusb-1.0.a -ldl -lpthread -o out/linux-armel/rtl_test&quot;" ContinueOnError="false"/>
     <Exec Command="TextTransform.exe template\addon.xml.tt -out tmp\addon-linux-armel.xml -a !!platform!linux -a !!libraryplatform!linux -a !!libraryname!zuki.pvr.rtlradio.so -a !!changelogtxt!pvr.rtlradio\changelog.txt -a &quot;!!displayversion!$(DisplayVersion)&quot; -a &quot;!!repomanifest!linux-armel.xml.gz&quot;" ContinueOnError="false"/>
     <XmlPeek XmlInputPath="tmp\addon-linux-armel.xml" Query="/addon/@version">
@@ -248,29 +305,48 @@
   <Target Name="linux-armhf" DependsOnTargets="AddonVersion">
 
     <PropertyGroup>
-      <CPPFLAGS>-Wall -Wno-unknown-pragmas -Idepends/xbmc/xbmc -Idepends/xbmc/xbmc/linux -Idepends/xbmc/xbmc/addons/kodi-addon-dev-kit/include/kodi -Idepends/xbmc/xbmc/cores/VideoPlayer/Interface/Addon -Idepends/libusb/linux-armhf/include -Idepends/rtl-sdr/include -Idepends/softfm -Itmp/version</CPPFLAGS>
-      <CFLAGS>-DNDEBUG -fPIC</CFLAGS>
+      <CPPFLAGS>-Wall -Wno-unknown-pragmas -Idepends/xbmc/xbmc -Idepends/xbmc/xbmc/linux -Idepends/xbmc/xbmc/addons/kodi-addon-dev-kit/include/kodi -Idepends/xbmc/xbmc/cores/VideoPlayer/Interface/Addon -Idepends/libusb/linux-armhf/include -Idepends/rtl-sdr/include -Itmp/version</CPPFLAGS>
+      <CFLAGS>-DNDEBUG -fPIC -Wno-unused-function -Wno-unused-variable</CFLAGS>
       <CXXFLAGS>-DNDEBUG -fPIC -std=c++11</CXXFLAGS>
     </PropertyGroup>
 
     <MakeDir Directories="out\linux-armhf" ContinueOnError="false"/>
     <MakeDir Directories="out\repository" ContinueOnError="false"/>
-    <Exec Command="$(BashExe) -c &quot;arm-linux-gnueabihf-gcc-4.9 $(CPPFLAGS) $(CFLAGS) -Wno-unused-function -Wno-unused-variable -c depends/rtl-sdr/src/librtlsdr.c -o out/linux-armhf/librtlsdr.o&quot;" ContinueOnError="false"/>
-    <Exec Command="$(BashExe) -c &quot;arm-linux-gnueabihf-gcc-4.9 $(CPPFLAGS) $(CFLAGS) -Wno-unused-function -Wno-unused-variable -c depends/rtl-sdr/src/tuner_e4k.c -o out/linux-armhf/tuner_e4k.o&quot;" ContinueOnError="false"/>
-    <Exec Command="$(BashExe) -c &quot;arm-linux-gnueabihf-gcc-4.9 $(CPPFLAGS) $(CFLAGS) -Wno-unused-function -Wno-unused-variable -c depends/rtl-sdr/src/tuner_fc0012.c -o out/linux-armhf/tuner_fc0012.o&quot;" ContinueOnError="false"/>
-    <Exec Command="$(BashExe) -c &quot;arm-linux-gnueabihf-gcc-4.9 $(CPPFLAGS) $(CFLAGS) -Wno-unused-function -Wno-unused-variable -c depends/rtl-sdr/src/tuner_fc0013.c -o out/linux-armhf/tuner_fc0013.o&quot;" ContinueOnError="false"/>
-    <Exec Command="$(BashExe) -c &quot;arm-linux-gnueabihf-gcc-4.9 $(CPPFLAGS) $(CFLAGS) -Wno-unused-function -Wno-unused-variable -c depends/rtl-sdr/src/tuner_fc2580.c -o out/linux-armhf/tuner_fc2580.o&quot;" ContinueOnError="false"/>
-    <Exec Command="$(BashExe) -c &quot;arm-linux-gnueabihf-gcc-4.9 $(CPPFLAGS) $(CFLAGS) -Wno-unused-function -Wno-unused-variable -c depends/rtl-sdr/src/tuner_r82xx.c -o out/linux-armhf/tuner_r82xx.o&quot;" ContinueOnError="false"/>
-    <Exec Command="$(BashExe) -c &quot;arm-linux-gnueabihf-gcc-4.9 $(CPPFLAGS) $(CFLAGS) -Wno-unused-function -Wno-unused-variable -c depends/rtl-sdr/src/convenience/convenience.c -o out/linux-armhf/convenience.o&quot;" ContinueOnError="false"/>
-    <Exec Command="$(BashExe) -c &quot;arm-linux-gnueabihf-gcc-4.9 $(CPPFLAGS) $(CFLAGS) -Wno-unused-function -Wno-unused-variable -c depends/rtl-sdr/src/getopt/getopt.c -o out/linux-armhf/getopt.o&quot;" ContinueOnError="false"/>
-    <Exec Command="$(BashExe) -c &quot;arm-linux-gnueabihf-gcc-4.9 $(CPPFLAGS) $(CFLAGS) -Wno-unused-function -Wno-unused-variable -c depends/rtl-sdr/src/rtl_test.c -o out/linux-armhf/rtl_test.o&quot;" ContinueOnError="false"/>
-    <Exec Command="$(BashExe) -c &quot;arm-linux-gnueabihf-g++-4.9 $(CPPFLAGS) $(CXXFLAGS) -c depends/softfm/Filter.cc -o out/linux-armhf/Filter.o&quot;" ContinueOnError="false"/>
-    <Exec Command="$(BashExe) -c &quot;arm-linux-gnueabihf-g++-4.9 $(CPPFLAGS) $(CXXFLAGS) -c depends/softfm/FmDecode.cc -o out/linux-armhf/FmDecode.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;arm-linux-gnueabihf-gcc-4.9 $(CPPFLAGS) $(CFLAGS) -c depends/rtl-sdr/src/librtlsdr.c -o out/linux-armhf/librtlsdr.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;arm-linux-gnueabihf-gcc-4.9 $(CPPFLAGS) $(CFLAGS) -c depends/rtl-sdr/src/tuner_e4k.c -o out/linux-armhf/tuner_e4k.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;arm-linux-gnueabihf-gcc-4.9 $(CPPFLAGS) $(CFLAGS) -c depends/rtl-sdr/src/tuner_fc0012.c -o out/linux-armhf/tuner_fc0012.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;arm-linux-gnueabihf-gcc-4.9 $(CPPFLAGS) $(CFLAGS) -c depends/rtl-sdr/src/tuner_fc0013.c -o out/linux-armhf/tuner_fc0013.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;arm-linux-gnueabihf-gcc-4.9 $(CPPFLAGS) $(CFLAGS) -c depends/rtl-sdr/src/tuner_fc2580.c -o out/linux-armhf/tuner_fc2580.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;arm-linux-gnueabihf-gcc-4.9 $(CPPFLAGS) $(CFLAGS) -c depends/rtl-sdr/src/tuner_r82xx.c -o out/linux-armhf/tuner_r82xx.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;arm-linux-gnueabihf-gcc-4.9 $(CPPFLAGS) $(CFLAGS) -c depends/rtl-sdr/src/convenience/convenience.c -o out/linux-armhf/convenience.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;arm-linux-gnueabihf-gcc-4.9 $(CPPFLAGS) $(CFLAGS) -c depends/rtl-sdr/src/getopt/getopt.c -o out/linux-armhf/getopt.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;arm-linux-gnueabihf-gcc-4.9 $(CPPFLAGS) $(CFLAGS) -c depends/rtl-sdr/src/rtl_test.c -o out/linux-armhf/rtl_test.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;arm-linux-gnueabihf-gcc-4.9 $(CPPFLAGS) $(CXXFLAGS) -c src/fmdsp/agc.cpp -o out/linux-armhf/agc.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;arm-linux-gnueabihf-gcc-4.9 $(CPPFLAGS) $(CXXFLAGS) -c src/fmdsp/amdemod.cpp -o out/linux-armhf/amdemod.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;arm-linux-gnueabihf-gcc-4.9 $(CPPFLAGS) $(CXXFLAGS) -c src/fmdsp/datamodifier.cpp -o out/linux-armhf/datamodifier.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;arm-linux-gnueabihf-gcc-4.9 $(CPPFLAGS) $(CXXFLAGS) -c src/fmdsp/demodulator.cpp -o out/linux-armhf/demodulator.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;arm-linux-gnueabihf-gcc-4.9 $(CPPFLAGS) $(CXXFLAGS) -c src/fmdsp/downconvert.cpp -o out/linux-armhf/downconvert.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;arm-linux-gnueabihf-gcc-4.9 $(CPPFLAGS) $(CXXFLAGS) -c src/fmdsp/fastfir.cpp -o out/linux-armhf/fastfir.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;arm-linux-gnueabihf-gcc-4.9 $(CPPFLAGS) $(CXXFLAGS) -c src/fmdsp/fft.cpp -o out/linux-armhf/fft.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;arm-linux-gnueabihf-gcc-4.9 $(CPPFLAGS) $(CXXFLAGS) -c src/fmdsp/fir.cpp -o out/linux-armhf/fir.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;arm-linux-gnueabihf-gcc-4.9 $(CPPFLAGS) $(CXXFLAGS) -c src/fmdsp/fmdemod.cpp -o out/linux-armhf/fmdemod.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;arm-linux-gnueabihf-gcc-4.9 $(CPPFLAGS) $(CXXFLAGS) -c src/fmdsp/fractresampler.cpp -o out/linux-armhf/fractresampler.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;arm-linux-gnueabihf-gcc-4.9 $(CPPFLAGS) $(CXXFLAGS) -c src/fmdsp/fskdemod.cpp -o out/linux-armhf/fskdemod.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;arm-linux-gnueabihf-gcc-4.9 $(CPPFLAGS) $(CXXFLAGS) -c src/fmdsp/fskmod.cpp -o out/linux-armhf/fskmod.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;arm-linux-gnueabihf-gcc-4.9 $(CPPFLAGS) $(CXXFLAGS) -c src/fmdsp/iir.cpp -o out/linux-armhf/iir.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;arm-linux-gnueabihf-gcc-4.9 $(CPPFLAGS) $(CXXFLAGS) -c src/fmdsp/noiseproc.cpp -o out/linux-armhf/noiseproc.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;arm-linux-gnueabihf-gcc-4.9 $(CPPFLAGS) $(CXXFLAGS) -c src/fmdsp/pskdemod.cpp -o out/linux-armhf/pskdemod.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;arm-linux-gnueabihf-gcc-4.9 $(CPPFLAGS) $(CXXFLAGS) -c src/fmdsp/pskmod.cpp -o out/linux-armhf/pskmod.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;arm-linux-gnueabihf-gcc-4.9 $(CPPFLAGS) $(CXXFLAGS) -c src/fmdsp/samdemod.cpp -o out/linux-armhf/samdemod.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;arm-linux-gnueabihf-gcc-4.9 $(CPPFLAGS) $(CXXFLAGS) -c src/fmdsp/smeter.cpp -o out/linux-armhf/smeter.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;arm-linux-gnueabihf-gcc-4.9 $(CPPFLAGS) $(CXXFLAGS) -c src/fmdsp/ssbdemod.cpp -o out/linux-armhf/ssbdemod.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;arm-linux-gnueabihf-gcc-4.9 $(CPPFLAGS) $(CXXFLAGS) -c src/fmdsp/wfmdemod.cpp -o out/linux-armhf/wfmdemod.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;arm-linux-gnueabihf-gcc-4.9 $(CPPFLAGS) $(CXXFLAGS) -c src/fmdsp/wfmmod.cpp -o out/linux-armhf/wfmmod.o&quot;" ContinueOnError="false"/>
     <Exec Command="$(BashExe) -c &quot;arm-linux-gnueabihf-g++-4.9 $(CPPFLAGS) $(CXXFLAGS) -c src/fmstream.cpp -o out/linux-armhf/fmstream.o&quot;" ContinueOnError="false"/>
     <Exec Command="$(BashExe) -c &quot;arm-linux-gnueabihf-g++-4.9 $(CPPFLAGS) $(CXXFLAGS) -c src/libusb_exception.cpp -o out/linux-armhf/libusb_exception.o&quot;" ContinueOnError="false"/>
     <Exec Command="$(BashExe) -c &quot;arm-linux-gnueabihf-g++-4.9 $(CPPFLAGS) $(CXXFLAGS) -c src/pvr.cpp -o out/linux-armhf/pvr.o&quot;" ContinueOnError="false"/>
     <Exec Command="$(BashExe) -c &quot;arm-linux-gnueabihf-g++-4.9 $(CPPFLAGS) $(CXXFLAGS) -c src/rtldevice.cpp -o out/linux-armhf/rtldevice.o&quot;" ContinueOnError="false"/>
-    <Exec Command="$(BashExe) -c &quot;arm-linux-gnueabihf-g++-4.9 $(CPPFLAGS) $(CXXFLAGS) -shared -Wl,--version-script=exportlist/exportlist.linux out/linux-armhf/Filter.o out/linux-armhf/FmDecode.o out/linux-armhf/fmstream.o out/linux-armhf/librtlsdr.o out/linux-armhf/libusb_exception.o out/linux-armhf/pvr.o out/linux-armhf/rtldevice.o out/linux-armhf/tuner_e4k.o out/linux-armhf/tuner_fc0012.o out/linux-armhf/tuner_fc0013.o out/linux-armhf/tuner_fc2580.o out/linux-armhf/tuner_r82xx.o depends/libusb/linux-armhf/lib/libusb-1.0.a -ldl -lpthread -o out/linux-armhf/zuki.pvr.rtlradio.so&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;arm-linux-gnueabihf-g++-4.9 $(CPPFLAGS) $(CXXFLAGS) -shared -Wl,--version-script=exportlist/exportlist.linux out/linux-armhf/agc.o out/linux-armhf/amdemod.o out/linux-armhf/datamodifier.o out/linux-armhf/demodulator.o out/linux-armhf/downconvert.o out/linux-armhf/fastfir.o out/linux-armhf/fft.o out/linux-armhf/fir.o out/linux-armhf/fmdemod.o out/linux-armhf/fractresampler.o out/linux-armhf/fskdemod.o out/linux-armhf/fskmod.o out/linux-armhf/iir.o out/linux-armhf/noiseproc.o out/linux-armhf/pskdemod.o out/linux-armhf/pskmod.o out/linux-armhf/samdemod.o out/linux-armhf/smeter.o out/linux-armhf/ssbdemod.o out/linux-armhf/wfmdemod.o out/linux-armhf/wfmmod.o out/linux-armhf/fmstream.o out/linux-armhf/librtlsdr.o out/linux-armhf/libusb_exception.o out/linux-armhf/pvr.o out/linux-armhf/rtldevice.o out/linux-armhf/tuner_e4k.o out/linux-armhf/tuner_fc0012.o out/linux-armhf/tuner_fc0013.o out/linux-armhf/tuner_fc2580.o out/linux-armhf/tuner_r82xx.o depends/libusb/linux-armhf/lib/libusb-1.0.a -ldl -lpthread -o out/linux-armhf/zuki.pvr.rtlradio.so&quot;" ContinueOnError="false"/>
     <Exec Command="$(BashExe) -c &quot;arm-linux-gnueabihf-g++-4.9 $(CPPFLAGS) $(CXXFLAGS) out/linux-armhf/librtlsdr.o out/linux-armhf/tuner_e4k.o out/linux-armhf/tuner_fc0012.o out/linux-armhf/tuner_fc0013.o out/linux-armhf/tuner_fc2580.o out/linux-armhf/tuner_r82xx.o out/linux-armhf/convenience.o out/linux-armhf/getopt.o out/linux-armhf/rtl_test.o  depends/libusb/linux-armhf/lib/libusb-1.0.a -ldl -lpthread -o out/linux-armhf/rtl_test&quot;" ContinueOnError="false"/>
     <Exec Command="TextTransform.exe template\addon.xml.tt -out tmp\addon-linux-armhf.xml -a !!platform!linux -a !!libraryplatform!linux -a !!libraryname!zuki.pvr.rtlradio.so -a !!changelogtxt!pvr.rtlradio\changelog.txt -a &quot;!!displayversion!$(DisplayVersion)&quot; -a &quot;!!repomanifest!linux-armhf.xml.gz&quot;" ContinueOnError="false"/>
     <XmlPeek XmlInputPath="tmp\addon-linux-armhf.xml" Query="/addon/@version">
@@ -293,29 +369,48 @@
   <Target Name="linux-aarch64" DependsOnTargets="AddonVersion">
 
     <PropertyGroup>
-      <CPPFLAGS>-Wall -Wno-unknown-pragmas -Idepends/xbmc/xbmc -Idepends/xbmc/xbmc/linux -Idepends/xbmc/xbmc/addons/kodi-addon-dev-kit/include/kodi -Idepends/xbmc/xbmc/cores/VideoPlayer/Interface/Addon -Idepends/libusb/linux-aarch64/include -Idepends/rtl-sdr/include -Idepends/softfm -Itmp/version</CPPFLAGS>
-      <CFLAGS>-DNDEBUG -fPIC</CFLAGS>
+      <CPPFLAGS>-Wall -Wno-unknown-pragmas -Idepends/xbmc/xbmc -Idepends/xbmc/xbmc/linux -Idepends/xbmc/xbmc/addons/kodi-addon-dev-kit/include/kodi -Idepends/xbmc/xbmc/cores/VideoPlayer/Interface/Addon -Idepends/libusb/linux-aarch64/include -Idepends/rtl-sdr/include -Itmp/version</CPPFLAGS>
+      <CFLAGS>-DNDEBUG -fPIC -Wno-unused-function -Wno-unused-variable</CFLAGS>
       <CXXFLAGS>-DNDEBUG -fPIC -std=c++11</CXXFLAGS>
     </PropertyGroup>
 
     <MakeDir Directories="out\linux-aarch64" ContinueOnError="false"/>
     <MakeDir Directories="out\repository" ContinueOnError="false"/>
-    <Exec Command="$(BashExe) -c &quot;aarch64-linux-gnu-gcc-4.9 $(CPPFLAGS) $(CFLAGS) -Wno-unused-function -Wno-unused-variable -c depends/rtl-sdr/src/librtlsdr.c -o out/linux-aarch64/librtlsdr.o&quot;" ContinueOnError="false"/>
-    <Exec Command="$(BashExe) -c &quot;aarch64-linux-gnu-gcc-4.9 $(CPPFLAGS) $(CFLAGS) -Wno-unused-function -Wno-unused-variable -c depends/rtl-sdr/src/tuner_e4k.c -o out/linux-aarch64/tuner_e4k.o&quot;" ContinueOnError="false"/>
-    <Exec Command="$(BashExe) -c &quot;aarch64-linux-gnu-gcc-4.9 $(CPPFLAGS) $(CFLAGS) -Wno-unused-function -Wno-unused-variable -c depends/rtl-sdr/src/tuner_fc0012.c -o out/linux-aarch64/tuner_fc0012.o&quot;" ContinueOnError="false"/>
-    <Exec Command="$(BashExe) -c &quot;aarch64-linux-gnu-gcc-4.9 $(CPPFLAGS) $(CFLAGS) -Wno-unused-function -Wno-unused-variable -c depends/rtl-sdr/src/tuner_fc0013.c -o out/linux-aarch64/tuner_fc0013.o&quot;" ContinueOnError="false"/>
-    <Exec Command="$(BashExe) -c &quot;aarch64-linux-gnu-gcc-4.9 $(CPPFLAGS) $(CFLAGS) -Wno-unused-function -Wno-unused-variable -c depends/rtl-sdr/src/tuner_fc2580.c -o out/linux-aarch64/tuner_fc2580.o&quot;" ContinueOnError="false"/>
-    <Exec Command="$(BashExe) -c &quot;aarch64-linux-gnu-gcc-4.9 $(CPPFLAGS) $(CFLAGS) -Wno-unused-function -Wno-unused-variable -c depends/rtl-sdr/src/convenience/convenience.c -o out/linux-aarch64/convenience.o&quot;" ContinueOnError="false"/>
-    <Exec Command="$(BashExe) -c &quot;aarch64-linux-gnu-gcc-4.9 $(CPPFLAGS) $(CFLAGS) -Wno-unused-function -Wno-unused-variable -c depends/rtl-sdr/src/getopt/getopt.c -o out/linux-aarch64/getopt.o&quot;" ContinueOnError="false"/>
-    <Exec Command="$(BashExe) -c &quot;aarch64-linux-gnu-gcc-4.9 $(CPPFLAGS) $(CFLAGS) -Wno-unused-function -Wno-unused-variable -c depends/rtl-sdr/src/rtl_test.c -o out/linux-aarch64/rtl_test.o&quot;" ContinueOnError="false"/>
-    <Exec Command="$(BashExe) -c &quot;aarch64-linux-gnu-gcc-4.9 $(CPPFLAGS) $(CFLAGS) -Wno-unused-function -Wno-unused-variable -c depends/rtl-sdr/src/tuner_r82xx.c -o out/linux-aarch64/tuner_r82xx.o&quot;" ContinueOnError="false"/>
-    <Exec Command="$(BashExe) -c &quot;aarch64-linux-gnu-g++-4.9 $(CPPFLAGS) $(CXXFLAGS) -c depends/softfm/Filter.cc -o out/linux-aarch64/Filter.o&quot;" ContinueOnError="false"/>
-    <Exec Command="$(BashExe) -c &quot;aarch64-linux-gnu-g++-4.9 $(CPPFLAGS) $(CXXFLAGS) -c depends/softfm/FmDecode.cc -o out/linux-aarch64/FmDecode.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;aarch64-linux-gnu-gcc-4.9 $(CPPFLAGS) $(CFLAGS) -c depends/rtl-sdr/src/librtlsdr.c -o out/linux-aarch64/librtlsdr.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;aarch64-linux-gnu-gcc-4.9 $(CPPFLAGS) $(CFLAGS) -c depends/rtl-sdr/src/tuner_e4k.c -o out/linux-aarch64/tuner_e4k.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;aarch64-linux-gnu-gcc-4.9 $(CPPFLAGS) $(CFLAGS) -c depends/rtl-sdr/src/tuner_fc0012.c -o out/linux-aarch64/tuner_fc0012.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;aarch64-linux-gnu-gcc-4.9 $(CPPFLAGS) $(CFLAGS) -c depends/rtl-sdr/src/tuner_fc0013.c -o out/linux-aarch64/tuner_fc0013.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;aarch64-linux-gnu-gcc-4.9 $(CPPFLAGS) $(CFLAGS) -c depends/rtl-sdr/src/tuner_fc2580.c -o out/linux-aarch64/tuner_fc2580.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;aarch64-linux-gnu-gcc-4.9 $(CPPFLAGS) $(CFLAGS) -c depends/rtl-sdr/src/convenience/convenience.c -o out/linux-aarch64/convenience.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;aarch64-linux-gnu-gcc-4.9 $(CPPFLAGS) $(CFLAGS) -c depends/rtl-sdr/src/getopt/getopt.c -o out/linux-aarch64/getopt.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;aarch64-linux-gnu-gcc-4.9 $(CPPFLAGS) $(CFLAGS) -c depends/rtl-sdr/src/rtl_test.c -o out/linux-aarch64/rtl_test.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;aarch64-linux-gnu-gcc-4.9 $(CPPFLAGS) $(CFLAGS) -c depends/rtl-sdr/src/tuner_r82xx.c -o out/linux-aarch64/tuner_r82xx.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;aarch64-linux-gnu-g++-4.9 $(CPPFLAGS) $(CXXFLAGS) -c src/fmdsp/agc.cpp -o out/linux-aarch64/agc.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;aarch64-linux-gnu-g++-4.9 $(CPPFLAGS) $(CXXFLAGS) -c src/fmdsp/amdemod.cpp -o out/linux-aarch64/amdemod.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;aarch64-linux-gnu-g++-4.9 $(CPPFLAGS) $(CXXFLAGS) -c src/fmdsp/datamodifier.cpp -o out/linux-aarch64/datamodifier.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;aarch64-linux-gnu-g++-4.9 $(CPPFLAGS) $(CXXFLAGS) -c src/fmdsp/demodulator.cpp -o out/linux-aarch64/demodulator.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;aarch64-linux-gnu-g++-4.9 $(CPPFLAGS) $(CXXFLAGS) -c src/fmdsp/downconvert.cpp -o out/linux-aarch64/downconvert.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;aarch64-linux-gnu-g++-4.9 $(CPPFLAGS) $(CXXFLAGS) -c src/fmdsp/fastfir.cpp -o out/linux-aarch64/fastfir.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;aarch64-linux-gnu-g++-4.9 $(CPPFLAGS) $(CXXFLAGS) -c src/fmdsp/fft.cpp -o out/linux-aarch64/fft.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;aarch64-linux-gnu-g++-4.9 $(CPPFLAGS) $(CXXFLAGS) -c src/fmdsp/fir.cpp -o out/linux-aarch64/fir.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;aarch64-linux-gnu-g++-4.9 $(CPPFLAGS) $(CXXFLAGS) -c src/fmdsp/fmdemod.cpp -o out/linux-aarch64/fmdemod.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;aarch64-linux-gnu-g++-4.9 $(CPPFLAGS) $(CXXFLAGS) -c src/fmdsp/fractresampler.cpp -o out/linux-aarch64/fractresampler.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;aarch64-linux-gnu-g++-4.9 $(CPPFLAGS) $(CXXFLAGS) -c src/fmdsp/fskdemod.cpp -o out/linux-aarch64/fskdemod.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;aarch64-linux-gnu-g++-4.9 $(CPPFLAGS) $(CXXFLAGS) -c src/fmdsp/fskmod.cpp -o out/linux-aarch64/fskmod.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;aarch64-linux-gnu-g++-4.9 $(CPPFLAGS) $(CXXFLAGS) -c src/fmdsp/iir.cpp -o out/linux-aarch64/iir.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;aarch64-linux-gnu-g++-4.9 $(CPPFLAGS) $(CXXFLAGS) -c src/fmdsp/noiseproc.cpp -o out/linux-aarch64/noiseproc.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;aarch64-linux-gnu-g++-4.9 $(CPPFLAGS) $(CXXFLAGS) -c src/fmdsp/pskdemod.cpp -o out/linux-aarch64/pskdemod.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;aarch64-linux-gnu-g++-4.9 $(CPPFLAGS) $(CXXFLAGS) -c src/fmdsp/pskmod.cpp -o out/linux-aarch64/pskmod.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;aarch64-linux-gnu-g++-4.9 $(CPPFLAGS) $(CXXFLAGS) -c src/fmdsp/samdemod.cpp -o out/linux-aarch64/samdemod.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;aarch64-linux-gnu-g++-4.9 $(CPPFLAGS) $(CXXFLAGS) -c src/fmdsp/smeter.cpp -o out/linux-aarch64/smeter.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;aarch64-linux-gnu-g++-4.9 $(CPPFLAGS) $(CXXFLAGS) -c src/fmdsp/ssbdemod.cpp -o out/linux-aarch64/ssbdemod.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;aarch64-linux-gnu-g++-4.9 $(CPPFLAGS) $(CXXFLAGS) -c src/fmdsp/wfmdemod.cpp -o out/linux-aarch64/wfmdemod.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;aarch64-linux-gnu-g++-4.9 $(CPPFLAGS) $(CXXFLAGS) -c src/fmdsp/wfmmod.cpp -o out/linux-aarch64/wfmmod.o&quot;" ContinueOnError="false"/>
     <Exec Command="$(BashExe) -c &quot;aarch64-linux-gnu-g++-4.9 $(CPPFLAGS) $(CXXFLAGS) -c src/fmstream.cpp -o out/linux-aarch64/fmstream.o&quot;" ContinueOnError="false"/>
     <Exec Command="$(BashExe) -c &quot;aarch64-linux-gnu-g++-4.9 $(CPPFLAGS) $(CXXFLAGS) -c src/libusb_exception.cpp -o out/linux-aarch64/libusb_exception.o&quot;" ContinueOnError="false"/>
     <Exec Command="$(BashExe) -c &quot;aarch64-linux-gnu-g++-4.9 $(CPPFLAGS) $(CXXFLAGS) -c src/pvr.cpp -o out/linux-aarch64/pvr.o&quot;" ContinueOnError="false"/>
     <Exec Command="$(BashExe) -c &quot;aarch64-linux-gnu-g++-4.9 $(CPPFLAGS) $(CXXFLAGS) -c src/rtldevice.cpp -o out/linux-aarch64/rtldevice.o&quot;" ContinueOnError="false"/>
-    <Exec Command="$(BashExe) -c &quot;aarch64-linux-gnu-g++-4.9 $(CPPFLAGS) $(CXXFLAGS) -shared -Wl,--version-script=exportlist/exportlist.linux out/linux-aarch64/Filter.o out/linux-aarch64/FmDecode.o out/linux-aarch64/fmstream.o out/linux-aarch64/librtlsdr.o out/linux-aarch64/libusb_exception.o out/linux-aarch64/pvr.o out/linux-aarch64/rtldevice.o out/linux-aarch64/tuner_e4k.o out/linux-aarch64/tuner_fc0012.o out/linux-aarch64/tuner_fc0013.o out/linux-aarch64/tuner_fc2580.o out/linux-aarch64/tuner_r82xx.o depends/libusb/linux-aarch64/lib/libusb-1.0.a -ldl -lpthread -o out/linux-aarch64/zuki.pvr.rtlradio.so&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;aarch64-linux-gnu-g++-4.9 $(CPPFLAGS) $(CXXFLAGS) -shared -Wl,--version-script=exportlist/exportlist.linux out/linux-aarch64/agc.o out/linux-aarch64/amdemod.o out/linux-aarch64/datamodifier.o out/linux-aarch64/demodulator.o out/linux-aarch64/downconvert.o out/linux-aarch64/fastfir.o out/linux-aarch64/fft.o out/linux-aarch64/fir.o out/linux-aarch64/fmdemod.o out/linux-aarch64/fractresampler.o out/linux-aarch64/fskdemod.o out/linux-aarch64/fskmod.o out/linux-aarch64/iir.o out/linux-aarch64/noiseproc.o out/linux-aarch64/pskdemod.o out/linux-aarch64/pskmod.o out/linux-aarch64/samdemod.o out/linux-aarch64/smeter.o out/linux-aarch64/ssbdemod.o out/linux-aarch64/wfmdemod.o out/linux-aarch64/wfmmod.o out/linux-aarch64/fmstream.o out/linux-aarch64/librtlsdr.o out/linux-aarch64/libusb_exception.o out/linux-aarch64/pvr.o out/linux-aarch64/rtldevice.o out/linux-aarch64/tuner_e4k.o out/linux-aarch64/tuner_fc0012.o out/linux-aarch64/tuner_fc0013.o out/linux-aarch64/tuner_fc2580.o out/linux-aarch64/tuner_r82xx.o depends/libusb/linux-aarch64/lib/libusb-1.0.a -ldl -lpthread -o out/linux-aarch64/zuki.pvr.rtlradio.so&quot;" ContinueOnError="false"/>
     <Exec Command="$(BashExe) -c &quot;aarch64-linux-gnu-g++-4.9 $(CPPFLAGS) $(CXXFLAGS) out/linux-aarch64/librtlsdr.o out/linux-aarch64/tuner_e4k.o out/linux-aarch64/tuner_fc0012.o out/linux-aarch64/tuner_fc0013.o out/linux-aarch64/tuner_fc2580.o out/linux-aarch64/tuner_r82xx.o out/linux-aarch64/convenience.o out/linux-aarch64/getopt.o out/linux-aarch64/rtl_test.o  depends/libusb/linux-aarch64/lib/libusb-1.0.a -ldl -lpthread -o out/linux-aarch64/rtl_test&quot;" ContinueOnError="false"/>
     <Exec Command="TextTransform.exe template\addon.xml.tt -out tmp\addon-linux-aarch64.xml -a !!platform!linux -a !!libraryplatform!linux -a !!libraryname!zuki.pvr.rtlradio.so -a !!changelogtxt!pvr.rtlradio\changelog.txt -a &quot;!!displayversion!$(DisplayVersion)&quot; -a &quot;!!repomanifest!linux-aarch64.xml.gz&quot;" ContinueOnError="false"/>
     <XmlPeek XmlInputPath="tmp\addon-linux-aarch64.xml" Query="/addon/@version">
@@ -339,29 +434,48 @@
 
     <PropertyGroup>
       <ENV>PATH+=:~/raspberrypi/arm-bcm2708/gcc-linaro-arm-linux-gnueabihf-raspbian-x64/bin</ENV>
-      <CPPFLAGS>-Wall -Wno-unknown-pragmas -Idepends/xbmc/xbmc -Idepends/xbmc/xbmc/linux -Idepends/xbmc/xbmc/addons/kodi-addon-dev-kit/include/kodi -Idepends/xbmc/xbmc/cores/VideoPlayer/Interface/Addon -Idepends/libusb/raspbian-armhf/include -Idepends/rtl-sdr/include -Idepends/softfm -Itmp/version</CPPFLAGS>
-      <CFLAGS>-DNDEBUG -fPIC</CFLAGS>
+      <CPPFLAGS>-Wall -Wno-unknown-pragmas -Idepends/xbmc/xbmc -Idepends/xbmc/xbmc/linux -Idepends/xbmc/xbmc/addons/kodi-addon-dev-kit/include/kodi -Idepends/xbmc/xbmc/cores/VideoPlayer/Interface/Addon -Idepends/libusb/raspbian-armhf/include -Idepends/rtl-sdr/include -Itmp/version</CPPFLAGS>
+      <CFLAGS>-DNDEBUG -fPIC -Wno-unused-function -Wno-unused-variable</CFLAGS>
       <CXXFLAGS>-DNDEBUG -fPIC -std=c++11</CXXFLAGS>
     </PropertyGroup>
 
     <MakeDir Directories="out\raspbian-armhf" ContinueOnError="false"/>
     <MakeDir Directories="out\repository" ContinueOnError="false"/>
-    <Exec Command="$(BashExe) -c &quot;$(ENV) arm-linux-gnueabihf-gcc $(CPPFLAGS) $(CFLAGS) -Wno-unused-function -Wno-unused-variable -c depends/rtl-sdr/src/librtlsdr.c -o out/raspbian-armhf/librtlsdr.o&quot;" ContinueOnError="false"/>
-    <Exec Command="$(BashExe) -c &quot;$(ENV) arm-linux-gnueabihf-gcc $(CPPFLAGS) $(CFLAGS) -Wno-unused-function -Wno-unused-variable -c depends/rtl-sdr/src/tuner_e4k.c -o out/raspbian-armhf/tuner_e4k.o&quot;" ContinueOnError="false"/>
-    <Exec Command="$(BashExe) -c &quot;$(ENV) arm-linux-gnueabihf-gcc $(CPPFLAGS) $(CFLAGS) -Wno-unused-function -Wno-unused-variable -c depends/rtl-sdr/src/tuner_fc0012.c -o out/raspbian-armhf/tuner_fc0012.o&quot;" ContinueOnError="false"/>
-    <Exec Command="$(BashExe) -c &quot;$(ENV) arm-linux-gnueabihf-gcc $(CPPFLAGS) $(CFLAGS) -Wno-unused-function -Wno-unused-variable -c depends/rtl-sdr/src/tuner_fc0013.c -o out/raspbian-armhf/tuner_fc0013.o&quot;" ContinueOnError="false"/>
-    <Exec Command="$(BashExe) -c &quot;$(ENV) arm-linux-gnueabihf-gcc $(CPPFLAGS) $(CFLAGS) -Wno-unused-function -Wno-unused-variable -c depends/rtl-sdr/src/tuner_fc2580.c -o out/raspbian-armhf/tuner_fc2580.o&quot;" ContinueOnError="false"/>
-    <Exec Command="$(BashExe) -c &quot;$(ENV) arm-linux-gnueabihf-gcc $(CPPFLAGS) $(CFLAGS) -Wno-unused-function -Wno-unused-variable -c depends/rtl-sdr/src/tuner_r82xx.c -o out/raspbian-armhf/tuner_r82xx.o&quot;" ContinueOnError="false"/>
-    <Exec Command="$(BashExe) -c &quot;$(ENV) arm-linux-gnueabihf-gcc $(CPPFLAGS) $(CFLAGS) -Wno-unused-function -Wno-unused-variable -c depends/rtl-sdr/src/convenience/convenience.c -o out/raspbian-armhf/convenience.o&quot;" ContinueOnError="false"/>
-    <Exec Command="$(BashExe) -c &quot;$(ENV) arm-linux-gnueabihf-gcc $(CPPFLAGS) $(CFLAGS) -Wno-unused-function -Wno-unused-variable -c depends/rtl-sdr/src/getopt/getopt.c -o out/raspbian-armhf/getopt.o&quot;" ContinueOnError="false"/>
-    <Exec Command="$(BashExe) -c &quot;$(ENV) arm-linux-gnueabihf-gcc $(CPPFLAGS) $(CFLAGS) -Wno-unused-function -Wno-unused-variable -c depends/rtl-sdr/src/rtl_test.c -o out/raspbian-armhf/rtl_test.o&quot;" ContinueOnError="false"/>
-    <Exec Command="$(BashExe) -c &quot;$(ENV) arm-linux-gnueabihf-g++ $(CPPFLAGS) $(CXXFLAGS) -c depends/softfm/Filter.cc -o out/raspbian-armhf/Filter.o&quot;" ContinueOnError="false"/>
-    <Exec Command="$(BashExe) -c &quot;$(ENV) arm-linux-gnueabihf-g++ $(CPPFLAGS) $(CXXFLAGS) -c depends/softfm/FmDecode.cc -o out/raspbian-armhf/FmDecode.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;$(ENV) arm-linux-gnueabihf-gcc $(CPPFLAGS) $(CFLAGS) -c depends/rtl-sdr/src/librtlsdr.c -o out/raspbian-armhf/librtlsdr.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;$(ENV) arm-linux-gnueabihf-gcc $(CPPFLAGS) $(CFLAGS) -c depends/rtl-sdr/src/tuner_e4k.c -o out/raspbian-armhf/tuner_e4k.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;$(ENV) arm-linux-gnueabihf-gcc $(CPPFLAGS) $(CFLAGS) -c depends/rtl-sdr/src/tuner_fc0012.c -o out/raspbian-armhf/tuner_fc0012.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;$(ENV) arm-linux-gnueabihf-gcc $(CPPFLAGS) $(CFLAGS) -c depends/rtl-sdr/src/tuner_fc0013.c -o out/raspbian-armhf/tuner_fc0013.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;$(ENV) arm-linux-gnueabihf-gcc $(CPPFLAGS) $(CFLAGS) -c depends/rtl-sdr/src/tuner_fc2580.c -o out/raspbian-armhf/tuner_fc2580.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;$(ENV) arm-linux-gnueabihf-gcc $(CPPFLAGS) $(CFLAGS) -c depends/rtl-sdr/src/tuner_r82xx.c -o out/raspbian-armhf/tuner_r82xx.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;$(ENV) arm-linux-gnueabihf-gcc $(CPPFLAGS) $(CFLAGS) -c depends/rtl-sdr/src/convenience/convenience.c -o out/raspbian-armhf/convenience.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;$(ENV) arm-linux-gnueabihf-gcc $(CPPFLAGS) $(CFLAGS) -c depends/rtl-sdr/src/getopt/getopt.c -o out/raspbian-armhf/getopt.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;$(ENV) arm-linux-gnueabihf-gcc $(CPPFLAGS) $(CFLAGS) -c depends/rtl-sdr/src/rtl_test.c -o out/raspbian-armhf/rtl_test.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;$(ENV) arm-linux-gnueabihf-gcc $(CPPFLAGS) $(CXXFLAGS) -c src/fmdsp/agc.cpp -o out/raspbian-armhf/agc.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;$(ENV) arm-linux-gnueabihf-gcc $(CPPFLAGS) $(CXXFLAGS) -c src/fmdsp/amdemod.cpp -o out/raspbian-armhf/amdemod.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;$(ENV) arm-linux-gnueabihf-gcc $(CPPFLAGS) $(CXXFLAGS) -c src/fmdsp/datamodifier.cpp -o out/raspbian-armhf/datamodifier.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;$(ENV) arm-linux-gnueabihf-gcc $(CPPFLAGS) $(CXXFLAGS) -c src/fmdsp/demodulator.cpp -o out/raspbian-armhf/demodulator.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;$(ENV) arm-linux-gnueabihf-gcc $(CPPFLAGS) $(CXXFLAGS) -c src/fmdsp/downconvert.cpp -o out/raspbian-armhf/downconvert.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;$(ENV) arm-linux-gnueabihf-gcc $(CPPFLAGS) $(CXXFLAGS) -c src/fmdsp/fastfir.cpp -o out/raspbian-armhf/fastfir.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;$(ENV) arm-linux-gnueabihf-gcc $(CPPFLAGS) $(CXXFLAGS) -c src/fmdsp/fft.cpp -o out/raspbian-armhf/fft.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;$(ENV) arm-linux-gnueabihf-gcc $(CPPFLAGS) $(CXXFLAGS) -c src/fmdsp/fir.cpp -o out/raspbian-armhf/fir.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;$(ENV) arm-linux-gnueabihf-gcc $(CPPFLAGS) $(CXXFLAGS) -c src/fmdsp/fmdemod.cpp -o out/raspbian-armhf/fmdemod.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;$(ENV) arm-linux-gnueabihf-gcc $(CPPFLAGS) $(CXXFLAGS) -c src/fmdsp/fractresampler.cpp -o out/raspbian-armhf/fractresampler.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;$(ENV) arm-linux-gnueabihf-gcc $(CPPFLAGS) $(CXXFLAGS) -c src/fmdsp/fskdemod.cpp -o out/raspbian-armhf/fskdemod.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;$(ENV) arm-linux-gnueabihf-gcc $(CPPFLAGS) $(CXXFLAGS) -c src/fmdsp/fskmod.cpp -o out/raspbian-armhf/fskmod.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;$(ENV) arm-linux-gnueabihf-gcc $(CPPFLAGS) $(CXXFLAGS) -c src/fmdsp/iir.cpp -o out/raspbian-armhf/iir.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;$(ENV) arm-linux-gnueabihf-gcc $(CPPFLAGS) $(CXXFLAGS) -c src/fmdsp/noiseproc.cpp -o out/raspbian-armhf/noiseproc.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;$(ENV) arm-linux-gnueabihf-gcc $(CPPFLAGS) $(CXXFLAGS) -c src/fmdsp/pskdemod.cpp -o out/raspbian-armhf/pskdemod.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;$(ENV) arm-linux-gnueabihf-gcc $(CPPFLAGS) $(CXXFLAGS) -c src/fmdsp/pskmod.cpp -o out/raspbian-armhf/pskmod.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;$(ENV) arm-linux-gnueabihf-gcc $(CPPFLAGS) $(CXXFLAGS) -c src/fmdsp/samdemod.cpp -o out/raspbian-armhf/samdemod.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;$(ENV) arm-linux-gnueabihf-gcc $(CPPFLAGS) $(CXXFLAGS) -c src/fmdsp/smeter.cpp -o out/raspbian-armhf/smeter.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;$(ENV) arm-linux-gnueabihf-gcc $(CPPFLAGS) $(CXXFLAGS) -c src/fmdsp/ssbdemod.cpp -o out/raspbian-armhf/ssbdemod.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;$(ENV) arm-linux-gnueabihf-gcc $(CPPFLAGS) $(CXXFLAGS) -c src/fmdsp/wfmdemod.cpp -o out/raspbian-armhf/wfmdemod.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;$(ENV) arm-linux-gnueabihf-gcc $(CPPFLAGS) $(CXXFLAGS) -c src/fmdsp/wfmmod.cpp -o out/raspbian-armhf/wfmmod.o&quot;" ContinueOnError="false"/>
     <Exec Command="$(BashExe) -c &quot;$(ENV) arm-linux-gnueabihf-g++ $(CPPFLAGS) $(CXXFLAGS) -c src/fmstream.cpp -o out/raspbian-armhf/fmstream.o&quot;" ContinueOnError="false"/>
     <Exec Command="$(BashExe) -c &quot;$(ENV) arm-linux-gnueabihf-g++ $(CPPFLAGS) $(CXXFLAGS) -c src/libusb_exception.cpp -o out/raspbian-armhf/libusb_exception.o&quot;" ContinueOnError="false"/>
     <Exec Command="$(BashExe) -c &quot;$(ENV) arm-linux-gnueabihf-g++ $(CPPFLAGS) $(CXXFLAGS) -c src/pvr.cpp -o out/raspbian-armhf/pvr.o&quot;" ContinueOnError="false"/>
     <Exec Command="$(BashExe) -c &quot;$(ENV) arm-linux-gnueabihf-g++ $(CPPFLAGS) $(CXXFLAGS) -c src/rtldevice.cpp -o out/raspbian-armhf/rtldevice.o&quot;" ContinueOnError="false"/>
-    <Exec Command="$(BashExe) -c &quot;$(ENV) arm-linux-gnueabihf-g++ $(CPPFLAGS) $(CXXFLAGS) -shared -Wl,--version-script=exportlist/exportlist.raspbian out/raspbian-armhf/Filter.o out/raspbian-armhf/FmDecode.o out/raspbian-armhf/fmstream.o out/raspbian-armhf/librtlsdr.o out/raspbian-armhf/libusb_exception.o out/raspbian-armhf/pvr.o out/raspbian-armhf/rtldevice.o out/raspbian-armhf/tuner_e4k.o out/raspbian-armhf/tuner_fc0012.o out/raspbian-armhf/tuner_fc0013.o out/raspbian-armhf/tuner_fc2580.o out/raspbian-armhf/tuner_r82xx.o depends/libusb/raspbian-armhf/lib/libusb-1.0.a -ldl -lpthread -o out/raspbian-armhf/zuki.pvr.rtlradio.so&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;$(ENV) arm-linux-gnueabihf-g++ $(CPPFLAGS) $(CXXFLAGS) -shared -Wl,--version-script=exportlist/exportlist.raspbian out/raspbian-armhf/agc.o out/raspbian-armhf/amdemod.o out/raspbian-armhf/datamodifier.o out/raspbian-armhf/demodulator.o out/raspbian-armhf/downconvert.o out/raspbian-armhf/fastfir.o out/raspbian-armhf/fft.o out/raspbian-armhf/fir.o out/raspbian-armhf/fmdemod.o out/raspbian-armhf/fractresampler.o out/raspbian-armhf/fskdemod.o out/raspbian-armhf/fskmod.o out/raspbian-armhf/iir.o out/raspbian-armhf/noiseproc.o out/raspbian-armhf/pskdemod.o out/raspbian-armhf/pskmod.o out/raspbian-armhf/samdemod.o out/raspbian-armhf/smeter.o out/raspbian-armhf/ssbdemod.o out/raspbian-armhf/wfmdemod.o out/raspbian-armhf/wfmmod.o out/raspbian-armhf/fmstream.o out/raspbian-armhf/librtlsdr.o out/raspbian-armhf/libusb_exception.o out/raspbian-armhf/pvr.o out/raspbian-armhf/rtldevice.o out/raspbian-armhf/tuner_e4k.o out/raspbian-armhf/tuner_fc0012.o out/raspbian-armhf/tuner_fc0013.o out/raspbian-armhf/tuner_fc2580.o out/raspbian-armhf/tuner_r82xx.o depends/libusb/raspbian-armhf/lib/libusb-1.0.a -ldl -lpthread -o out/raspbian-armhf/zuki.pvr.rtlradio.so&quot;" ContinueOnError="false"/>
     <Exec Command="$(BashExe) -c &quot;$(ENV) arm-linux-gnueabihf-g++ $(CPPFLAGS) $(CXXFLAGS) out/raspbian-armhf/librtlsdr.o out/raspbian-armhf/tuner_e4k.o out/raspbian-armhf/tuner_fc0012.o out/raspbian-armhf/tuner_fc0013.o out/raspbian-armhf/tuner_fc2580.o out/raspbian-armhf/tuner_r82xx.o out/raspbian-armhf/convenience.o out/raspbian-armhf/getopt.o out/raspbian-armhf/rtl_test.o  depends/libusb/raspbian-armhf/lib/libusb-1.0.a -ldl -lpthread -lrt -o out/raspbian-armhf/rtl_test&quot;" ContinueOnError="false"/>
     <Exec Command="TextTransform.exe template\addon.xml.tt -out tmp\addon-raspbian-armhf.xml -a !!platform!linux -a !!libraryplatform!linux -a !!libraryname!zuki.pvr.rtlradio.so -a !!changelogtxt!pvr.rtlradio\changelog.txt -a &quot;!!displayversion!$(DisplayVersion)&quot; -a &quot;!!repomanifest!raspbian-armhf.xml.gz&quot;" ContinueOnError="false"/>
     <XmlPeek XmlInputPath="tmp\addon-raspbian-armhf.xml" Query="/addon/@version">
@@ -385,30 +499,49 @@
 
     <PropertyGroup>
       <ENV>OSXCROSS_NO_EXTENSION_WARNINGS=1 PATH+=:~/osxcross/target/bin</ENV>
-      <CPPFLAGS>-mmacosx-version-min=10.9 -Wall -Wno-unknown-pragmas -Idepends/xbmc/xbmc -Idepends/xbmc/xbmc/linux -Idepends/xbmc/xbmc/addons/kodi-addon-dev-kit/include/kodi -Idepends/xbmc/xbmc/cores/VideoPlayer/Interface/Addon -Idepends/libusb/osx-x86_64/include -Idepends/rtl-sdr/include -Idepends/softfm -Itmp/version</CPPFLAGS>
-      <CFLAGS>-DNDEBUG -fPIC -stdlib=libc++</CFLAGS>
+      <CPPFLAGS>-mmacosx-version-min=10.9 -Wall -Wno-unknown-pragmas -Idepends/xbmc/xbmc -Idepends/xbmc/xbmc/linux -Idepends/xbmc/xbmc/addons/kodi-addon-dev-kit/include/kodi -Idepends/xbmc/xbmc/cores/VideoPlayer/Interface/Addon -Idepends/libusb/osx-x86_64/include -Idepends/rtl-sdr/include -Itmp/version</CPPFLAGS>
+      <CFLAGS>-DNDEBUG -fPIC -stdlib=libc++ -Wno-unused-function -Wno-unused-variable</CFLAGS>
       <CXXFLAGS>-DNDEBUG -fPIC -std=c++11 -stdlib=libc++</CXXFLAGS>
     </PropertyGroup>
 
     <MakeDir Directories="out\osx-x86_64" ContinueOnError="false"/>
     <MakeDir Directories="out\repository" ContinueOnError="false"/>
-    <Exec Command="$(BashExe) -c &quot;$(ENV) x86_64-apple-darwin15-clang $(CPPFLAGS) $(CFLAGS) -Wno-unused-function -Wno-unused-variable -c depends/rtl-sdr/src/librtlsdr.c -o out/osx-x86_64/librtlsdr.o&quot;" ContinueOnError="false"/>
-    <Exec Command="$(BashExe) -c &quot;$(ENV) x86_64-apple-darwin15-clang $(CPPFLAGS) $(CFLAGS) -Wno-unused-function -Wno-unused-variable -c depends/rtl-sdr/src/tuner_e4k.c -o out/osx-x86_64/tuner_e4k.o&quot;" ContinueOnError="false"/>
-    <Exec Command="$(BashExe) -c &quot;$(ENV) x86_64-apple-darwin15-clang $(CPPFLAGS) $(CFLAGS) -Wno-unused-function -Wno-unused-variable -c depends/rtl-sdr/src/tuner_fc0012.c -o out/osx-x86_64/tuner_fc0012.o&quot;" ContinueOnError="false"/>
-    <Exec Command="$(BashExe) -c &quot;$(ENV) x86_64-apple-darwin15-clang $(CPPFLAGS) $(CFLAGS) -Wno-unused-function -Wno-unused-variable -c depends/rtl-sdr/src/tuner_fc0013.c -o out/osx-x86_64/tuner_fc0013.o&quot;" ContinueOnError="false"/>
-    <Exec Command="$(BashExe) -c &quot;$(ENV) x86_64-apple-darwin15-clang $(CPPFLAGS) $(CFLAGS) -Wno-unused-function -Wno-unused-variable -c depends/rtl-sdr/src/tuner_fc2580.c -o out/osx-x86_64/tuner_fc2580.o&quot;" ContinueOnError="false"/>
-    <Exec Command="$(BashExe) -c &quot;$(ENV) x86_64-apple-darwin15-clang $(CPPFLAGS) $(CFLAGS) -Wno-unused-function -Wno-unused-variable -c depends/rtl-sdr/src/tuner_r82xx.c -o out/osx-x86_64/tuner_r82xx.o&quot;" ContinueOnError="false"/>
-    <Exec Command="$(BashExe) -c &quot;$(ENV) x86_64-apple-darwin15-clang $(CPPFLAGS) $(CFLAGS) -Wno-unused-function -Wno-unused-variable -c depends/rtl-sdr/src/convenience/convenience.c -o out/osx-x86_64/convenience.o&quot;" ContinueOnError="false"/>
-    <Exec Command="$(BashExe) -c &quot;$(ENV) x86_64-apple-darwin15-clang $(CPPFLAGS) $(CFLAGS) -Wno-unused-function -Wno-unused-variable -c depends/rtl-sdr/src/getopt/getopt.c -o out/osx-x86_64/getopt.o&quot;" ContinueOnError="false"/>
-    <Exec Command="$(BashExe) -c &quot;$(ENV) x86_64-apple-darwin15-clang $(CPPFLAGS) $(CFLAGS) -Wno-unused-function -Wno-unused-variable -c depends/rtl-sdr/src/rtl_test.c -o out/osx-x86_64/rtl_test.o&quot;" ContinueOnError="false"/>
-    <Exec Command="$(BashExe) -c &quot;$(ENV) x86_64-apple-darwin15-clang++ $(CPPFLAGS) $(CXXFLAGS) -c depends/softfm/Filter.cc -o out/osx-x86_64/Filter.o&quot;" ContinueOnError="false"/>
-    <Exec Command="$(BashExe) -c &quot;$(ENV) x86_64-apple-darwin15-clang++ $(CPPFLAGS) $(CXXFLAGS) -c depends/softfm/FmDecode.cc -o out/osx-x86_64/FmDecode.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;$(ENV) x86_64-apple-darwin15-clang $(CPPFLAGS) $(CFLAGS) -c depends/rtl-sdr/src/librtlsdr.c -o out/osx-x86_64/librtlsdr.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;$(ENV) x86_64-apple-darwin15-clang $(CPPFLAGS) $(CFLAGS) -c depends/rtl-sdr/src/tuner_e4k.c -o out/osx-x86_64/tuner_e4k.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;$(ENV) x86_64-apple-darwin15-clang $(CPPFLAGS) $(CFLAGS) -c depends/rtl-sdr/src/tuner_fc0012.c -o out/osx-x86_64/tuner_fc0012.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;$(ENV) x86_64-apple-darwin15-clang $(CPPFLAGS) $(CFLAGS) -c depends/rtl-sdr/src/tuner_fc0013.c -o out/osx-x86_64/tuner_fc0013.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;$(ENV) x86_64-apple-darwin15-clang $(CPPFLAGS) $(CFLAGS) -c depends/rtl-sdr/src/tuner_fc2580.c -o out/osx-x86_64/tuner_fc2580.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;$(ENV) x86_64-apple-darwin15-clang $(CPPFLAGS) $(CFLAGS) -c depends/rtl-sdr/src/tuner_r82xx.c -o out/osx-x86_64/tuner_r82xx.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;$(ENV) x86_64-apple-darwin15-clang $(CPPFLAGS) $(CFLAGS) -c depends/rtl-sdr/src/convenience/convenience.c -o out/osx-x86_64/convenience.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;$(ENV) x86_64-apple-darwin15-clang $(CPPFLAGS) $(CFLAGS) -c depends/rtl-sdr/src/getopt/getopt.c -o out/osx-x86_64/getopt.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;$(ENV) x86_64-apple-darwin15-clang $(CPPFLAGS) $(CFLAGS) -c depends/rtl-sdr/src/rtl_test.c -o out/osx-x86_64/rtl_test.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;$(ENV) x86_64-apple-darwin15-clang++ $(CPPFLAGS) $(CXXFLAGS) -c src/fmdsp/agc.cpp -o out/osx-x86_64/agc.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;$(ENV) x86_64-apple-darwin15-clang++ $(CPPFLAGS) $(CXXFLAGS) -c src/fmdsp/amdemod.cpp -o out/osx-x86_64/amdemod.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;$(ENV) x86_64-apple-darwin15-clang++ $(CPPFLAGS) $(CXXFLAGS) -c src/fmdsp/datamodifier.cpp -o out/osx-x86_64/datamodifier.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;$(ENV) x86_64-apple-darwin15-clang++ $(CPPFLAGS) $(CXXFLAGS) -c src/fmdsp/demodulator.cpp -o out/osx-x86_64/demodulator.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;$(ENV) x86_64-apple-darwin15-clang++ $(CPPFLAGS) $(CXXFLAGS) -c src/fmdsp/downconvert.cpp -o out/osx-x86_64/downconvert.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;$(ENV) x86_64-apple-darwin15-clang++ $(CPPFLAGS) $(CXXFLAGS) -c src/fmdsp/fastfir.cpp -o out/osx-x86_64/fastfir.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;$(ENV) x86_64-apple-darwin15-clang++ $(CPPFLAGS) $(CXXFLAGS) -c src/fmdsp/fft.cpp -o out/osx-x86_64/fft.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;$(ENV) x86_64-apple-darwin15-clang++ $(CPPFLAGS) $(CXXFLAGS) -c src/fmdsp/fir.cpp -o out/osx-x86_64/fir.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;$(ENV) x86_64-apple-darwin15-clang++ $(CPPFLAGS) $(CXXFLAGS) -c src/fmdsp/fmdemod.cpp -o out/osx-x86_64/fmdemod.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;$(ENV) x86_64-apple-darwin15-clang++ $(CPPFLAGS) $(CXXFLAGS) -c src/fmdsp/fractresampler.cpp -o out/osx-x86_64/fractresampler.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;$(ENV) x86_64-apple-darwin15-clang++ $(CPPFLAGS) $(CXXFLAGS) -c src/fmdsp/fskdemod.cpp -o out/osx-x86_64/fskdemod.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;$(ENV) x86_64-apple-darwin15-clang++ $(CPPFLAGS) $(CXXFLAGS) -c src/fmdsp/fskmod.cpp -o out/osx-x86_64/fskmod.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;$(ENV) x86_64-apple-darwin15-clang++ $(CPPFLAGS) $(CXXFLAGS) -c src/fmdsp/iir.cpp -o out/osx-x86_64/iir.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;$(ENV) x86_64-apple-darwin15-clang++ $(CPPFLAGS) $(CXXFLAGS) -c src/fmdsp/noiseproc.cpp -o out/osx-x86_64/noiseproc.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;$(ENV) x86_64-apple-darwin15-clang++ $(CPPFLAGS) $(CXXFLAGS) -c src/fmdsp/pskdemod.cpp -o out/osx-x86_64/pskdemod.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;$(ENV) x86_64-apple-darwin15-clang++ $(CPPFLAGS) $(CXXFLAGS) -c src/fmdsp/pskmod.cpp -o out/osx-x86_64/pskmod.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;$(ENV) x86_64-apple-darwin15-clang++ $(CPPFLAGS) $(CXXFLAGS) -c src/fmdsp/samdemod.cpp -o out/osx-x86_64/samdemod.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;$(ENV) x86_64-apple-darwin15-clang++ $(CPPFLAGS) $(CXXFLAGS) -c src/fmdsp/smeter.cpp -o out/osx-x86_64/smeter.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;$(ENV) x86_64-apple-darwin15-clang++ $(CPPFLAGS) $(CXXFLAGS) -c src/fmdsp/ssbdemod.cpp -o out/osx-x86_64/ssbdemod.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;$(ENV) x86_64-apple-darwin15-clang++ $(CPPFLAGS) $(CXXFLAGS) -c src/fmdsp/wfmdemod.cpp -o out/osx-x86_64/wfmdemod.o&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;$(ENV) x86_64-apple-darwin15-clang++ $(CPPFLAGS) $(CXXFLAGS) -c src/fmdsp/wfmmod.cpp -o out/osx-x86_64/wfmmod.o&quot;" ContinueOnError="false"/>
     <Exec Command="$(BashExe) -c &quot;$(ENV) x86_64-apple-darwin15-clang++ $(CPPFLAGS) $(CXXFLAGS) -c src/fmstream.cpp -o out/osx-x86_64/fmstream.o&quot;" ContinueOnError="false"/>
     <Exec Command="$(BashExe) -c &quot;$(ENV) x86_64-apple-darwin15-clang++ $(CPPFLAGS) $(CXXFLAGS) -c src/libusb_exception.cpp -o out/osx-x86_64/libusb_exception.o&quot;" ContinueOnError="false"/>
     <Exec Command="$(BashExe) -c &quot;$(ENV) x86_64-apple-darwin15-clang++ $(CPPFLAGS) $(CXXFLAGS) -c src/pvr.cpp -o out/osx-x86_64/pvr.o&quot;" ContinueOnError="false"/>
     <Exec Command="$(BashExe) -c &quot;$(ENV) x86_64-apple-darwin15-clang++ $(CPPFLAGS) $(CXXFLAGS) -c src/rtldevice.cpp -o out/osx-x86_64/rtldevice.o&quot;" ContinueOnError="false"/>
-    <Exec Command="$(BashExe) -c &quot;$(ENV) x86_64-apple-darwin15-clang++ $(CPPFLAGS) $(CXXFLAGS) -dynamiclib -exported_symbols_list exportlist/exportlist.osx out/osx-x86_64/Filter.o out/osx-x86_64/FmDecode.o out/osx-x86_64/fmstream.o out/osx-x86_64/librtlsdr.o out/osx-x86_64/libusb_exception.o out/osx-x86_64/pvr.o out/osx-x86_64/rtldevice.o out/osx-x86_64/tuner_e4k.o out/osx-x86_64/tuner_fc0012.o out/osx-x86_64/tuner_fc0013.o out/osx-x86_64/tuner_fc2580.o out/osx-x86_64/tuner_r82xx.o depends/libusb/osx-x86_64/lib/libusb-1.0.a -ldl -lpthread -lobjc -framework CoreFoundation -framework IOKit -o out/osx-x86_64/zuki.pvr.rtlradio.dylib&quot;" ContinueOnError="false"/>
-    <Exec Command="$(BashExe) -c &quot;$(ENV) x86_64-apple-darwin15-clang++ $(CPPFLAGS) $(CXXFLAGS) out/osx-x86_64/librtlsdr.o out/osx-x86_64/tuner_e4k.o out/osx-x86_64/tuner_fc0012.o out/osx-x86_64/tuner_fc0013.o out/osx-x86_64/tuner_fc2580.o out/osx-x86_64/tuner_r82xx.o out/osx-x86_64/convenience.o out/osx-x86_64/getopt.o out/osx-x86_64/rtl_test.o  depends/libusb/osx-x86_64/lib/libusb-1.0.a -ldl -lpthread -lobjc -framework CoreFoundation -framework IOKit -o out/osx-x86_64/rtl_test&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;$(ENV) x86_64-apple-darwin15-clang++ $(CPPFLAGS) $(CXXFLAGS) -dynamiclib -exported_symbols_list exportlist/exportlist.osx out/osx-x86_64/agc.o out/osx-x86_64/amdemod.o out/osx-x86_64/datamodifier.o out/osx-x86_64/demodulator.o out/osx-x86_64/downconvert.o out/osx-x86_64/fastfir.o out/osx-x86_64/fft.o out/osx-x86_64/fir.o out/osx-x86_64/fmdemod.o out/osx-x86_64/fractresampler.o out/osx-x86_64/fskdemod.o out/osx-x86_64/fskmod.o out/osx-x86_64/iir.o out/osx-x86_64/noiseproc.o out/osx-x86_64/pskdemod.o out/osx-x86_64/pskmod.o out/osx-x86_64/samdemod.o out/osx-x86_64/smeter.o out/osx-x86_64/ssbdemod.o out/osx-x86_64/wfmdemod.o out/osx-x86_64/wfmmod.o out/osx-x86_64/fmstream.o out/osx-x86_64/librtlsdr.o out/osx-x86_64/libusb_exception.o out/osx-x86_64/pvr.o out/osx-x86_64/rtldevice.o out/osx-x86_64/tuner_e4k.o out/osx-x86_64/tuner_fc0012.o out/osx-x86_64/tuner_fc0013.o out/osx-x86_64/tuner_fc2580.o out/osx-x86_64/tuner_r82xx.o depends/libusb/osx-x86_64/lib/libusb-1.0.a -ldl -lpthread -lobjc -framework CoreFoundation -framework IOKit -o out/osx-x86_64/zuki.pvr.rtlradio.dylib&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;$(ENV) x86_64-apple-darwin15-clang++ $(CPPFLAGS) $(CXXFLAGS) out/osx-x86_64/librtlsdr.o out/osx-x86_64/tuner_e4k.o out/osx-x86_64/tuner_fc0012.o out/osx-x86_64/tuner_fc0013.o out/osx-x86_64/tuner_fc2580.o out/osx-x86_64/tuner_r82xx.o out/osx-x86_64/convenience.o out/osx-x86_64/getopt.o out/osx-x86_64/rtl_test.o depends/libusb/osx-x86_64/lib/libusb-1.0.a -ldl -lpthread -lobjc -framework CoreFoundation -framework IOKit -o out/osx-x86_64/rtl_test&quot;" ContinueOnError="false"/>
     <Exec Command="TextTransform.exe template\addon.xml.tt -out tmp\addon-osx-x86_64.xml -a !!platform!osx-x86_64 -a !!libraryplatform!osx -a !!libraryname!zuki.pvr.rtlradio.dylib -a !!changelogtxt!pvr.rtlradio\changelog.txt -a &quot;!!displayversion!$(DisplayVersion)&quot; -a &quot;!!repomanifest!osx-x86_64.xml.gz&quot;" ContinueOnError="false"/>
     <XmlPeek XmlInputPath="tmp\addon-osx-x86_64.xml" Query="/addon/@version">
       <Output TaskParameter="Result" PropertyName="PeekedDisplayVersion"/>

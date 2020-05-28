@@ -34,7 +34,7 @@
 // fmstream::DEFAULT_DEVICE_BLOCK_SIZE
 //
 // Default device block size
-size_t const fmstream::DEFAULT_DEVICE_BLOCK_SIZE = (32 KiB);
+size_t const fmstream::DEFAULT_DEVICE_BLOCK_SIZE = (16 KiB);
 
 // fmstream::DEFAULT_DEVICE_SAMPLE_RATE
 //
@@ -54,7 +54,7 @@ double const fmstream::DEFAULT_OUTPUT_SAMPLE_RATE = (48.0 KHz);
 // fmstream::DEFAULT_RINGBUFFER_SIZE
 //
 // Default ring buffer size
-size_t const fmstream::DEFAULT_RINGBUFFER_SIZE = (1 MiB);
+size_t const fmstream::DEFAULT_RINGBUFFER_SIZE = (8 MiB);
 
 //---------------------------------------------------------------------------
 // fmstream Constructor (private)
@@ -74,29 +74,57 @@ fmstream::fmstream(struct streamparams const& params) : m_params(params),
 	m_buffer = std::unique_ptr<uint8_t[]>(new uint8_t[m_buffersize]);
 	if(!m_buffer) throw std::bad_alloc();
 
-	// Intentionally tune at a higher frequency to avoid DC offset
-	uint32_t devicefreq = params.frequency + static_cast<uint32_t>(0.25 * m_samplerate);
+	// TODO: "DC offset" tuning?
 
 	// Create and initialize the RTL-SDR device instance
 	m_device = rtldevice::create(rtldevice::DEFAULT_DEVICE_INDEX);
-	uint32_t sample_rate = m_device->set_sample_rate(m_samplerate);
-	m_device->set_bandwidth(250 KHz);
-	uint32_t frequency = m_device->set_center_frequency(devicefreq);
-	
+	uint32_t samplerate = m_device->set_sample_rate(m_samplerate);
+	/*uint32_t frequency =*/ m_device->set_center_frequency(params.frequency);
+	m_device->set_bandwidth(200 KHz);
+
 	// Adjust the device gain as specified by the stream parameters
-	m_device->set_automatic_gain_control(params.agc);
-	if(params.agc == false) m_device->set_gain(params.gain * 10);
+	// TODO: do I want to use these or not?  Probably manual gain at least?
+	//m_device->set_automatic_gain_control(params.agc);
+	//if(params.agc == false) m_device->set_gain(params.gain * 10);
 
-	// Retrieve the actual device sample rate and configure downsample/half bandwidth
-	double devicerate = static_cast<double>(sample_rate);
-	unsigned int downsample = std::max(1, static_cast<int>(devicerate / 215.0e3));
-	double pcmbandwidth = std::min(FmDecoder::default_bandwidth_pcm, 0.45 * m_pcmsamplerate);
+	// Create and initialize the CDemodulator instance
+	tDemodInfo t{};
 
-	// Create and initialize the FmDecoder instance using calculated adjustments
-	m_decoder = std::unique_ptr<FmDecoder>(new FmDecoder(devicerate,
-		static_cast<double>(m_params.frequency - frequency), m_pcmsamplerate,
-		true, FmDecoder::default_deemphasis, FmDecoder::default_bandwidth_if, 
-		FmDecoder::default_freq_dev, pcmbandwidth, downsample));
+	// FIXED SETTINGS
+	//
+	t.txt.assign("WFM");
+	t.HiCutmin = 100000;
+	t.HiCutmax = 100000;
+	t.LowCutmax = -100000;
+	t.LowCutmin = -100000;
+	t.Symetric = true;
+	t.DefFreqClickResolution = 100000;
+	t.FilterClickResolution = 10000;
+
+	// VARIABLE SETTINGS
+	//
+	// TODO: These should come in via configuration parameters
+	t.HiCut = 5000;
+	t.LowCut = -5000;
+	t.FreqClickResolution = t.DefFreqClickResolution;
+	t.Offset = 0;
+	t.SquelchValue = -160;
+	t.AgcSlope = 0;
+	t.AgcThresh = -100;
+	t.AgcManualGain = 30;
+	t.AgcDecay = 200;
+	t.AgcOn = true;
+	t.AgcHangOn = false;
+
+	m_demodulator = std::unique_ptr<CDemodulator>(new CDemodulator());
+	m_demodulator->SetInputSampleRate(static_cast<TYPEREAL>(samplerate));
+	m_demodulator->SetDemod(DEMOD_WFM, t);
+	//m_demodulator->SetDemodFreq(frequency);	// <-- TODO: What does this do?
+	m_demodulator->SetUSFmVersion(true);
+
+	// TODO: How big does this really need to be?
+	m_resampler = std::unique_ptr<CFractResampler>(new CFractResampler());
+	m_resampler->Init(512000);
 
 	// Create a worker thread on which to perform the transfer operations
 	scalar_condition<bool> started{ false };
@@ -199,8 +227,11 @@ DemuxPacket* fmstream::demuxread(void)
 	size_t				available = 0;			// Available bytes to read
 	bool				stopped = false;		// Flag if data transfer has stopped
 
-	// Determine the minimum allowable read size to generate the demux packet (2 byte alignment)
-	size_t const minreadsize = align::down(m_blocksize / 2, 2);
+	// Use a constant read size of 20K (10Khz worth of I/Q samples), the demodulator
+	// is designed to work with about 1/10th of a second of data, and this typically
+	// provides exactly 480 audio samples which is a good match for 48000Hz PCM output
+	// TODO: Does 9984 or 10000 work better here?
+	size_t const minreadsize = 9984 * 2;
 
 	// Wait up to 10ms for there to be available data in the ring buffer
 	std::unique_lock<std::mutex> lock(m_lock);
@@ -229,17 +260,20 @@ DemuxPacket* fmstream::demuxread(void)
 		available = align::down((tail > head) ? (m_buffersize - tail) + head : head - tail, 2);
 	}
 
-	// If there is still no data to be processed, return an empty demuxer packet
-	if(available == 0) return m_params.demuxalloc(0);
+	// If there is still not enough data to be processed, return an empty demuxer packet
+	if(available < minreadsize) return m_params.demuxalloc(0);
 
-	// Convert the raw data into a vector<> of IQSamples for FmDecoder to process
+	// Convert the raw data into a vector<> of I/Q samples for the demodulator
 	assert(available % 2 == 0);
-	IQSampleVector samples(available / 2);
+	available = std::min(available, minreadsize);
+
+	std::vector<TYPECPX> samples(available / 2);
 	for(size_t index = 0; index < samples.size(); index++) {
 
-		int32_t real = m_buffer[tail];
-		int32_t imaginary = m_buffer[tail + 1];
-		samples[index] = IQSample((real - 128) / IQSample::value_type(128), (imaginary - 128) / IQSample::value_type(128));
+		// TODO: Performance here.  Demodulator seems to work just as well without converting the
+		// -1/+1 value to -32767/+32767 and the double cast may be too much for slow systems
+		samples[index].re = ((static_cast<double>(m_buffer[tail]) - 127.5) / 127.5) * 32767.0;
+		samples[index].im = ((static_cast<double>(m_buffer[tail + 1]) - 127.5) / 127.5) * 32767.0;
 
 		tail += 2;								// Increment new tail position
 		if(tail >= m_buffersize) tail = 0;		// Handle buffer rollover
@@ -248,24 +282,29 @@ DemuxPacket* fmstream::demuxread(void)
 	// Modify the atomic<> tail position to mark the ring buffer space as free
 	m_buffertail.store(tail);
 
-	SampleVector audio;							// vector<> of output audio samples
-	m_decoder->process(samples, audio);			// Decode the input I/Q data
+	// Process the raw I/Q data, the original sample vector<> can be reused/overwritten as it's processed
+	int audiopackets = m_demodulator->ProcessData(static_cast<int>(samples.size()), samples.data(), samples.data());
 
 	// Determine the size of the demuxer packet data and allocate it
-	int size = static_cast<int>(audio.size() * sizeof(SampleVector::value_type));
-	DemuxPacket* packet = m_params.demuxalloc(size);
+	int packetsize = audiopackets * sizeof(TYPESTEREO16);
+	DemuxPacket* packet = m_params.demuxalloc(packetsize);
 	if(packet == nullptr) return nullptr;
 
-	// Calculate the duration of the packet in microseconds
-	double duration = ((static_cast<double>(audio.size() / 2) / m_pcmsamplerate) US);
+	// Resample the audio data directly into the packet buffer
+	// TODO: Gain argument - should always be 1.0?
+	// TODO: Use constant for 48000.0
+	int stereopackets = m_resampler->Resample(audiopackets, m_demodulator->GetOutputRate() / 48000.0, samples.data(),
+		reinterpret_cast<TYPESTEREO16*>(packet->pData), 1.0);
 
-	packet->iStreamId = 1;						// Audio data stream identifier
-	packet->iSize = size;						// Audio data length
-	packet->duration = duration;				// Duration in microseconds
-	packet->pts = m_pts;						// Program time stamp
+	// Calcuate the duration of the demultiplexer packet, in microseconds
+	double duration = ((stereopackets / m_pcmsamplerate) US);
 
-	// Copy the audio output data from the vector<> into the demux packet
-	memcpy(packet->pData, audio.data(), size);
+	// Set up the demultiplexer packet with the proper packet size and duration
+	// TODO: Use constant for stream ID
+	packet->iStreamId = 1;
+	packet->iSize = stereopackets * sizeof(TYPESTEREO16);
+	packet->duration = duration;
+	packet->pts = m_pts;
 
 	// Increment the program time stamp value based on the calculated duration
 	m_pts += duration;

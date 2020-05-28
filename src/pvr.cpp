@@ -1206,7 +1206,8 @@ PVR_ERROR GetStreamProperties(PVR_STREAM_PROPERTIES* properties)
 
 	// AUDIO STREAM
 	//
-	xbmc_codec_t codecid = g_pvr->GetCodecByName("pcm_f64le");
+	xbmc_codec_t codecid = g_pvr->GetCodecByName("pcm_s16le");
+	// TODO: Verify iBitsPerSample - should it be 16 or 32?
 	if((g_pvrstream) && (codecid.codec_type == XBMC_CODEC_TYPE_AUDIO)) {
 
 		properties->stream[0].iPID = 1;
@@ -1214,7 +1215,7 @@ PVR_ERROR GetStreamProperties(PVR_STREAM_PROPERTIES* properties)
 		properties->stream[0].iCodecId = codecid.codec_id;
 		properties->stream[0].iChannels = 2;
 		properties->stream[0].iSampleRate = g_pvrstream->samplerate();
-		properties->stream[0].iBitsPerSample = 64;
+		properties->stream[0].iBitsPerSample = 16;
 		properties->stream[0].iBitRate = properties->stream[0].iSampleRate * properties->stream[0].iChannels * properties->stream[0].iBitsPerSample;
 		properties->stream[0].strLanguage[0] = 0;
 		properties->stream[0].strLanguage[1] = 0;

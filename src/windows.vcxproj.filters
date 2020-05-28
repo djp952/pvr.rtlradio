@@ -42,16 +42,11 @@
     <Filter Include="External Libraries\rtl-sdr\Source Files">
       <UniqueIdentifier>{98748055-eaa8-490c-bfd9-0a3e3ef969c8}</UniqueIdentifier>
     </Filter>
-    <Filter Include="External Libraries\softfm">
-      <UniqueIdentifier>{1d042c6d-f5d8-41df-843b-57251b5de425}</UniqueIdentifier>
+    <Filter Include="Source Files\fmdsp">
+      <UniqueIdentifier>{80025ac2-f586-42d0-b4d2-0cb43c338e2b}</UniqueIdentifier>
     </Filter>
-    <Filter Include="External Libraries\softfm\Header Files">
-      <UniqueIdentifier>{afcc663c-aaf7-49fc-a16f-d0c1227ac008}</UniqueIdentifier>
-      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
-    </Filter>
-    <Filter Include="External Libraries\softfm\Source Files">
-      <UniqueIdentifier>{3b85fa7f-a710-49fb-9007-361ba3a09b56}</UniqueIdentifier>
-      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    <Filter Include="Header Files\fmdsp">
+      <UniqueIdentifier>{17379ab4-8fe3-4d04-a8e1-d3f3535ac13f}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -118,15 +113,6 @@
     <ClInclude Include="pvrstream.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\depends\softfm\Filter.h">
-      <Filter>External Libraries\softfm\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\depends\softfm\FmDecode.h">
-      <Filter>External Libraries\softfm\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\depends\softfm\SoftFM.h">
-      <Filter>External Libraries\softfm\Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="scalar_condition.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -135,6 +121,84 @@
     </ClInclude>
     <ClInclude Include="streamparams.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="fmdsp\demodulator.h">
+      <Filter>Header Files\fmdsp</Filter>
+    </ClInclude>
+    <ClInclude Include="fmdsp\fractresampler.h">
+      <Filter>Header Files\fmdsp</Filter>
+    </ClInclude>
+    <ClInclude Include="fmdsp\agc.h">
+      <Filter>Header Files\fmdsp</Filter>
+    </ClInclude>
+    <ClInclude Include="fmdsp\amdemod.h">
+      <Filter>Header Files\fmdsp</Filter>
+    </ClInclude>
+    <ClInclude Include="fmdsp\downconvert.h">
+      <Filter>Header Files\fmdsp</Filter>
+    </ClInclude>
+    <ClInclude Include="fmdsp\fastfir.h">
+      <Filter>Header Files\fmdsp</Filter>
+    </ClInclude>
+    <ClInclude Include="fmdsp\fmdemod.h">
+      <Filter>Header Files\fmdsp</Filter>
+    </ClInclude>
+    <ClInclude Include="fmdsp\fskdemod.h">
+      <Filter>Header Files\fmdsp</Filter>
+    </ClInclude>
+    <ClInclude Include="fmdsp\pskdemod.h">
+      <Filter>Header Files\fmdsp</Filter>
+    </ClInclude>
+    <ClInclude Include="fmdsp\samdemod.h">
+      <Filter>Header Files\fmdsp</Filter>
+    </ClInclude>
+    <ClInclude Include="fmdsp\smeter.h">
+      <Filter>Header Files\fmdsp</Filter>
+    </ClInclude>
+    <ClInclude Include="fmdsp\ssbdemod.h">
+      <Filter>Header Files\fmdsp</Filter>
+    </ClInclude>
+    <ClInclude Include="fmdsp\wfmmod.h">
+      <Filter>Header Files\fmdsp</Filter>
+    </ClInclude>
+    <ClInclude Include="fmdsp\datatypes.h">
+      <Filter>Header Files\fmdsp</Filter>
+    </ClInclude>
+    <ClInclude Include="fmdsp\fir.h">
+      <Filter>Header Files\fmdsp</Filter>
+    </ClInclude>
+    <ClInclude Include="fmdsp\fft.h">
+      <Filter>Header Files\fmdsp</Filter>
+    </ClInclude>
+    <ClInclude Include="fmdsp\filtercoef.h">
+      <Filter>Header Files\fmdsp</Filter>
+    </ClInclude>
+    <ClInclude Include="fmdsp\iir.h">
+      <Filter>Header Files\fmdsp</Filter>
+    </ClInclude>
+    <ClInclude Include="fmdsp\psktables.h">
+      <Filter>Header Files\fmdsp</Filter>
+    </ClInclude>
+    <ClInclude Include="fmdsp\datamodifier.h">
+      <Filter>Header Files\fmdsp</Filter>
+    </ClInclude>
+    <ClInclude Include="fmdsp\fircoef.h">
+      <Filter>Header Files\fmdsp</Filter>
+    </ClInclude>
+    <ClInclude Include="fmdsp\fskmod.h">
+      <Filter>Header Files\fmdsp</Filter>
+    </ClInclude>
+    <ClInclude Include="fmdsp\noiseproc.h">
+      <Filter>Header Files\fmdsp</Filter>
+    </ClInclude>
+    <ClInclude Include="fmdsp\pskmod.h">
+      <Filter>Header Files\fmdsp</Filter>
+    </ClInclude>
+    <ClInclude Include="fmdsp\rbdsconstants.h">
+      <Filter>Header Files\fmdsp</Filter>
+    </ClInclude>
+    <ClInclude Include="fmdsp\wfmdemod.h">
+      <Filter>Header Files\fmdsp</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -204,11 +268,68 @@
     <ClCompile Include="fmstream.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\depends\softfm\Filter.cc">
-      <Filter>External Libraries\softfm\Source Files</Filter>
+    <ClCompile Include="fmdsp\demodulator.cpp">
+      <Filter>Source Files\fmdsp</Filter>
     </ClCompile>
-    <ClCompile Include="..\depends\softfm\FmDecode.cc">
-      <Filter>External Libraries\softfm\Source Files</Filter>
+    <ClCompile Include="fmdsp\fractresampler.cpp">
+      <Filter>Source Files\fmdsp</Filter>
+    </ClCompile>
+    <ClCompile Include="fmdsp\agc.cpp">
+      <Filter>Source Files\fmdsp</Filter>
+    </ClCompile>
+    <ClCompile Include="fmdsp\amdemod.cpp">
+      <Filter>Source Files\fmdsp</Filter>
+    </ClCompile>
+    <ClCompile Include="fmdsp\datamodifier.cpp">
+      <Filter>Source Files\fmdsp</Filter>
+    </ClCompile>
+    <ClCompile Include="fmdsp\downconvert.cpp">
+      <Filter>Source Files\fmdsp</Filter>
+    </ClCompile>
+    <ClCompile Include="fmdsp\fastfir.cpp">
+      <Filter>Source Files\fmdsp</Filter>
+    </ClCompile>
+    <ClCompile Include="fmdsp\fft.cpp">
+      <Filter>Source Files\fmdsp</Filter>
+    </ClCompile>
+    <ClCompile Include="fmdsp\fir.cpp">
+      <Filter>Source Files\fmdsp</Filter>
+    </ClCompile>
+    <ClCompile Include="fmdsp\fmdemod.cpp">
+      <Filter>Source Files\fmdsp</Filter>
+    </ClCompile>
+    <ClCompile Include="fmdsp\fskdemod.cpp">
+      <Filter>Source Files\fmdsp</Filter>
+    </ClCompile>
+    <ClCompile Include="fmdsp\fskmod.cpp">
+      <Filter>Source Files\fmdsp</Filter>
+    </ClCompile>
+    <ClCompile Include="fmdsp\iir.cpp">
+      <Filter>Source Files\fmdsp</Filter>
+    </ClCompile>
+    <ClCompile Include="fmdsp\noiseproc.cpp">
+      <Filter>Source Files\fmdsp</Filter>
+    </ClCompile>
+    <ClCompile Include="fmdsp\pskdemod.cpp">
+      <Filter>Source Files\fmdsp</Filter>
+    </ClCompile>
+    <ClCompile Include="fmdsp\pskmod.cpp">
+      <Filter>Source Files\fmdsp</Filter>
+    </ClCompile>
+    <ClCompile Include="fmdsp\samdemod.cpp">
+      <Filter>Source Files\fmdsp</Filter>
+    </ClCompile>
+    <ClCompile Include="fmdsp\smeter.cpp">
+      <Filter>Source Files\fmdsp</Filter>
+    </ClCompile>
+    <ClCompile Include="fmdsp\ssbdemod.cpp">
+      <Filter>Source Files\fmdsp</Filter>
+    </ClCompile>
+    <ClCompile Include="fmdsp\wfmdemod.cpp">
+      <Filter>Source Files\fmdsp</Filter>
+    </ClCompile>
+    <ClCompile Include="fmdsp\wfmmod.cpp">
+      <Filter>Source Files\fmdsp</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -32,7 +32,8 @@
 #include <mutex>
 #include <thread>
 
-#include <FmDecode.h>
+#include "fmdsp/demodulator.h"
+#include "fmdsp/fractresampler.h"
 
 #include "pvrstream.h"
 #include "rtldevice.h"
@@ -168,7 +169,8 @@ private:
 	struct streamparams	const			m_params;				// Stream parameters
 
 	std::unique_ptr<rtldevice>			m_device;				// RTL-SDR device instance
-	std::unique_ptr<FmDecoder>			m_decoder;				// SoftFM decoder instance
+	std::unique_ptr<CDemodulator>		m_demodulator;			// CuteSDR demodulator instance
+	std::unique_ptr<CFractResampler>	m_resampler;			// CuteSDR resampler instance
 
 	size_t const						m_blocksize;			// Device block size
 	uint32_t const						m_samplerate;			// Device sample rate

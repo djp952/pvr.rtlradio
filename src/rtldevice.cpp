@@ -462,7 +462,7 @@ int rtldevice::set_gain(int db) const
 
 	// Select the gain value that's closest to what has been requested
 	int nearest = validgains[0];
-	for(int index = 0; index < validgains.size(); index++)
+	for(size_t index = 0; index < validgains.size(); index++)
 		if(std::abs(db - validgains[index]) < std::abs(db - nearest)) nearest = validgains[index];
 
 	// Attempt to set the gain to the detected nearest gain value
