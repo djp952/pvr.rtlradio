@@ -76,7 +76,9 @@ private:
 	TYPEREAL m_Ratio;
 	TYPEREAL m_MagAveSum;
 
-	std::mutex m_Mutex;		//for keeping threads from stomping on each other
+#ifdef FMDSP_THREAD_SAFE
+	mutable std::mutex m_Mutex;		//for keeping threads from stomping on each other
+#endif
 
 };
 #endif //  NOISEPROC_H

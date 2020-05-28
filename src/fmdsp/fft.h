@@ -82,7 +82,9 @@ private:
 	TYPEREAL* m_pFFTAveBuf;
 	TYPEREAL* m_pFFTSumBuf;
 	TYPEREAL* m_pFFTInBuf;
-	std::mutex m_Mutex;		//for keeping threads from stomping on each other
+#ifdef FMDSP_THREAD_SAFE
+	mutable std::mutex m_Mutex;		//for keeping threads from stomping on each other
+#endif
 };
 
 #endif // FFT_H

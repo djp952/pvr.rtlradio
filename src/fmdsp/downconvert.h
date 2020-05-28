@@ -142,7 +142,9 @@ private:
 	TYPECPX m_Osc1;
 	TYPEREAL m_OscCos;
 	TYPEREAL m_OscSin;
+#ifdef FMDSP_THREAD_SAFE
 	mutable std::mutex m_Mutex;		//for keeping threads from stomping on each other
+#endif
 	//array of pointers for performing decimate by 2 stages
 	CDec2* m_pDecimatorPtrs[MAX_DECSTAGES];
 

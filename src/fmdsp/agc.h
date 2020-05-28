@@ -82,8 +82,9 @@ private:
 	int m_WindowSamples;
 	int m_HangTime;
 	int m_HangTimer;
-
-	std::mutex m_Mutex;		//for keeping threads from stomping on each other
+#ifdef FMDSP_THREAD_SAFE
+	mutable std::mutex m_Mutex;		//for keeping threads from stomping on each other
+#endif
 	TYPECPX m_SigDelayBuf[MAX_DELAY_BUF];
 	TYPEREAL m_MagBuf[MAX_DELAY_BUF];
 };

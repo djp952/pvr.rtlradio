@@ -119,7 +119,11 @@ TYPEREAL f = InRate;
 	{
 		m_InRate = InRate;
 		m_MaxBW = MaxBW;
+
+	#ifdef FMDSP_THREAD_SAFE
 		std::unique_lock<std::mutex> lock(m_Mutex);
+	#endif
+
 		DeleteFilters();
 		//loop until closest output rate is found and list of pointers to decimate by 2 stages is generated
 		while( (f > (m_MaxBW / HB51TAP_MAX) ) && (f > MIN_OUTPUT_RATE) )
@@ -162,7 +166,11 @@ TYPEREAL f = InRate;
 						new CHalfBandDecimateBy2(HB51TAP_LENGTH, HB51TAP_H);
 			f /= 2.0;
 		}
+
+	#ifdef FMDSP_THREAD_SAFE
 		lock.unlock();
+	#endif
+
 		m_OutputRate = f;
 		SetFrequency(m_NcoFreq);
 	}
@@ -183,7 +191,11 @@ TYPEREAL f = InRate;
 	{
 		m_InRate = InRate;
 		m_MaxBW = MaxBW;
+
+	#ifdef FMDSP_THREAD_SAFE
 		std::unique_lock<std::mutex> lock(m_Mutex);
+	#endif
+
 		DeleteFilters();
 		//loop until closest output rate is found and list of pointers to decimate by 2 stages is generated
 		while( (f > 400000.0)  )
@@ -192,7 +204,10 @@ TYPEREAL f = InRate;
 			f /= 2.0;
 		}
 		m_OutputRate = f;
+	#ifdef FMDSP_THREAD_SAFE
 		lock.unlock();
+	#endif
+
 		SetFrequency(m_NcoFreq);
 	}
 	return m_OutputRate;
@@ -214,8 +229,6 @@ int CDownConvert::ProcessData(int InLength, TYPECPX* pInData, TYPECPX* pOutData)
 int i,j;
 TYPECPX dtmp;
 TYPECPX Osc;
-
-//StartPerformance();
 
 #if (NCO_VCASM || NCO_GCCASM)
 TYPEREAL	dPhaseAcc = m_NcoTime;
@@ -274,17 +287,22 @@ TYPEREAL*	pdSinAns  = &dASMSin;
 	//until NULL pointer encountered designating end of chain
 	int n = InLength;
 	j = 0;
+
+#ifdef FMDSP_THREAD_SAFE
 	std::unique_lock<std::mutex> lock(m_Mutex);
+#endif
+
 	while(m_pDecimatorPtrs[j])
 	{
 		n = m_pDecimatorPtrs[j++]->DecBy2(n, pInData, pInData);
-//if(1==j)
-//g_pTestBench->DisplayData(n, 1.0, (TYPECPX*)pInData, 615385/2.0);
+
 	}
+#ifdef FMDSP_THREAD_SAFE
 	lock.unlock();
+#endif
 	for(i=0; i<n; i++)
 		pOutData[i] = pInData[i];
-//StopPerformance(InLength);
+
 	return n;
 }
 

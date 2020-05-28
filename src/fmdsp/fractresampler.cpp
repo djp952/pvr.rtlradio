@@ -45,7 +45,7 @@
 //////////////////////////////////////////////////////////////////////
 // Local defines
 //////////////////////////////////////////////////////////////////////
-#ifdef USE_DOUBLE_PRECISION
+#ifdef FMDSP_USE_DOUBLE_PRECISION
 #define SINC_PERIOD_PTS 10000	//number of points in sinc table between "zero crossings"
 								//smaller value increases noise floor
 #define SINC_PERIODS 28	//number of input sample periods("zero crossings"-1) in

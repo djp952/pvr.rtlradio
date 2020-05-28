@@ -199,8 +199,11 @@ int i;
 	{
 		return;
 	}
-//qDebug()<<"FLowCut="<<FLoCut<<"FHiCut="<<FHiCut<<"SampleRate="<<SampleRate;
-	m_Mutex.lock();
+
+#ifdef FMDSP_THREAD_SAFE
+	std::unique_lock<std::mutex> lock(m_Mutex);
+#endif
+
 	//calculate some normalized filter parameters
 	TYPEREAL nFL = FLoCut/SampleRate;
 	TYPEREAL nFH = FHiCut/SampleRate;
@@ -230,30 +233,8 @@ int i;
 		m_pFilterCoef[i].im = z * MSIN(nFs * x)/(TYPEREAL)CONV_FFT_SIZE;
 	}
 
-#if 0		//debug hack to write m_pFilterCoef to a file for analysis
-	QDir::setCurrent("d:/");
-	QFile File;
-	File.setFileName("lpcoef.txt");
-	if(File.open(QIODevice::WriteOnly))
-	{
-		qDebug()<<"file Opened OK";
-		char Buf[256];
-		for( i=0; i<CONV_FIR_SIZE; i++)
-		{
-			sprintf( Buf, "%19.12g %19.12g\r\n", (TYPEREAL)CONV_FFT_SIZE*m_pFilterCoef[i].re, (TYPEREAL)CONV_FFT_SIZE*m_pFilterCoef[i].im);
-			File.write(Buf);
-		}
-	}
-	else
-		qDebug()<<"file Failed to Open";
-
-#endif
 	//convert FIR coefficients to frequency domain by taking forward FFT
 	m_Fft.FwdFFT(m_pFilterCoef);
-	m_Mutex.unlock();
-
-
-
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -271,8 +252,11 @@ int len = InLength;
 int outpos = 0;
 	if( !InLength)	//if nothing to do
 		return 0;
-//StartPerformance();
-	m_Mutex.lock();
+
+#ifdef FMDSP_THREAD_SAFE
+	std::unique_lock<std::mutex> lock(m_Mutex);
+#endif
+
 	while(len--)
 	{
 		j = m_InBufInPos - (CONV_FFT_SIZE - CONV_FIR_SIZE + 1) ;
@@ -298,8 +282,7 @@ int outpos = 0;
 			m_InBufInPos = CONV_FIR_SIZE - 1;
 		}
 	}
-	m_Mutex.unlock();
-//StopPerformance(InLength);
+
 	return outpos;	//return number of output samples processed and placed in OutBuf
 }
 

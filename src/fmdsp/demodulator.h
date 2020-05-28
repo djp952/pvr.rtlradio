@@ -130,7 +130,9 @@ private:
 	CFastFIR m_FastFIR;
 	CAgc m_Agc;
 	CSMeter m_SMeter;
-	std::mutex m_Mutex;		//for keeping threads from stomping on each other
+#ifdef FMDSP_THREAD_SAFE
+	mutable std::mutex m_Mutex;		//for keeping threads from stomping on each other
+#endif
 	tDemodInfo m_DemodInfo;
 	TYPEREAL m_InputRate;
 	TYPEREAL m_DownConverterOutputRate;

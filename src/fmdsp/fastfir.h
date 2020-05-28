@@ -68,7 +68,9 @@ private:
 	TYPECPX* m_pFFTOverlapBuf;
 	TYPECPX* m_pFilterCoef;
 	TYPECPX* m_pFFTBuf;
-	std::mutex m_Mutex;		//for keeping threads from stomping on each other
+#ifdef FMDSP_THREAD_SAFE
+	mutable std::mutex m_Mutex;		//for keeping threads from stomping on each other
+#endif
 	CFft m_Fft;
 };
 #endif // FASTFIR_H

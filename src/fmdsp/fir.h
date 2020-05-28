@@ -76,7 +76,9 @@ private:
 	TYPEREAL m_QCoef[MAX_NUMCOEF*2];
 	TYPEREAL m_rZBuf[MAX_NUMCOEF];
 	TYPECPX m_cZBuf[MAX_NUMCOEF];
+#ifdef FMDSP_THREAD_SAFE
 	mutable std::mutex m_Mutex;		//for keeping threads from stomping on each other
+#endif
 };
 
 ////////////

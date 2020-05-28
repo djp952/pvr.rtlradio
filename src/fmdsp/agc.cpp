@@ -111,7 +111,9 @@ void CAgc::SetParameters(bool AgcOn,  bool UseHang, int Threshold, int ManualGai
 	{
 		return;		//just return if no parameter changed
 	}
-	m_Mutex.lock();
+#ifdef FMDSP_THREAD_SAFE
+	std::unique_lock<std::mutex> lock(m_Mutex);
+#endif
 	m_AgcOn = AgcOn;
 	m_UseHang = UseHang;
 	m_Threshold = Threshold;
@@ -160,8 +162,6 @@ void CAgc::SetParameters(bool AgcOn,  bool UseHang, int Threshold, int ManualGai
 	//clamp Delay samples within buffer limit
 	if(m_DelaySamples >= MAX_DELAY_BUF-1)
 		m_DelaySamples = MAX_DELAY_BUF-1;
-
-	m_Mutex.unlock();
 }
 
 
@@ -174,7 +174,11 @@ void CAgc::ProcessData(int Length, TYPECPX* pInData, TYPECPX* pOutData)
 TYPEREAL gain;
 TYPEREAL mag;
 TYPECPX delayedin;
-	m_Mutex.lock();
+
+#ifdef FMDSP_THREAD_SAFE
+	std::unique_lock<std::mutex> lock(m_Mutex);
+#endif
+
 	if(m_AgcOn)
 	{
 		for(int i=0; i<Length; i++)
@@ -282,7 +286,6 @@ TYPECPX delayedin;
 			pOutData[i].im = m_ManualAgcGain * pInData[i].im;
 		}
 	}
-	m_Mutex.unlock();
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -293,7 +296,11 @@ void CAgc::ProcessData(int Length, TYPEREAL* pInData, TYPEREAL* pOutData)
 TYPEREAL gain;
 TYPEREAL mag;
 TYPEREAL delayedin;
-	m_Mutex.lock();
+
+#ifdef FMDSP_THREAD_SAFE
+	std::unique_lock<std::mutex> lock(m_Mutex);
+#endif
+
 	if(m_AgcOn)
 	{
 		for(int i=0; i<Length; i++)
@@ -387,5 +394,4 @@ TYPEREAL delayedin;
 		for(int i=0; i<Length; i++)
 			pOutData[i] = m_ManualAgcGain * pInData[i];
 	}
-	m_Mutex.unlock();
 }

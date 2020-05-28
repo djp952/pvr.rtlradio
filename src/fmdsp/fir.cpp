@@ -74,7 +74,11 @@ void CFir::ProcessFilter(int InLength, TYPEREAL* InBuf, TYPEREAL* OutBuf)
 TYPEREAL acc;
 TYPEREAL* Zptr;
 const TYPEREAL* Hptr;
+
+#ifdef FMDSP_THREAD_SAFE
 	std::unique_lock<std::mutex> lock(m_Mutex);
+#endif
+
 	for(int i=0; i<InLength; i++)
 	{
 		m_rZBuf[m_State] = InBuf[i];
@@ -104,7 +108,10 @@ TYPECPX* Zptr;
 TYPEREAL* HIptr;
 TYPEREAL* HQptr;
 
+#ifdef FMDSP_THREAD_SAFE
 	std::unique_lock<std::mutex> lock(m_Mutex);
+#endif
+
 	for(int i=0; i<InLength; i++)
 	{
 		m_cZBuf[m_State] = InBuf[i];
@@ -140,7 +147,10 @@ TYPECPX* Zptr;
 TYPEREAL* HIptr;
 TYPEREAL* HQptr;
 
-std::unique_lock<std::mutex> lock(m_Mutex);
+#ifdef FMDSP_THREAD_SAFE
+	std::unique_lock<std::mutex> lock(m_Mutex);
+#endif
+
 	for(int i=0; i<InLength; i++)
 	{
 		m_cZBuf[m_State].re = InBuf[i];
@@ -167,7 +177,10 @@ std::unique_lock<std::mutex> lock(m_Mutex);
 /////////////////////////////////////////////////////////////////////////////////
 void CFir::InitConstFir( int NumTaps, const TYPEREAL* pCoef, TYPEREAL Fsamprate)
 {
+#ifdef FMDSP_THREAD_SAFE
 	std::unique_lock<std::mutex> lock(m_Mutex);
+#endif
+
 	m_SampleRate = Fsamprate;
 	if(NumTaps>MAX_NUMCOEF)
 		m_NumTaps = MAX_NUMCOEF;
@@ -193,7 +206,10 @@ void CFir::InitConstFir( int NumTaps, const TYPEREAL* pCoef, TYPEREAL Fsamprate)
 /////////////////////////////////////////////////////////////////////////////////
 void CFir::InitConstFir( int NumTaps, const TYPEREAL* pICoef, const TYPEREAL* pQCoef, TYPEREAL Fsamprate)
 {
+#ifdef FMDSP_THREAD_SAFE
 	std::unique_lock<std::mutex> lock(m_Mutex);
+#endif
+
 	m_SampleRate = Fsamprate;
 	if(NumTaps>MAX_NUMCOEF)
 		m_NumTaps = MAX_NUMCOEF;
@@ -237,7 +253,11 @@ int CFir::InitLPFilter(int NumTaps, TYPEREAL Scale, TYPEREAL Astop, TYPEREAL Fpa
 {
 int n;
 TYPEREAL Beta;
-std::unique_lock<std::mutex> lock(m_Mutex);
+
+#ifdef FMDSP_THREAD_SAFE
+	std::unique_lock<std::mutex> lock(m_Mutex);
+#endif
+
 	m_SampleRate = Fsamprate;
 	//create normalized frequency parameters
 	TYPEREAL normFpass = Fpass/Fsamprate;
@@ -345,7 +365,11 @@ int CFir::InitHPFilter(int NumTaps, TYPEREAL Scale, TYPEREAL Astop, TYPEREAL Fpa
 {
 int n;
 TYPEREAL Beta;
+
+#ifdef FMDSP_THREAD_SAFE
 	std::unique_lock<std::mutex> lock(m_Mutex);
+#endif
+
 	m_SampleRate = Fsamprate;
 	//create normalized frequency parameters
 	TYPEREAL normFpass = Fpass/Fsamprate;

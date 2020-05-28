@@ -122,7 +122,11 @@ void CFft::SetFFTParams( qint32 size,
 qint32 i;
 	if(size==0)
 		return;
-	m_Mutex.lock();
+
+#ifdef FMDSP_THREAD_SAFE
+	std::unique_lock<std::mutex> lock(m_Mutex);
+#endif
+
 	m_BinMin = 0;		//force recalculation of plot variables
 	m_BinMax = 0;
 	m_StartFreq = 0;
@@ -237,7 +241,11 @@ TYPEREAL WindowGain;
 
 #endif
 	}
-	m_Mutex.unlock();
+
+#ifdef FMDSP_THREAD_SAFE
+	lock.unlock();
+#endif
+
 	ResetFFT();
 }
 
@@ -246,7 +254,10 @@ TYPEREAL WindowGain;
 ///////////////////////////////////////////////////////////////////
 void CFft::ResetFFT()
 {
-	m_Mutex.lock();
+#ifdef FMDSP_THREAD_SAFE
+	std::unique_lock<std::mutex> lock(m_Mutex);
+#endif
+
 	for(qint32 i=0; i<m_FFTSize;i++)
 	{
 		m_pFFTAveBuf[i] = 0.0;
@@ -254,7 +265,6 @@ void CFft::ResetFFT()
 	}
 	m_AveCount = 0;
 	m_TotalCount = 0;
-	m_Mutex.unlock();
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -267,7 +277,11 @@ qint32 CFft::PutInDisplayFFT(qint32 n, TYPECPX* InBuf)
 {
 qint32 i;
 	m_Overload = false;
-	m_Mutex.lock();
+
+#ifdef FMDSP_THREAD_SAFE
+	std::unique_lock<std::mutex> lock(m_Mutex);
+#endif
+
 	TYPEREAL dtmp1;
 	for(i=0; i<n; i++)
 	{
@@ -282,7 +296,7 @@ qint32 i;
 	//Calculate the complex FFT
 	bitrv2(m_FFTSize*2, m_pWorkArea + 2, m_pFFTInBuf);
 	CpxFFT(m_FFTSize*2, m_pFFTInBuf, m_pSinCosTbl);
-	m_Mutex.unlock();
+
 	return m_TotalCount;
 }
 
@@ -322,9 +336,10 @@ qint32 maxbin;
 TYPEREAL dBmaxOffset = MaxdB/10.0;
 TYPEREAL dBGainFactor = -10.0/(MaxdB-MindB);
 
-//qDebug()<<"maxoffset dbgaindfact "<<dBmaxOffset << dBGainFactor;
+#ifdef FMDSP_THREAD_SAFE
+	std::unique_lock<std::mutex> lock(m_Mutex);
+#endif
 
-	m_Mutex.lock();
 	if( (m_StartFreq != StartFreq) ||
 		(m_StopFreq != StopFreq) ||
 		(m_PlotWidth != MaxWidth) )
@@ -407,7 +422,7 @@ TYPEREAL dBGainFactor = -10.0/(MaxdB-MindB);
 			OutBuf[x] = y;
 		}
 	}
-	m_Mutex.unlock();
+
 	return m_Overload;
 }
 

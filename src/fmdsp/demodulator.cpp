@@ -148,7 +148,10 @@ void CDemodulator::SetInputSampleRate(TYPEREAL InputRate)
 //////////////////////////////////////////////////////////////////
 void CDemodulator::SetDemod(int Mode, tDemodInfo CurrentDemodInfo)
 {
-	m_Mutex.lock();
+#ifdef FMDSP_THREAD_SAFE
+	std::unique_lock<std::mutex> lock(m_Mutex);
+#endif
+
 	m_DemodInfo = CurrentDemodInfo;
 	if(m_DemodMode != Mode)	//do only if changes
 	{
@@ -219,7 +222,6 @@ void CDemodulator::SetDemod(int Mode, tDemodInfo CurrentDemodInfo)
 	//set input buffer limit so that decimated output is abt 10mSec or more of data
 	m_InBufLimit = static_cast<int>((m_DemodOutputRate/100.0) * m_InputRate/m_DemodOutputRate);	//process abt .01sec of output samples at a time
 	m_InBufLimit &= 0xFFFFFF00;	//keep modulo 256 since decimation is only in power of 2
-	m_Mutex.unlock();
 }
 
 //////////////////////////////////////////////////////////////////
@@ -245,7 +247,11 @@ int CDemodulator::ProcessData(int InLength, TYPECPX* pInData, TYPEREAL* pOutData
 {
 int ret = 0;
 bool SquelchState = false;
-	m_Mutex.lock();
+
+#ifdef FMDSP_THREAD_SAFE
+	std::unique_lock<std::mutex> lock(m_Mutex);
+#endif
+
 	for(int i=0; i<InLength; i++)
 	{	//place in demod buffer
 		m_pDemodInBuf[m_InBufPos++] = pInData[i];
@@ -315,7 +321,7 @@ bool SquelchState = false;
 			ret += n;
 		}
 	}
-	m_Mutex.unlock();
+
 	return ret;
 }
 
@@ -327,7 +333,11 @@ int CDemodulator::ProcessData(int InLength, TYPECPX* pInData, TYPECPX* pOutData)
 {
 int ret = 0;
 bool SquelchState = false;
-	m_Mutex.lock();
+
+#ifdef FMDSP_THREAD_SAFE
+	std::unique_lock<std::mutex> lock(m_Mutex);
+#endif
+
 	for(int i=0; i<InLength; i++)
 	{	//place in demod buffer
 		m_pDemodInBuf[m_InBufPos++] = pInData[i];
@@ -397,6 +407,6 @@ bool SquelchState = false;
 			ret += n;
 		}
 	}
-	m_Mutex.unlock();
+
 	return ret;
 }

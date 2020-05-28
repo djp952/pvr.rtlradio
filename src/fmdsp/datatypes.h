@@ -12,19 +12,20 @@
 #include <math.h>
 #include <stdint.h>
 
-//comment out to use single precision math
-#define USE_DOUBLE_PRECISION
+// uncomment to use single precision math
+#define FMDSP_USE_DOUBLE_PRECISION
 
-// TODO: Add something like CUTESDR_MULTITHREADED to eliminate the mutexes,
-// they aren't going to be necessary here
+// uncomment to enable thread safety mechanisms
+// #define FMDSP_THREAD_SAFE
 
+// Qt compatibility
+//
 typedef int8_t qint8;
 typedef int16_t qint16;
 typedef int32_t qint32;
 typedef uint8_t quint8;
 typedef uint16_t quint16;
 typedef uint32_t quint32;
-
 
 //define single or double precision reals and complex types
 typedef float tSReal;
@@ -91,7 +92,7 @@ typedef union
 	unsigned short all;
 }tBtoS;
 
-#ifdef USE_DOUBLE_PRECISION
+#ifdef FMDSP_USE_DOUBLE_PRECISION
  #define TYPEREAL tDReal
  #define TYPECPX	tDComplex
 #else
@@ -99,7 +100,7 @@ typedef union
  #define TYPECPX	tSComplex
 #endif
 
-#ifdef USE_DOUBLE_PRECISION
+#ifdef FMDSP_USE_DOUBLE_PRECISION
  #define MSIN(x) sin(x)
  #define MCOS(x) cos(x)
  #define MPOW(x,y) pow(x,y)

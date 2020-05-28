@@ -81,7 +81,11 @@ void CNoiseProc::SetupBlanker(bool On, TYPEREAL Threshold, TYPEREAL Width, TYPER
 	{
 		return;
 	}
-	m_Mutex.lock();
+
+#ifdef FMDSP_THREAD_SAFE
+	std::unique_lock<std::mutex> lock(m_Mutex);
+#endif
+
 	m_On = On;
 	m_Threshold = Threshold;
 	m_Width = Width;
@@ -112,8 +116,6 @@ void CNoiseProc::SetupBlanker(bool On, TYPEREAL Threshold, TYPEREAL Width, TYPER
 	}
 	for(int i=0; i<MAX_AVE ; i++)
 		m_MagBuf[i] = 0.0;
-
-	m_Mutex.unlock();
 }
 
 void CNoiseProc::ProcessBlanker(int InLength, TYPECPX* pInData, TYPECPX* pOutData)
@@ -124,8 +126,11 @@ TYPECPX oldest;
 	{
 		return;
 	}
-	m_Mutex.lock();
-//StartPerformance();
+
+#ifdef FMDSP_THREAD_SAFE
+	std::unique_lock<std::mutex> lock(m_Mutex);
+#endif
+
 	for(int i=0; i<InLength; i++)
 	{
 		newsamp = pInData[i];
@@ -167,6 +172,4 @@ m_TestBenchDataBuf[i].re = m_MagAveSum/m_Ratio;
 			pOutData[i] = oldest;
 		}
 	}
-	m_Mutex.unlock();
-//StopPerformance(InLength);
 }
