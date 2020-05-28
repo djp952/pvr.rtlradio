@@ -270,7 +270,7 @@ TYPEREAL Beta;
 	else if(Astop >= 50.0)
 		Beta = .1102 * (Astop - 8.71);
 	else
-		Beta = .5842 * MPOW( (Astop-20.96), 0.4) + .07886 * (Astop - 20.96);
+		Beta = .5842 * MPOW( (Astop-20.96), TYPEREAL(0.4)) + .07886 * (Astop - 20.96);
 
 	//Now Estimate number of filter taps required based on filter specs
 	m_NumTaps = static_cast<int>((Astop - 8.0) / (2.285*K_2PI*(normFstop - normFpass) ) + 1);
@@ -382,7 +382,7 @@ TYPEREAL Beta;
 	else if(Astop >= 50.0)
 		Beta = .1102 * (Astop - 8.71);
 	else
-		Beta = .5842 * MPOW( (Astop-20.96), 0.4) + .07886 * (Astop - 20.96);
+		Beta = .5842 * MPOW( (Astop-20.96), TYPEREAL(0.4)) + .07886 * (Astop - 20.96);
 
 	//Now Estimate number of filter taps required based on filter specs
 	m_NumTaps = static_cast<int>((Astop - 8.0) / (2.285*K_2PI*(normFpass - normFstop ) ) + 1);
@@ -507,7 +507,7 @@ TYPEREAL x2 = x/2.0;
 TYPEREAL sum = 1.0;
 TYPEREAL ds = 1.0;
 TYPEREAL di = 1.0;
-TYPEREAL errorlimit = 1e-9;
+TYPEREAL errorlimit = TYPEREAL(1e-9);
 TYPEREAL tmp;
 	do
 	{

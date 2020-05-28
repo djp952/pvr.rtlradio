@@ -272,8 +272,8 @@ DemuxPacket* fmstream::demuxread(void)
 
 		// TODO: Performance here.  Demodulator seems to work just as well without converting the
 		// -1/+1 value to -32767/+32767 and the double cast may be too much for slow systems
-		samples[index].re = ((static_cast<double>(m_buffer[tail]) - 127.5) / 127.5) * 32767.0;
-		samples[index].im = ((static_cast<double>(m_buffer[tail + 1]) - 127.5) / 127.5) * 32767.0;
+		samples[index].re = ((static_cast<TYPEREAL>(m_buffer[tail]) - TYPEREAL(127.5)) / TYPEREAL(127.5)) * TYPEREAL(32767.0);
+		samples[index].im = ((static_cast<TYPEREAL>(m_buffer[tail + 1]) - TYPEREAL(127.5)) / TYPEREAL(127.5)) * TYPEREAL(32767.0);
 
 		tail += 2;								// Increment new tail position
 		if(tail >= m_buffersize) tail = 0;		// Handle buffer rollover
@@ -293,7 +293,7 @@ DemuxPacket* fmstream::demuxread(void)
 	// Resample the audio data directly into the packet buffer
 	// TODO: Gain argument - should always be 1.0?
 	// TODO: Use constant for 48000.0
-	int stereopackets = m_resampler->Resample(audiopackets, m_demodulator->GetOutputRate() / 48000.0, samples.data(),
+	int stereopackets = m_resampler->Resample(audiopackets, m_demodulator->GetOutputRate() / TYPEREAL(48000.0), samples.data(),
 		reinterpret_cast<TYPESTEREO16*>(packet->pData), 1.0);
 
 	// Calcuate the duration of the demultiplexer packet, in microseconds

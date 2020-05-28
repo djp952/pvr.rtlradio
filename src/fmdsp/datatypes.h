@@ -12,8 +12,8 @@
 #include <math.h>
 #include <stdint.h>
 
-// uncomment to use single precision math
-#define FMDSP_USE_DOUBLE_PRECISION
+// uncomment to use double precision math
+// #define FMDSP_USE_DOUBLE_PRECISION
 
 // uncomment to enable thread safety mechanisms
 // #define FMDSP_THREAD_SAFE
@@ -130,11 +130,20 @@ typedef union
 #define TYPEMONO16 qint16
 
 //#define K_2PI (8.0*atan(1))	//maybe some compilers are't too smart to optimize out
+
+#ifdef FMDSP_USE_DOUBLE_PRECISION
 #define K_2PI (2.0 * 3.14159265358979323846)
 #define K_PI (3.14159265358979323846)
 #define K_PI4 (K_PI/4.0)
 #define K_PI2 (K_PI/2.0)
 #define K_3PI4 (3.0*K_PI4)
+#else
+#define K_2PI (2.0F * 3.14159265358979323846F)
+#define K_PI (3.14159265358979323846F)
+#define K_PI4 (K_PI/4.0F)
+#define K_PI2 (K_PI/2.0F)
+#define K_3PI4 (3.0F*K_PI4)
+#endif
 
 #ifndef NULL
 #define NULL 0
