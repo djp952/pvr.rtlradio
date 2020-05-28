@@ -119,7 +119,7 @@ public:
 
 	//access to WFM mode status
 	int GetStereoLock(int* pPilotLock){ if(m_pWFmDemod) return m_pWFmDemod->GetStereoLock(pPilotLock); else return false;}
-	int GetNextRdsGroupData(tRDS_GROUPS* pGroupData)
+	bool GetNextRdsGroupData(tRDS_GROUPS* pGroupData)
 	{
 		if(m_pWFmDemod) return m_pWFmDemod->GetNextRdsGroupData(pGroupData); else return false;
 	}

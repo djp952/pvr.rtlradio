@@ -15,6 +15,9 @@
 //comment out to use single precision math
 #define USE_DOUBLE_PRECISION
 
+// TODO: Add something like CUTESDR_MULTITHREADED to eliminate the mutexes,
+// they aren't going to be necessary here
+
 typedef int8_t qint8;
 typedef int16_t qint16;
 typedef int32_t qint32;

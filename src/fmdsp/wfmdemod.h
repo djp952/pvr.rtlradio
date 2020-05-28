@@ -58,7 +58,7 @@ public:
 	int ProcessData(int InLength, TYPECPX* pInData, TYPEREAL* pOutData);
 	TYPEREAL GetDemodRate(){return m_OutRate;}
 
-	int GetNextRdsGroupData(tRDS_GROUPS* pGroupData);
+	bool GetNextRdsGroupData(tRDS_GROUPS* pGroupData);
 	int GetStereoLock(int* pPilotLock);
 
 private:

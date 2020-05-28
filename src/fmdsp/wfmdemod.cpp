@@ -807,11 +807,11 @@ quint32 CWFmDemod::CheckBlock(quint32 SyndromeOffset, int UseFec)
 // Get next group data from RDS data queue.
 // Returns zero if queue is empty or null pointer passed or data has not changed
 /////////////////////////////////////////////////////////////////////////////////
-int CWFmDemod::GetNextRdsGroupData(tRDS_GROUPS* pGroupData)
+bool CWFmDemod::GetNextRdsGroupData(tRDS_GROUPS* pGroupData)
 {
 	if( (m_RdsQHead == m_RdsQTail) || (NULL == pGroupData) )
 	{
-		return 0;
+		return false;
 	}
 	pGroupData->BlockA = m_RdsGroupQueue[m_RdsQTail].BlockA;
 	pGroupData->BlockB = m_RdsGroupQueue[m_RdsQTail].BlockB;
