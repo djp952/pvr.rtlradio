@@ -167,8 +167,6 @@ private:
 	//-----------------------------------------------------------------------
 	// Member Variables
 
-	struct streamparams	const			m_params;				// Stream parameters
-
 	std::unique_ptr<rtldevice>			m_device;				// RTL-SDR device instance
 	std::unique_ptr<CDemodulator>		m_demodulator;			// CuteSDR demodulator instance
 	std::unique_ptr<CFractResampler>	m_resampler;			// CuteSDR resampler instance

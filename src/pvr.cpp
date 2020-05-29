@@ -1019,7 +1019,7 @@ bool OpenLiveStream(PVR_CHANNEL const& /*channel*/)
 {
 	// TODO: DUMMY OPERATION
 	//
-	struct streamparams params {};
+	struct streamparams params = {};
 
 	// Create a copy of the current addon settings structure
 	struct addon_settings settings = copy_settings();

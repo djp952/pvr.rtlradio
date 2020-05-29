@@ -24,10 +24,11 @@
 #define __RDSDECODER_H_
 #pragma once
 
+#include <array>
 #include <queue>
-#include <vector>
 
 #include "fmdsp/demodulator.h"
+#include "uecp.h"
 
 #pragma warning(push, 4)
 
@@ -39,8 +40,6 @@
 class rdsdecoder
 {
 public:
-
-	using uecp_packet = std::vector<uint8_t>;
 
 	// Instance Constructor
 	//
@@ -58,10 +57,10 @@ public:
 	// Decodes the next RDS group
 	void decode_rdsgroup(tRDS_GROUPS const& rdsgroup);
 
-	// pop_uecp_packet
+	// pop_uecp_data_packet
 	//
 	// Pops the topmost UECP data packet from the queue
-	bool pop_uecp_packet(uecp_packet& packet);
+	bool pop_uecp_data_packet(uecp_data_packet& frame);
 
 private:
 
@@ -71,10 +70,23 @@ private:
 	//-----------------------------------------------------------------------
 	// Private Member Functions
 
+	// decode_radiotext
+	//
+	// Decodes Group Type 2A and 2B - RadioText
+	void decode_radiotext(tRDS_GROUPS const& rdsgroup);
+
 	//-----------------------------------------------------------------------
 	// Member Variables
 
-	std::queue<uecp_packet>		m_uecppackets;		// Queued UECP packets
+	// UECP
+	//
+	std::queue<uecp_data_packet>	m_uecp_packets;		// Queued UECP packets
+
+	// GROUP 2 - RADIOTEXT
+	//
+	bool						m_rt_init = false;		// RadioText init flag
+	uint8_t						m_rt_ab = 0;			// RadioText A/B flag
+	std::array<uint8_t, 64>		m_rt_data;				// RadioText data
 };
 
 //-----------------------------------------------------------------------------

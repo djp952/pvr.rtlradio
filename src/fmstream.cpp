@@ -63,8 +63,7 @@ size_t const fmstream::DEFAULT_RINGBUFFER_SIZE = (8 MiB);
 //
 //	params		- Stream creation parameters
 
-fmstream::fmstream(struct streamparams const& params) : m_params(params), 
-	m_blocksize(align::up(DEFAULT_DEVICE_BLOCK_SIZE, 16 KiB)),
+fmstream::fmstream(struct streamparams const& params) : m_blocksize(align::up(DEFAULT_DEVICE_BLOCK_SIZE, 16 KiB)),
 	m_samplerate(DEFAULT_DEVICE_SAMPLE_RATE), m_pcmsamplerate(DEFAULT_OUTPUT_SAMPLE_RATE),
 	m_buffersize(align::up(DEFAULT_RINGBUFFER_SIZE, 16 KiB))
 {
@@ -81,12 +80,11 @@ fmstream::fmstream(struct streamparams const& params) : m_params(params),
 	m_device->set_bandwidth(200 KHz);
 
 	// Adjust the device gain as specified by the stream parameters
-	// TODO: do I want to use these or not?  Probably manual gain at least?
 	//m_device->set_automatic_gain_control(params.agc);
 	//if(params.agc == false) m_device->set_gain(params.gain * 10);
 
 	// Create and initialize the CDemodulator instance
-	tDemodInfo t{};
+	tDemodInfo t = {};
 
 	// FIXED SETTINGS
 	//
@@ -226,8 +224,8 @@ DemuxPacket* fmstream::demuxread(std::function<DemuxPacket*(int)> const& allocat
 	bool				stopped = false;		// Flag if data transfer has stopped
 
 	// If there is an RDS UECP packet available, handle it before demodulating more audio
-	rdsdecoder::uecp_packet uecp_packet;
-	if(m_rdsdecoder.pop_uecp_packet(uecp_packet) && (!uecp_packet.empty())) {
+	uecp_data_packet uecp_packet;
+	if(m_rdsdecoder.pop_uecp_data_packet(uecp_packet) && (!uecp_packet.empty())) {
 
 		// Allocate and initialize the demultiplexer packet
 		int packetsize = static_cast<int>(uecp_packet.size());
@@ -302,7 +300,8 @@ DemuxPacket* fmstream::demuxread(std::function<DemuxPacket*(int)> const& allocat
 	int audiopackets = m_demodulator->ProcessData(static_cast<int>(samples.size()), samples.data(), samples.data());
 
 	// Process any RDS group data that was collected during demodulation
-	tRDS_GROUPS rdsgroup{};
+	// TODO: Is this ever going to have more than one entry? I imagine it should given the input frequency (1 MHz)
+	tRDS_GROUPS rdsgroup = {};
 	while(m_demodulator->GetNextRdsGroupData(&rdsgroup)) m_rdsdecoder.decode_rdsgroup(rdsgroup);
 
 	// Determine the size of the demultiplexer packet data and allocate it
