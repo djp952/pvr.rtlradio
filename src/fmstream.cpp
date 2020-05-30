@@ -241,11 +241,10 @@ DemuxPacket* fmstream::demuxread(std::function<DemuxPacket*(int)> const& allocat
 		return packet;
 	}
 
-	// Use a constant read size of 20K (10Khz worth of I/Q samples), the demodulator
-	// is designed to work with about 1/10th of a second of data, and this typically
-	// provides exactly 480 audio samples which is a good match for 48000Hz PCM output
-	// TODO: Does 9984 or 10000 work better here?
-	size_t const minreadsize = 9984 * 2;
+	// The demodulator only works properly in this use pattern if it's fed the exact
+	// number of input bytes it's looking for.  Excess bytes will be discarded, and
+	// an insufficient number of bytes won't generate any output samples
+	size_t const minreadsize = m_demodulator->GetInputBufferLimit() * 2;
 
 	// Wait up to 10ms for there to be available data in the ring buffer
 	std::unique_lock<std::mutex> lock(m_lock);
@@ -277,8 +276,7 @@ DemuxPacket* fmstream::demuxread(std::function<DemuxPacket*(int)> const& allocat
 	// If there is still not enough data to be processed, return an empty demuxer packet
 	if(available < minreadsize) return allocator(0);
 
-	// Convert the raw data into a vector<> of I/Q samples for the demodulator
-	assert(available % 2 == 0);
+	// Adjust the input size to match the optimal setting from the decoder
 	available = std::min(available, minreadsize);
 
 	std::vector<TYPECPX> samples(available / 2);

@@ -116,6 +116,11 @@ public:
 	bool GetUSFmVersion(){return m_USFm;}
 	void SetPskMode(int index);
 
+	// expose the input buffer limit
+	int GetInputBufferLimit(void) const
+	{
+		return m_InBufLimit;
+	}
 
 	//access to WFM mode status
 	int GetStereoLock(int* pPilotLock){ if(m_pWFmDemod) return m_pWFmDemod->GetStereoLock(pPilotLock); else return false;}
