@@ -136,7 +136,7 @@ TYPEREAL PhzInc = K_2PI*SHIFT_FREQ/(2.0*m_SampleRate);	// FreqShift/2
 	m_Fir.InitConstFir(FSK1_LENGTH, FSK1_COEF, FSK1_COEF, m_SampleRate);
 
 	//Init Post data IIR LP filter
-	m_OutIir.InitLP(TYPEREAL(150.0), TYPEREAL(0.707), m_SampleRate);
+	m_OutIir.InitLP(150.0, 0.707, m_SampleRate);
 
 	//create Hi-Q resonator at the bit rate to recover bit sync position Q==200
 	m_BitSyncFilter.InitBP(100.0, 200.0, m_SampleRate);
@@ -533,7 +533,18 @@ int rxphzcnt = 0;
 					m_RxBuf[m_RxBufIndex] = ch;
 				else	//else use Dx ECC
 					m_RxBuf[m_RxBufIndex] = m_DxBuf[m_DxBufIndex];
-
+				if(m_Ecc == m_RxBuf[m_RxBufIndex])
+				{	//here if EEC correct MSG received in m_RxBuf[]
+				}
+				else
+				{
+					rxphzcnt = 0; //use to count up all error characters
+					for(i=1; i<=m_RxBufIndex; i++)
+					{
+						if(255==m_RxBuf[i])
+							rxphzcnt++;
+					}
+				}
 				m_RxDecodeState = STATE_PHASEDET;
 				//create/Reset Hi-Q resonator at the bit rate to recover bit sync position Q==200
 				m_BitSyncFilter.InitBP(100.0, 200.0, m_SampleRate);

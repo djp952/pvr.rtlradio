@@ -65,10 +65,6 @@ private:
 	int m_DxBufIndex;
 	int m_RxBufIndex;
 
-
-	//tst stuff
-	std::string m_Str1;	//for debug
-	std::string m_Str2;
 	TYPECPX m_AudioShiftOsc1;
 	TYPEREAL m_AudioShiftOscCos;
 	TYPEREAL m_AudioShiftOscSin;

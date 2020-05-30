@@ -460,8 +460,9 @@ struct SurvivorStates
 	int BitEstimates;	// the bit pattern estimate associated with given survivor path
 };
 // phase wraparound correction tables for viterbi decoder
-const TYPEREAL ANGLE_TBL1[4] = { TYPEREAL(3.0)*K_PI/ TYPEREAL(2.0), TYPEREAL(0.0), K_PI/ TYPEREAL(2.0), K_PI};
-const TYPEREAL ANGLE_TBL2[4] = { TYPEREAL(3.0)*K_PI/ TYPEREAL(2.0), K_2PI, K_PI/ TYPEREAL(2.0), K_PI };
+const TYPEREAL ANGLE_TBL1[4] = { 3.0*K_PI/2.0, 0.0, K_PI/2.0, K_PI};
+const TYPEREAL ANGLE_TBL2[4] = { 3.0*K_PI/2.0, K_2PI, K_PI/2.0, K_PI };
+
 
 #define SYM_NOCHANGE 0	//Stay the same phase
 #define SYM_P90 1		//Plus 90  deg

@@ -222,7 +222,7 @@ TYPEREAL WindowGain;
 				- 0.01168*MCOS( (3.0*K_2PI*i)/(m_FFTSize-1) ) );
 #endif
 #if 1
-		WindowGain = TYPEREAL(2.8);
+		WindowGain = 2.8;
 		for(i=0; i<m_FFTSize; i++)	//Nuttall
 			m_pWindowTbl[i] = WindowGain*(0.355768
 				- 0.487396*MCOS( (K_2PI*i)/(m_FFTSize-1) )
