@@ -119,9 +119,6 @@
     <ClInclude Include="align.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="streamparams.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="fmdsp\demodulator.h">
       <Filter>Header Files\fmdsp</Filter>
     </ClInclude>
@@ -195,6 +192,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="uecp.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="props.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

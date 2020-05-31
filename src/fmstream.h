@@ -35,11 +35,11 @@
 #include "fmdsp/demodulator.h"
 #include "fmdsp/fractresampler.h"
 
+#include "props.h"
 #include "pvrstream.h"
 #include "rdsdecoder.h"
 #include "rtldevice.h"
 #include "scalar_condition.h"
-#include "streamparams.h"
 
 //---------------------------------------------------------------------------
 // Class fmstream
@@ -70,7 +70,7 @@ public:
 	// create (static)
 	//
 	// Factory method, creates a new fmstream instance
-	static std::unique_ptr<fmstream> create(struct streamparams const& params);
+	static std::unique_ptr<fmstream> create(struct deviceprops const& deviceprops, struct fmprops const& fmprops);
 
 	// demuxabort
 	//
@@ -92,6 +92,11 @@ public:
 	// Resets the demultiplexer
 	void demuxreset(void);
 
+	// enumproperties
+	//
+	// Enumerates the stream properties
+	void enumproperties(std::function<void(struct streamprops const& props)> const& callback);
+
 	// length
 	//
 	// Gets the length of the stream
@@ -111,11 +116,6 @@ public:
 	//
 	// Gets a flag indicating if the stream is real-time
 	bool realtime(void) const;
-
-	// samplerate
-	//
-	// Gets the sample rate of the stream
-	int samplerate(void) const;
 
 	// seek
 	//
@@ -137,24 +137,24 @@ private:
 	// Default device sample rate
 	static uint32_t const DEFAULT_DEVICE_SAMPLE_RATE;
 
-	// DEFAULT_OUTPUT_CHANNELS
-	//
-	// Default number of PCM output channels
-	static int const DEFAULT_OUTPUT_CHANNELS;
-
-	// DEFAULT_OUTPUT_SAMPLE_RATE
-	//
-	// Default PCM output sample rate
-	static double const DEFAULT_OUTPUT_SAMPLE_RATE;
-
 	// DEFAULT_RINGBUFFER_SIZE
 	//
 	// Default ring buffer size
 	static size_t const DEFAULT_RINGBUFFER_SIZE;
 
+	// STREAM_ID_AUDIO
+	//
+	// Stream identifier for the audio output stream
+	static int const STREAM_ID_AUDIO;
+
+	// STREAM_ID_UECP
+	//
+	// Stream identifier for the UECP output stream
+	static int const STREAM_ID_UECP;
+
 	// Instance Constructor
 	//
-	fmstream(struct streamparams const& params);
+	fmstream(struct deviceprops const& deviceprops, struct fmprops const& fmprops);
 
 	//-----------------------------------------------------------------------
 	// Private Member Functions
@@ -174,7 +174,7 @@ private:
 
 	size_t const						m_blocksize;			// Device block size
 	uint32_t const						m_samplerate;			// Device sample rate
-	double const						m_pcmsamplerate;		// Output sample rate
+	uint32_t const						m_pcmsamplerate;		// Output sample rate
 	double								m_pts{ 1 US };			// Current program time stamp
 
 	// STREAM CONTROL

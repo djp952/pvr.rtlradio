@@ -28,6 +28,7 @@
 #include <memory.h>
 
 #include "align.h"
+#include "string_exception.h"
 
 #pragma warning(push, 4)
 
@@ -41,32 +42,37 @@ size_t const fmstream::DEFAULT_DEVICE_BLOCK_SIZE = (16 KiB);
 // Default device sample rate
 uint32_t const fmstream::DEFAULT_DEVICE_SAMPLE_RATE = (1 MHz);
 
-// fmstream::DEFAULT_OUTPUT_CHANNELS
-//
-// Default number of PCM output channels
-int const fmstream::DEFAULT_OUTPUT_CHANNELS = 1;
-
-// fmstream::DEFAULT_OUTPUT_SAMPLE_RATE
-//
-// Default PCM output sample rate
-double const fmstream::DEFAULT_OUTPUT_SAMPLE_RATE = (48.0 KHz);
-
 // fmstream::DEFAULT_RINGBUFFER_SIZE
 //
 // Default ring buffer size
 size_t const fmstream::DEFAULT_RINGBUFFER_SIZE = (8 MiB);
+
+// fmstream::STREAM_ID_AUDIO
+//
+// Stream identifier for the audio output stream
+int const fmstream::STREAM_ID_AUDIO = 1;
+
+// fmstream::STREAM_ID_UECP
+//
+// Stream identifier for the UECP output stream
+int const fmstream::STREAM_ID_UECP = 2;
 
 //---------------------------------------------------------------------------
 // fmstream Constructor (private)
 //
 // Arguments:
 //
-//	params		- Stream creation parameters
+//	deviceprops		- RTL-SDR device properties
+//	fmprops			- FM signal processor properties
 
-fmstream::fmstream(struct streamparams const& params) : m_blocksize(align::up(DEFAULT_DEVICE_BLOCK_SIZE, 16 KiB)),
-	m_samplerate(DEFAULT_DEVICE_SAMPLE_RATE), m_pcmsamplerate(DEFAULT_OUTPUT_SAMPLE_RATE),
+fmstream::fmstream(struct deviceprops const& deviceprops, struct fmprops const& fmprops) : m_blocksize(align::up(DEFAULT_DEVICE_BLOCK_SIZE, 16 KiB)),
+	m_samplerate(DEFAULT_DEVICE_SAMPLE_RATE), m_pcmsamplerate(fmprops.samplerate),
 	m_buffersize(align::up(DEFAULT_RINGBUFFER_SIZE, 16 KiB))
 {
+	// The only allowable output sample rates for this stream are 44100Hz and 48000Hz
+	if((m_pcmsamplerate != 44100) && (m_pcmsamplerate != 48000))
+		throw string_exception(__func__, ": FM DSP output sample rate must be set to either 44.1KHz or 48.0KHz");
+
 	// Allocate the ring buffer
 	m_buffer = std::unique_ptr<uint8_t[]>(new uint8_t[m_buffersize]);
 	if(!m_buffer) throw std::bad_alloc();
@@ -76,45 +82,44 @@ fmstream::fmstream(struct streamparams const& params) : m_blocksize(align::up(DE
 	// Create and initialize the RTL-SDR device instance
 	m_device = rtldevice::create(rtldevice::DEFAULT_DEVICE_INDEX);
 	uint32_t samplerate = m_device->set_sample_rate(m_samplerate);
-	/*uint32_t frequency =*/ m_device->set_center_frequency(params.frequency);
+	/*uint32_t frequency =*/ m_device->set_center_frequency(fmprops.centerfrequency);
 	m_device->set_bandwidth(200 KHz);
 
-	// Adjust the device gain as specified by the stream parameters
-	//m_device->set_automatic_gain_control(params.agc);
-	//if(params.agc == false) m_device->set_gain(params.gain * 10);
+	// Adjust the device gain as specified by the parameters
+	m_device->set_automatic_gain_control(deviceprops.agc);
+	if(deviceprops.agc == false) m_device->set_gain(deviceprops.manualgain * 10);
 
 	// Create and initialize the CDemodulator instance
-	tDemodInfo t = {};
+	tDemodInfo demodinfo = {};
 
-	// FIXED SETTINGS
+	// FIXED DEMODULATOR SETTINGS
 	//
-	t.txt.assign("WFM");
-	t.HiCutmin = 100000;
-	t.HiCutmax = 100000;
-	t.LowCutmax = -100000;
-	t.LowCutmin = -100000;
-	t.Symetric = true;
-	t.DefFreqClickResolution = 100000;
-	t.FilterClickResolution = 10000;
+	demodinfo.txt.assign("WFM");
+	demodinfo.HiCutmin = 100000;
+	demodinfo.HiCutmax = 100000;
+	demodinfo.LowCutmax = -100000;
+	demodinfo.LowCutmin = -100000;
+	demodinfo.Symetric = true;
+	demodinfo.DefFreqClickResolution = 100000;
+	demodinfo.FilterClickResolution = 10000;
 
-	// VARIABLE SETTINGS
+	// VARIABLE DEMODULATOR SETTINGS
 	//
-	// TODO: These should come in via the stream parameters
-	t.HiCut = 5000;
-	t.LowCut = -5000;
-	t.FreqClickResolution = t.DefFreqClickResolution;
-	t.Offset = 0;
-	t.SquelchValue = -160;
-	t.AgcSlope = 0;
-	t.AgcThresh = -100;
-	t.AgcManualGain = 30;
-	t.AgcDecay = 200;
-	t.AgcOn = true;
-	t.AgcHangOn = false;
+	demodinfo.HiCut = fmprops.hicut;
+	demodinfo.LowCut = fmprops.lowcut;
+	demodinfo.FreqClickResolution = demodinfo.DefFreqClickResolution;	// <--- TODO: what does this do?
+	demodinfo.Offset = 0;												// <--- TODO: ties into "DC offset" ?
+	demodinfo.SquelchValue = fmprops.squelch;
+	demodinfo.AgcSlope = fmprops.agcslope;
+	demodinfo.AgcThresh = fmprops.agcthresh;
+	demodinfo.AgcManualGain = fmprops.agcmanualgain;
+	demodinfo.AgcDecay = fmprops.agcdecay;
+	demodinfo.AgcOn = fmprops.agcon;
+	demodinfo.AgcHangOn = fmprops.agchangon;
 
 	m_demodulator = std::unique_ptr<CDemodulator>(new CDemodulator());
 	m_demodulator->SetInputSampleRate(static_cast<TYPEREAL>(samplerate));
-	m_demodulator->SetDemod(DEMOD_WFM, t);
+	m_demodulator->SetDemod(DEMOD_WFM, demodinfo);
 	//m_demodulator->SetDemodFreq(frequency);	// <-- TODO: What does this do?
 	m_demodulator->SetUSFmVersion(true);
 
@@ -174,11 +179,12 @@ void fmstream::close(void)
 //
 // Arguments:
 //
-//	params		- Stream creation parameters
+//	deviceprops		- RTL-SDR device properties
+//	fmprops			- FM signal processor properties
 
-std::unique_ptr<fmstream> fmstream::create(struct streamparams const& params)
+std::unique_ptr<fmstream> fmstream::create(struct deviceprops const& deviceprops, struct fmprops const& fmprops)
 {
-	return std::unique_ptr<fmstream>(new fmstream(params));
+	return std::unique_ptr<fmstream>(new fmstream(deviceprops, fmprops));
 }
 
 //---------------------------------------------------------------------------
@@ -227,12 +233,12 @@ DemuxPacket* fmstream::demuxread(std::function<DemuxPacket*(int)> const& allocat
 	uecp_data_packet uecp_packet;
 	if(m_rdsdecoder.pop_uecp_data_packet(uecp_packet) && (!uecp_packet.empty())) {
 
-		// Allocate and initialize the demultiplexer packet
+		// Allocate and initialize the UECP demultiplexer packet
 		int packetsize = static_cast<int>(uecp_packet.size());
 		DemuxPacket* packet = allocator(packetsize);
 		if(packet == nullptr) return nullptr;
 
-		packet->iStreamId = 2;
+		packet->iStreamId = STREAM_ID_UECP;
 		packet->iSize = packetsize;
 		packet->pts = m_pts;
 
@@ -282,10 +288,10 @@ DemuxPacket* fmstream::demuxread(std::function<DemuxPacket*(int)> const& allocat
 	std::vector<TYPECPX> samples(available / 2);
 	for(size_t index = 0; index < samples.size(); index++) {
 
-		// TODO: Performance here.  Demodulator seems to work just as well without converting the
-		// -1/+1 value to -32767/+32767 and the casting may be too much for slow systems
-		samples[index].re = ((static_cast<TYPEREAL>(m_buffer[tail]) - 127.5) / 127.5) * 32767.0;
-		samples[index].im = ((static_cast<TYPEREAL>(m_buffer[tail + 1]) - 127.5) / 127.5) * 32767.0;
+		// NOTE: CuteSdr indicates it expects values in the range of +/-32767 instead of +/-1,
+		// which is being done here.  In practice it doesn't seem to matter so leave it as +/-1
+		samples[index].re = ((static_cast<TYPEREAL>(m_buffer[tail]) - 127.5) / 127.5);
+		samples[index].im = ((static_cast<TYPEREAL>(m_buffer[tail + 1]) - 127.5) / 127.5);
 
 		tail += 2;								// Increment new tail position
 		if(tail >= m_buffersize) tail = 0;		// Handle buffer rollover
@@ -307,18 +313,15 @@ DemuxPacket* fmstream::demuxread(std::function<DemuxPacket*(int)> const& allocat
 	DemuxPacket* packet = allocator(packetsize);
 	if(packet == nullptr) return nullptr;
 
-	// Resample the audio data directly into the packet buffer
-	// TODO: Gain argument - should always be 1.0?
-	// TODO: Use constant for 48000.0
-	int stereopackets = m_resampler->Resample(audiopackets, m_demodulator->GetOutputRate() / 48000.0, samples.data(),
-		reinterpret_cast<TYPESTEREO16*>(packet->pData), 1.0);
+	// Resample the audio data directly into the allocated packet buffer
+	int stereopackets = m_resampler->Resample(audiopackets, m_demodulator->GetOutputRate() / m_pcmsamplerate, 
+		samples.data(), reinterpret_cast<TYPESTEREO16*>(packet->pData), 1.0);
 
 	// Calcuate the duration of the demultiplexer packet, in microseconds
-	double duration = ((stereopackets / m_pcmsamplerate) US);
+	double duration = ((stereopackets / static_cast<double>(m_pcmsamplerate)) US);
 
-	// Set up the demultiplexer packet with the proper packet size and duration
-	// TODO: Use constant for stream IDs (also above for stream 2)
-	packet->iStreamId = 1;
+	// Set up the demultiplexer packet with the proper size, duration and pts
+	packet->iStreamId = STREAM_ID_AUDIO;
 	packet->iSize = stereopackets * sizeof(TYPESTEREO16);
 	packet->duration = duration;
 	packet->pts = m_pts;
@@ -340,6 +343,38 @@ DemuxPacket* fmstream::demuxread(std::function<DemuxPacket*(int)> const& allocat
 
 void fmstream::demuxreset(void)
 {
+}
+
+//---------------------------------------------------------------------------
+// fmstream::enumproperties
+//
+// Enumerates the stream properties
+//
+// Arguments:
+//
+//	callback		- Callback to invoke for each stream
+
+void fmstream::enumproperties(std::function<void(struct streamprops const& props)> const& callback)
+{
+	// AUDIO STREAM
+	//
+	streamprops audio = {};
+	audio.codec = "pcm_s16le";
+	audio.pid = STREAM_ID_AUDIO;
+	audio.channels = 2;
+	audio.samplerate = static_cast<int>(m_pcmsamplerate);
+	audio.bitspersample = 16;
+	callback(audio);
+
+	// UECP STREAM
+	//
+	streamprops uecp = {};
+	uecp.codec = "rds";
+	uecp.pid = STREAM_ID_UECP;
+	uecp.channels = 1;			// TODO: was 2
+	uecp.samplerate = 1;		// TODO: was 48000
+	uecp.bitspersample = 8;		// TODO: was 32
+	callback(uecp);
 }
 
 //---------------------------------------------------------------------------
@@ -397,20 +432,6 @@ size_t fmstream::read(uint8_t* /*buffer*/, size_t /*count*/)
 bool fmstream::realtime(void) const
 {
 	return true;
-}
-
-//---------------------------------------------------------------------------
-// fmstream::samplerate
-//
-// Gets the sample rate of the stream
-//
-// Arguments:
-//
-//	NONE
-
-int fmstream::samplerate(void) const
-{
-	return static_cast<int>(m_pcmsamplerate);
 }
 
 //---------------------------------------------------------------------------

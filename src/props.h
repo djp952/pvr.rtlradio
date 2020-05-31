@@ -20,25 +20,67 @@
 // SOFTWARE.
 //-----------------------------------------------------------------------------
 
-#ifndef __STREAMPARAMS_H_
-#define __STREAMPARAMS_H_
+#ifndef __PROPS_H_
+#define __PROPS_H_
 #pragma once
 
 #pragma warning(push, 4)
 
-// streamparams
+// deviceprops
 //
-// Parameters required to start a radio stream
-struct streamparams {
+// Defines RTL-SDR device specific properties
+struct deviceprops {
 
-	uint32_t				frequency;		// Target frequency, in hertz
+	uint32_t	samplerate;				// Device sample rate, in hertz
+	bool		agc;					// Enable/disable device automatic gain control
+	int			manualgain;				// Device manual gain value, in decibels
+};
 
-	bool					agc;			// Automatic gain control
-	int						gain;			// Manual gain value
+// fmprops
+//
+// Defines FM Radio DSP specific properties
+struct fmprops {
+
+	uint32_t	centerfrequency;		// Station center frequency
+	uint32_t	samplerate;				// Output sample rate, in hertz
+
+	//
+	// TODO: I don't understand most of these yet
+	//
+
+	int			hicut;						// 5000
+	int			lowcut;						// -5000
+	//int			freqclickresolution;	// (default)
+	//int			offset;					// 0
+	int			squelch;					// -160
+	int			agcslope;					// 0
+	int			agcthresh;					// -100
+	int			agcmanualgain;				// 30
+	int			agcdecay;					// 200
+	bool		agcon;						// true
+	bool		agchangon;					// false
+};
+
+// hdradioprops
+//
+// Defines HD Radio DSP specific properties
+//struct hdradioprops {
+//};
+
+// streamprops
+//
+// Defines stream-specific properties
+struct streamprops {
+
+	char const*		codec;				// Stream codec name
+	int				pid;				// Stream PID
+	int				channels;			// Stream number of channels
+	int				samplerate;			// Stream sample rate
+	int				bitspersample;		// Stream bits per sample
 };
 
 //-----------------------------------------------------------------------------
 
 #pragma warning(pop)
 
-#endif	// __STREAMPARAMS_H_
+#endif	// __PROPS_H_

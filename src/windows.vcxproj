@@ -212,13 +212,13 @@
     <ClInclude Include="fmdsp\wfmdemod.h" />
     <ClInclude Include="fmstream.h" />
     <ClInclude Include="libusb_exception.h" />
+    <ClInclude Include="props.h" />
     <ClInclude Include="pvrstream.h" />
     <ClInclude Include="rdsdecoder.h" />
     <ClInclude Include="rtldevice.h" />
     <ClInclude Include="scalar_condition.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="string_exception.h" />
-    <ClInclude Include="streamparams.h" />
     <ClInclude Include="uecp.h" />
   </ItemGroup>
   <ItemGroup>

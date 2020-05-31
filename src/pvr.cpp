@@ -72,15 +72,15 @@ template<typename... _args> static void log_notice(_args&&... args);
 // Defines all of the configurable addon settings
 struct addon_settings {
 
-	// tuner_enable_automatic_gain_control
+	// device_enable_automatic_gain_control
 	//
 	// Flag to enable tuner-based automatic gain control
-	bool tuner_enable_automatic_gain_control;
+	bool device_enable_automatic_gain_control;
 
-	// tuner_manual_gain_db
+	// device_manual_gain_db
 	//
 	// Specifies the tuner-based manual gain value in decibels
-	int tuner_manual_gain_db;
+	int device_manual_gain_db;
 };
 
 //---------------------------------------------------------------------------
@@ -140,8 +140,8 @@ static std::unique_ptr<pvrstream> g_pvrstream;
 // Global addon settings instance
 static addon_settings g_settings = {
 
-	false,				// tuner_enable_automatic_gain_control
-	0,					// tuner_manual_gain_db
+	false,				// device_enable_automatic_gain_control
+	0,					// device_manual_gain_db
 };
 
 // g_settings_lock
@@ -317,8 +317,8 @@ ADDON_STATUS ADDON_Create(void* handle, void* props)
 			}
 
 			// Load the tuner settings
-			if(g_addon->GetSetting("tuner_enable_automatic_gain_control", &bvalue)) g_settings.tuner_enable_automatic_gain_control = bvalue;
-			if(g_addon->GetSetting("tuner_manual_gain_db", &nvalue)) g_settings.tuner_manual_gain_db = nvalue;
+			if(g_addon->GetSetting("device_enable_automatic_gain_control", &bvalue)) g_settings.device_enable_automatic_gain_control = bvalue;
+			if(g_addon->GetSetting("device_manual_gain_db", &nvalue)) g_settings.device_manual_gain_db = nvalue;
 
 			// Create the global gui callbacks instance
 			g_gui.reset(new CHelper_libKODI_guilib());
@@ -401,27 +401,27 @@ ADDON_STATUS ADDON_SetSetting(char const* name, void const* value)
 {
 	std::unique_lock<std::mutex> settings_lock(g_settings_lock);
 
-	// tuner_enable_automatic_gain_control
+	// device_enable_automatic_gain_control
 	//
-	if(strcmp(name, "tuner_enable_automatic_gain_control") == 0) {
+	if(strcmp(name, "device_enable_automatic_gain_control") == 0) {
 
 		bool bvalue = *reinterpret_cast<bool const*>(value);
-		if(bvalue != g_settings.tuner_enable_automatic_gain_control) {
+		if(bvalue != g_settings.device_enable_automatic_gain_control) {
 
-			g_settings.tuner_enable_automatic_gain_control = bvalue;
-			log_notice(__func__, ": setting tuner_enable_automatic_gain_control changed to ", (bvalue) ? "true" : "false");
+			g_settings.device_enable_automatic_gain_control = bvalue;
+			log_notice(__func__, ": setting device_enable_automatic_gain_control changed to ", (bvalue) ? "true" : "false");
 		}
 	}
 
-	// tuner_manual_gain_db
+	// device_manual_gain_db
 	//
-	else if(strcmp(name, "tuner_manual_gain_db") == 0) {
+	else if(strcmp(name, "device_manual_gain_db") == 0) {
 
 		int nvalue = *reinterpret_cast<int const*>(value);
-		if(nvalue != g_settings.tuner_manual_gain_db) {
+		if(nvalue != g_settings.device_manual_gain_db) {
 
-			g_settings.tuner_manual_gain_db = nvalue;
-			log_notice(__func__, ": setting tuner_manual_gain_db changed to ", nvalue, " decibels");
+			g_settings.device_manual_gain_db = nvalue;
+			log_notice(__func__, ": setting device_manual_gain_db changed to ", nvalue, " decibels");
 		}
 	}
 
@@ -488,6 +488,8 @@ char const* GetBackendVersion(void)
 
 char const* GetConnectionString(void)
 {
+	// TODO: I would like this to return either the local RTL-SDR device name
+	// or the IP address of the remote RTL-SDR device if using rtl_tcp
 	return "TODO";
 }
 
@@ -1019,17 +1021,33 @@ bool OpenLiveStream(PVR_CHANNEL const& /*channel*/)
 {
 	// TODO: DUMMY OPERATION
 	//
-	struct streamparams params = {};
+	struct deviceprops deviceprops = {};
+	struct fmprops fmprops = {};
 
 	// Create a copy of the current addon settings structure
 	struct addon_settings settings = copy_settings();
 
-	params.frequency = 95100000;
-	
-	params.agc = settings.tuner_enable_automatic_gain_control;
-	params.gain = settings.tuner_manual_gain_db;
+	// TODO: Sample Rate should be controlled by settings
+	deviceprops.samplerate = 1 MHz;
+	deviceprops.agc = settings.device_enable_automatic_gain_control;
+	deviceprops.manualgain = settings.device_manual_gain_db;
 
-	try { g_pvrstream = fmstream::create(params); }
+	// TODO: Everything here needs to be controlled by settings and/or channel information
+	fmprops.centerfrequency = 95100000;
+	fmprops.samplerate = 44100;
+	fmprops.hicut = 5000;
+	fmprops.lowcut = -5000;
+	// fmprops.freqclickresolution
+	// fmprops.offset = 0;
+	fmprops.squelch = -160;
+	fmprops.agcslope = 0;
+	fmprops.agcthresh = -100;
+	fmprops.agcmanualgain = 30;
+	fmprops.agcdecay = 200;
+	fmprops.agcon = true;
+	fmprops.agchangon = false;
+
+	try { g_pvrstream = fmstream::create(deviceprops, fmprops); }
 	catch(std::exception& ex) { return handle_stdexception(__func__, ex, false); } 
 	catch(...) { return handle_generalexception(__func__, false); }
 
@@ -1192,44 +1210,27 @@ PVR_ERROR GetStreamProperties(PVR_STREAM_PROPERTIES* properties)
 
 	properties->iStreamCount = 0;
 
-	// AUDIO STREAM
-	//
-	xbmc_codec_t codecid = g_pvr->GetCodecByName("pcm_s16le");
-	// TODO: Verify iBitsPerSample - should it be 16 or 32?
-	if((g_pvrstream) && (codecid.codec_type == XBMC_CODEC_TYPE_AUDIO)) {
+	// Enumerate the stream properties as specified by the PVR stream instance
+	g_pvrstream->enumproperties([&](struct streamprops const& props) -> void {
 
-		properties->stream[0].iPID = 1;
-		properties->stream[0].iCodecType = codecid.codec_type;
-		properties->stream[0].iCodecId = codecid.codec_id;
-		properties->stream[0].iChannels = 2;
-		properties->stream[0].iSampleRate = g_pvrstream->samplerate();
-		properties->stream[0].iBitsPerSample = 16;
-		properties->stream[0].iBitRate = properties->stream[0].iSampleRate * properties->stream[0].iChannels * properties->stream[0].iBitsPerSample;
-		properties->stream[0].strLanguage[0] = 0;
-		properties->stream[0].strLanguage[1] = 0;
-		properties->stream[0].strLanguage[2] = 0;
-		properties->stream[0].strLanguage[3] = 0;
-		properties->iStreamCount++;
-	}
+		xbmc_codec_t codecid = g_pvr->GetCodecByName(props.codec);
+		if(codecid.codec_type != XBMC_CODEC_TYPE_UNKNOWN) {
 
-	// RDS STREAM
-	//
-	codecid = g_pvr->GetCodecByName("rds");
-	if((g_pvrstream) && (codecid.codec_type == XBMC_CODEC_TYPE_RDS)) {
-
-		properties->stream[1].iPID = 2;
-		properties->stream[1].iCodecType = codecid.codec_type;
-		properties->stream[1].iCodecId = codecid.codec_id;
-		properties->stream[1].iChannels = 2;
-		properties->stream[1].iSampleRate = g_pvrstream->samplerate();
-		properties->stream[1].iBitsPerSample = 32;
-		properties->stream[1].iBitRate = properties->stream[1].iSampleRate * properties->stream[1].iChannels * properties->stream[1].iBitsPerSample;
-		properties->stream[1].strLanguage[0] = 0;
-		properties->stream[1].strLanguage[1] = 0;
-		properties->stream[1].strLanguage[2] = 0;
-		properties->stream[1].strLanguage[3] = 0;
-		properties->iStreamCount++;
-	}
+			properties->stream[properties->iStreamCount].iPID = props.pid;
+			properties->stream[properties->iStreamCount].iCodecType = codecid.codec_type;
+			properties->stream[properties->iStreamCount].iCodecId = codecid.codec_id;
+			properties->stream[properties->iStreamCount].iChannels = props.channels;
+			properties->stream[properties->iStreamCount].iSampleRate = props.samplerate;
+			properties->stream[properties->iStreamCount].iBitsPerSample = props.bitspersample;
+			properties->stream[properties->iStreamCount].iBitRate = properties->stream[properties->iStreamCount].iSampleRate * 
+				properties->stream[properties->iStreamCount].iChannels * properties->stream[properties->iStreamCount].iBitsPerSample;
+			properties->stream[properties->iStreamCount].strLanguage[properties->iStreamCount] = 0;
+			properties->stream[properties->iStreamCount].strLanguage[1] = 0;
+			properties->stream[properties->iStreamCount].strLanguage[2] = 0;
+			properties->stream[properties->iStreamCount].strLanguage[3] = 0;
+			properties->iStreamCount++;
+		}
+	});
 
 	return PVR_ERROR::PVR_ERROR_NO_ERROR;
 }

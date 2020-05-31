@@ -27,6 +27,7 @@
 #include <functional>
 
 #include "DemuxPacket.h"
+#include "props.h"
 
 #pragma warning(push, 4)
 
@@ -77,6 +78,11 @@ public:
 	// Resets the demultiplexer
 	virtual void demuxreset(void) = 0;
 
+	// enumproperties
+	//
+	// Enumerates the stream properties
+	virtual void enumproperties(std::function<void(struct streamprops const& props)> const& callback) = 0;
+
 	// length
 	//
 	// Gets the length of the stream
@@ -96,9 +102,6 @@ public:
 	//
 	// Gets a flag indicating if the stream is real-time
 	virtual bool realtime(void) const = 0;
-
-	// Gets the sample rate of the stream
-	virtual int samplerate(void) const = 0;
 
 	// seek
 	//

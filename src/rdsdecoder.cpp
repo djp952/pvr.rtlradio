@@ -89,10 +89,8 @@ void rdsdecoder::decode_radiotext(tRDS_GROUPS const& rdsgroup)
 		m_rt_data[textsegmentaddress + 1] = rdsgroup.BlockD & 0xFF;
 	}
 
-	//
 	// UECP_MEC_RT
 	//
-
 	struct uecp_data_frame frame = {};
 	struct uecp_message* message = &frame.msg;
 
@@ -127,118 +125,18 @@ void rdsdecoder::decode_radiotext(tRDS_GROUPS const& rdsgroup)
 
 void rdsdecoder::decode_rdsgroup(tRDS_GROUPS const& rdsgroup)
 {
-	// Determine the 
+	// Determine the group type code
 	uint8_t grouptypecode = (rdsgroup.BlockB & 0xF000) >> 12;
 
-	//unsigned int grouptype = (rdsgroup.BlockB >> 11) & 0x1F;
-	//bool versioncode = ((rdsgroup.BlockB >> 11) & 0x01) == 0x01;
-
-	//uint16_t pIdent = blockData[BLOCK__A] & 0xFFFF;                // "PI"
-	//if(pIdent != m_ProgramIdentCode)
-	//	Decode_PI(pIdent);
-
-	//int pType = (blockData[BLOCK__B] >> 5) & 0x1F;            // "PTY"
-	//if(pType != m_PTY)
-	//	Decode_PTY(pType);
-
+	// Invoke the proper handler for the specified group type code
 	switch(grouptypecode) {
 
 		// Group Type 2: RadioText
+		//
 		case 2:
 			decode_radiotext(rdsgroup);
 			break;
 	}
-
-	//switch(grouptype) {
-	//	 
-	//	case GRPTYPE_0A:
-	//	case GRPTYPE_0B:
-	//		//Decode_Type0___PS_DI_MS(blockData, VersionCode);
-	//		break;
-	//	case GRPTYPE_1A:
-	//	case GRPTYPE_1B:
-	//		//Decode_Type1___ProgItemNum_SlowLabelCodes(blockData, VersionCode);
-	//		break;
-	//	case GRPTYPE_2A:
-	//	case GRPTYPE_2B:
-	//		decode_radiotext(rdsgroup);
-	//		//Decode_Type2___Radiotext(blockData, VersionCode);
-	//		break;
-	//	case GRPTYPE_3A:
-	//		//Decode_Type3A__AppIdentOpenData(blockData);
-	//		break;
-	//	case GRPTYPE_4A:
-	//		//Decode_Type4A__Clock(blockData);
-	//		break;
-	//	case GRPTYPE_5A:
-	//	case GRPTYPE_5B:
-	//		//if(m_ODATypeMap[group_type] > 0)
-	//		//	Decode_Type____ODA(blockData, m_ODATypeMap[group_type]);
-	//		//else
-	//		//	Decode_Type5___TransparentDataChannels(blockData, VersionCode);
-	//		break;
-	//	case GRPTYPE_6A:
-	//	case GRPTYPE_6B:
-	//		//if(m_ODATypeMap[group_type] > 0)
-	//		//	Decode_Type____ODA(blockData, m_ODATypeMap[group_type]);
-	//		//else
-	//		//	Decode_Type6___InHouseApplications(blockData, VersionCode);
-	//		break;
-	//	case GRPTYPE_7A:
-	//		//if(m_ODATypeMap[group_type] > 0)
-	//		//	Decode_Type____ODA(blockData, m_ODATypeMap[group_type]);
-	//		//else
-	//		//	Decode_Type7A__RadioPaging(blockData);
-	//		break;
-	//	case GRPTYPE_8A:
-	//		//if(m_ODATypeMap[group_type] > 0)
-	//		//	Decode_Type____ODA(blockData, m_ODATypeMap[group_type]);
-	//		//else
-	//		//	Decode_Type8A__TrafficMessageChannel(blockData);
-	//		break;
-	//	case GRPTYPE_9A:
-	//		//if(m_ODATypeMap[group_type] > 0)
-	//		//	Decode_Type____ODA(blockData, m_ODATypeMap[group_type]);
-	//		//else
-	//		//	Decode_Type9A__EmergencyWarningSystem(blockData);
-	//		break;
-	//	case GRPTYPE_10A:
-	//		//Decode_Type10A_PTYN(blockData);
-	//		break;
-	//	case GRPTYPE_13A:
-	//		//if(m_ODATypeMap[group_type] > 0)
-	//		//	Decode_Type____ODA(blockData, m_ODATypeMap[group_type]);
-	//		//else
-	//		//	Decode_Type13A_EnhancedRadioPaging(blockData);
-	//		break;
-	//	case GRPTYPE_14A:
-	//	case GRPTYPE_14B:
-	//		//Decode_Type14__EnhancedOtherNetworksInfo(blockData, VersionCode);
-	//		break;
-	//	case GRPTYPE_15A:
-	//		//Decode_Type15A_RBDS(blockData);
-	//		break;
-	//	case GRPTYPE_15B:
-	//		//Decode_Type15B_FastSwitchingInfo(blockData);
-	//		break;
-	//	case GRPTYPE_3B:
-	//	case GRPTYPE_4B:
-	//	case GRPTYPE_7B:
-	//	case GRPTYPE_8B:
-	//	case GRPTYPE_9B:
-	//	case GRPTYPE_10B:
-	//	case GRPTYPE_11A:
-	//	case GRPTYPE_11B:
-	//	case GRPTYPE_12A:
-	//	case GRPTYPE_12B:
-	//	case GRPTYPE_13B:
-	//	//	if(m_ODATypeMap[group_type] > 0)
-	//	//	{
-	//	//		Decode_Type____ODA(blockData, m_ODATypeMap[group_type]);
-	//	//		break;
-	//	//	}
-	//		break;
-	//}
 }
 
 //---------------------------------------------------------------------------

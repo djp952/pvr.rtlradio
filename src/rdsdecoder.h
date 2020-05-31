@@ -35,7 +35,8 @@
 //---------------------------------------------------------------------------
 // Class rdsdecoder
 //
-// Implements TODO
+// Implements an RDS decoder to convert the data from the demodulator into
+// UECP packets that will be understood by Kodi
 
 class rdsdecoder
 {
