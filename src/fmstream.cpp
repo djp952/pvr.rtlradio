@@ -83,32 +83,32 @@ fmstream::fmstream(struct deviceprops const& deviceprops, struct fmprops const& 
 	m_device = rtldevice::create(rtldevice::DEFAULT_DEVICE_INDEX);
 	uint32_t samplerate = m_device->set_sample_rate(m_samplerate);
 	/*uint32_t frequency =*/ m_device->set_center_frequency(fmprops.centerfrequency);
-	m_device->set_bandwidth(200 KHz);
+	m_device->set_bandwidth(200 KHz);		// <-- TODO: 250KHz?
 
 	// Adjust the device gain as specified by the parameters
 	m_device->set_automatic_gain_control(deviceprops.agc);
 	if(deviceprops.agc == false) m_device->set_gain(deviceprops.manualgain * 10);
 
-	// Create and initialize the CDemodulator instance
+	// Initialize the demodulator parameters
 	tDemodInfo demodinfo = {};
 
 	// FIXED DEMODULATOR SETTINGS
 	//
 	demodinfo.txt.assign("WFM");
-	demodinfo.HiCutmin = 100000;
+	demodinfo.HiCutmin = 100000;						// Not used by demodulator
 	demodinfo.HiCutmax = 100000;
-	demodinfo.LowCutmax = -100000;
+	demodinfo.LowCutmax = -100000;						// Not used by demodulator
 	demodinfo.LowCutmin = -100000;
-	demodinfo.Symetric = true;
-	demodinfo.DefFreqClickResolution = 100000;
-	demodinfo.FilterClickResolution = 10000;
+	demodinfo.Symetric = true;							// Not used by demodulator
+	demodinfo.DefFreqClickResolution = 100000;			// Not used by demodulator
+	demodinfo.FilterClickResolution = 10000;			// Not used by demodulator
 
 	// VARIABLE DEMODULATOR SETTINGS
 	//
 	demodinfo.HiCut = fmprops.hicut;
 	demodinfo.LowCut = fmprops.lowcut;
-	demodinfo.FreqClickResolution = demodinfo.DefFreqClickResolution;	// <--- TODO: what does this do?
-	demodinfo.Offset = 0;												// <--- TODO: ties into "DC offset" ?
+	demodinfo.FreqClickResolution = 100000;				// Not used by demodulator
+	demodinfo.Offset = 0;								// <--- TODO: what does this do?
 	demodinfo.SquelchValue = fmprops.squelch;
 	demodinfo.AgcSlope = fmprops.agcslope;
 	demodinfo.AgcThresh = fmprops.agcthresh;
@@ -117,15 +117,16 @@ fmstream::fmstream(struct deviceprops const& deviceprops, struct fmprops const& 
 	demodinfo.AgcOn = fmprops.agcon;
 	demodinfo.AgcHangOn = fmprops.agchangon;
 
+	// Initialize the wideband FM demodulator
 	m_demodulator = std::unique_ptr<CDemodulator>(new CDemodulator());
+	m_demodulator->SetUSFmVersion(true);
 	m_demodulator->SetInputSampleRate(static_cast<TYPEREAL>(samplerate));
 	m_demodulator->SetDemod(DEMOD_WFM, demodinfo);
 	//m_demodulator->SetDemodFreq(frequency);	// <-- TODO: What does this do?
-	m_demodulator->SetUSFmVersion(true);
 
-	// TODO: How big does this really need to be?
+	// Initialize the output resampler
 	m_resampler = std::unique_ptr<CFractResampler>(new CFractResampler());
-	m_resampler->Init(512000);
+	m_resampler->Init(m_demodulator->GetInputBufferLimit());
 
 	// Create a worker thread on which to perform the transfer operations
 	scalar_condition<bool> started{ false };
@@ -304,7 +305,6 @@ DemuxPacket* fmstream::demuxread(std::function<DemuxPacket*(int)> const& allocat
 	int audiopackets = m_demodulator->ProcessData(static_cast<int>(samples.size()), samples.data(), samples.data());
 
 	// Process any RDS group data that was collected during demodulation
-	// TODO: Is this ever going to have more than one entry? I imagine it should given the input frequency (1 MHz)
 	tRDS_GROUPS rdsgroup = {};
 	while(m_demodulator->GetNextRdsGroupData(&rdsgroup)) m_rdsdecoder.decode_rdsgroup(rdsgroup);
 
@@ -371,9 +371,6 @@ void fmstream::enumproperties(std::function<void(struct streamprops const& props
 	streamprops uecp = {};
 	uecp.codec = "rds";
 	uecp.pid = STREAM_ID_UECP;
-	uecp.channels = 1;			// TODO: was 2
-	uecp.samplerate = 1;		// TODO: was 48000
-	uecp.bitspersample = 8;		// TODO: was 32
 	callback(uecp);
 }
 

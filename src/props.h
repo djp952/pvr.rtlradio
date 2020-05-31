@@ -44,21 +44,16 @@ struct fmprops {
 	uint32_t	centerfrequency;		// Station center frequency
 	uint32_t	samplerate;				// Output sample rate, in hertz
 
-	//
-	// TODO: I don't understand most of these yet
-	//
-
-	int			hicut;						// 5000
-	int			lowcut;						// -5000
-	//int			freqclickresolution;	// (default)
-	//int			offset;					// 0
-	int			squelch;					// -160
-	int			agcslope;					// 0
-	int			agcthresh;					// -100
-	int			agcmanualgain;				// 30
-	int			agcdecay;					// 200
-	bool		agcon;						// true
-	bool		agchangon;					// false
+	int			hicut;					// 5000
+	int			lowcut;					// -5000
+	//int			offset;				// 0
+	int			squelch;				// -160
+	int			agcslope;				// 0
+	int			agcthresh;				// -100
+	int			agcmanualgain;			// 30
+	int			agcdecay;				// 200
+	bool		agcon;					// true
+	bool		agchangon;				// false
 };
 
 // hdradioprops
