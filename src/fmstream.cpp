@@ -77,7 +77,8 @@ fmstream::fmstream(struct deviceprops const& deviceprops, struct fmprops const& 
 	m_buffer = std::unique_ptr<uint8_t[]>(new uint8_t[m_buffersize]);
 	if(!m_buffer) throw std::bad_alloc();
 
-	// TODO: "DC offset" tuning?
+	// TODO: "DC offset" tuning? Can't get that work properly at all yet
+	// TODO: Should the sample rate be matched with the decoder? (1000000 vs 998400, for example)
 
 	// Create and initialize the RTL-SDR device instance
 	m_device = rtldevice::create(rtldevice::DEFAULT_DEVICE_INDEX);
@@ -87,7 +88,7 @@ fmstream::fmstream(struct deviceprops const& deviceprops, struct fmprops const& 
 
 	// Adjust the device gain as specified by the parameters
 	m_device->set_automatic_gain_control(deviceprops.agc);
-	if(deviceprops.agc == false) m_device->set_gain(deviceprops.manualgain * 10);
+	if(deviceprops.agc == false) m_device->set_gain(deviceprops.manualgain);
 
 	// Initialize the demodulator parameters
 	tDemodInfo demodinfo = {};
@@ -118,6 +119,9 @@ fmstream::fmstream(struct deviceprops const& deviceprops, struct fmprops const& 
 	demodinfo.AgcHangOn = fmprops.agchangon;
 
 	// Initialize the wideband FM demodulator
+	// TODO: there is quite a bit of "chicken and the egg" stuff with this class, put a new
+	// constructor on it that accepts all the proper parameters at once or at least fix the
+	// weird order of operations here ...
 	m_demodulator = std::unique_ptr<CDemodulator>(new CDemodulator());
 	m_demodulator->SetUSFmVersion(true);
 	m_demodulator->SetInputSampleRate(static_cast<TYPEREAL>(samplerate));

@@ -383,7 +383,8 @@ void rtldevice::set_automatic_gain_control(bool enable) const
 {
 	assert(m_device != nullptr);
 
-	rtlsdr_set_agc_mode(m_device, (enable) ? 1 : 0);
+	int result = rtlsdr_set_tuner_gain_mode(m_device, (enable) ? 0 : 1);
+	if(result < 0) throw string_exception(__func__, ": failed to set device automatic gain control to ", (enable) ? "on" : "off");
 }
 
 //---------------------------------------------------------------------------
@@ -462,8 +463,10 @@ int rtldevice::set_gain(int db) const
 
 	// Select the gain value that's closest to what has been requested
 	int nearest = validgains[0];
-	for(size_t index = 0; index < validgains.size(); index++)
+	for(size_t index = 0; index < validgains.size(); index++) {
+
 		if(std::abs(db - validgains[index]) < std::abs(db - nearest)) nearest = validgains[index];
+	}
 
 	// Attempt to set the gain to the detected nearest gain value
 	int result = rtlsdr_set_tuner_gain(m_device, nearest);
