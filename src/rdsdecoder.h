@@ -98,6 +98,7 @@ private:
 
 	// GROUP 0 - BASIC TUNING AND SWITCHING INFORMATION
 	//
+	uint8_t						m_ta_tp = 0x00;			// TA/TP indicators
 	uint8_t						m_ps_ready = 0x00;		// PS name ready indicator
 	std::array<char, 8>			m_ps_data;				// Program Service name
 

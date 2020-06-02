@@ -58,12 +58,39 @@ rdsdecoder::~rdsdecoder()
 
 void rdsdecoder::decode_basictuning(tRDS_GROUPS const& rdsgroup)
 {
-	uint8_t codebits = rdsgroup.BlockB & 0x03;
-	m_ps_data[codebits * 2] = (rdsgroup.BlockD >> 8) & 0xFF;
-	m_ps_data[codebits * 2 + 1]= rdsgroup.BlockD & 0xFF;
+	uint8_t const ta_tp = (((rdsgroup.BlockB & 0x0010) >> 4) || ((rdsgroup.BlockB & 0x0400) >> 9));
+	uint8_t const ps_codebits = rdsgroup.BlockB & 0x03;
+
+	// Indicate a change to the Traffic Announcement / Traffic Program flags
+	if(ta_tp != m_ta_tp) {
+
+		// UECP_MEC_TA_TP
+		//
+		struct uecp_data_frame frame = {};
+		struct uecp_message* message = &frame.msg;
+
+		message->mec = UECP_MEC_TA_TP;
+		message->dsn = UECP_MSG_DSN_CURRENT_SET;
+		message->psn = UECP_MSG_PSN_MAIN;
+
+		// Kodi expects a single byte for TA/TP  at the address of mel_len
+		*reinterpret_cast<uint8_t*>(&message->mel_len) = ta_tp;
+
+		frame.seq = UECP_DF_SEQ_DISABLED;
+		frame.msg_len = 3 + 1;				// mec, dsn, psn + mel_data[1]
+
+		// Convert the UECP data frame into a packet and queue it up
+		m_uecp_packets.emplace(uecp_create_data_packet(frame));
+
+		// Save the current TA/TP flags
+		m_ta_tp = ta_tp;
+	}
+
+	m_ps_data[ps_codebits * 2] = (rdsgroup.BlockD >> 8) & 0xFF;
+	m_ps_data[ps_codebits * 2 + 1]= rdsgroup.BlockD & 0xFF;
 
 	// Accumulate segments until all 4 (0xF) have been received
-	m_ps_ready |= (0x01 << codebits);
+	m_ps_ready |= (0x01 << ps_codebits);
 	if(m_ps_ready == 0x0F) {
 
 		// UECP_MEC_PS
@@ -150,7 +177,18 @@ void rdsdecoder::decode_radiotext(tRDS_GROUPS const& rdsgroup)
 	// Indicate that this segment has been received, and if a CR was detected flag
 	// all remaining text segments as received (they're not going to come anyway)
 	m_rt_ready |= (0x01 << textsegmentaddress);
-	while((hascr) && (++textsegmentaddress < 16)) m_rt_ready |= (0x01 << textsegmentaddress);
+	while((hascr) && (++textsegmentaddress < 16)) {
+
+		// Clear any RT information that may have been previously set
+		size_t offset = (textsegmentaddress << 2);
+		m_rt_data[offset + 0] = 0x00;
+		m_rt_data[offset + 1] = 0x00;
+		if(groupa) m_rt_data[offset + 2] = 0x00;
+		if(groupa) m_rt_data[offset + 3] = 0x00;
+
+		// Flag this segment as ready in the bitmask
+		m_rt_ready |= (0x01 << textsegmentaddress);
+	}
 
 	// The RT information is ready to be sent if all 16 segments have been retrieved
 	// for a Group A signal, or the first 8 segments of a Group B signal
