@@ -69,7 +69,20 @@ private:
 	rdsdecoder& operator=(rdsdecoder const&) = delete;
 
 	//-----------------------------------------------------------------------
+	// Private Type Declarations
+
+	// uecp_packet_queue
+	//
+	// queue<> of formed UECP packets to be sent via the demultiplexer
+	using uecp_packet_queue = std::queue<uecp_data_packet>;
+
+	//-----------------------------------------------------------------------
 	// Private Member Functions
+
+	// decode_basictuning
+	//
+	// Decodes Group Type 0A and 0B - Basic Tuning and switching information
+	void decode_basictuning(tRDS_GROUPS const& rdsgroup);
 
 	// decode_radiotext
 	//
@@ -81,12 +94,18 @@ private:
 
 	// UECP
 	//
-	std::queue<uecp_data_packet>	m_uecp_packets;		// Queued UECP packets
+	uecp_packet_queue			m_uecp_packets;		// Queued UECP packets
+
+	// GROUP 0 - BASIC TUNING AND SWITCHING INFORMATION
+	//
+	uint8_t						m_ps_ready = 0x00;		// PS name ready indicator
+	std::array<char, 8>			m_ps_data;				// Program Service name
 
 	// GROUP 2 - RADIOTEXT
 	//
 	bool						m_rt_init = false;		// RadioText init flag
-	uint8_t						m_rt_ab = 0;			// RadioText A/B flag
+	uint16_t					m_rt_ready = 0x0000;	// RadioText ready indicator
+	uint8_t						m_rt_ab = 0x00;			// RadioText A/B flag
 	std::array<uint8_t, 64>		m_rt_data;				// RadioText data
 };
 

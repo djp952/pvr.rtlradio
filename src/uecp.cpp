@@ -73,7 +73,7 @@ uecp_data_packet uecp_create_data_packet(uecp_data_frame& frame)
 	uecp_data_packet		packet;				// UECP data packet
 
 	// Calculate the length of the data frame
-	size_t framelength = 8 + frame.msg.mel_len;
+	size_t framelength = 4 + frame.msg_len;
 
 	// Get a pointer to the raw frame data 
 	uint8_t* framedata = reinterpret_cast<uint8_t*>(&frame);

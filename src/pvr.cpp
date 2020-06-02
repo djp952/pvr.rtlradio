@@ -1034,10 +1034,9 @@ bool OpenLiveStream(PVR_CHANNEL const& /*channel*/)
 
 	// TODO: Everything here needs to be controlled by settings and/or channel information
 	fmprops.centerfrequency = 95100000;
-	fmprops.samplerate = 44100;
+	fmprops.samplerate = 48000;
 	fmprops.hicut = 5000;
 	fmprops.lowcut = -5000;
-	// fmprops.freqclickresolution
 	// fmprops.offset = 0;
 	fmprops.squelch = -160;
 	fmprops.agcslope = 0;
