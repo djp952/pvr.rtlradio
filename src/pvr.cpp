@@ -696,10 +696,10 @@ PVR_ERROR GetChannels(ADDON_HANDLE handle, bool radio)
 
 	// TODO: DUMMY DATA
 	PVR_CHANNEL dummyChannel = {};
-	dummyChannel.iUniqueId = 1;
+	dummyChannel.iUniqueId = 12345678;
 	dummyChannel.bIsRadio = true;
-	dummyChannel.iChannelNumber = 1;
-	dummyChannel.iSubChannelNumber = 0;
+	dummyChannel.iChannelNumber = 95;
+	dummyChannel.iSubChannelNumber = 1;
 	snprintf(dummyChannel.strChannelName, std::extent<decltype(dummyChannel.strChannelName)>::value, "RTLSDR");
 
 	g_pvr->TransferChannelEntry(handle, &dummyChannel);
@@ -1143,9 +1143,17 @@ long long LengthLiveStream(void)
 //
 //	status		- The signal status
 
-PVR_ERROR SignalStatus(PVR_SIGNAL_STATUS& /*status*/)
+PVR_ERROR SignalStatus(PVR_SIGNAL_STATUS& status)
 {
-	return PVR_ERROR::PVR_ERROR_NOT_IMPLEMENTED;
+	if(!g_pvrstream) return PVR_ERROR::PVR_ERROR_FAILED;
+
+	// TODO: FILL IN MORE PROPERTIES
+
+	// Kodi expects these values to be based on a range of 0-65535
+	status.iSignal = g_pvrstream->signalstrength() * 655;
+	status.iSNR = g_pvrstream->signaltonoise() * 655;
+
+	return PVR_ERROR::PVR_ERROR_NO_ERROR;
 }
 
 //---------------------------------------------------------------------------

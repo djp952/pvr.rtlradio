@@ -108,6 +108,16 @@ public:
 	// Sets the stream pointer to a specific position
 	virtual long long seek(long long position, int whence) = 0;
 
+	// signalstrength
+	//
+	// Gets the signal strength as a percentage
+	virtual int signalstrength(void) const = 0;
+
+	// signaltonoise
+	//
+	// Gets the signal to noise ratio as a percentage
+	virtual int signaltonoise(void) const = 0;
+
 private:
 
 	pvrstream(pvrstream const&) = delete;

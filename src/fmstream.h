@@ -122,6 +122,16 @@ public:
 	// Sets the stream pointer to a specific position
 	long long seek(long long position, int whence);
 
+	// signalstrength
+	//
+	// Gets the signal strength as a percentage
+	int signalstrength(void) const;
+
+	// signaltonoise
+	//
+	// Gets the signal to noise ratio as a percentage
+	int signaltonoise(void) const;
+
 private:
 
 	fmstream(fmstream const&) = delete;

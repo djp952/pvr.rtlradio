@@ -65,7 +65,8 @@ int const fmstream::STREAM_ID_UECP = 2;
 //	deviceprops		- RTL-SDR device properties
 //	fmprops			- FM signal processor properties
 
-fmstream::fmstream(struct deviceprops const& deviceprops, struct fmprops const& fmprops) : m_blocksize(align::up(DEFAULT_DEVICE_BLOCK_SIZE, 16 KiB)),
+fmstream::fmstream(struct deviceprops const& deviceprops, struct fmprops const& fmprops) : 
+	m_blocksize(align::up(DEFAULT_DEVICE_BLOCK_SIZE, 16 KiB)),
 	m_samplerate(DEFAULT_DEVICE_SAMPLE_RATE), m_pcmsamplerate(fmprops.samplerate),
 	m_buffersize(align::up(DEFAULT_RINGBUFFER_SIZE, 16 KiB))
 {
@@ -293,10 +294,9 @@ DemuxPacket* fmstream::demuxread(std::function<DemuxPacket*(int)> const& allocat
 	std::vector<TYPECPX> samples(available / 2);
 	for(size_t index = 0; index < samples.size(); index++) {
 
-		// NOTE: CuteSdr indicates it expects values in the range of +/-32767 instead of +/-1,
-		// which is being done here.  In practice it doesn't seem to matter so leave it as +/-1
-		samples[index].re = ((static_cast<TYPEREAL>(m_buffer[tail]) - 127.5) / 127.5);
-		samples[index].im = ((static_cast<TYPEREAL>(m_buffer[tail + 1]) - 127.5) / 127.5);
+		// The demodulator expects the I/Q samples in the range of -32767.0 through +32767.0
+		samples[index].re = ((static_cast<TYPEREAL>(m_buffer[tail]) - 127.5) / 127.5) * 32767.0;		// I
+		samples[index].im = ((static_cast<TYPEREAL>(m_buffer[tail + 1]) - 127.5) / 127.5) * 32767.0;	// Q
 
 		tail += 2;								// Increment new tail position
 		if(tail >= m_buffersize) tail = 0;		// Handle buffer rollover
@@ -448,6 +448,42 @@ bool fmstream::realtime(void) const
 long long fmstream::seek(long long /*position*/, int /*whence*/)
 {
 	return -1;
+}
+
+//---------------------------------------------------------------------------
+// fmstream::signalstrength
+//
+// Gets the signal strength as a percentage
+//
+// Arguments:
+//
+//	NONE
+
+int fmstream::signalstrength(void) const
+{
+	// The range provided by the signal meter goes from -300dBm to +3dBm, but the
+	// noise floor of the device seems to be more like -60dBm. I'm certain this
+	// isn't accurate but use a linear scale from -60dBm to 0dBm for strength ...
+	TYPEREAL dbm = static_cast<int>(m_demodulator->GetSMeterAve());
+	
+	if(dbm <= -60.0) return 0;
+	else if(dbm >= 0.0) return 100;
+
+	return static_cast<int>((1.0 - (dbm / -60.0)) * 100.0);
+}
+
+//---------------------------------------------------------------------------
+// fmstream::signaltonoise
+//
+// Gets the signal to noise ratio as a percentage
+//
+// Arguments:
+//
+//	NONE
+
+int fmstream::signaltonoise(void) const
+{
+	return 50;
 }
 
 //---------------------------------------------------------------------------

@@ -42,8 +42,6 @@
 #define  ATTACK_TIMECONST .01	//attack time in seconds
 #define  DECAY_TIMECONST .1		//decay time in seconds
 
-#define SMETER_CALIBRATION 5.0	//S-Meter calibration offset added to make reading absolute dBm
-
 #define MAX_PWR (32767.0*32767.0)
 
 CSMeter::CSMeter()
@@ -99,7 +97,7 @@ TYPEREAL CSMeter::GetPeak()
 {
 	TYPEREAL x = m_PeakMag;
 	m_PeakMag = 0;
-	return x+SMETER_CALIBRATION + m_CalibrationOffset;
+	return x + m_CalibrationOffset;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////
@@ -107,6 +105,6 @@ TYPEREAL CSMeter::GetPeak()
 ////////////////////////////////////////////////////////////////////////////////////
 TYPEREAL CSMeter::GetAve()
 {
-	return m_AverageMag + SMETER_CALIBRATION + m_CalibrationOffset;
+	return m_AverageMag + m_CalibrationOffset;
 }
 
