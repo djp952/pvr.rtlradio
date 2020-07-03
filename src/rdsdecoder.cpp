@@ -23,6 +23,8 @@
 #include "stdafx.h"
 #include "rdsdecoder.h"
 
+#include <memory.h>
+
 #include "fmdsp/rbdsconstants.h"
 
 #pragma warning(push, 4)
