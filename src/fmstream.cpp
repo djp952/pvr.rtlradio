@@ -461,15 +461,21 @@ long long fmstream::seek(long long /*position*/, int /*whence*/)
 
 int fmstream::signalstrength(void) const
 {
-	// The range provided by the signal meter goes from -300dBm to +3dBm, but the
-	// noise floor of the device seems to be more like -60dBm. I'm certain this
-	// isn't accurate but use a linear scale from -60dBm to 0dBm for strength ...
-	TYPEREAL dbm = static_cast<int>(m_demodulator->GetSMeterAve());
-	
-	if(dbm <= -60.0) return 0;
-	else if(dbm >= 0.0) return 100;
+	static const double LN100 = MLOG(100);		// natural log of 100
 
-	return static_cast<int>((1.0 - (dbm / -60.0)) * 100.0);
+	TYPEREAL db = static_cast<int>(m_demodulator->GetSMeterAve());
+
+	// The dynamic range of an 8-bit ADC is 48dB, use anything -48dB or more as 0%,
+	// and anything at or over 0dB as 100% signal strength
+	if(db <= -48.0) return 0;
+	else if(db >= 0.0) return 100;
+
+	// Convert db into a percentage based on a linear scale from -48dB to 0dB
+	db = (1.0 - (db / -48.0)) * 100;
+
+	// While this is certainly not technically accurate, scale the percentage
+	// using a natural logarithm to bump up the value into something realistic
+	return static_cast<int>(MLOG(db) * (100 / LN100));
 }
 
 //---------------------------------------------------------------------------
