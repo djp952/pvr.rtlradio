@@ -66,6 +66,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "rtl_test", "src\rtl_test.vc
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "rtl_sdr", "src\rtl_sdr.vcxproj", "{F616BA5E-F7BF-48E7-B907-BB68863FC8AC}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "rtl_power", "src\rtl_power.vcxproj", "{A2D671A7-80F6-4B10-B353-D3E36C3D0AF0}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -106,6 +108,14 @@ Global
 		{F616BA5E-F7BF-48E7-B907-BB68863FC8AC}.Release|Win32.Build.0 = Release|Win32
 		{F616BA5E-F7BF-48E7-B907-BB68863FC8AC}.Release|x64.ActiveCfg = Release|x64
 		{F616BA5E-F7BF-48E7-B907-BB68863FC8AC}.Release|x64.Build.0 = Release|x64
+		{A2D671A7-80F6-4B10-B353-D3E36C3D0AF0}.Debug|Win32.ActiveCfg = Debug|Win32
+		{A2D671A7-80F6-4B10-B353-D3E36C3D0AF0}.Debug|Win32.Build.0 = Debug|Win32
+		{A2D671A7-80F6-4B10-B353-D3E36C3D0AF0}.Debug|x64.ActiveCfg = Debug|x64
+		{A2D671A7-80F6-4B10-B353-D3E36C3D0AF0}.Debug|x64.Build.0 = Debug|x64
+		{A2D671A7-80F6-4B10-B353-D3E36C3D0AF0}.Release|Win32.ActiveCfg = Release|Win32
+		{A2D671A7-80F6-4B10-B353-D3E36C3D0AF0}.Release|Win32.Build.0 = Release|Win32
+		{A2D671A7-80F6-4B10-B353-D3E36C3D0AF0}.Release|x64.ActiveCfg = Release|x64
+		{A2D671A7-80F6-4B10-B353-D3E36C3D0AF0}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
