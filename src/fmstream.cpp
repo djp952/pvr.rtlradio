@@ -111,7 +111,7 @@ fmstream::fmstream(struct deviceprops const& deviceprops, struct fmprops const& 
 	demodinfo.LowCut = fmprops.lowcut;
 	demodinfo.FreqClickResolution = 100000;				// Not used by demodulator
 	demodinfo.Offset = 0;								// <--- TODO: what does this do?
-	demodinfo.SquelchValue = fmprops.squelch;
+	demodinfo.SquelchValue = -160;						// Not used by demodulator
 	demodinfo.AgcSlope = fmprops.agcslope;
 	demodinfo.AgcThresh = fmprops.agcthresh;
 	demodinfo.AgcManualGain = fmprops.agcmanualgain;

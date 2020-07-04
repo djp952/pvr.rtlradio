@@ -47,7 +47,6 @@ struct fmprops {
 	int			hicut;					// 5000
 	int			lowcut;					// -5000
 	//int			offset;				// 0
-	int			squelch;				// -160
 	int			agcslope;				// 0
 	int			agcthresh;				// -100
 	int			agcmanualgain;			// 30

@@ -1038,7 +1038,6 @@ bool OpenLiveStream(PVR_CHANNEL const& /*channel*/)
 	fmprops.hicut = 5000;
 	fmprops.lowcut = -5000;
 	// fmprops.offset = 0;
-	fmprops.squelch = -160;
 	fmprops.agcslope = 0;
 	fmprops.agcthresh = -100;
 	fmprops.agcmanualgain = 30;
