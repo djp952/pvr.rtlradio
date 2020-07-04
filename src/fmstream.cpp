@@ -489,7 +489,15 @@ int fmstream::signalstrength(void) const
 
 int fmstream::signaltonoise(void) const
 {
-	return 50;
+	TYPEREAL db = static_cast<int>(m_demodulator->GetSMeterAve());
+
+	// The actual SNR is difficult to calculate and track (I tried), so use the
+	// delta between the signal and -44dB (-48dB [ADC] + -4dB [device]) as the SNR
+
+	if(db <= -44.0) return 0;				// No signal
+	else if(db >= 0.0) return 100;			// Maximum signal
+
+	return static_cast<int>((abs(-44.0 - db) * 100) / 44.0);
 }
 
 //---------------------------------------------------------------------------
