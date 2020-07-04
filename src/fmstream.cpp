@@ -461,7 +461,7 @@ long long fmstream::seek(long long /*position*/, int /*whence*/)
 
 int fmstream::signalstrength(void) const
 {
-	static const double LN100 = MLOG(100);		// natural log of 100
+	static const double LN25 = MLOG(25);		// natural log of 25
 
 	TYPEREAL db = static_cast<int>(m_demodulator->GetSMeterAve());
 
@@ -475,7 +475,7 @@ int fmstream::signalstrength(void) const
 
 	// While this is certainly not technically accurate, scale the percentage
 	// using a natural logarithm to bump up the value into something realistic
-	return static_cast<int>(MLOG(db) * (100 / LN100));
+	return static_cast<int>(MLOG(db / 4) * (100 / LN25));
 }
 
 //---------------------------------------------------------------------------
