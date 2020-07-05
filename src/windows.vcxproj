@@ -211,6 +211,7 @@
     <ClInclude Include="fmdsp\smeter.h" />
     <ClInclude Include="fmdsp\ssbdemod.h" />
     <ClInclude Include="fmdsp\wfmdemod.h" />
+    <ClInclude Include="fmscanner.h" />
     <ClInclude Include="fmstream.h" />
     <ClInclude Include="libusb_exception.h" />
     <ClInclude Include="props.h" />
@@ -777,6 +778,7 @@
       <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">4244;4305</DisableSpecificWarnings>
       <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='Release|x64'">4244;4305</DisableSpecificWarnings>
     </ClCompile>
+    <ClCompile Include="fmscanner.cpp" />
     <ClCompile Include="fmstream.cpp" />
     <ClCompile Include="libusb_exception.cpp">
       <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(ProjectDir)..\depends\libusb\src\libusb;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>

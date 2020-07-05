@@ -1033,7 +1033,7 @@ bool OpenLiveStream(PVR_CHANNEL const& /*channel*/)
 	deviceprops.manualgain = settings.device_manual_gain_db;
 
 	// TODO: Everything here needs to be controlled by settings and/or channel information
-	fmprops.centerfrequency = 95100000;
+	fmprops.frequency = 95100000;
 	fmprops.samplerate = 48000;
 	fmprops.hicut = 5000;
 	fmprops.lowcut = -5000;

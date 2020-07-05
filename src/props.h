@@ -26,14 +26,24 @@
 
 #pragma warning(push, 4)
 
+// channelprops
+//
+// Defines properties for a channel detected via a scan
+struct channelprops {
+
+	uint32_t		frequency;		// Station center frequency
+	char const*		callsign;		// Station call sign
+	int				gain;			// Default gain value as 10*dB (i.e. 32.8dB = 328)
+};
+
 // deviceprops
 //
 // Defines RTL-SDR device specific properties
 struct deviceprops {
 
-	uint32_t	samplerate;				// Device sample rate, in hertz
-	bool		agc;					// Enable/disable device automatic gain control
-	int			manualgain;				// Device manual gain value, in decibels
+	uint32_t		samplerate;		// Device sample rate in hertz
+	bool			agc;			// Enable/disable device automatic gain control
+	int				manualgain;		// Device manual gain value as 10*dB (i.e. 32.8dB = 328)
 };
 
 // fmprops
@@ -41,18 +51,18 @@ struct deviceprops {
 // Defines FM Radio DSP specific properties
 struct fmprops {
 
-	uint32_t	centerfrequency;		// Station center frequency
-	uint32_t	samplerate;				// Output sample rate, in hertz
+	uint32_t		frequency;		// Station center frequency
+	uint32_t		samplerate;		// Output sample rate, in hertz
 
-	int			hicut;					// 5000
-	int			lowcut;					// -5000
-	//int			offset;				// 0
-	int			agcslope;				// 0
-	int			agcthresh;				// -100
-	int			agcmanualgain;			// 30
-	int			agcdecay;				// 200
-	bool		agcon;					// true
-	bool		agchangon;				// false
+	int				hicut;			// 5000
+	int				lowcut;			// -5000
+	//int			offset;			// 0
+	int				agcslope;		// 0
+	int				agcthresh;		// -100
+	int				agcmanualgain;	// 30
+	int				agcdecay;		// 200
+	bool			agcon;			// true
+	bool			agchangon;		// false
 };
 
 // hdradioprops
@@ -66,11 +76,11 @@ struct fmprops {
 // Defines stream-specific properties
 struct streamprops {
 
-	char const*		codec;				// Stream codec name
-	int				pid;				// Stream PID
-	int				channels;			// Stream number of channels
-	int				samplerate;			// Stream sample rate
-	int				bitspersample;		// Stream bits per sample
+	char const*		codec;			// Stream codec name
+	int				pid;			// Stream PID
+	int				channels;		// Stream number of channels
+	int				samplerate;		// Stream sample rate
+	int				bitspersample;	// Stream bits per sample
 };
 
 //-----------------------------------------------------------------------------

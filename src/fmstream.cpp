@@ -84,7 +84,7 @@ fmstream::fmstream(struct deviceprops const& deviceprops, struct fmprops const& 
 	// Create and initialize the RTL-SDR device instance
 	m_device = rtldevice::create(rtldevice::DEFAULT_DEVICE_INDEX);
 	uint32_t samplerate = m_device->set_sample_rate(m_samplerate);
-	/*uint32_t frequency =*/ m_device->set_center_frequency(fmprops.centerfrequency);
+	/*uint32_t frequency =*/ m_device->set_center_frequency(fmprops.frequency);
 	m_device->set_bandwidth(200 KHz);		// <-- TODO: 250KHz?
 
 	// Adjust the device gain as specified by the parameters
@@ -497,7 +497,7 @@ int fmstream::signaltonoise(void) const
 	if(db <= -44.0) return 0;				// No signal
 	else if(db >= 0.0) return 100;			// Maximum signal
 
-	return static_cast<int>((abs(-44.0 - db) * 100) / 44.0);
+	return static_cast<int>((fabs(-44.0 - db) * 100) / 44.0);
 }
 
 //---------------------------------------------------------------------------
