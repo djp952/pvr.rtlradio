@@ -1038,12 +1038,6 @@ bool OpenLiveStream(PVR_CHANNEL const& /*channel*/)
 	fmprops.hicut = 5000;
 	fmprops.lowcut = -5000;
 	// fmprops.offset = 0;
-	fmprops.agcslope = 0;
-	fmprops.agcthresh = -100;
-	fmprops.agcmanualgain = 30;
-	fmprops.agcdecay = 200;
-	fmprops.agcon = true;
-	fmprops.agchangon = false;
 
 	try { g_pvrstream = fmstream::create(deviceprops, fmprops); }
 	catch(std::exception& ex) { return handle_stdexception(__func__, ex, false); } 

@@ -78,14 +78,12 @@ fmstream::fmstream(struct deviceprops const& deviceprops, struct fmprops const& 
 	m_buffer = std::unique_ptr<uint8_t[]>(new uint8_t[m_buffersize]);
 	if(!m_buffer) throw std::bad_alloc();
 
-	// TODO: "DC offset" tuning? Can't get that work properly at all yet
 	// TODO: Should the sample rate be matched with the decoder? (1000000 vs 998400, for example)
 
 	// Create and initialize the RTL-SDR device instance
 	m_device = rtldevice::create(rtldevice::DEFAULT_DEVICE_INDEX);
 	uint32_t samplerate = m_device->set_sample_rate(m_samplerate);
-	/*uint32_t frequency =*/ m_device->set_center_frequency(fmprops.frequency);
-	m_device->set_bandwidth(200 KHz);		// <-- TODO: 250KHz?
+	uint32_t frequency = m_device->set_center_frequency(fmprops.frequency + (m_samplerate / 4));	// DC offset
 
 	// Adjust the device gain as specified by the parameters
 	m_device->set_automatic_gain_control(deviceprops.agc);
@@ -112,12 +110,12 @@ fmstream::fmstream(struct deviceprops const& deviceprops, struct fmprops const& 
 	demodinfo.FreqClickResolution = 100000;				// Not used by demodulator
 	demodinfo.Offset = 0;								// <--- TODO: what does this do?
 	demodinfo.SquelchValue = -160;						// Not used by demodulator
-	demodinfo.AgcSlope = fmprops.agcslope;
-	demodinfo.AgcThresh = fmprops.agcthresh;
-	demodinfo.AgcManualGain = fmprops.agcmanualgain;
-	demodinfo.AgcDecay = fmprops.agcdecay;
-	demodinfo.AgcOn = fmprops.agcon;
-	demodinfo.AgcHangOn = fmprops.agchangon;
+	demodinfo.AgcSlope = 0;								// Not used by demodulator
+	demodinfo.AgcThresh = -100;							// Not used by demodulator
+	demodinfo.AgcManualGain = 30;						// Not used by demodulator
+	demodinfo.AgcDecay = 200;							// Not used by demodulator
+	demodinfo.AgcOn = false;							// Not used by demodulator
+	demodinfo.AgcHangOn = false;						// Not used by demodulator
 
 	// Initialize the wideband FM demodulator
 	// TODO: there is quite a bit of "chicken and the egg" stuff with this class, put a new
@@ -127,7 +125,7 @@ fmstream::fmstream(struct deviceprops const& deviceprops, struct fmprops const& 
 	m_demodulator->SetUSFmVersion(true);
 	m_demodulator->SetInputSampleRate(static_cast<TYPEREAL>(samplerate));
 	m_demodulator->SetDemod(DEMOD_WFM, demodinfo);
-	//m_demodulator->SetDemodFreq(frequency);	// <-- TODO: What does this do?
+	m_demodulator->SetDemodFreq(static_cast<TYPEREAL>(frequency - fmprops.frequency));
 
 	// Initialize the output resampler
 	m_resampler = std::unique_ptr<CFractResampler>(new CFractResampler());

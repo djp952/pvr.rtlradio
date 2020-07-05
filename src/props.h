@@ -57,12 +57,6 @@ struct fmprops {
 	int				hicut;			// 5000
 	int				lowcut;			// -5000
 	//int			offset;			// 0
-	int				agcslope;		// 0
-	int				agcthresh;		// -100
-	int				agcmanualgain;	// 30
-	int				agcdecay;		// 200
-	bool			agcon;			// true
-	bool			agchangon;		// false
 };
 
 // hdradioprops
