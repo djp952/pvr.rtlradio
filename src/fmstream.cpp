@@ -78,8 +78,6 @@ fmstream::fmstream(struct deviceprops const& deviceprops, struct fmprops const& 
 	m_buffer = std::unique_ptr<uint8_t[]>(new uint8_t[m_buffersize]);
 	if(!m_buffer) throw std::bad_alloc();
 
-	// TODO: Should the sample rate be matched with the decoder? (1000000 vs 998400, for example)
-
 	// Create and initialize the RTL-SDR device instance
 	m_device = rtldevice::create(rtldevice::DEFAULT_DEVICE_INDEX);
 	uint32_t samplerate = m_device->set_sample_rate(m_samplerate);
@@ -105,10 +103,10 @@ fmstream::fmstream(struct deviceprops const& deviceprops, struct fmprops const& 
 
 	// VARIABLE DEMODULATOR SETTINGS
 	//
-	demodinfo.HiCut = fmprops.hicut;
-	demodinfo.LowCut = fmprops.lowcut;
+	demodinfo.HiCut = 5000;								// Not used by demodulator
+	demodinfo.LowCut = -5000;							// Not used by demodulator
 	demodinfo.FreqClickResolution = 100000;				// Not used by demodulator
-	demodinfo.Offset = 0;								// <--- TODO: what does this do?
+	demodinfo.Offset = 0;
 	demodinfo.SquelchValue = -160;						// Not used by demodulator
 	demodinfo.AgcSlope = 0;								// Not used by demodulator
 	demodinfo.AgcThresh = -100;							// Not used by demodulator
@@ -118,9 +116,6 @@ fmstream::fmstream(struct deviceprops const& deviceprops, struct fmprops const& 
 	demodinfo.AgcHangOn = false;						// Not used by demodulator
 
 	// Initialize the wideband FM demodulator
-	// TODO: there is quite a bit of "chicken and the egg" stuff with this class, put a new
-	// constructor on it that accepts all the proper parameters at once or at least fix the
-	// weird order of operations here ...
 	m_demodulator = std::unique_ptr<CDemodulator>(new CDemodulator());
 	m_demodulator->SetUSFmVersion(true);
 	m_demodulator->SetInputSampleRate(static_cast<TYPEREAL>(samplerate));

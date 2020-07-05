@@ -1035,9 +1035,6 @@ bool OpenLiveStream(PVR_CHANNEL const& /*channel*/)
 	// TODO: Everything here needs to be controlled by settings and/or channel information
 	fmprops.frequency = 95100000;
 	fmprops.samplerate = 48000;
-	fmprops.hicut = 5000;
-	fmprops.lowcut = -5000;
-	// fmprops.offset = 0;
 
 	try { g_pvrstream = fmstream::create(deviceprops, fmprops); }
 	catch(std::exception& ex) { return handle_stdexception(__func__, ex, false); } 

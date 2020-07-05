@@ -53,10 +53,6 @@ struct fmprops {
 
 	uint32_t		frequency;		// Station center frequency
 	uint32_t		samplerate;		// Output sample rate, in hertz
-
-	int				hicut;			// 5000
-	int				lowcut;			// -5000
-	//int			offset;			// 0
 };
 
 // hdradioprops
