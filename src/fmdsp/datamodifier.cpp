@@ -20,10 +20,6 @@ void CDataModifier::Init(TYPEREAL SampleRate)
 	m_SweepAcc = 0.0;
 	m_SweepRateInc = m_SweepRate/m_SampleRate;
 	m_SweepDirUp = true;
-	if(m_SweepStartFrequency>=m_SweepStopFrequency)
-		m_SweepDirUp = true;
-	else
-		m_SweepDirUp = false;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -34,11 +30,6 @@ void CDataModifier::SetSweepStart(int start)
 	m_SweepStartFrequency = (TYPEREAL)start;
 	m_SweepFrequency = m_SweepStartFrequency;
 	m_SweepAcc = 0.0;
-	if(m_SweepStartFrequency>=m_SweepStopFrequency)
-		m_SweepDirUp = true;
-	else
-		m_SweepDirUp = false;
-
 }
 
 void CDataModifier::SetSweepStop(int stop)
@@ -46,10 +37,6 @@ void CDataModifier::SetSweepStop(int stop)
 	m_SweepStopFrequency = (TYPEREAL)stop;
 	m_SweepFrequency = m_SweepStartFrequency;
 	m_SweepAcc = 0.0;
-	if(m_SweepStartFrequency>=m_SweepStopFrequency)
-		m_SweepDirUp = true;
-	else
-		m_SweepDirUp = false;
 }
 
 void CDataModifier::SetSweepRate(TYPEREAL rate)
@@ -61,7 +48,7 @@ void CDataModifier::SetSweepRate(TYPEREAL rate)
 
 void CDataModifier::SetSignalPower( TYPEREAL PwrdB)
 {
-	m_SignalAmplitude = 1.0*MPOW(10.0, PwrdB/20.0);
+	m_SignalAmplitude = 0.5*MPOW(10.0, PwrdB/20.0);
 }
 
 void CDataModifier::SetNoisePower( TYPEREAL NoisedB)
@@ -118,6 +105,10 @@ void CDataModifier::ProcessBlock(TYPECPX* pBuf, int NumSamples)
 			pBuf[i].re += (m_NoiseAmplitude*u1*rad);
 			pBuf[i].im += (m_NoiseAmplitude*u2*rad);
 		}
+		if(m_SweepAcc > K_2PI)	//keep radian counter bounded
+			m_SweepAcc -= K_2PI;
+		else if(m_SweepAcc < K_2PI)
+			m_SweepAcc += K_2PI;
 	}
 	m_SweepAcc = (TYPEREAL)MFMOD((TYPEREAL)m_SweepAcc, K_2PI);	//keep radian counter bounded
 }
