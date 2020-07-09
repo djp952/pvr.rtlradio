@@ -34,6 +34,7 @@
 #include <libKODI_guilib.h>
 #include <libXBMC_pvr.h>
 
+#include "dbtypes.h"
 #include "fmstream.h"
 #include "pvrstream.h"
 #include "string_exception.h"

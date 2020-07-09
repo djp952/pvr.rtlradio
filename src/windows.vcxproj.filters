@@ -38,9 +38,11 @@
     </Filter>
     <Filter Include="External Libraries\rtl-sdr\Header Files">
       <UniqueIdentifier>{19f6cf9e-899a-459e-9960-7fddb823192d}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
     </Filter>
     <Filter Include="External Libraries\rtl-sdr\Source Files">
       <UniqueIdentifier>{98748055-eaa8-490c-bfd9-0a3e3ef969c8}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
     </Filter>
     <Filter Include="Source Files\fmdsp">
       <UniqueIdentifier>{80025ac2-f586-42d0-b4d2-0cb43c338e2b}</UniqueIdentifier>
@@ -50,6 +52,17 @@
     </Filter>
     <Filter Include="Header Files\compat">
       <UniqueIdentifier>{f9548fb9-c133-4c83-850c-1b366fa2a60c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="External Libraries\sqlite">
+      <UniqueIdentifier>{29bd4bed-fde7-459e-b947-cc362aba16c4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="External Libraries\sqlite\Header Files">
+      <UniqueIdentifier>{90a025e2-bacf-4942-89bd-431a24af5d65}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="External Libraries\sqlite\Source Files">
+      <UniqueIdentifier>{aaeb06b2-3a1d-49f0-aeaf-4e5f4dd55457}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -206,6 +219,18 @@
     <ClInclude Include="fmscanner.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\depends\sqlite\sqlite3.h">
+      <Filter>External Libraries\sqlite\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\depends\sqlite\sqlite3ext.h">
+      <Filter>External Libraries\sqlite\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="database.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="dbtypes.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -335,6 +360,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="fmscanner.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\sqlite\sqlite3.c">
+      <Filter>External Libraries\sqlite\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="database.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
