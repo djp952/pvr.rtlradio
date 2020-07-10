@@ -30,10 +30,15 @@
 // CONSTANTS
 //---------------------------------------------------------------------------
 
+// DATABASE_CONNECTIONPOOL_SIZE
+//
+// Specifies the default size of the database connection pool
+static size_t const DATABASE_CONNECTIONPOOL_SIZE = 3;
+
 // DATABASE_SCHEMA_VERSION
 //
 // This value needs to be incremented with any database schema change
-static char const DATABASE_SCHEMA_VERSION[] = "0";
+static char const DATABASE_SCHEMA_VERSION[] = "1";
 
 //---------------------------------------------------------------------------
 

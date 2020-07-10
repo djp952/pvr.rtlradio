@@ -231,6 +231,9 @@
     <ClInclude Include="dbtypes.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="sqlite_exception.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -366,6 +369,9 @@
       <Filter>External Libraries\sqlite\Source Files</Filter>
     </ClCompile>
     <ClCompile Include="database.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="sqlite_exception.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

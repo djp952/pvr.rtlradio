@@ -34,10 +34,12 @@
 #include <libKODI_guilib.h>
 #include <libXBMC_pvr.h>
 
+#include "database.h"
 #include "dbtypes.h"
 #include "fmstream.h"
 #include "pvrstream.h"
 #include "string_exception.h"
+#include "sqlite_exception.h"
 
 #pragma warning(push, 4)
 
@@ -120,6 +122,11 @@ static const PVR_ADDON_CAPABILITIES g_capabilities = {
 	{ { 0, "" } },	// recordingsLifetimeValues
 	false,			// bSupportsAsyncEPGTransfer
 };
+
+// g_connpool
+//
+// Global SQLite database connection pool instance
+static std::shared_ptr<connectionpool> g_connpool;
 
 // g_gui
 //
@@ -330,6 +337,29 @@ ADDON_STATUS ADDON_Create(void* handle, void* props)
 				// Create the global pvr callbacks instance
 				g_pvr.reset(new CHelper_libXBMC_pvr());
 				if(!g_pvr->RegisterMe(handle)) throw string_exception(__func__, ": failed to register pvr addon handle (CHelper_libXBMC_pvr::RegisterMe)");
+
+				try {
+
+					// Generate the local file system and URL-based file names for the PVR database, the file name is based on the version
+					std::string databasefile = std::string(g_userpath.c_str()) + "/rtlradio-v" + DATABASE_SCHEMA_VERSION + ".db";
+					std::string databasefileuri = "file:///" + databasefile;
+
+					// Create the global database connection pool instance
+					try { g_connpool = std::make_shared<connectionpool>(databasefileuri.c_str(), DATABASE_CONNECTIONPOOL_SIZE, SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE | SQLITE_OPEN_URI); } 
+					catch(sqlite_exception const& dbex) {
+
+						log_error(__func__, ": unable to create/open the PVR database ", databasefile, " - ", dbex.what());
+
+						// If any SQLite-specific errors were thrown during database open/create, attempt to delete and recreate the database
+						log_notice(__func__, ": attempting to delete and recreate the PVR database");
+						g_addon->DeleteFile(databasefile.c_str());
+						g_connpool = std::make_shared<connectionpool>(databasefileuri.c_str(), DATABASE_CONNECTIONPOOL_SIZE, SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE | SQLITE_OPEN_URI);
+						log_notice(__func__, ": successfully recreated the PVR database");
+					}
+				}
+
+				// Clean up the pvr callbacks instance on exception
+				catch(...) { g_pvr.reset(); throw; }
 			}
 			
 			// Clean up the gui callbacks instance on exception
@@ -364,6 +394,12 @@ void ADDON_Destroy(void)
 {
 	// Throw a message out to the Kodi log indicating that the add-on is being unloaded
 	log_notice(__func__, ": ", VERSION_PRODUCTNAME_ANSI, " v", VERSION_VERSION3_ANSI, " unloading");
+
+	// Check for more than just the global connection pool reference during shutdown,
+	// there shouldn't still be any active callbacks running during ADDON_Destroy
+	long poolrefs = g_connpool.use_count();
+	if(poolrefs != 1) log_notice(__func__, ": warning: g_connpool.use_count = ", g_connpool.use_count());
+	g_connpool.reset();
 
 	// Destroy the PVR and GUI callback instances
 	g_pvr.reset();
@@ -1034,7 +1070,7 @@ bool OpenLiveStream(PVR_CHANNEL const& /*channel*/)
 	deviceprops.manualgain = settings.device_manual_gain_db;
 
 	// TODO: Everything here needs to be controlled by settings and/or channel information
-	fmprops.frequency = 95100000;
+	fmprops.frequency = 99100000;
 	fmprops.samplerate = 48000;
 
 	try { g_pvrstream = fmstream::create(deviceprops, fmprops); }
