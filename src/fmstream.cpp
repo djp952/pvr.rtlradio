@@ -127,6 +127,9 @@ fmstream::fmstream(struct deviceprops const& deviceprops, struct fmprops const& 
 	m_resampler = std::unique_ptr<CFractResampler>(new CFractResampler());
 	m_resampler->Init(m_demodulator->GetInputBufferLimit());
 
+	// Set the initial time_point from which to calculate PTS values
+	m_ptsstart = std::chrono::high_resolution_clock::now();
+
 	// Create a worker thread on which to perform the transfer operations
 	scalar_condition<bool> started{ false };
 	m_worker = std::thread(&fmstream::transfer, this, std::ref(started));
@@ -240,7 +243,7 @@ DemuxPacket* fmstream::demuxread(std::function<DemuxPacket*(int)> const& allocat
 
 		packet->iStreamId = STREAM_ID_UECP;
 		packet->iSize = packetsize;
-		packet->pts = m_pts;
+		packet->pts = DVD_NOPTS_VALUE;
 
 		// Copy the UECP data into the demultiplexer packet and return it
 		memcpy(packet->pData, uecp_packet.data(), uecp_packet.size());
@@ -266,7 +269,7 @@ DemuxPacket* fmstream::demuxread(std::function<DemuxPacket*(int)> const& allocat
 		// The result from the predicate is true if data available or stopped
 		return ((available >= minreadsize) || (stopped));
 
-	}) == false) return 0;
+	}) == false) return nullptr;
 
 	// If the wait loop was broken by the worker thread stopping, make one more pass
 	// to ensure that no additional data was first written by the thread
@@ -322,10 +325,7 @@ DemuxPacket* fmstream::demuxread(std::function<DemuxPacket*(int)> const& allocat
 	packet->iStreamId = STREAM_ID_AUDIO;
 	packet->iSize = stereopackets * sizeof(TYPESTEREO16);
 	packet->duration = duration;
-	packet->pts = m_pts;
-
-	// Increment the program time stamp value based on the calculated duration
-	m_pts += duration;
+	packet->pts = std::chrono::duration<double, std::micro>(std::chrono::high_resolution_clock::now() - m_ptsstart).count();
 
 	return packet;
 }

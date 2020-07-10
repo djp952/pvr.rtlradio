@@ -137,6 +137,11 @@ private:
 	fmstream(fmstream const&) = delete;
 	fmstream& operator=(fmstream const&) = delete;
 
+	// time_point
+	//
+	// Alias for the high resolution clock time_point
+	using time_point = std::chrono::high_resolution_clock::time_point;
+
 	// DEFAULT_DEVICE_BLOCK_SIZE
 	//
 	// Default device block size
@@ -185,7 +190,7 @@ private:
 	size_t const						m_blocksize;			// Device block size
 	uint32_t const						m_samplerate;			// Device sample rate
 	uint32_t const						m_pcmsamplerate;		// Output sample rate
-	double								m_pts{ 1 US };			// Current program time stamp
+	time_point							m_ptsstart;				// Starting PTS value
 
 	// STREAM CONTROL
 	//
