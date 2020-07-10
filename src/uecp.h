@@ -82,6 +82,7 @@ struct uecp_message {
 #define UECP_MEC_EON_AF				0x14	// Enhanced Other Networks Information
 #define UECP_MEC_SLOW_LABEL_CODES	0x1A	// Slow labeling codes
 #define UECP_MEC_LINKAGE_INFO		0x2E	// Linkage information
+#define UECP_EPP_TM_INFO			0x31	// EPP transmitter information
 
 // Data Set Number
 //

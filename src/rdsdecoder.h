@@ -115,6 +115,16 @@ private:
 	// Decodes RBDS Program Identification (PI)
 	void decode_rbds_programidentification(tRDS_GROUPS const& rdsgroup);
 
+	// decode_trafficprogram
+	//
+	// Decodes Traffic Program / Traffic Announcement (TP/TA)
+	void decode_trafficprogram(tRDS_GROUPS const& rdsgroup);
+
+	// decode_slowlabellingcodes
+	//
+	// Decodes Group Type 1A - Slow Labelling Codes
+	void decode_slowlabellingcodes(tRDS_GROUPS const& rdsgroup);
+
 	//-----------------------------------------------------------------------
 	// Member Variables
 

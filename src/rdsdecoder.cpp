@@ -58,33 +58,7 @@ rdsdecoder::~rdsdecoder()
 
 void rdsdecoder::decode_basictuning(tRDS_GROUPS const& rdsgroup)
 {
-	uint8_t const ta_tp = (((rdsgroup.BlockB & 0x0010) >> 4) || ((rdsgroup.BlockB & 0x0400) >> 9));	// todo, shift first then & like elsewhere; be consistent
 	uint8_t const ps_codebits = rdsgroup.BlockB & 0x03;
-
-	// Indicate a change to the Traffic Announcement / Traffic Program flags
-	if(ta_tp != m_ta_tp) {
-
-		// UECP_MEC_TA_TP
-		//
-		struct uecp_data_frame frame = {};
-		struct uecp_message* message = &frame.msg;
-
-		message->mec = UECP_MEC_TA_TP;
-		message->dsn = UECP_MSG_DSN_CURRENT_SET;
-		message->psn = UECP_MSG_PSN_MAIN;
-
-		// Kodi expects a single byte for TA/TP  at the address of mel_len
-		*reinterpret_cast<uint8_t*>(&message->mel_len) = ta_tp;
-
-		frame.seq = UECP_DF_SEQ_DISABLED;
-		frame.msg_len = 3 + 1;				// mec, dsn, psn + mel_data[1]
-
-		// Convert the UECP data frame into a packet and queue it up
-		m_uecp_packets.emplace(uecp_create_data_packet(frame));
-
-		// Save the current TA/TP flags
-		m_ta_tp = ta_tp;
-	}
 
 	m_ps_data[ps_codebits * 2] = (rdsgroup.BlockD >> 8) & 0xFF;
 	m_ps_data[ps_codebits * 2 + 1]= rdsgroup.BlockD & 0xFF;
@@ -148,7 +122,7 @@ void rdsdecoder::decode_programidentification(tRDS_GROUPS const& rdsgroup)
 		*reinterpret_cast<uint8_t*>(&message->mel_data[0]) = (pi >> 8) & 0xFF;
 
 		frame.seq = UECP_DF_SEQ_DISABLED;
-		frame.msg_len = 4 + 1;				// mec, dsn, psn + mel_data[2]
+		frame.msg_len = 3 + 2;				// mec, dsn, psn + mel_data[2]
 
 		// Convert the UECP data frame into a packet and queue it up
 		m_uecp_packets.emplace(uecp_create_data_packet(frame));
@@ -368,6 +342,39 @@ void rdsdecoder::decode_rbds_programidentification(tRDS_GROUPS const& rdsgroup)
 			m_rbds_callsign[3] = static_cast<char>(static_cast<uint16_t>('A') + char3);
 		}
 
+		// Generate a couple fake UECP packets anytime the PI changes to allow Kodi
+		// to get the internals right for North American broadcasts with RBDS
+		struct uecp_data_frame frame = {};
+		struct uecp_message* message = &frame.msg;
+
+		// UECP_MEC_PI
+		//
+		message->mec = UECP_MEC_PI;
+		message->dsn = UECP_MSG_DSN_CURRENT_SET;
+		message->psn = UECP_MSG_PSN_MAIN;
+
+		// Kodi expects a single word for PI at the address of mel_len
+		*reinterpret_cast<uint8_t*>(&message->mel_len) = 0x10;
+		*reinterpret_cast<uint8_t*>(&message->mel_data[0]) = 0x00;
+
+		frame.seq = UECP_DF_SEQ_DISABLED;
+		frame.msg_len = 3 + 2;				// mec, dsn, psn + mel_data[2]
+
+		// Convert the UECP data frame into a packet and queue it up
+		m_uecp_packets.emplace(uecp_create_data_packet(frame));
+
+		// UECP_EPP_TM_INFO
+		//
+		message->mec = UECP_EPP_TM_INFO;
+		message->dsn = UECP_MSG_DSN_CURRENT_SET;
+		message->psn = 0xA0;				// "US"
+
+		frame.seq = UECP_DF_SEQ_DISABLED;
+		frame.msg_len = 3;					// mec, dsn, psn
+
+		// Convert the UECP data frame into a packet and queue it up
+		m_uecp_packets.emplace(uecp_create_data_packet(frame));
+
 		// Save the current PI flags
 		m_rbds_pi = pi;
 	}
@@ -391,24 +398,18 @@ void rdsdecoder::decode_rdsgroup(tRDS_GROUPS const& rdsgroup)
 	// Determine the group type code
 	uint8_t grouptypecode = (rdsgroup.BlockB >> 12) & 0x0F;
 
-	// Program Identification (RBDS)
+	// Program Identification
 	//
 	if(m_isrbds) decode_rbds_programidentification(rdsgroup);
+	else decode_programidentification(rdsgroup);
 
-	// Program Identification / Program Type (RDS)
+	// Program Type
 	//
-	else {
+	decode_programtype(rdsgroup);
 
-		// TODO: these cycle between 0 and a value (why? bug?) and differ for North America vs.
-		// everywhere else in the world.  Kodi doesn't use PI unless it also gets
-		// "EPP Transmitter Info", whatever that is, so it's only use here may be
-		// for North America to get the call sign of the station. Ignore for now.
-		//
-		// TP should also be handled for every RDS packet, not just as part of Group 0
-		//
-		//decode_programidentification(rdsgroup);
-		//decode_programtype(rdsgroup);
-	}
+	// Traffic Program / Traffic Announcement
+	//
+	decode_trafficprogram(rdsgroup);
 
 	// Invoke the proper handler for the specified group type code
 	switch(grouptypecode) {
@@ -419,11 +420,94 @@ void rdsdecoder::decode_rdsgroup(tRDS_GROUPS const& rdsgroup)
 			decode_basictuning(rdsgroup);
 			break;
 
+		// Group Type 1: Slow Labelling Codes
+		//
+		case 1:
+			decode_slowlabellingcodes(rdsgroup);
+			break;
+
 		// Group Type 2: RadioText
 		//
 		case 2:
 			decode_radiotext(rdsgroup);
 			break;
+	}
+}
+
+//---------------------------------------------------------------------------
+// rdsdecoder::decode_slowlabellingcodes
+//
+// Decodes Group 1A - Slow Labelling Codes
+//
+// Arguments:
+//
+//	rdsgroup	- RDS group to be processed
+
+void rdsdecoder::decode_slowlabellingcodes(tRDS_GROUPS const& rdsgroup)
+{
+	// Determine if this is Group A or Group B data
+	bool const groupa = ((rdsgroup.BlockB & 0x0800) == 0x0000);
+
+	if(groupa) {
+
+		// UECP_MEC_SLOW_LABEL_CODES
+		//
+		struct uecp_data_frame frame = {};
+		struct uecp_message* message = &frame.msg;
+
+		message->mec = UECP_MEC_SLOW_LABEL_CODES;
+		message->dsn = UECP_MSG_DSN_CURRENT_SET;
+		//message->psn = UECP_MSG_PSN_MAIN;
+
+		// For whatever reason, Kodi expects the high byte of the data to 
+		// be in the message PSN field -- could be a bug in Kodi, but whatever
+		message->psn = ((rdsgroup.BlockC >> 8) & 0xFF);
+		*reinterpret_cast<uint8_t*>(&message->mel_len) = (rdsgroup.BlockC & 0xFF);
+
+		frame.seq = UECP_DF_SEQ_DISABLED;
+		frame.msg_len = 3 + 1;				// mec, dsn, psn + mel_data[1]
+
+		// Convert the UECP data frame into a packet and queue it up
+		m_uecp_packets.emplace(uecp_create_data_packet(frame));
+	}
+}
+
+//---------------------------------------------------------------------------
+// rdsdecoder::decode_trafficprogram
+//
+// Decodes Traffic Program / Traffic Announcement (TP/TA)
+//
+// Arguments:
+//
+//	rdsgroup	- RDS group to be processed
+
+void rdsdecoder::decode_trafficprogram(tRDS_GROUPS const& rdsgroup)
+{
+	uint8_t const ta_tp = (((rdsgroup.BlockB & 0x0010) >> 4) || ((rdsgroup.BlockB & 0x0400) >> 9));
+
+	// Indicate a change to the Traffic Announcement / Traffic Program flags
+	if(ta_tp != m_ta_tp) {
+
+		// UECP_MEC_TA_TP
+		//
+		struct uecp_data_frame frame = {};
+		struct uecp_message* message = &frame.msg;
+
+		message->mec = UECP_MEC_TA_TP;
+		message->dsn = UECP_MSG_DSN_CURRENT_SET;
+		message->psn = UECP_MSG_PSN_MAIN;
+
+		// Kodi expects a single byte for TA/TP  at the address of mel_len
+		*reinterpret_cast<uint8_t*>(&message->mel_len) = ta_tp;
+
+		frame.seq = UECP_DF_SEQ_DISABLED;
+		frame.msg_len = 3 + 1;				// mec, dsn, psn + mel_data[1]
+
+		// Convert the UECP data frame into a packet and queue it up
+		m_uecp_packets.emplace(uecp_create_data_packet(frame));
+
+		// Save the current TA/TP flags
+		m_ta_tp = ta_tp;
 	}
 }
 
