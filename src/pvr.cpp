@@ -109,7 +109,7 @@ static const PVR_ADDON_CAPABILITIES g_capabilities = {
 	false,			// bSupportsTimers
 	false,			// bSupportsChannelGroups
 	false,			// bSupportsChannelScan
-	false,			// bSupportsChannelSettings
+	true,			// bSupportsChannelSettings
 	true,			// bHandlesInputStream
 	true,			// bHandlesDemuxing
 	false,			// bSupportsRecordingPlayCount
@@ -708,8 +708,9 @@ PVR_ERROR OpenDialogChannelScan(void)
 
 int GetChannelsAmount(void)
 {
-	// TODO: DUMMY DATA
-	return 1;
+	try { return get_channel_count(connectionpool::handle(g_connpool)); }
+	catch(std::exception& ex) { return handle_stdexception(__func__, ex, -1); }
+	catch(...) { return handle_generalexception(__func__, -1); }
 }
 
 //---------------------------------------------------------------------------
@@ -724,22 +725,42 @@ int GetChannelsAmount(void)
 
 PVR_ERROR GetChannels(ADDON_HANDLE handle, bool radio)
 {
-	assert(g_pvr);
+	assert(g_pvr);	
 
 	if(handle == nullptr) return PVR_ERROR::PVR_ERROR_INVALID_PARAMETERS;
 
-	// This PVR only supports radio channels
-	if(radio == false) return PVR_ERROR::PVR_ERROR_NO_ERROR;
+	// The PVR only supports radio channels
+	if(!radio) return PVR_ERROR::PVR_ERROR_NO_ERROR;
 
-	// TODO: DUMMY DATA
-	PVR_CHANNEL dummyChannel = {};
-	dummyChannel.iUniqueId = 12345678;
-	dummyChannel.bIsRadio = true;
-	dummyChannel.iChannelNumber = 95;
-	dummyChannel.iSubChannelNumber = 1;
-	snprintf(dummyChannel.strChannelName, std::extent<decltype(dummyChannel.strChannelName)>::value, "RTLSDR");
+	try {
 
-	g_pvr->TransferChannelEntry(handle, &dummyChannel);
+		// Enumerate all of the channels in the database
+		enumerate_channels(connectionpool::handle(g_connpool), [&](struct channel const& item) -> void {
+
+			PVR_CHANNEL channel = {};
+
+			// iUniqueId (required)
+			channel.iUniqueId = item.id;
+
+			// bIsRadio (required)
+			channel.bIsRadio = true;
+
+			// iChannelNumber
+			channel.iChannelNumber = item.channel;
+
+			// iSubChannelNumber
+			channel.iSubChannelNumber = item.subchannel;
+
+			// strChannelName
+			if(item.name != nullptr) snprintf(channel.strChannelName, std::extent<decltype(channel.strChannelName)>::value, "%s", item.name);
+
+			// Transfer the PVR_CHANNEL structure over to Kodi
+			g_pvr->TransferChannelEntry(handle, &channel);
+		});
+	}
+	
+	catch(std::exception& ex) { return handle_stdexception(__func__, ex, PVR_ERROR::PVR_ERROR_FAILED); }
+	catch(...) { return handle_generalexception(__func__, PVR_ERROR::PVR_ERROR_FAILED); }
 
 	return PVR_ERROR::PVR_ERROR_NO_ERROR;
 }
@@ -753,9 +774,13 @@ PVR_ERROR GetChannels(ADDON_HANDLE handle, bool radio)
 //
 //	channel		- The channel to delete
 
-PVR_ERROR DeleteChannel(PVR_CHANNEL const& /*channel*/)
+PVR_ERROR DeleteChannel(PVR_CHANNEL const& channel)
 {
-	return PVR_ERROR::PVR_ERROR_NOT_IMPLEMENTED;
+	try { delete_channel(connectionpool::handle(g_connpool), channel.iUniqueId); }
+	catch(std::exception& ex) { return handle_stdexception(__func__, ex, PVR_ERROR::PVR_ERROR_FAILED); }
+	catch(...) { return handle_generalexception(__func__, PVR_ERROR::PVR_ERROR_FAILED); }
+
+	return PVR_ERROR::PVR_ERROR_NO_ERROR;
 }
 
 //---------------------------------------------------------------------------
@@ -767,9 +792,13 @@ PVR_ERROR DeleteChannel(PVR_CHANNEL const& /*channel*/)
 //
 //	channel		- The channel to rename, containing the new channel name
 
-PVR_ERROR RenameChannel(PVR_CHANNEL const& /*channel*/)
+PVR_ERROR RenameChannel(PVR_CHANNEL const& channel)
 {
-	return PVR_ERROR::PVR_ERROR_NOT_IMPLEMENTED;
+	try { rename_channel(connectionpool::handle(g_connpool), channel.iUniqueId, channel.strChannelName); }
+	catch(std::exception& ex) { return handle_stdexception(__func__, ex, PVR_ERROR::PVR_ERROR_FAILED); }
+	catch(...) { return handle_generalexception(__func__, PVR_ERROR::PVR_ERROR_FAILED); }
+
+	return PVR_ERROR::PVR_ERROR_NO_ERROR;
 }
 
 //---------------------------------------------------------------------------

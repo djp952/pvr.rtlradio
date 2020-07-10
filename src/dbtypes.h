@@ -41,6 +41,21 @@ static size_t const DATABASE_CONNECTIONPOOL_SIZE = 3;
 static char const DATABASE_SCHEMA_VERSION[] = "1";
 
 //---------------------------------------------------------------------------
+// DATA TYPES
+//---------------------------------------------------------------------------
+
+// channel
+//
+// Information about a single channel enumerated from the database
+struct channel {
+	
+	unsigned int		id;
+	unsigned int		channel;
+	unsigned int		subchannel;
+	char const*			name;
+};
+
+//---------------------------------------------------------------------------
 
 #pragma warning(pop)
 

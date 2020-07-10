@@ -34,6 +34,15 @@
 #pragma warning(push, 4)
 
 //---------------------------------------------------------------------------
+// DATA TYPES
+//---------------------------------------------------------------------------
+
+// enumerate_channels_callback
+//
+// Callback function passed to enumerate_channels
+using enumerate_channels_callback = std::function<void(struct channel const& channel)>;
+
+//---------------------------------------------------------------------------
 // connectionpool
 //
 // Implements a connection pool for the SQLite database connections
@@ -122,11 +131,31 @@ private:
 // Creates a SQLite database instance handle
 void close_database(sqlite3* instance);
 
+// delete_channel
+//
+// Deletes a channel from the database
+void delete_channel(sqlite3* instance, unsigned int id);
+
+// enumerate_channels
+//
+// Enumerates the available channels
+void enumerate_channels(sqlite3* instance, enumerate_channels_callback const& callback);
+
+// get_channel_count
+//
+// Gets the number of available channels in the database
+int get_channel_count(sqlite3* instance);
+
 // open_database
 //
 // Opens a handle to the backend SQLite database
 sqlite3* open_database(char const* connstring, int flags);
 sqlite3* open_database(char const* connstring, int flags, bool initialize);
+
+// rename_channel
+//
+// Renames a channel in the database
+void rename_channel(sqlite3* instance, unsigned int id, char const* newname);
 
 //---------------------------------------------------------------------------
 
