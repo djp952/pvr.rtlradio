@@ -68,7 +68,8 @@ int const fmstream::STREAM_ID_UECP = 2;
 fmstream::fmstream(struct deviceprops const& deviceprops, struct fmprops const& fmprops) : 
 	m_blocksize(align::up(DEFAULT_DEVICE_BLOCK_SIZE, 16 KiB)),
 	m_samplerate(DEFAULT_DEVICE_SAMPLE_RATE), m_pcmsamplerate(fmprops.samplerate),
-	m_buffersize(align::up(DEFAULT_RINGBUFFER_SIZE, 16 KiB))
+	m_buffersize(align::up(DEFAULT_RINGBUFFER_SIZE, 16 KiB)),
+	m_rdsdecoder(true)		// <--- todo: fmprops setting
 {
 	// The only allowable output sample rates for this stream are 44100Hz and 48000Hz
 	if((m_pcmsamplerate != 44100) && (m_pcmsamplerate != 48000))
@@ -117,7 +118,7 @@ fmstream::fmstream(struct deviceprops const& deviceprops, struct fmprops const& 
 
 	// Initialize the wideband FM demodulator
 	m_demodulator = std::unique_ptr<CDemodulator>(new CDemodulator());
-	m_demodulator->SetUSFmVersion(true);
+	m_demodulator->SetUSFmVersion(true);		// <--- todo: fmprops setting
 	m_demodulator->SetInputSampleRate(static_cast<TYPEREAL>(samplerate));
 	m_demodulator->SetDemod(DEMOD_WFM, demodinfo);
 	m_demodulator->SetDemodFreq(static_cast<TYPEREAL>(frequency - fmprops.frequency));

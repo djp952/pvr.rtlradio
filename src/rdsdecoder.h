@@ -26,6 +26,7 @@
 
 #include <array>
 #include <queue>
+#include <string>
 
 #include "fmdsp/demodulator.h"
 #include "uecp.h"
@@ -44,7 +45,7 @@ public:
 
 	// Instance Constructor
 	//
-	rdsdecoder();
+	rdsdecoder(bool isrbds);
 
 	// Destructor
 	//
@@ -57,6 +58,16 @@ public:
 	//
 	// Decodes the next RDS group
 	void decode_rdsgroup(tRDS_GROUPS const& rdsgroup);
+
+	// get_rdbs_callsign
+	//
+	// Retrieves the RBDS call sign (if present)
+	std::string get_rbds_callsign(void) const;
+	
+	// has_rbds_callsign
+	//
+	// Flag indicating that the RDBS call sign has been decoded
+	bool has_rbds_callsign(void) const;
 
 	// pop_uecp_data_packet
 	//
@@ -84,17 +95,39 @@ private:
 	// Decodes Group Type 0A and 0B - Basic Tuning and switching information
 	void decode_basictuning(tRDS_GROUPS const& rdsgroup);
 
+	// decode_programidentification
+	//
+	// Decodes Program Identification (PI)
+	void decode_programidentification(tRDS_GROUPS const& rdsgroup);
+
+	// decode_programtype
+	//
+	// Decodes Program Type (PTY)
+	void decode_programtype(tRDS_GROUPS const& rdsgroup);
+
 	// decode_radiotext
 	//
 	// Decodes Group Type 2A and 2B - RadioText
 	void decode_radiotext(tRDS_GROUPS const& rdsgroup);
 
+	// decode_rbds_programidentification
+	//
+	// Decodes RBDS Program Identification (PI)
+	void decode_rbds_programidentification(tRDS_GROUPS const& rdsgroup);
+
 	//-----------------------------------------------------------------------
 	// Member Variables
 
+	const bool					m_isrbds;				// RBDS vs RDS flag
+
 	// UECP
 	//
-	uecp_packet_queue			m_uecp_packets;		// Queued UECP packets
+	uecp_packet_queue			m_uecp_packets;			// Queued UECP packets
+
+	// GENERAL
+	//
+	uint16_t					m_pi = 0x0000;			// PI indicator
+	uint8_t						m_pty = 0x00;			// PTY indicator
 
 	// GROUP 0 - BASIC TUNING AND SWITCHING INFORMATION
 	//
@@ -108,6 +141,11 @@ private:
 	uint16_t					m_rt_ready = 0x0000;	// RadioText ready indicator
 	uint8_t						m_rt_ab = 0x00;			// RadioText A/B flag
 	std::array<uint8_t, 64>		m_rt_data;				// RadioText data
+
+	// RBDS
+	//
+	uint16_t					m_rbds_pi = 0x0000;		// RDBS PI indicator
+	std::array<char, 4>			m_rbds_callsign;		// RDBS station call sign
 };
 
 //-----------------------------------------------------------------------------

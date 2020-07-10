@@ -23,8 +23,6 @@
 #include "stdafx.h"
 #include "rdsdecoder.h"
 
-#include <memory.h>
-
 #include "fmdsp/rbdsconstants.h"
 
 #pragma warning(push, 4)
@@ -34,9 +32,9 @@
 //
 // Arguments:
 //
-//	NONE
+//	isrbds		- Flag if input will be RBDS (North America) or RDS
 
-rdsdecoder::rdsdecoder()
+rdsdecoder::rdsdecoder(bool isrbds) : m_isrbds(isrbds)
 {
 	m_ps_data.fill(0x00);				// Initialize PS buffer
 	m_rt_data.fill(0x00);				// Initialize RT buffer
@@ -60,7 +58,7 @@ rdsdecoder::~rdsdecoder()
 
 void rdsdecoder::decode_basictuning(tRDS_GROUPS const& rdsgroup)
 {
-	uint8_t const ta_tp = (((rdsgroup.BlockB & 0x0010) >> 4) || ((rdsgroup.BlockB & 0x0400) >> 9));
+	uint8_t const ta_tp = (((rdsgroup.BlockB & 0x0010) >> 4) || ((rdsgroup.BlockB & 0x0400) >> 9));	// todo, shift first then & like elsewhere; be consistent
 	uint8_t const ps_codebits = rdsgroup.BlockB & 0x03;
 
 	// Indicate a change to the Traffic Announcement / Traffic Program flags
@@ -121,6 +119,85 @@ void rdsdecoder::decode_basictuning(tRDS_GROUPS const& rdsgroup)
 }
 
 //---------------------------------------------------------------------------
+// rdsdecoder::decode_programidentification
+//
+// Decodes Program Identification (PI)
+//
+// Arguments:
+//
+//	rdsgroup	- RDS group to be processed
+
+void rdsdecoder::decode_programidentification(tRDS_GROUPS const& rdsgroup)
+{
+	uint16_t const pi = rdsgroup.BlockA;
+
+	// Indicate a change to the Program Identification flags
+	if(pi != m_pi) {
+
+		// UECP_MEC_PI
+		//
+		struct uecp_data_frame frame = {};
+		struct uecp_message* message = &frame.msg;
+
+		message->mec = UECP_MEC_PI;
+		message->dsn = UECP_MSG_DSN_CURRENT_SET;
+		message->psn = UECP_MSG_PSN_MAIN;
+
+		// Kodi expects a single word for PI at the address of mel_len
+		*reinterpret_cast<uint8_t*>(&message->mel_len) = pi & 0xFF;
+		*reinterpret_cast<uint8_t*>(&message->mel_data[0]) = (pi >> 8) & 0xFF;
+
+		frame.seq = UECP_DF_SEQ_DISABLED;
+		frame.msg_len = 4 + 1;				// mec, dsn, psn + mel_data[2]
+
+		// Convert the UECP data frame into a packet and queue it up
+		m_uecp_packets.emplace(uecp_create_data_packet(frame));
+
+		// Save the current PI flags
+		m_pi = pi;
+	}
+}
+
+//---------------------------------------------------------------------------
+// rdsdecoder::decode_programtype
+//
+// Decodes Program Type (PTY)
+//
+// Arguments:
+//
+//	rdsgroup	- RDS group to be processed
+
+void rdsdecoder::decode_programtype(tRDS_GROUPS const& rdsgroup)
+{
+	uint8_t const pty = (rdsgroup.BlockB >> 5) & 0x1F;
+
+	// Indicate a change to the Program Type flags
+	if(pty != m_pty) {
+
+		// UECP_MEC_PTY
+		//
+		struct uecp_data_frame frame = {};
+		struct uecp_message* message = &frame.msg;
+
+		message->mec = UECP_MEC_PTY;
+		message->dsn = UECP_MSG_DSN_CURRENT_SET;
+		message->psn = UECP_MSG_PSN_MAIN;
+
+		// Kodi expects a single byte for PTY at the address of mel_len
+		*reinterpret_cast<uint8_t*>(&message->mel_len) = pty;
+
+		frame.seq = UECP_DF_SEQ_DISABLED;
+		frame.msg_len = 3 + 1;				// mec, dsn, psn + mel_data[1]
+
+		// Convert the UECP data frame into a packet and queue it up
+		m_uecp_packets.emplace(uecp_create_data_packet(frame));
+
+		// Save the current PTY flags
+		m_pty = pty;
+	}
+}
+
+//---------------------------------------------------------------------------
 // rdsdecoder::decode_radiotext
 //
 // Decodes Group Type 2A and 2B - RadioText
@@ -134,8 +211,8 @@ void rdsdecoder::decode_radiotext(tRDS_GROUPS const& rdsgroup)
 	bool hascr = false;				// Flag if carriage return detected
 
 	// Get the text segment address and A/B indicators from the data
-	uint8_t textsegmentaddress = (rdsgroup.BlockB & 0x000F);
-	uint8_t const ab = ((rdsgroup.BlockB & 0x0010) >> 4);
+	uint8_t textsegmentaddress = rdsgroup.BlockB & 0x000F;
+	uint8_t const ab = (rdsgroup.BlockB >> 4) & 0x01;
 
 	// Set the initial A/B flag the first time it's been seen
 	if(!m_rt_init) { m_rt_ab = ab; m_rt_init = true; }
@@ -226,6 +303,77 @@ void rdsdecoder::decode_radiotext(tRDS_GROUPS const& rdsgroup)
 }
 
 //---------------------------------------------------------------------------
+// rdsdecoder::decode_rbds_programidentification
+//
+// Decodes RBDS Program Identification (PI)
+//
+// Arguments:
+//
+//	rdsgroup	- RDS group to be processed
+
+void rdsdecoder::decode_rbds_programidentification(tRDS_GROUPS const& rdsgroup)
+{
+	uint16_t const pi = rdsgroup.BlockA;
+
+	// TODO: This is a rudimentary implementation that does not take into account
+	// Canada, Mexico, and a whole host of special cases .. US only for now
+
+	// Indicate a change to the Program Identification flags
+	if(pi != m_rbds_pi) {
+
+		m_rbds_callsign.fill(0x00);
+
+		// USA 3-LETTER-ONLY (ref: NRSC-4-B 04.2011 Table D.7)
+		//
+		if((pi >= 0x9950) && (pi <= 0x9EFF)) {
+
+			// The 3-letter only callsigns are static and represented in a lookup table
+			for(auto const iterator : CALL3TABLE) {
+
+				if(iterator.pi == pi) {
+
+					m_rbds_callsign[0] = iterator.csign[0];
+					m_rbds_callsign[1] = iterator.csign[1];
+					m_rbds_callsign[2] = iterator.csign[2];
+					break;
+				}
+			}
+		}
+
+		// USA EAST (Wxxx)
+		//
+		else if((pi >= 21672) && (pi <= 39247)) {
+
+			uint16_t char1 = (pi - 21672) / 676;
+			uint16_t char2 = ((pi - 21672) - (char1 * 676)) / 26;
+			uint16_t char3 = ((pi - 21672) - (char1 * 676) - (char2 * 26));
+
+			m_rbds_callsign[0] = 'W';
+			m_rbds_callsign[1] = static_cast<char>(static_cast<uint16_t>('A') + char1);
+			m_rbds_callsign[2] = static_cast<char>(static_cast<uint16_t>('A') + char2);
+			m_rbds_callsign[3] = static_cast<char>(static_cast<uint16_t>('A') + char3);
+		}
+
+		// USA WEST (Kxxx)
+		//
+		else if((pi >= 4096) && (pi <= 21671)) {
+
+			uint16_t char1 = (pi - 4096) / 676;
+			uint16_t char2 = ((pi - 4096) - (char1 * 676)) / 26;
+			uint16_t char3 = ((pi - 4096) - (char1 * 676) - (char2 * 26));
+
+			m_rbds_callsign[0] = 'K';
+			m_rbds_callsign[1] = static_cast<char>(static_cast<uint16_t>('A') + char1);
+			m_rbds_callsign[2] = static_cast<char>(static_cast<uint16_t>('A') + char2);
+			m_rbds_callsign[3] = static_cast<char>(static_cast<uint16_t>('A') + char3);
+		}
+
+		// Save the current PI flags
+		m_rbds_pi = pi;
+	}
+}
+
+//---------------------------------------------------------------------------
 // rdsdecoder::decode_rdsgroup
 //
 // Decodes the next RDS group
@@ -236,8 +384,31 @@ void rdsdecoder::decode_radiotext(tRDS_GROUPS const& rdsgroup)
 
 void rdsdecoder::decode_rdsgroup(tRDS_GROUPS const& rdsgroup)
 {
+	// Ignore spurious RDS packets that contain no data
+	// todo: figure out how this happens; could be a bug in the FM DSP
+	if((rdsgroup.BlockA == 0x0000) && (rdsgroup.BlockB == 0x0000) && (rdsgroup.BlockC == 0x0000) && (rdsgroup.BlockD == 0x0000)) return;
+
 	// Determine the group type code
-	uint8_t grouptypecode = (rdsgroup.BlockB & 0xF000) >> 12;
+	uint8_t grouptypecode = (rdsgroup.BlockB >> 12) & 0x0F;
+
+	// Program Identification (RBDS)
+	//
+	if(m_isrbds) decode_rbds_programidentification(rdsgroup);
+
+	// Program Identification / Program Type (RDS)
+	//
+	else {
+
+		// TODO: these cycle between 0 and a value (why? bug?) and differ for North America vs.
+		// everywhere else in the world.  Kodi doesn't use PI unless it also gets
+		// "EPP Transmitter Info", whatever that is, so it's only use here may be
+		// for North America to get the call sign of the station. Ignore for now.
+		//
+		// TP should also be handled for every RDS packet, not just as part of Group 0
+		//
+		//decode_programidentification(rdsgroup);
+		//decode_programtype(rdsgroup);
+	}
 
 	// Invoke the proper handler for the specified group type code
 	switch(grouptypecode) {
@@ -254,6 +425,34 @@ void rdsdecoder::decode_rdsgroup(tRDS_GROUPS const& rdsgroup)
 			decode_radiotext(rdsgroup);
 			break;
 	}
+}
+
+//---------------------------------------------------------------------------
+// rdsdecoder::get_rdbs_callsign
+//
+// Retrieves the RBDS call sign (if present)
+//
+// Arguments:
+//
+//	NONE
+
+std::string rdsdecoder::get_rbds_callsign(void) const
+{
+	return std::string(m_rbds_callsign.begin(), m_rbds_callsign.end());
+}
+
+//---------------------------------------------------------------------------
+// rdsdecoder::has_rbds_callsign
+//
+// Flag indicating that the RDBS call sign has been decoded
+//
+// Arguments:
+//
+//	NONE
+
+bool rdsdecoder::has_rbds_callsign(void) const
+{
+	return m_rbds_callsign[0] != '\0';
 }
 
 //---------------------------------------------------------------------------
