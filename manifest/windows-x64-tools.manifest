@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<zip>
+  <file path="rtl_adsb.exe" source="out\windows-x64\Release\rtl_adsb.exe"/>
+  <file path="rtl_eeprom.exe" source="out\windows-x64\Release\rtl_eeprom.exe"/>
+  <file path="rtl_fm.exe" source="out\windows-x64\Release\rtl_fm.exe"/>
+  <file path="rtl_power.exe" source="out\windows-x64\Release\rtl_power.exe"/>
+  <file path="rtl_sdr.exe" source="out\windows-x64\Release\rtl_sdr.exe"/>
+  <file path="rtl_tcp.exe" source="out\windows-x64\Release\rtl_tcp.exe"/>
+  <file path="rtl_test.exe" source="out\windows-x64\Release\rtl_test.exe"/>
+  <file path="sqlite3.exe" source="out\windows-x64\Release\sqlite3.exe"/>
+</zip>

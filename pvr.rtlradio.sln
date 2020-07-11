@@ -39,17 +39,29 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "version", "src\version.vcxp
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "manifest", "manifest", "{03E257C2-B115-4D59-AB37-DB0AD52F5366}"
 	ProjectSection(SolutionItems) = preProject
+		manifest\android-aarch64-tools.manifest = manifest\android-aarch64-tools.manifest
 		manifest\android-aarch64.manifest = manifest\android-aarch64.manifest
+		manifest\android-arm-tools.manifest = manifest\android-arm-tools.manifest
 		manifest\android-arm.manifest = manifest\android-arm.manifest
+		manifest\android-x86-tools.manifest = manifest\android-x86-tools.manifest
 		manifest\android-x86.manifest = manifest\android-x86.manifest
+		manifest\linux-aarch64-tools.manifest = manifest\linux-aarch64-tools.manifest
 		manifest\linux-aarch64.manifest = manifest\linux-aarch64.manifest
+		manifest\linux-armel-tools.manifest = manifest\linux-armel-tools.manifest
 		manifest\linux-armel.manifest = manifest\linux-armel.manifest
+		manifest\linux-armhf-tools.manifest = manifest\linux-armhf-tools.manifest
 		manifest\linux-armhf.manifest = manifest\linux-armhf.manifest
+		manifest\linux-i686-tools.manifest = manifest\linux-i686-tools.manifest
 		manifest\linux-i686.manifest = manifest\linux-i686.manifest
+		manifest\linux-x86_64-tools.manifest = manifest\linux-x86_64-tools.manifest
 		manifest\linux-x86_64.manifest = manifest\linux-x86_64.manifest
+		manifest\osx-x86_64-tools.manifest = manifest\osx-x86_64-tools.manifest
 		manifest\osx-x86_64.manifest = manifest\osx-x86_64.manifest
+		manifest\raspbian-armhf-tools.manifest = manifest\raspbian-armhf-tools.manifest
 		manifest\raspbian-armhf.manifest = manifest\raspbian-armhf.manifest
+		manifest\windows-win32-tools.manifest = manifest\windows-win32-tools.manifest
 		manifest\windows-win32.manifest = manifest\windows-win32.manifest
+		manifest\windows-x64-tools.manifest = manifest\windows-x64-tools.manifest
 		manifest\windows-x64.manifest = manifest\windows-x64.manifest
 	EndProjectSection
 EndProject
@@ -81,6 +93,8 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "rtl_eeprom", "src\rtl_eeprom.vcxproj", "{EB2B389B-770C-49AC-8122-A1630AE1EF3B}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "rtl_adsb", "src\rtl_adsb.vcxproj", "{0702FDF8-DB5B-43B3-96B0-E0AC2EEF8170}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "sqlite3", "src\sqlite3.vcxproj", "{FB973A22-FC5B-437A-8EA0-B4F1397A0E13}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -162,6 +176,14 @@ Global
 		{0702FDF8-DB5B-43B3-96B0-E0AC2EEF8170}.Release|Win32.Build.0 = Release|Win32
 		{0702FDF8-DB5B-43B3-96B0-E0AC2EEF8170}.Release|x64.ActiveCfg = Release|x64
 		{0702FDF8-DB5B-43B3-96B0-E0AC2EEF8170}.Release|x64.Build.0 = Release|x64
+		{FB973A22-FC5B-437A-8EA0-B4F1397A0E13}.Debug|Win32.ActiveCfg = Debug|Win32
+		{FB973A22-FC5B-437A-8EA0-B4F1397A0E13}.Debug|Win32.Build.0 = Debug|Win32
+		{FB973A22-FC5B-437A-8EA0-B4F1397A0E13}.Debug|x64.ActiveCfg = Debug|x64
+		{FB973A22-FC5B-437A-8EA0-B4F1397A0E13}.Debug|x64.Build.0 = Debug|x64
+		{FB973A22-FC5B-437A-8EA0-B4F1397A0E13}.Release|Win32.ActiveCfg = Release|Win32
+		{FB973A22-FC5B-437A-8EA0-B4F1397A0E13}.Release|Win32.Build.0 = Release|Win32
+		{FB973A22-FC5B-437A-8EA0-B4F1397A0E13}.Release|x64.ActiveCfg = Release|x64
+		{FB973A22-FC5B-437A-8EA0-B4F1397A0E13}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

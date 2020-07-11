@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<zip>
+  <file path="rtl_adsb" source="out\linux-armhf\rtl_adsb"/>
+  <file path="rtl_eeprom" source="out\linux-armhf\rtl_eeprom"/>
+  <file path="rtl_fm" source="out\linux-armhf\rtl_fm"/>
+  <file path="rtl_power" source="out\linux-armhf\rtl_power"/>
+  <file path="rtl_sdr" source="out\linux-armhf\rtl_sdr"/>
+  <file path="rtl_tcp" source="out\linux-armhf\rtl_tcp"/>
+  <file path="rtl_test" source="out\linux-armhf\rtl_test"/>
+  <file path="sqlite3" source="out\linux-armhf\sqlite3"/>
+</zip>

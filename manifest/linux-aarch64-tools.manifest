@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<zip>
+  <file path="rtl_adsb" source="out\linux-aarch64\rtl_adsb"/>
+  <file path="rtl_eeprom" source="out\linux-aarch64\rtl_eeprom"/>
+  <file path="rtl_fm" source="out\linux-aarch64\rtl_fm"/>
+  <file path="rtl_power" source="out\linux-aarch64\rtl_power"/>
+  <file path="rtl_sdr" source="out\linux-aarch64\rtl_sdr"/>
+  <file path="rtl_tcp" source="out\linux-aarch64\rtl_tcp"/>
+  <file path="rtl_test" source="out\linux-aarch64\rtl_test"/>
+  <file path="sqlite3" source="out\linux-aarch64\sqlite3"/>
+</zip>
