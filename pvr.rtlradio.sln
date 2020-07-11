@@ -76,6 +76,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "rtl_power", "src\rtl_power.
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "rtl_tcp", "src\rtl_tcp.vcxproj", "{D7D45A72-202E-470A-8020-1826DFF174E9}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "rtl_fm", "src\rtl_fm.vcxproj", "{F4C823BE-374B-484B-B7A0-4898A5FC6FE0}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -132,6 +134,14 @@ Global
 		{D7D45A72-202E-470A-8020-1826DFF174E9}.Release|Win32.Build.0 = Release|Win32
 		{D7D45A72-202E-470A-8020-1826DFF174E9}.Release|x64.ActiveCfg = Release|x64
 		{D7D45A72-202E-470A-8020-1826DFF174E9}.Release|x64.Build.0 = Release|x64
+		{F4C823BE-374B-484B-B7A0-4898A5FC6FE0}.Debug|Win32.ActiveCfg = Debug|Win32
+		{F4C823BE-374B-484B-B7A0-4898A5FC6FE0}.Debug|Win32.Build.0 = Debug|Win32
+		{F4C823BE-374B-484B-B7A0-4898A5FC6FE0}.Debug|x64.ActiveCfg = Debug|x64
+		{F4C823BE-374B-484B-B7A0-4898A5FC6FE0}.Debug|x64.Build.0 = Debug|x64
+		{F4C823BE-374B-484B-B7A0-4898A5FC6FE0}.Release|Win32.ActiveCfg = Release|Win32
+		{F4C823BE-374B-484B-B7A0-4898A5FC6FE0}.Release|Win32.Build.0 = Release|Win32
+		{F4C823BE-374B-484B-B7A0-4898A5FC6FE0}.Release|x64.ActiveCfg = Release|x64
+		{F4C823BE-374B-484B-B7A0-4898A5FC6FE0}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
