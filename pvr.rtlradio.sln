@@ -10,6 +10,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "windows", "src\windows.vcxp
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{BC723F63-F0D7-4CC4-8789-D6A7DD8AA6E1}"
 	ProjectSection(SolutionItems) = preProject
+		Android.mk = Android.mk
+		Application.mk = Application.mk
 		LICENSE = LICENSE
 		msbuild.proj = msbuild.proj
 		README.md = README.md
@@ -37,6 +39,9 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "version", "src\version.vcxp
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "manifest", "manifest", "{03E257C2-B115-4D59-AB37-DB0AD52F5366}"
 	ProjectSection(SolutionItems) = preProject
+		manifest\android-aarch64.manifest = manifest\android-aarch64.manifest
+		manifest\android-arm.manifest = manifest\android-arm.manifest
+		manifest\android-x86.manifest = manifest\android-x86.manifest
 		manifest\linux-aarch64.manifest = manifest\linux-aarch64.manifest
 		manifest\linux-armel.manifest = manifest\linux-armel.manifest
 		manifest\linux-armhf.manifest = manifest\linux-armhf.manifest
@@ -50,6 +55,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "manifest", "manifest", "{03
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "exportlist", "exportlist", "{4702CBFF-0944-4364-BC2D-D7E3670681BC}"
 	ProjectSection(SolutionItems) = preProject
+		exportlist\exportlist.android = exportlist\exportlist.android
 		exportlist\exportlist.linux = exportlist\exportlist.linux
 		exportlist\exportlist.osx = exportlist\exportlist.osx
 		exportlist\exportlist.raspbian = exportlist\exportlist.raspbian

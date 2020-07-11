@@ -619,13 +619,89 @@
 
   </Target>
 
+  <!-- BUILD: ANDROID-ARM -->
+  <Target Name="android-arm" DependsOnTargets="AddonVersion">
+
+    <Error Condition="'$(ANDROID_NDK_ROOT)' == ''" Text="Environment variable ANDROID_NDK_ROOT has not been set; see README.md"/>
+
+    <MakeDir Directories="out" ContinueOnError="false"/>
+    <MakeDir Directories="out\repository" ContinueOnError="false"/>
+    <Exec Command="&quot;$(ANDROID_NDK_ROOT)\ndk-build.cmd&quot; APP_ABI=armeabi-v7a NDK_APPLICATION_MK=Application.mk NDK_PROJECT_PATH=. NDK_OUT=out\android-arm NDK_LIBS_OUT=out\android-arm" ContinueOnError="false"/>
+    <Exec Command="TextTransform.exe template\addon.xml.tt -out tmp\addon-android-arm.xml -a !!platform!android-armv7 -a !!libraryplatform!android -a !!libraryname!librtlradio.so -a !!changelogtxt!pvr.rtlradio\changelog.txt -a &quot;!!displayversion!$(DisplayVersion)&quot; -a &quot;!!repomanifest!android-arm.xml.gz&quot;" ContinueOnError="false"/>
+    <XmlPeek XmlInputPath="tmp\addon-android-arm.xml" Query="/addon/@version">
+      <Output TaskParameter="Result" PropertyName="PeekedDisplayVersion"/>
+    </XmlPeek>
+    <Error Condition="'$(PeekedDisplayVersion)' != '$(DisplayVersion)'" Text="DisplayVersion build property was not properly applied to the addon.xml text template"/>
+    <Exec Command="$(ZipperExe) create out\zuki.pvr.rtlradio-android-arm-$(KodiBaseline)-$(AddonVersion).zip manifest\android-arm.manifest -sha256" ContinueOnError="false"/>
+
+    <GetFileSize filename="out\zuki.pvr.rtlradio-android-arm-$(KodiBaseline)-$(AddonVersion).zip">
+      <Output PropertyName="ZipFileSize" TaskParameter="size"/>
+    </GetFileSize>
+
+    <Exec Command="TextTransform.exe template\addons.xml.tt -out &quot;tmp\repo-android-arm.xml&quot; -a !!platform!android-armv7 -a !!libraryplatform!android -a !!libraryname!libhdhhomerundvr.so -a &quot;!!displayversion!$(DisplayVersion)&quot; -a !!zipfilesize!$(ZipFileSize) -a !!zipfilename!zuki.pvr.rtlradio-android-arm-$(KodiBaseline)-$(AddonVersion).zip" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;gzip -cf tmp/repo-android-arm.xml &gt; out/repository/android-arm.xml.gz&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;pushd out/repository/ ; sha256sum android-arm.xml.gz &gt; android-arm.xml.gz.sha256 ; popd&quot;" ContinueOnError="false"/>
+
+  </Target>
+
+  <!-- BUILD: ANDROID-AARCH64 -->
+  <Target Name="android-aarch64" DependsOnTargets="AddonVersion">
+
+    <Error Condition="'$(ANDROID_NDK_ROOT)' == ''" Text="Environment variable ANDROID_NDK_ROOT has not been set; see README.md"/>
+
+    <MakeDir Directories="out" ContinueOnError="false"/>
+    <MakeDir Directories="out\repository" ContinueOnError="false"/>
+    <Exec Command="&quot;$(ANDROID_NDK_ROOT)\ndk-build.cmd&quot; APP_ABI=arm64-v8a NDK_APPLICATION_MK=Application.mk NDK_PROJECT_PATH=. NDK_OUT=out\android-aarch64 NDK_LIBS_OUT=out\android-aarch64" ContinueOnError="false"/>
+    <Exec Command="TextTransform.exe template\addon.xml.tt -out tmp\addon-android-aarch64.xml -a !!platform!android-aarch64 -a !!libraryplatform!android -a !!libraryname!librtlradio.so -a !!changelogtxt!pvr.rtlradio\changelog.txt -a &quot;!!displayversion!$(DisplayVersion)&quot; -a &quot;!!repomanifest!android-aarch64.xml.gz&quot;" ContinueOnError="false"/>
+    <XmlPeek XmlInputPath="tmp\addon-android-aarch64.xml" Query="/addon/@version">
+      <Output TaskParameter="Result" PropertyName="PeekedDisplayVersion"/>
+    </XmlPeek>
+    <Error Condition="'$(PeekedDisplayVersion)' != '$(DisplayVersion)'" Text="DisplayVersion build property was not properly applied to the addon.xml text template"/>
+    <Exec Command="$(ZipperExe) create out\zuki.pvr.rtlradio-android-aarch64-$(KodiBaseline)-$(AddonVersion).zip manifest\android-aarch64.manifest -sha256" ContinueOnError="false"/>
+
+    <GetFileSize filename="out\zuki.pvr.rtlradio-android-aarch64-$(KodiBaseline)-$(AddonVersion).zip">
+      <Output PropertyName="ZipFileSize" TaskParameter="size"/>
+    </GetFileSize>
+
+    <Exec Command="TextTransform.exe template\addons.xml.tt -out &quot;tmp\repo-android-aarch64.xml&quot; -a !!platform!android-aarch64 -a !!libraryplatform!android -a !!libraryname!libhdhhomerundvr.so -a &quot;!!displayversion!$(DisplayVersion)&quot; -a !!zipfilesize!$(ZipFileSize) -a !!zipfilename!zuki.pvr.rtlradio-android-aarch64-$(KodiBaseline)-$(AddonVersion).zip" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;gzip -cf tmp/repo-android-aarch64.xml &gt; out/repository/android-aarch64.xml.gz&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;pushd out/repository/ ; sha256sum android-aarch64.xml.gz &gt; android-aarch64.xml.gz.sha256 ; popd&quot;" ContinueOnError="false"/>
+
+  </Target>
+
+  <!-- BUILD: ANDROID-X86 -->
+  <Target Name="android-x86" DependsOnTargets="AddonVersion">
+
+    <Error Condition="'$(ANDROID_NDK_ROOT)' == ''" Text="Environment variable ANDROID_NDK_ROOT has not been set; see README.md"/>
+
+    <MakeDir Directories="out" ContinueOnError="false"/>
+    <MakeDir Directories="out\repository" ContinueOnError="false"/>
+    <Exec Command="&quot;$(ANDROID_NDK_ROOT)\ndk-build.cmd&quot; APP_ABI=x86 NDK_APPLICATION_MK=Application.mk NDK_PROJECT_PATH=. NDK_OUT=out\android-x86 NDK_LIBS_OUT=out\android-x86" ContinueOnError="false"/>
+    <Exec Command="TextTransform.exe template\addon.xml.tt -out tmp\addon-android-x86.xml -a !!platform!android-i686 -a !!libraryplatform!android -a !!libraryname!librtlradio.so -a !!changelogtxt!pvr.rtlradio\changelog.txt -a &quot;!!displayversion!$(DisplayVersion)&quot; -a &quot;!!repomanifest!android-x86.xml.gz&quot;" ContinueOnError="false"/>
+    <XmlPeek XmlInputPath="tmp\addon-android-x86.xml" Query="/addon/@version">
+      <Output TaskParameter="Result" PropertyName="PeekedDisplayVersion"/>
+    </XmlPeek>
+    <Error Condition="'$(PeekedDisplayVersion)' != '$(DisplayVersion)'" Text="DisplayVersion build property was not properly applied to the addon.xml text template"/>
+    <Exec Command="$(ZipperExe) create out\zuki.pvr.rtlradio-android-x86-$(KodiBaseline)-$(AddonVersion).zip manifest\android-x86.manifest -sha256" ContinueOnError="false"/>
+
+    <GetFileSize filename="out\zuki.pvr.rtlradio-android-x86-$(KodiBaseline)-$(AddonVersion).zip">
+      <Output PropertyName="ZipFileSize" TaskParameter="size"/>
+    </GetFileSize>
+
+    <Exec Command="TextTransform.exe template\addons.xml.tt -out &quot;tmp\repo-android-x86.xml&quot; -a !!platform!android-i686 -a !!libraryplatform!android -a !!libraryname!libhdhhomerundvr.so -a &quot;!!displayversion!$(DisplayVersion)&quot; -a !!zipfilesize!$(ZipFileSize) -a !!zipfilename!zuki.pvr.rtlradio-android-x86-$(KodiBaseline)-$(AddonVersion).zip" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;gzip -cf tmp/repo-android-x86.xml &gt; out/repository/android-x86.xml.gz&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;pushd out/repository/ ; sha256sum android-x86.xml.gz &gt; android-x86.xml.gz.sha256 ; popd&quot;" ContinueOnError="false"/>
+
+  </Target>
+
   <!-- BUILD: PLATFORMS -->
   <Target Name="windows" DependsOnTargets="windows-win32;windows-x64"/>
   <Target Name="linux" DependsOnTargets="linux-i686;linux-x86_64;linux-armel;linux-armhf;linux-aarch64"/>
   <Target Name="raspbian" DependsOnTargets="raspbian-armhf"/>
   <Target Name="osx" DependsOnTargets="osx-x86_64"/>
+  <Target Name="android" DependsOnTargets="android-arm;android-aarch64;android-x86"/>
 
   <!-- BUILD: ALL -->
-  <Target Name="all" DependsOnTargets="windows;linux;raspbian;osx"/>
+  <Target Name="all" DependsOnTargets="windows;linux;raspbian;osx;android"/>
 
 </Project>
