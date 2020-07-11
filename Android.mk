@@ -98,9 +98,10 @@ LOCAL_SRC_FILES := \
     src/libusb_exception.cpp \
     src/pvr.cpp \
     src/rdsdecoder.cpp \
-    src/rtldevice.cpp \
     src/sqlite_exception.cpp \
-    src/uecp.cpp
+    src/uecp.cpp \
+    src/usbdevice.cpp \
+    src/tcpdevice.cpp
 
 include $(BUILD_SHARED_LIBRARY)
 

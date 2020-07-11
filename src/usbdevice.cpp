@@ -21,7 +21,7 @@
 //---------------------------------------------------------------------------
 
 #include "stdafx.h"
-#include "rtldevice.h"
+#include "usbdevice.h"
 
 #include <assert.h>
 #include <cmath>
@@ -31,24 +31,24 @@
 
 #pragma warning(push, 4)
 
-// rtldevice::AUTOMATIC_BANDWIDTH (static)
+// usbdevice::AUTOMATIC_BANDWIDTH (static)
 //
 // Specifies that automatic bandwidth selection should be used
-uint32_t const rtldevice::AUTOMATIC_BANDWIDTH = 0;
+uint32_t const usbdevice::AUTOMATIC_BANDWIDTH = 0;
 
-// rtldevice::DEFAULT_DEVICE_INDEX (static)
+// usbdevice::DEFAULT_DEVICE_INDEX (static)
 //
 // Default device index value
-uint32_t const rtldevice::DEFAULT_DEVICE_INDEX = 0;
+uint32_t const usbdevice::DEFAULT_DEVICE_INDEX = 0;
 
 //---------------------------------------------------------------------------
-// rtldevice Constructor (private)
+// usbdevice Constructor (private)
 //
 // Arguments:
 //
 //	index		- Device index
 
-rtldevice::rtldevice(uint32_t index)
+usbdevice::usbdevice(uint32_t index)
 {
 	char		manufacturer[256] = { '\0' };		// Manufacturer string
 	char		product[256] = { '\0' };			// Product string
@@ -85,17 +85,17 @@ rtldevice::rtldevice(uint32_t index)
 	// Close the RTL-SDR device on any thrown exception
 	catch(...) { rtlsdr_close(m_device); m_device = nullptr; throw; }
 }
-	
-//---------------------------------------------------------------------------
-// rtldevice Destructor
 
-rtldevice::~rtldevice()
+//---------------------------------------------------------------------------
+// usbdevice Destructor
+
+usbdevice::~usbdevice()
 {
 	if(m_device != nullptr) rtlsdr_close(m_device);
 }
 
 //---------------------------------------------------------------------------
-// rtldevice::begin_stream
+// usbdevice::begin_stream
 //
 // Starts streaming data from the device
 //
@@ -103,7 +103,7 @@ rtldevice::~rtldevice()
 //
 //	NONE
 
-void rtldevice::begin_stream(void) const
+void usbdevice::begin_stream(void) const
 {
 	assert(m_device != nullptr);
 
@@ -113,7 +113,7 @@ void rtldevice::begin_stream(void) const
 }
 
 //---------------------------------------------------------------------------
-// rtldevice::cancel_async
+// usbdevice::cancel_async
 //
 // Cancels any pending asynchronous read operations from the device
 //
@@ -121,7 +121,7 @@ void rtldevice::begin_stream(void) const
 //
 //	NONE
 
-void rtldevice::cancel_async(void) const
+void usbdevice::cancel_async(void) const
 {
 	assert(m_device != nullptr);
 
@@ -129,35 +129,35 @@ void rtldevice::cancel_async(void) const
 }
 
 //---------------------------------------------------------------------------
-// rtldevice::create (static)
+// usbdevice::create (static)
 //
-// Factory method, creates a new rtldevice instance
+// Factory method, creates a new usbdevice instance
 //
 // Arguments:
 //
 //	NONE
 
-std::unique_ptr<rtldevice> rtldevice::create(void)
+std::unique_ptr<usbdevice> usbdevice::create(void)
 {
 	return create(DEFAULT_DEVICE_INDEX);
 }
 
 //---------------------------------------------------------------------------
-// rtldevice::create (static)
+// usbdevice::create (static)
 //
-// Factory method, creates a new rtldevice instance
+// Factory method, creates a new usbdevice instance
 //
 // Arguments:
 //
 //	index		- Device index
 
-std::unique_ptr<rtldevice> rtldevice::create(uint32_t index)
+std::unique_ptr<usbdevice> usbdevice::create(uint32_t index)
 {
-	return std::unique_ptr<rtldevice>(new rtldevice(index));
+	return std::unique_ptr<usbdevice>(new usbdevice(index));
 }
 
 //---------------------------------------------------------------------------
-// rtldevice::get_center_frequency
+// usbdevice::get_center_frequency
 //
 // Gets the center frequency of the device
 //
@@ -165,7 +165,7 @@ std::unique_ptr<rtldevice> rtldevice::create(uint32_t index)
 //
 //	NONE
 
-uint32_t rtldevice::get_center_frequency(void) const
+uint32_t usbdevice::get_center_frequency(void) const
 {
 	assert(m_device != nullptr);
 
@@ -173,7 +173,7 @@ uint32_t rtldevice::get_center_frequency(void) const
 }
 
 //---------------------------------------------------------------------------
-// rtldevice::get_device_name
+// usbdevice::get_device_name
 //
 // Gets the name of the device
 //
@@ -181,13 +181,13 @@ uint32_t rtldevice::get_center_frequency(void) const
 //
 //	NONE
 
-char const* rtldevice::get_device_name(void) const
+char const* usbdevice::get_device_name(void) const
 {
 	return m_name.c_str();
 }
 
 //---------------------------------------------------------------------------
-// rtldevice::get_frequency_correction
+// usbdevice::get_frequency_correction
 //
 // Gets the frequency correction of the device
 //
@@ -195,7 +195,7 @@ char const* rtldevice::get_device_name(void) const
 //
 //	NONE
 
-uint32_t rtldevice::get_frequency_correction(void) const
+int usbdevice::get_frequency_correction(void) const
 {
 	assert(m_device != nullptr);
 
@@ -203,7 +203,7 @@ uint32_t rtldevice::get_frequency_correction(void) const
 }
 
 //---------------------------------------------------------------------------
-// rtldevice::get_gain
+// usbdevice::get_gain
 //
 // Gets the gain of the device
 //
@@ -211,7 +211,7 @@ uint32_t rtldevice::get_frequency_correction(void) const
 //
 //	NONE
 
-int rtldevice::get_gain(void) const
+int usbdevice::get_gain(void) const
 {
 	assert(m_device != nullptr);
 
@@ -219,7 +219,7 @@ int rtldevice::get_gain(void) const
 }
 
 //---------------------------------------------------------------------------
-// rtldevice::get_manufacturer_name
+// usbdevice::get_manufacturer_name
 //
 // Gets the manufacturer name of the device
 //
@@ -227,13 +227,13 @@ int rtldevice::get_gain(void) const
 //
 //	NONE
 
-char const* rtldevice::get_manufacturer_name(void) const
+char const* usbdevice::get_manufacturer_name(void) const
 {
 	return m_manufacturer.c_str();
 }
 
 //---------------------------------------------------------------------------
-// rtldevice::get_product_name
+// usbdevice::get_product_name
 //
 // Gets the product name of the device
 //
@@ -241,13 +241,13 @@ char const* rtldevice::get_manufacturer_name(void) const
 //
 //	NONE
 
-char const* rtldevice::get_product_name(void) const
+char const* usbdevice::get_product_name(void) const
 {
 	return m_product.c_str();
 }
 
 //---------------------------------------------------------------------------
-// rtldevice::get_sample_rate
+// usbdevice::get_sample_rate
 //
 // Gets the sample rate of the device
 //
@@ -255,7 +255,7 @@ char const* rtldevice::get_product_name(void) const
 //
 //	NONE
 
-uint32_t rtldevice::get_sample_rate(void) const
+uint32_t usbdevice::get_sample_rate(void) const
 {
 	assert(m_device != nullptr);
 
@@ -263,7 +263,7 @@ uint32_t rtldevice::get_sample_rate(void) const
 }
 
 //---------------------------------------------------------------------------
-// rtldevice::get_serial_number
+// usbdevice::get_serial_number
 //
 // Gets the serial number of the device
 //
@@ -271,13 +271,13 @@ uint32_t rtldevice::get_sample_rate(void) const
 //
 //	NONE
 
-char const* rtldevice::get_serial_number(void) const
+char const* usbdevice::get_serial_number(void) const
 {
 	return m_serialnumber.c_str();
 }
 
 //---------------------------------------------------------------------------
-// rtldevice::get_valid_gains
+// usbdevice::get_valid_gains
 //
 // Gets the valid tuner gain values for the device
 //
@@ -285,7 +285,7 @@ char const* rtldevice::get_serial_number(void) const
 //
 //	dbs			- vector<> to retrieve the valid gain values
 
-void rtldevice::get_valid_gains(std::vector<int>& dbs) const
+void usbdevice::get_valid_gains(std::vector<int>& dbs) const
 {
 	assert(m_device != nullptr);
 
@@ -303,7 +303,7 @@ void rtldevice::get_valid_gains(std::vector<int>& dbs) const
 }
 
 //---------------------------------------------------------------------------
-// rtldevice::read
+// usbdevice::read
 //
 // Reads data from the device
 //
@@ -312,7 +312,7 @@ void rtldevice::get_valid_gains(std::vector<int>& dbs) const
 //	buffer		- Buffer to receive the data
 //	count		- Size of the destination buffer, specified in bytes
 
-size_t rtldevice::read(uint8_t* buffer, size_t count) const
+size_t usbdevice::read(uint8_t* buffer, size_t count) const
 {
 	int			bytesread = 0;			// Bytes read from the device
 
@@ -326,7 +326,7 @@ size_t rtldevice::read(uint8_t* buffer, size_t count) const
 }
 
 //---------------------------------------------------------------------------
-// rtldevice::read_async
+// usbdevice::read_async
 //
 // Asynchronously reads data from the device
 //
@@ -335,13 +335,13 @@ size_t rtldevice::read(uint8_t* buffer, size_t count) const
 //	callback		- Asynchronous read callback function
 //	bufferlength	- Device buffer length, must be multiple of 512
 
-void rtldevice::read_async(asynccallback const& callback, uint32_t bufferlength) const
+void usbdevice::read_async(rtldevice::asynccallback const& callback, uint32_t bufferlength) const
 {
 	return read_async(callback, 0, bufferlength);
 }
 
 //---------------------------------------------------------------------------
-// rtldevice::read_async
+// usbdevice::read_async
 //
 // Asynchronously reads data from the device
 //
@@ -351,7 +351,7 @@ void rtldevice::read_async(asynccallback const& callback, uint32_t bufferlength)
 //	numbuffers		- Number of device buffers
 //	bufferlength	- Device buffer length, must be multiple of 512
 
-void rtldevice::read_async(asynccallback const& callback, uint32_t numbuffers, uint32_t bufferlength) const
+void usbdevice::read_async(rtldevice::asynccallback const& callback, uint32_t numbuffers, uint32_t bufferlength) const
 {
 	assert(m_device != nullptr);
 
@@ -371,7 +371,7 @@ void rtldevice::read_async(asynccallback const& callback, uint32_t numbuffers, u
 }
 
 //---------------------------------------------------------------------------
-// rtldevice::set_automatic_gain_control
+// usbdevice::set_automatic_gain_control
 //
 // Enables/disables the automatic gain control mode of the device
 //
@@ -379,7 +379,7 @@ void rtldevice::read_async(asynccallback const& callback, uint32_t numbuffers, u
 //
 //	enable		- Flag to enable/disable test mode
 
-void rtldevice::set_automatic_gain_control(bool enable) const
+void usbdevice::set_automatic_gain_control(bool enable) const
 {
 	assert(m_device != nullptr);
 
@@ -388,7 +388,7 @@ void rtldevice::set_automatic_gain_control(bool enable) const
 }
 
 //---------------------------------------------------------------------------
-// rtldevice::set_bandwidth
+// usbdevice::set_bandwidth
 //
 // Sets the bandwidth of the device
 //
@@ -396,7 +396,7 @@ void rtldevice::set_automatic_gain_control(bool enable) const
 //
 //	hz		- Bandwidth to set, specified in hertz
 
-void rtldevice::set_bandwidth(uint32_t hz) const
+void usbdevice::set_bandwidth(uint32_t hz) const
 {
 	assert(m_device != nullptr);
 
@@ -405,7 +405,7 @@ void rtldevice::set_bandwidth(uint32_t hz) const
 }
 
 //---------------------------------------------------------------------------
-// rtldevice::set_center_frequency
+// usbdevice::set_center_frequency
 //
 // Sets the center frequency of the device
 //
@@ -413,7 +413,7 @@ void rtldevice::set_bandwidth(uint32_t hz) const
 //
 //	hz		- Frequency to set, specified in hertz
 
-uint32_t rtldevice::set_center_frequency(uint32_t hz) const
+uint32_t usbdevice::set_center_frequency(uint32_t hz) const
 {
 	assert(m_device != nullptr);
 
@@ -424,7 +424,7 @@ uint32_t rtldevice::set_center_frequency(uint32_t hz) const
 }
 
 //---------------------------------------------------------------------------
-// rtldevice::set_frequency_correction
+// usbdevice::set_frequency_correction
 //
 // Sets the frequency correction of the device
 //
@@ -432,7 +432,7 @@ uint32_t rtldevice::set_center_frequency(uint32_t hz) const
 //
 //	ppm		- Frequency correction to set, specified in parts per million
 
-uint32_t rtldevice::set_frequency_correction(int ppm) const
+int usbdevice::set_frequency_correction(int ppm) const
 {
 	assert(m_device != nullptr);
 
@@ -443,7 +443,7 @@ uint32_t rtldevice::set_frequency_correction(int ppm) const
 }
 
 //---------------------------------------------------------------------------
-// rtldevice::set_gain
+// usbdevice::set_gain
 //
 // Sets the gain of the device
 //
@@ -451,7 +451,7 @@ uint32_t rtldevice::set_frequency_correction(int ppm) const
 //
 //	db			- Gain to set, specified in tenths of a decibel
 
-int rtldevice::set_gain(int db) const
+int usbdevice::set_gain(int db) const
 {
 	std::vector<int>	validgains;			// Gains allowed by the device
 
@@ -477,7 +477,7 @@ int rtldevice::set_gain(int db) const
 }
 
 //---------------------------------------------------------------------------
-// rtldevice::set_sample_rate
+// usbdevice::set_sample_rate
 //
 // Sets the sample rate of the device
 //
@@ -485,7 +485,7 @@ int rtldevice::set_gain(int db) const
 //
 //	hz		- Sample rate to set, specified in hertz
 
-uint32_t rtldevice::set_sample_rate(uint32_t hz) const
+uint32_t usbdevice::set_sample_rate(uint32_t hz) const
 {
 	assert(m_device != nullptr);
 
@@ -496,7 +496,7 @@ uint32_t rtldevice::set_sample_rate(uint32_t hz) const
 }
 
 //---------------------------------------------------------------------------
-// rtldevice::set_test_mode
+// usbdevice::set_test_mode
 //
 // Enables/disables the test mode of the device
 //
@@ -504,7 +504,7 @@ uint32_t rtldevice::set_sample_rate(uint32_t hz) const
 //
 //	enable		- Flag to enable/disable test mode
 
-void rtldevice::set_test_mode(bool enable) const
+void usbdevice::set_test_mode(bool enable) const
 {
 	assert(m_device != nullptr);
 

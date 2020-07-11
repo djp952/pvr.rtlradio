@@ -29,6 +29,8 @@
 
 #include "align.h"
 #include "string_exception.h"
+#include "usbdevice.h"
+#include "tcpdevice.h"
 
 #pragma warning(push, 4)
 
@@ -80,7 +82,7 @@ fmstream::fmstream(struct deviceprops const& deviceprops, struct fmprops const& 
 	if(!m_buffer) throw std::bad_alloc();
 
 	// Create and initialize the RTL-SDR device instance
-	m_device = rtldevice::create(rtldevice::DEFAULT_DEVICE_INDEX);
+	m_device = usbdevice::create(usbdevice::DEFAULT_DEVICE_INDEX);
 	uint32_t samplerate = m_device->set_sample_rate(m_samplerate);
 	uint32_t frequency = m_device->set_center_frequency(fmprops.frequency + (m_samplerate / 4));	// DC offset
 

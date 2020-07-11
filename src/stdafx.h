@@ -35,6 +35,8 @@
 #define	_WIN32_IE		_WIN32_IE_IE80
 #define NOMINMAX
 
+#include <WinSock2.h>
+#include <WS2tcpip.h>
 #include <Windows.h>
 #include <wchar.h>				// Prevents redefinition of WCHAR_MIN by libusb
 #define TARGET_WINDOWS

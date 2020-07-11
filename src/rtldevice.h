@@ -25,41 +25,28 @@
 #pragma once
 
 #include <functional>
-#include <memory>
-#include <string>
 #include <vector>
-
-#include <rtl-sdr.h>
 
 #pragma warning(push, 4)
 
 //---------------------------------------------------------------------------
 // Class rtldevice
 //
-// Interfaces with the RTL-SDR API to provide device management services
+// Defines the interface required for managing an RTL-SDR device
 
 class rtldevice
 {
+public:
+
 	// asynccallback
 	//
 	// Callback function passed to readasync
 	using asynccallback = std::function<void(uint8_t const*, size_t)>;
 
-public:
-
-	// AUTOMATIC_BANDWIDTH
+	// Constructor / Destructor
 	//
-	// Specifies that automatic bandwidth selection should be used
-	static uint32_t const AUTOMATIC_BANDWIDTH;
-
-	// DEFAULT_DEVICE_INDEX
-	//
-	// Default device index number
-	static uint32_t const DEFAULT_DEVICE_INDEX;
-
-	// Destructor
-	//
-	~rtldevice();
+	rtldevice() {}
+	virtual ~rtldevice() {}
 
 	//-----------------------------------------------------------------------
 	// Member Functions
@@ -67,131 +54,63 @@ public:
 	// begin_stream
 	//
 	// Starts streaming data from the device
-	void begin_stream(void) const;
+	virtual void begin_stream(void) const = 0;
 
 	// cancel_async
 	//
 	// Cancels any pending asynchronous read operations from the device
-	void cancel_async(void) const;
-
-	// create (static)
-	//
-	// Factory method, creates a new rtldevice instance
-	static std::unique_ptr<rtldevice> create(void);
-	static std::unique_ptr<rtldevice> create(uint32_t index);
-
-	// get_center_frequency
-	//
-	// Gets the center frequency of the device
-	uint32_t get_center_frequency(void) const;
-
-	// get_device_name
-	//
-	// Gets the name of the device
-	char const* get_device_name(void) const;
-
-	// get_frequency_correction
-	//
-	// Gets the frequency correction of the device
-	uint32_t get_frequency_correction(void) const;
-
-	// get_gain
-	//
-	// Gets the gain value of the device
-	int get_gain(void) const;
-
-	// get_manufacturer_name
-	//
-	// Gets the manufacturer name of the device
-	char const* get_manufacturer_name(void) const;
-
-	// get_product_name
-	//
-	// Gets the product name of the device
-	char const* get_product_name(void) const;
-
-	// get_sample_rate
-	//
-	// Gets the sample rate of the device
-	uint32_t get_sample_rate(void) const;
-
-	// get_serial_number
-	//
-	// Gets the serial number of the device
-	char const* get_serial_number(void) const;
+	virtual void cancel_async(void) const = 0;
 
 	// get_valid_gains
 	//
 	// Gets the valid tuner gain values for the device
-	void get_valid_gains(std::vector<int>& dbs) const;
+	virtual void get_valid_gains(std::vector<int>& dbs) const = 0;
 
 	// read
 	//
 	// Reads data from the device
-	size_t read(uint8_t* buffer, size_t count) const;
+	virtual size_t read(uint8_t* buffer, size_t count) const = 0;
 
 	// read_async
 	//
 	// Asynchronously reads data from the device
-	void read_async(asynccallback const& callback, uint32_t bufferlength) const;
-	void read_async(asynccallback const& callback, uint32_t numbuffers, uint32_t bufferlength) const;
+	virtual void read_async(asynccallback const& callback, uint32_t bufferlength) const = 0;
+	virtual void read_async(asynccallback const& callback, uint32_t numbuffers, uint32_t bufferlength) const = 0;
 
 	// set_automatic_gain_control
 	//
 	// Enables/disables the automatic gain control of the device
-	void set_automatic_gain_control(bool enable) const;
-
-	// set_bandwidth
-	//
-	// Sets the bandwidth of the device
-	void set_bandwidth(uint32_t hz) const;
+	virtual void set_automatic_gain_control(bool enable) const = 0;
 
 	// set_center_frequency
 	//
 	// Sets the center frequency of the device
-	uint32_t set_center_frequency(uint32_t hz) const;
+	virtual uint32_t set_center_frequency(uint32_t hz) const = 0;
 
 	// set_frequency_correction
 	//
 	// Sets the frequency correction of the device
-	uint32_t set_frequency_correction(int ppm) const;
+	virtual int set_frequency_correction(int ppm) const = 0;
 
 	// set_gain
 	//
 	// Sets the gain value of the device
-	int set_gain(int db) const;
+	virtual int set_gain(int db) const = 0;
 
 	// set_sample_rate
 	//
 	// Sets the sample rate of the device
-	uint32_t set_sample_rate(uint32_t hz) const;
+	virtual uint32_t set_sample_rate(uint32_t hz) const = 0;
 
 	// set_test_mode
 	//
 	// Enables/disables the test mode of the device
-	void set_test_mode(bool enable) const;
+	virtual void set_test_mode(bool enable) const = 0;
 
 private:
 
 	rtldevice(rtldevice const&) = delete;
 	rtldevice& operator=(rtldevice const&) = delete;
-
-	// Instance Constructor
-	//
-	rtldevice(uint32_t index);
-
-	//-----------------------------------------------------------------------
-	// Private Member Functions
-
-	//-----------------------------------------------------------------------
-	// Member Variables
-
-	rtlsdr_dev_t*			m_device = nullptr;		// Device instance
-
-	std::string				m_name;					// Device name
-	std::string				m_manufacturer;			// Device manufacturer
-	std::string				m_product;				// Device product name
-	std::string				m_serialnumber;			// Device serial number
 };
 
 //-----------------------------------------------------------------------------

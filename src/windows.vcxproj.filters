@@ -234,6 +234,12 @@
     <ClInclude Include="sqlite_exception.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="usbdevice.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="tcpdevice.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -292,9 +298,6 @@
     </ClCompile>
     <ClCompile Include="..\depends\rtl-sdr\src\tuner_r82xx.c">
       <Filter>External Libraries\rtl-sdr\Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="rtldevice.cpp">
-      <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="libusb_exception.cpp">
       <Filter>Source Files</Filter>
@@ -372,6 +375,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="sqlite_exception.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="usbdevice.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="tcpdevice.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
