@@ -104,6 +104,39 @@ LOCAL_SRC_FILES := \
 
 include $(BUILD_SHARED_LIBRARY)
 
+# rtl_eeprom
+#
+include $(CLEAR_VARS)
+LOCAL_MODULE := rtl_eeprom
+
+LOCAL_C_INCLUDES += \
+	depends/libusb/$(TARGET_ABI)/include \
+	depends/rtl-sdr/include
+	
+LOCAL_CPPFLAGS += \
+	-std=c++14 \
+	-Wall \
+	-Wno-unknown-pragmas
+	
+LOCAL_STATIC_LIBRARIES += \
+	libusb-prebuilt
+
+LOCAL_LDLIBS += \
+	-llog
+
+LOCAL_SRC_FILES := \
+    depends/rtl-sdr/src/librtlsdr.c \
+    depends/rtl-sdr/src/tuner_e4k.c \
+    depends/rtl-sdr/src/tuner_fc0012.c \
+    depends/rtl-sdr/src/tuner_fc0013.c \
+    depends/rtl-sdr/src/tuner_fc2580.c \
+    depends/rtl-sdr/src/tuner_r82xx.c \
+    depends/rtl-sdr/src/convenience/convenience.c \
+    depends/rtl-sdr/src/getopt/getopt.c \
+    depends/rtl-sdr/src/rtl_eeprom.c
+	
+include $(BUILD_EXECUTABLE)
+
 # rtl_fm
 #
 include $(CLEAR_VARS)
