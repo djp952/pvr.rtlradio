@@ -70,20 +70,40 @@ template<typename... _args> static void log_notice(_args&&... args);
 // TYPE DECLARATIONS
 //---------------------------------------------------------------------------
 
+// device_connection
+//
+// Defines the RTL-SDR device connection type
+enum device_connection {
+
+	usb			= 0,				// Locally connected USB device
+	rtltcp		= 1,				// Device connected via rtl_tcp
+};
+
+
 // addon_settings
 //
 // Defines all of the configurable addon settings
 struct addon_settings {
 
-	// device_enable_automatic_gain_control
+	// device_connection
 	//
-	// Flag to enable tuner-based automatic gain control
-	bool device_enable_automatic_gain_control;
+	// The type of device (USB vs network, for example)
+	enum device_connection device_connection;
 
-	// device_manual_gain_db
+	// device_connection_usb_index
 	//
-	// Specifies the tuner-based manual gain value in decibels
-	int device_manual_gain_db;
+	// The index of a USB connected device
+	int device_connection_usb_index;
+
+	// device_connection_tcp_host
+	//
+	// The IP address of the rtl_tcp host to connect to
+	std::string device_connection_tcp_host;
+
+	// device_connection_tcp_port
+	//
+	// The port number of the rtl_tcp host to connect to
+	int device_connection_tcp_port;
 };
 
 //---------------------------------------------------------------------------
@@ -148,8 +168,10 @@ static std::unique_ptr<pvrstream> g_pvrstream;
 // Global addon settings instance
 static addon_settings g_settings = {
 
-	false,				// device_enable_automatic_gain_control
-	0,					// device_manual_gain_db
+	device_connection::usb,				// device_connection
+	0,									// device_connection_usb_index
+	"",									// device_connection_tcp_host
+	1234,								// device_connection_tcp_port
 };
 
 // g_settings_lock
@@ -296,8 +318,8 @@ static void log_notice(_args&&... args)
 
 ADDON_STATUS ADDON_Create(void* handle, void* props)
 {
-	bool					bvalue = false;					// Setting value
 	int						nvalue = 0;						// Setting value
+	char					strvalue[1024] = { '\0' };		// Setting value 
 
 	if((handle == nullptr) || (props == nullptr)) return ADDON_STATUS::ADDON_STATUS_PERMANENT_FAILURE;
 
@@ -336,9 +358,11 @@ ADDON_STATUS ADDON_Create(void* handle, void* props)
 				log_notice(__func__, ": user data directory ", g_userpath.c_str(), " created");
 			}
 
-			// Load the tuner settings
-			if(g_addon->GetSetting("device_enable_automatic_gain_control", &bvalue)) g_settings.device_enable_automatic_gain_control = bvalue;
-			if(g_addon->GetSetting("device_manual_gain_db", &nvalue)) g_settings.device_manual_gain_db = nvalue;
+			// Load the device settings
+			if(g_addon->GetSetting("device_connection", &nvalue)) g_settings.device_connection = static_cast<enum device_connection>(nvalue);
+			if(g_addon->GetSetting("device_connection_usb_index", &nvalue)) g_settings.device_connection_usb_index = nvalue;
+			if(g_addon->GetSetting("device_connection_tcp_host", strvalue)) g_settings.device_connection_tcp_host.assign(strvalue);
+			if(g_addon->GetSetting("device_connection_tcp_port", &nvalue)) g_settings.device_connection_tcp_port = nvalue;
 
 			// Create the global gui callbacks instance
 			g_gui.reset(new CHelper_libKODI_guilib());
@@ -457,27 +481,50 @@ ADDON_STATUS ADDON_SetSetting(char const* name, void const* value)
 {
 	std::unique_lock<std::mutex> settings_lock(g_settings_lock);
 
-	// device_enable_automatic_gain_control
+	// device_connection
 	//
-	if(strcmp(name, "device_enable_automatic_gain_control") == 0) {
+	if(strcmp(name, "device_connection") == 0) {
 
-		bool bvalue = *reinterpret_cast<bool const*>(value);
-		if(bvalue != g_settings.device_enable_automatic_gain_control) {
+		int nvalue = *reinterpret_cast<int const*>(value);
+		if(nvalue != static_cast<int>(g_settings.device_connection)) {
 
-			g_settings.device_enable_automatic_gain_control = bvalue;
-			log_notice(__func__, ": setting device_enable_automatic_gain_control changed to ", (bvalue) ? "true" : "false");
+			g_settings.device_connection = static_cast<enum device_connection>(nvalue);
+			log_notice(__func__, ": setting device_connection changed to ", (g_settings.device_connection == device_connection::usb) ? "USB" : "Network (rtl_tcp)");
 		}
 	}
 
-	// device_manual_gain_db
+	// device_connection_usb_index
 	//
-	else if(strcmp(name, "device_manual_gain_db") == 0) {
+	else if(strcmp(name, "device_connection_usb_index") == 0) {
 
 		int nvalue = *reinterpret_cast<int const*>(value);
-		if(nvalue != g_settings.device_manual_gain_db) {
+		if(nvalue != static_cast<int>(g_settings.device_connection_usb_index)) {
 
-			g_settings.device_manual_gain_db = nvalue;
-			log_notice(__func__, ": setting device_manual_gain_db changed to ", nvalue, " decibels");
+			g_settings.device_connection_usb_index = nvalue;
+			log_notice(__func__, ": setting device_connection_usb_index changed to ", g_settings.device_connection_usb_index);
+		}
+	}
+
+	// device_connection_tcp_host
+	//
+	else if(strcmp(name, "device_connection_tcp_host") == 0) {
+
+		if(strcmp(g_settings.device_connection_tcp_host.c_str(), reinterpret_cast<char const*>(value)) != 0) {
+
+			g_settings.device_connection_tcp_host.assign(reinterpret_cast<char const*>(value));
+			log_notice(__func__, ": setting device_connection_tcp_host changed to ", g_settings.device_connection_tcp_host.c_str());
+		}
+	}
+
+	// device_connection_tcp_port
+	//
+	else if(strcmp(name, "device_connection_tcp_port") == 0) {
+
+		int nvalue = *reinterpret_cast<int const*>(value);
+		if(nvalue != static_cast<int>(g_settings.device_connection_tcp_port)) {
+
+			g_settings.device_connection_tcp_port = nvalue;
+			log_notice(__func__, ": setting device_connection_tcp_port changed to ", g_settings.device_connection_tcp_port);
 		}
 	}
 
@@ -1106,22 +1153,31 @@ bool OpenLiveStream(PVR_CHANNEL const& /*channel*/)
 {
 	// TODO: DUMMY OPERATION
 	//
-	struct deviceprops deviceprops = {};
 	struct fmprops fmprops = {};
 
 	// Create a copy of the current addon settings structure
 	struct addon_settings settings = copy_settings();
 
-	// TODO: Sample Rate should be controlled by settings
-	deviceprops.samplerate = 1 MHz;
-	deviceprops.agc = settings.device_enable_automatic_gain_control;
-	deviceprops.manualgain = settings.device_manual_gain_db;
-
 	// TODO: Everything here needs to be controlled by settings and/or channel information
+	// TODO: fmprops to become channelprops or channelinfo or something like that
 	fmprops.frequency = 99100000;
 	fmprops.samplerate = 48000;
 
-	try { g_pvrstream = fmstream::create(deviceprops, fmprops); }
+	try { 
+	
+		// USB device
+		//
+		if(settings.device_connection == device_connection::usb)
+			g_pvrstream = fmstream::create(settings.device_connection_usb_index, fmprops);
+
+		// Network (rtl_tcp) device
+		//
+		else if(settings.device_connection == device_connection::rtltcp)
+			g_pvrstream = fmstream::create(settings.device_connection_tcp_host.c_str(), static_cast<uint16_t>(settings.device_connection_tcp_port), fmprops);
+
+		else throw string_exception("invalid device_connection type specified");	
+	}
+
 	catch(std::exception& ex) { return handle_stdexception(__func__, ex, false); } 
 	catch(...) { return handle_generalexception(__func__, false); }
 

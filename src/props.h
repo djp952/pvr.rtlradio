@@ -36,16 +36,6 @@ struct channelprops {
 	int				gain;			// Default gain value as 10*dB (i.e. 32.8dB = 328)
 };
 
-// deviceprops
-//
-// Defines RTL-SDR device specific properties
-struct deviceprops {
-
-	uint32_t		samplerate;		// Device sample rate in hertz
-	bool			agc;			// Enable/disable device automatic gain control
-	int				manualgain;		// Device manual gain value as 10*dB (i.e. 32.8dB = 328)
-};
-
 // fmprops
 //
 // Defines FM Radio DSP specific properties

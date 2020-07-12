@@ -2,30 +2,76 @@
 <settings version="1">
   <section id="pvr.rtlradio" label="-1">
 
-    <category id="tuner" label="30000">
+    <category id="device" label="30000">
       <group id="1" label="-1">
 
-        <setting id="device_enable_automatic_gain_control" type="boolean" label="30100">
-          <level>0</level>
-          <default>false</default>
-          <control type="toggle"/>
-        </setting>
-
-        <setting id="device_manual_gain_db" type="integer" label="30101">
+        <setting id="device_connection" type="integer" label="30100" help="30500">
           <level>0</level>
           <default>0</default>
           <constraints>
-            <minimum label="30200">0</minimum>
-            <step>3</step>
-            <maximum>60</maximum>
+            <options>
+              <option label="30200">0</option>
+              <option label="30201">1</option>
+            </options>
+          </constraints>
+          <control type="spinner" format="integer"/>
+        </setting>
+
+        <setting id="device_connection_usb_index" parent="device_connection" type="integer" label="30101" help="30501">
+          <level>0</level>
+          <default>0</default>
+          <constraints>
+            <minimum>0</minimum>
+            <step>1</step>
+            <maximum>8</maximum>
           </constraints>
           <dependencies>
-            <dependency type="enable" setting="device_enable_automatic_gain_control">false</dependency>
+            <dependency type="visible" setting="device_connection" operator="is">0</dependency>
           </dependencies>
-          <control type="slider" format="integer">
-            <formatlabel>14050</formatlabel>
+          <control type="spinner" format="integer"/>
+        </setting>
+
+        <setting id="device_connection_tcp_host" parent="device_connection" type="string" label="30102" help="30502">
+          <level>0</level>
+          <default/>
+          <constraints>
+            <allowempty>true</allowempty>
+          </constraints>
+          <dependencies>
+            <dependency type="visible" setting="device_connection" operator="is">1</dependency>
+          </dependencies>
+          <control type="edit" format="ip">
+            <heading>30102</heading>
           </control>
         </setting>
+
+        <setting id="device_connection_tcp_port" parent="device_connection" type="integer" label="30103" help="30503">
+          <level>0</level>
+          <default>1234</default>
+          <constraints>
+            <allowempty>false</allowempty>
+            <minimum>0</minimum>
+            <maximum>65535</maximum>
+          </constraints>
+          <dependencies>
+            <dependency type="visible" setting="device_connection" operator="is">1</dependency>
+          </dependencies>
+          <control type="edit" format="integer">
+            <heading>30103</heading>
+          </control>
+        </setting>
+
+      </group>
+    </category>
+
+    <category id="fmradio" label="30001">
+      <group id="1" label="-1">
+
+      </group>
+    </category>
+
+    <category id="hdradio" label="30002">
+      <group id="1" label="-1">
 
       </group>
     </category>

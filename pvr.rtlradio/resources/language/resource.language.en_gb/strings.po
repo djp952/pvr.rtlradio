@@ -17,18 +17,54 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 msgctxt "#30000"
-msgid "Tuner"
+msgid "Device"
+msgstr ""
+
+msgctxt "#30001"
+msgid "FM Radio"
+msgstr ""
+
+msgctxt "#30002"
+msgid "HD Radio"
 msgstr ""
 
 msgctxt "#30100"
-msgid "Enable automatic gain control (AGC)"
+msgid "Connection type"
 msgstr ""
 
 msgctxt "#30101"
-msgid "Gain level"
+msgid "Device index"
+msgstr ""
+
+msgctxt "#30102"
+msgid "rtl_tcp server address"
+msgstr ""
+
+msgctxt "#30103"
+msgid "rtl_tcp server port"
 msgstr ""
 
 msgctxt "#30200"
-msgid "None"
+msgid "Universal Serial Bus (USB)"
+msgstr ""
+
+msgctxt "#30201"
+msgid "Network (rtl_tcp)"
+msgstr ""
+
+msgctxt "#30500"
+msgid "Specifies the RTL-SDR device connection type. When set to Universal Serial Bus (USB), the device must be connected locally to this system. When set to Network (rtl_tcp), the device must be attached to a system running the rtl_tcp server application."
+msgstr ""
+
+msgctxt "#30501"
+msgid "When multiple RTL-SDR devices are connected via Universal Serial Bus (USB), specifies the index of the device to connect to. If only one RTL-SDR device is connected, leave set to the default index 0."
+msgstr ""
+
+msgctxt "#30502"
+msgid "Specifies the IPv4 address of the rtl_tcp server where the RTL-SDR device is connected."
+msgstr ""
+
+msgctxt "#30503"
+msgid "Specifies the port number that the rtl_tcp server will be listening for client connections. If no port number was specified to rtl_tcp leave set to the default port number 1234."
 msgstr ""
 

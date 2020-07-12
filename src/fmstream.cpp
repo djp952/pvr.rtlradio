@@ -64,11 +64,11 @@ int const fmstream::STREAM_ID_UECP = 2;
 //
 // Arguments:
 //
-//	deviceprops		- RTL-SDR device properties
+//	device			- RTL-SDR device instance
 //	fmprops			- FM signal processor properties
 
-fmstream::fmstream(struct deviceprops const& deviceprops, struct fmprops const& fmprops) : 
-	m_rdsdecoder(true),		// <--- todo: fmprops setting
+fmstream::fmstream(std::unique_ptr<rtldevice> device, struct fmprops const& fmprops) :
+	m_device(std::move(device)), m_rdsdecoder(true),		// <--- todo: fmprops setting
 	m_blocksize(align::up(DEFAULT_DEVICE_BLOCK_SIZE, 16 KiB)),
 	m_samplerate(DEFAULT_DEVICE_SAMPLE_RATE), m_pcmsamplerate(fmprops.samplerate),
 	m_buffersize(align::up(DEFAULT_RINGBUFFER_SIZE, 16 KiB))
@@ -81,15 +81,13 @@ fmstream::fmstream(struct deviceprops const& deviceprops, struct fmprops const& 
 	m_buffer = std::unique_ptr<uint8_t[]>(new uint8_t[m_buffersize]);
 	if(!m_buffer) throw std::bad_alloc();
 
-	// Create and initialize the RTL-SDR device instance
-	m_device = usbdevice::create(usbdevice::DEFAULT_DEVICE_INDEX);
-	//m_device = tcpdevice::create("192.168.0.174", 1234);
+	// Initialize the RTL-SDR device instance
 	uint32_t samplerate = m_device->set_sample_rate(m_samplerate);
 	uint32_t frequency = m_device->set_center_frequency(fmprops.frequency + (m_samplerate / 4));	// DC offset
 
 	// Adjust the device gain as specified by the parameters
-	m_device->set_automatic_gain_control(deviceprops.agc);
-	if(deviceprops.agc == false) m_device->set_gain(deviceprops.manualgain);
+	m_device->set_automatic_gain_control(false); // deviceprops.agc);  // TODO: fmprops setting
+	/*if(deviceprops.agc == false)*/ m_device->set_gain(328); // (deviceprops.manualgain);	// TODO: fmprops setting
 
 	// Initialize the demodulator parameters
 	tDemodInfo demodinfo = {};
@@ -185,12 +183,32 @@ void fmstream::close(void)
 //
 // Arguments:
 //
-//	deviceprops		- RTL-SDR device properties
+//	usbindex		- USB index of the local RTL-SDR device
 //	fmprops			- FM signal processor properties
 
-std::unique_ptr<fmstream> fmstream::create(struct deviceprops const& deviceprops, struct fmprops const& fmprops)
+std::unique_ptr<fmstream> fmstream::create(uint32_t usbindex, struct fmprops const& fmprops)
 {
-	return std::unique_ptr<fmstream>(new fmstream(deviceprops, fmprops));
+	std::unique_ptr<rtldevice> device = usbdevice::create(usbindex);
+	return std::unique_ptr<fmstream>(new fmstream(std::move(device), fmprops));
+}
+
+//---------------------------------------------------------------------------
+// fmstream::create (static)
+//
+// Factory method, creates a new fmstream instance
+//
+// Arguments:
+//
+//	host			- IP address of the rtl_tcp network server
+//	port			- Port number of the rtl_tcp network server
+//	fmprops			- FM signal processor properties
+
+std::unique_ptr<fmstream> fmstream::create(char const* host, uint16_t port, struct fmprops const& fmprops)
+{
+	if((host == nullptr) || (*host == '\0')) throw std::invalid_argument("host");
+
+	std::unique_ptr<rtldevice> device = tcpdevice::create(host, port);
+	return std::unique_ptr<fmstream>(new fmstream(std::move(device), fmprops));
 }
 
 //---------------------------------------------------------------------------
