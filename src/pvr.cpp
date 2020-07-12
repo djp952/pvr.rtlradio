@@ -1268,7 +1268,13 @@ bool OpenLiveStream(PVR_CHANNEL const& channel)
 		else throw string_exception("invalid device_connection type specified");	
 	}
 
-	catch(std::exception& ex) { return handle_stdexception(__func__, ex, false); } 
+	// Queue a notification for the user when a live stream cannot be opened, don't just silently log it
+	catch(std::exception& ex) { 
+		
+		g_addon->QueueNotification(ADDON::queue_msg_t::QUEUE_ERROR, "Live Stream creation failed (%s).", ex.what());
+		return handle_stdexception(__func__, ex, false); 
+	}
+
 	catch(...) { return handle_generalexception(__func__, false); }
 
 	return true;
@@ -1607,8 +1613,18 @@ void DemuxFlush(void)
 
 DemuxPacket* DemuxRead(void)
 {
-	try { return (g_pvrstream) ? g_pvrstream->demuxread(demux_alloc) : nullptr; } 
-	catch(std::exception& ex) { return handle_stdexception(__func__, ex, nullptr); }
+	try { return (g_pvrstream) ? g_pvrstream->demuxread(demux_alloc) : nullptr; }
+
+	catch(std::exception& ex) {
+
+		// Log the exception and alert the user of the failure with an error notification
+		log_error(__func__, ": read operation failed with exception: ", ex.what());
+		g_addon->QueueNotification(ADDON::queue_msg_t::QUEUE_ERROR, "Unable to read from stream: %s", ex.what());
+
+		g_pvrstream.reset();				// Close the stream
+		return nullptr;						// Return a null demultiplexer packet
+	}
+
 	catch(...) { return handle_generalexception(__func__, nullptr); }
 }
 
