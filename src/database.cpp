@@ -223,7 +223,7 @@ void enumerate_channels(sqlite3* instance, enumerate_channels_callback const& ca
 	sqlite3_stmt*				statement;			// SQL statement to execute
 	int							result;				// Result from SQLite function
 
-	if((instance == nullptr) || (callback == nullptr)) return;
+	if(instance == nullptr) throw std::invalid_argument("instance");
 
 	// id | channel | subchannel | name
 	auto sql = "select ((frequency / 100000) * 10) + subchannel as id, (frequency / 1000000) as channel, "
@@ -366,6 +366,62 @@ int get_channel_count(sqlite3* instance)
 	if(instance == nullptr) return 0;
 
 	return execute_scalar_int(instance, "select count(*) from channel");
+}
+
+//---------------------------------------------------------------------------
+// get_channel_properties
+//
+// Gets the tuning properties of a channel from the database
+//
+// Arguments:
+//
+//	instance		- SQLite database instance
+//	id				- Channel unique identifier
+//	channelprops	- Structure to receive the channel properties
+
+bool get_channel_properties(sqlite3* instance, unsigned int id, struct channelprops& channelprops)
+{
+	sqlite3_stmt*				statement;			// SQL statement to execute
+	int							result;				// Result from SQLite function
+	bool						found = false;		// Flag if channel was found in database
+
+	if(instance == nullptr) throw std::invalid_argument("instance");
+
+	// frequency | subchannel | name | autogain | manualgain
+	auto sql = "select frequency, subchannel, name as callsign, autogain, manualgain from channel "
+		"where frequency = ?1 and subchannel = ?2";
+
+	result = sqlite3_prepare_v2(instance, sql, -1, &statement, nullptr);
+	if(result != SQLITE_OK) throw sqlite_exception(result, sqlite3_errmsg(instance));
+
+	try {
+
+		// Bind the query parameters
+		result = sqlite3_bind_int(statement, 1, (id / 10) * 100000);
+		if(result == SQLITE_OK) sqlite3_bind_int(statement, 2, id % 10);
+		if(result != SQLITE_OK) throw sqlite_exception(result);
+
+		// Execute the query; there should be one and only one row returned
+		if(sqlite3_step(statement) == SQLITE_ROW) {
+
+			channelprops.frequency = static_cast<uint32_t>(sqlite3_column_int(statement, 0));
+			channelprops.subchannel = static_cast<uint32_t>(sqlite3_column_int(statement, 1));
+
+			unsigned char const* name = sqlite3_column_text(statement, 2);
+			channelprops.name.assign((name == nullptr) ? "" : reinterpret_cast<char const*>(name));
+
+			channelprops.autogain = (sqlite3_column_int(statement, 3) != 0);
+			channelprops.manualgain = sqlite3_column_int(statement, 4);
+
+			found = true;						// Channel was found in the database
+		}
+
+		sqlite3_finalize(statement);			// Finalize the SQLite statement
+	}
+
+	catch(...) { sqlite3_finalize(statement); throw; }
+
+	return found;
 }
 
 //---------------------------------------------------------------------------

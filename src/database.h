@@ -31,6 +31,8 @@
 #include <string>
 #include <vector>
 
+#include "props.h"
+
 #pragma warning(push, 4)
 
 //---------------------------------------------------------------------------
@@ -145,6 +147,11 @@ void enumerate_channels(sqlite3* instance, enumerate_channels_callback const& ca
 //
 // Gets the number of available channels in the database
 int get_channel_count(sqlite3* instance);
+
+// get_channel_properties
+//
+// Gets the tuning properties of a channel from the database
+bool get_channel_properties(sqlite3* instance, unsigned int id, struct channelprops& channelprops);
 
 // open_database
 //

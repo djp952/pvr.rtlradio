@@ -1226,7 +1226,7 @@ PVR_ERROR UpdateTimer(PVR_TIMER const& /*timer*/)
 //
 //	channel		- The channel to stream
 
-bool OpenLiveStream(PVR_CHANNEL const& /*channel*/)
+bool OpenLiveStream(PVR_CHANNEL const& channel)
 {
 	//
 	// TODO: This doesn't seem that easy to do in Leia, but should be in Matrix ... need to
@@ -1240,13 +1240,13 @@ bool OpenLiveStream(PVR_CHANNEL const& /*channel*/)
 
 	try { 
 	
-		// TODO: this information gets looked up from the database
+		// Retrieve the tuning properties for the channel from the database
 		struct channelprops channelprops = {};
-		channelprops.frequency = 95100000;
-		channelprops.subchannel = 0;
-		channelprops.callsign = "WXXX-FM";
-		channelprops.autogain = false;
-		channelprops.manualgain = 328;
+		if(!get_channel_properties(connectionpool::handle(g_connpool), channel.iUniqueId, channelprops))
+			throw string_exception("channel ", channel.iUniqueId, " (", channel.strChannelName, ") was not found in the database");
+
+		// TODO: subchannel numbers are reserved for HD Radio
+		assert(channelprops.subchannel == 0);
 
 		// Set up the FM digital signal processor properties
 		struct fmprops fmprops = {};

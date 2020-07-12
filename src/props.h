@@ -25,6 +25,7 @@
 #pragma once
 
 #include <stdint.h>
+#include <string>
 
 #pragma warning(push, 4)
 
@@ -35,7 +36,7 @@ struct channelprops {
 
 	uint32_t		frequency;		// Station center frequency
 	uint32_t		subchannel;		// Subchannel (HD Radio only)
-	char const*		callsign;		// Station call sign
+	std::string		name;			// Station name / call sign
 	bool			autogain;		// Flag indicating if automatic gain should be used
 	int				manualgain;		// Manual gain value as 10*dB (i.e. 32.8dB = 328)
 };
