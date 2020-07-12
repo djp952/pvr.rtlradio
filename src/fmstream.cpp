@@ -83,6 +83,7 @@ fmstream::fmstream(struct deviceprops const& deviceprops, struct fmprops const& 
 
 	// Create and initialize the RTL-SDR device instance
 	m_device = usbdevice::create(usbdevice::DEFAULT_DEVICE_INDEX);
+	//m_device = tcpdevice::create("192.168.0.174", 1234);
 	uint32_t samplerate = m_device->set_sample_rate(m_samplerate);
 	uint32_t frequency = m_device->set_center_frequency(fmprops.frequency + (m_samplerate / 4));	// DC offset
 
@@ -535,14 +536,15 @@ void fmstream::transfer(scalar_condition<bool>& started)
 
 		// Transfer the available data from the device into the ring buffer
 		size_t count = DEFAULT_DEVICE_BLOCK_SIZE;
-		while(count) {
+		while((count > 0) && (m_stop.test(false) == true)) {
 
 			// If the head is behind the tail linearly, take the data between them otherwise 
 			// take the data between the end of the buffer and the head
 			size_t chunk = (head < tail) ? std::min(count, tail - head) : std::min(count, m_buffersize - head);
 
 			// Read the chunk directly into the ring buffer
-			chunk = m_device->read(&m_buffer[head], chunk);
+			try { chunk = m_device->read(&m_buffer[head], chunk); }
+			catch(...) { chunk = 0; }	// <--- TODO: Should report the exception somehow
 
 			head += chunk;				// Increment the head position
 			count -= chunk;				// Decrement remaining bytes to be transferred
