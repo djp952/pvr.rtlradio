@@ -24,32 +24,30 @@
 #define __PROPS_H_
 #pragma once
 
+#include <stdint.h>
+
 #pragma warning(push, 4)
 
 // channelprops
 //
-// Defines properties for a channel detected via a scan
+// Defines properties for a radio channel
 struct channelprops {
 
 	uint32_t		frequency;		// Station center frequency
+	uint32_t		subchannel;		// Subchannel (HD Radio only)
 	char const*		callsign;		// Station call sign
-	int				gain;			// Default gain value as 10*dB (i.e. 32.8dB = 328)
+	bool			autogain;		// Flag indicating if automatic gain should be used
+	int				manualgain;		// Manual gain value as 10*dB (i.e. 32.8dB = 328)
 };
 
 // fmprops
 //
-// Defines FM Radio DSP specific properties
+// Defines properties for the FM digital signal processor
 struct fmprops {
 
-	uint32_t		frequency;		// Station center frequency
-	uint32_t		samplerate;		// Output sample rate, in hertz
+	bool			isrbds;			// Flag if region is RBDS (North America)
+	uint32_t		outputrate;		// Output sample rate, in Hertz
 };
-
-// hdradioprops
-//
-// Defines HD Radio DSP specific properties
-//struct hdradioprops {
-//};
 
 // streamprops
 //

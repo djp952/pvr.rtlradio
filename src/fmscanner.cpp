@@ -44,15 +44,19 @@ void fmscanner::scan(struct deviceprops const& /*deviceprops*/, scan_callback co
 	// DUMMY CHANNEL 1 - 95.1 WRBS-FM
 	std::string channel_1_name("WRBS-FM");
 	props.frequency = 95100000;
+	props.subchannel = 0;
 	props.callsign = channel_1_name.c_str();
-	props.gain = 328;
+	props.autogain = false;
+	props.manualgain = 328;
 	callback(props);
 
 	// DUMMY CHANNEL 2 - 99.1 WDCH-FM
 	std::string channel_2_name("WDCH-FM");
 	props.frequency = 99100000;
+	props.subchannel = 0;
 	props.callsign = channel_2_name.c_str();
-	props.gain = 328;
+	props.autogain = false;
+	props.manualgain = 328;
 	callback(props);
 }
 

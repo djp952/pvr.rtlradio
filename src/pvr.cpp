@@ -79,6 +79,15 @@ enum device_connection {
 	rtltcp		= 1,				// Device connected via rtl_tcp
 };
 
+// rds_standard
+//
+// Defines the Radio Data System (RDS) standard
+enum rds_standard {
+
+	automatic	= 0,				// Automatically detect RDS standard
+	rds			= 1,				// Global RDS standard
+	rbds		= 2,				// North American RBDS standard
+};
 
 // addon_settings
 //
@@ -104,6 +113,16 @@ struct addon_settings {
 	//
 	// The port number of the rtl_tcp host to connect to
 	int device_connection_tcp_port;
+
+	// fmradio_rds_standard
+	//
+	// Specifies the Radio Data System (RDS) standard
+	enum rds_standard fmradio_rds_standard;
+
+	// fmradio_output_samplerate
+	//
+	// Specifies the output sample rate for the FM DSP
+	int fmradio_output_samplerate;
 };
 
 //---------------------------------------------------------------------------
@@ -172,6 +191,8 @@ static addon_settings g_settings = {
 	0,									// device_connection_usb_index
 	"",									// device_connection_tcp_host
 	1234,								// device_connection_tcp_port
+	rds_standard::automatic,			// fmradio_rds_standard
+	48000,								// fmradio_output_samplerate
 };
 
 // g_settings_lock
@@ -206,6 +227,19 @@ static DemuxPacket* demux_alloc(int size)
 	return g_pvr->AllocateDemuxPacket(size);
 }
 
+// device_connection_to_string (local)
+//
+// Converts a device_connection enumeration value into a string
+static std::string device_connection_to_string(enum device_connection connection)
+{
+	switch(connection) {
+
+		case device_connection::usb: return "USB";
+		case device_connection::rtltcp: return "Network (rtl_tcp)";
+	}
+
+	return "Unknown";
+}
 // handle_generalexception (local)
 //
 // Handler for thrown generic exceptions
@@ -302,6 +336,21 @@ static void log_notice(_args&&... args)
 	log_message(ADDON::addon_log_t::LOG_NOTICE, std::forward<_args>(args)...);
 }
 
+// rds_standard_to_string (local)
+//
+// Converts an rds_standard enumeration value into a string
+static std::string rds_standard_to_string(enum rds_standard mode)
+{
+	switch(mode) {
+
+		case rds_standard::automatic: return "Automatic";
+		case rds_standard::rds: return "World (RDS)";
+		case rds_standard::rbds: return "North America (RBDS)";
+	}
+
+	return "Unknown";
+}
+
 //---------------------------------------------------------------------------
 // KODI ADDON ENTRY POINTS
 //---------------------------------------------------------------------------
@@ -363,6 +412,10 @@ ADDON_STATUS ADDON_Create(void* handle, void* props)
 			if(g_addon->GetSetting("device_connection_usb_index", &nvalue)) g_settings.device_connection_usb_index = nvalue;
 			if(g_addon->GetSetting("device_connection_tcp_host", strvalue)) g_settings.device_connection_tcp_host.assign(strvalue);
 			if(g_addon->GetSetting("device_connection_tcp_port", &nvalue)) g_settings.device_connection_tcp_port = nvalue;
+
+			// Load the FM Radio settings
+			if(g_addon->GetSetting("fmradio_rds_standard", &nvalue)) g_settings.fmradio_rds_standard = static_cast<enum rds_standard>(nvalue);
+			if(g_addon->GetSetting("fmradio_output_samplerate", &nvalue)) g_settings.fmradio_output_samplerate = nvalue;
 
 			// Create the global gui callbacks instance
 			g_gui.reset(new CHelper_libKODI_guilib());
@@ -489,7 +542,7 @@ ADDON_STATUS ADDON_SetSetting(char const* name, void const* value)
 		if(nvalue != static_cast<int>(g_settings.device_connection)) {
 
 			g_settings.device_connection = static_cast<enum device_connection>(nvalue);
-			log_notice(__func__, ": setting device_connection changed to ", (g_settings.device_connection == device_connection::usb) ? "USB" : "Network (rtl_tcp)");
+			log_notice(__func__, ": setting device_connection changed to ", device_connection_to_string(g_settings.device_connection).c_str());
 		}
 	}
 
@@ -525,6 +578,30 @@ ADDON_STATUS ADDON_SetSetting(char const* name, void const* value)
 
 			g_settings.device_connection_tcp_port = nvalue;
 			log_notice(__func__, ": setting device_connection_tcp_port changed to ", g_settings.device_connection_tcp_port);
+		}
+	}
+
+	// fmradio_rds_standard
+	//
+	else if(strcmp(name, "fmradio_rds_standard") == 0) {
+
+		int nvalue = *reinterpret_cast<int const*>(value);
+		if(nvalue != static_cast<int>(g_settings.fmradio_rds_standard)) {
+
+			g_settings.fmradio_rds_standard = static_cast<enum rds_standard>(nvalue);
+			log_notice(__func__, ": setting fmradio_rds_standard changed to ", rds_standard_to_string(g_settings.fmradio_rds_standard).c_str());
+		}
+	}
+
+	// fmradio_output_samplerate
+	//
+	else if(strcmp(name, "fmradio_output_samplerate") == 0) {
+
+		int nvalue = *reinterpret_cast<int const*>(value);
+		if(nvalue != static_cast<int>(g_settings.fmradio_output_samplerate)) {
+
+			g_settings.fmradio_output_samplerate = nvalue;
+			log_notice(__func__, ": setting fmradio_output_samplerate changed to ", g_settings.fmradio_output_samplerate, "Hz");
 		}
 	}
 
@@ -1151,29 +1228,42 @@ PVR_ERROR UpdateTimer(PVR_TIMER const& /*timer*/)
 
 bool OpenLiveStream(PVR_CHANNEL const& /*channel*/)
 {
-	// TODO: DUMMY OPERATION
 	//
-	struct fmprops fmprops = {};
+	// TODO: This doesn't seem that easy to do in Leia, but should be in Matrix ... need to
+	// determine how to handle the "automatic" RDS standard.  The addon General interface has
+	// the ability to get the current language settings (like en-us, en-ca, etc), if there
+	// is a Mexico suffix (mx?) the default can be set by looking for -us, -ca, or -mx
+	//
 
 	// Create a copy of the current addon settings structure
 	struct addon_settings settings = copy_settings();
 
-	// TODO: Everything here needs to be controlled by settings and/or channel information
-	// TODO: fmprops to become channelprops or channelinfo or something like that
-	fmprops.frequency = 99100000;
-	fmprops.samplerate = 48000;
-
 	try { 
 	
+		// TODO: this information gets looked up from the database
+		struct channelprops channelprops = {};
+		channelprops.frequency = 95100000;
+		channelprops.subchannel = 0;
+		channelprops.callsign = "WXXX-FM";
+		channelprops.autogain = false;
+		channelprops.manualgain = 328;
+
+		// Set up the FM digital signal processor properties
+		struct fmprops fmprops = {};
+		if(settings.fmradio_rds_standard == rds_standard::automatic) fmprops.isrbds = true;		// <-- See above TODO
+		else fmprops.isrbds = (settings.fmradio_rds_standard == rds_standard::rbds);
+		fmprops.outputrate = settings.fmradio_output_samplerate;
+
 		// USB device
 		//
 		if(settings.device_connection == device_connection::usb)
-			g_pvrstream = fmstream::create(settings.device_connection_usb_index, fmprops);
+			g_pvrstream = fmstream::create(settings.device_connection_usb_index, channelprops, fmprops);
 
 		// Network (rtl_tcp) device
 		//
 		else if(settings.device_connection == device_connection::rtltcp)
-			g_pvrstream = fmstream::create(settings.device_connection_tcp_host.c_str(), static_cast<uint16_t>(settings.device_connection_tcp_port), fmprops);
+			g_pvrstream = fmstream::create(settings.device_connection_tcp_host.c_str(), static_cast<uint16_t>(settings.device_connection_tcp_port), 
+				channelprops, fmprops);
 
 		else throw string_exception("invalid device_connection type specified");	
 	}

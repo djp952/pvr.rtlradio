@@ -44,12 +44,40 @@ msgctxt "#30103"
 msgid "rtl_tcp server port"
 msgstr ""
 
+msgctxt "#30104"
+msgid "Radio Data System (RDS) standard"
+msgstr ""
+
+msgctxt "#30105"
+msgid "PCM output sample rate"
+msgstr ""
+
 msgctxt "#30200"
 msgid "Universal Serial Bus (USB)"
 msgstr ""
 
 msgctxt "#30201"
 msgid "Network (rtl_tcp)"
+msgstr ""
+
+msgctxt "#30202"
+msgid "Automatic"
+msgstr ""
+
+msgctxt "#30203"
+msgid "World (RDS)"
+msgstr ""
+
+msgctxt "#30204"
+msgid "North America (RBDS)"
+msgstr ""
+
+msgctxt "#30205"
+msgid "44.1 KHz"
+msgstr ""
+
+msgctxt "#30206"
+msgid "48.0 KHz"
 msgstr ""
 
 msgctxt "#30500"
@@ -66,5 +94,13 @@ msgstr ""
 
 msgctxt "#30503"
 msgid "Specifies the port number that the rtl_tcp server will be listening for client connections. If no port number was specified to rtl_tcp leave set to the default port number 1234."
+msgstr ""
+
+msgctxt "#30504"
+msgid "Specifies the Radio Data System (RDS) region. When set to Automatic the region will be automatically detected. When set to World the global RDS standard will be used. When set to North America the RBDS standard will be used."
+msgstr ""
+
+msgctxt "#30505"
+msgid "Specifies the FM digital signal processor PCM output sample rate."
 msgstr ""
 

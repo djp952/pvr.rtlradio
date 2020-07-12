@@ -67,6 +67,31 @@
     <category id="fmradio" label="30001">
       <group id="1" label="-1">
 
+        <setting id="fmradio_rds_standard" type="integer" label="30104" help="30504">
+          <level>0</level>
+          <default>0</default>
+          <constraints>
+            <options>
+              <option label="30202">0</option>
+              <option label="30203">1</option>
+              <option label="30204">2</option>
+            </options>
+          </constraints>
+          <control type="spinner" format="integer"/>
+        </setting>
+
+        <setting id="fmradio_output_samplerate" type="integer" label="30105" help="30505">
+          <level>0</level>
+          <default>48000</default>
+          <constraints>
+            <options>
+              <option label="30205">44100</option>
+              <option label="30206">48000</option>
+            </options>
+          </constraints>
+          <control type="spinner" format="integer"/>
+        </setting>
+
       </group>
     </category>
 
