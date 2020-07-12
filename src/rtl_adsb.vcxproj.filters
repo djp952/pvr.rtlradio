@@ -42,17 +42,6 @@
     <Filter Include="External Libraries\rtl-sdr\Source Files">
       <UniqueIdentifier>{98748055-eaa8-490c-bfd9-0a3e3ef969c8}</UniqueIdentifier>
     </Filter>
-    <Filter Include="External Libraries\pthreads4w">
-      <UniqueIdentifier>{c665ddb0-945a-47ac-bf63-472defd18361}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="External Libraries\pthreads4w\Header Files">
-      <UniqueIdentifier>{44472c45-55b7-4d14-bd02-518d6d9d98e1}</UniqueIdentifier>
-      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
-    </Filter>
-    <Filter Include="External Libraries\pthreads4w\Source Files">
-      <UniqueIdentifier>{abb89853-7aa3-4a37-9b3c-8e7c9f430dc8}</UniqueIdentifier>
-      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\depends\libusb\src\msvc\config.h">
@@ -102,12 +91,6 @@
     </ClInclude>
     <ClInclude Include="..\depends\rtl-sdr\src\getopt\getopt.h">
       <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\depends\pthreads4w\pthread.h">
-      <Filter>External Libraries\pthreads4w\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\depends\pthreads4w\config.h">
-      <Filter>External Libraries\pthreads4w\Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -167,9 +150,6 @@
     </ClCompile>
     <ClCompile Include="..\depends\rtl-sdr\src\convenience\convenience.c">
       <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\depends\pthreads4w\pthread.c">
-      <Filter>External Libraries\pthreads4w\Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\depends\rtl-sdr\src\rtl_adsb.c">
       <Filter>Source Files</Filter>
