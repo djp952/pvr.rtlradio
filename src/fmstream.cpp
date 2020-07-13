@@ -312,12 +312,28 @@ DemuxPacket* fmstream::demuxread(std::function<DemuxPacket*(int)> const& allocat
 	// Adjust the input size to match the optimal setting from the decoder
 	available = std::min(available, minreadsize);
 
-	std::vector<TYPECPX> samples(available / 2);
-	for(size_t index = 0; index < samples.size(); index++) {
+	// Create a heap array in which to hold the converted I/Q samples
+	size_t numsamples = (available / 2);
+	std::unique_ptr<TYPECPX[]> samples(new TYPECPX[numsamples]);
+
+	// On some platforms, accessing the data via a normal pointer as opposed
+	// to going through unique_ptr::operator[] was measurably faster
+	TYPECPX* sample = &samples[0];
+
+	for(size_t index = 0; index < numsamples; index++) {
 
 		// The demodulator expects the I/Q samples in the range of -32767.0 through +32767.0
-		samples[index].re = ((static_cast<TYPEREAL>(m_buffer[tail]) - 127.5) / 127.5) * 32767.0;		// I
-		samples[index].im = ((static_cast<TYPEREAL>(m_buffer[tail + 1]) - 127.5) / 127.5) * 32767.0;	// Q
+		// 256.996 = (32767.0 / 127.5) = 256.9960784313725
+		sample[index] = {
+
+#ifdef FMDSP_USE_DOUBLE_PRECISION
+			(static_cast<TYPEREAL>(m_buffer[tail]) - 127.5) * 256.996,			// I
+			(static_cast<TYPEREAL>(m_buffer[tail + 1]) - 127.5) * 256.996,		// Q
+#else
+			(static_cast<TYPEREAL>(m_buffer[tail]) - 127.5f) * 256.996f,		// I
+			(static_cast<TYPEREAL>(m_buffer[tail + 1]) - 127.5f) * 256.996f,	// Q
+#endif
+		};
 
 		tail += 2;								// Increment new tail position
 		if(tail >= m_buffersize) tail = 0;		// Handle buffer rollover
@@ -326,8 +342,8 @@ DemuxPacket* fmstream::demuxread(std::function<DemuxPacket*(int)> const& allocat
 	// Modify the atomic<> tail position to mark the ring buffer space as free
 	m_buffertail.store(tail);
 
-	// Process the raw I/Q data, the original sample vector<> can be reused/overwritten as it's processed
-	int audiopackets = m_demodulator->ProcessData(static_cast<int>(samples.size()), samples.data(), samples.data());
+	// Process the raw I/Q data, the original samples buffer can be reused/overwritten as it's processed
+	int audiopackets = m_demodulator->ProcessData(static_cast<int>(numsamples), samples.get(), samples.get());
 
 	// Process any RDS group data that was collected during demodulation
 	tRDS_GROUPS rdsgroup = {};
@@ -340,7 +356,7 @@ DemuxPacket* fmstream::demuxread(std::function<DemuxPacket*(int)> const& allocat
 
 	// Resample the audio data directly into the allocated packet buffer
 	int stereopackets = m_resampler->Resample(audiopackets, m_demodulator->GetOutputRate() / m_pcmsamplerate, 
-		samples.data(), reinterpret_cast<TYPESTEREO16*>(packet->pData), 1.0);
+		samples.get(), reinterpret_cast<TYPESTEREO16*>(packet->pData), 1.0);
 
 	// Calcuate the duration of the demultiplexer packet, in microseconds
 	double duration = ((stereopackets / static_cast<double>(m_pcmsamplerate)) US);
