@@ -368,6 +368,20 @@ void fmstream::demuxreset(void)
 }
 
 //---------------------------------------------------------------------------
+// fmstream::devicename
+//
+// Gets the device name associated with the stream
+//
+// Arguments:
+//
+//	NONE
+
+std::string fmstream::devicename(void) const
+{
+	return std::string(m_device->get_device_name());
+}
+
+//---------------------------------------------------------------------------
 // fmstream::enumproperties
 //
 // Enumerates the stream properties
@@ -408,6 +422,21 @@ void fmstream::enumproperties(std::function<void(struct streamprops const& props
 long long fmstream::length(void) const
 {
 	return -1;
+}
+
+//---------------------------------------------------------------------------
+// fmstream::muxname
+//
+// Gets the mux name associated with the stream
+//
+// Arguments:
+//
+//	NONE
+
+std::string fmstream::muxname(void) const
+{
+	// If the callsigbn for the station is known, use that with an -FM suffix, otherwise "Unknown"
+	return m_rdsdecoder.has_rbds_callsign() ? std::string(m_rdsdecoder.get_rbds_callsign()) + "-FM" : "Unknown";
 }
 
 //---------------------------------------------------------------------------
@@ -469,6 +498,20 @@ long long fmstream::seek(long long /*position*/, int /*whence*/)
 }
 
 //---------------------------------------------------------------------------
+// fmstream::servicename
+//
+// Gets the service name associated with the stream
+//
+// Arguments:
+//
+//	NONE
+
+std::string fmstream::servicename(void) const
+{
+	return std::string("Wideband FM radio");
+}
+
+//---------------------------------------------------------------------------
 // fmstream::signalstrength
 //
 // Gets the signal strength as a percentage
@@ -479,6 +522,10 @@ long long fmstream::seek(long long /*position*/, int /*whence*/)
 
 int fmstream::signalstrength(void) const
 {
+	//
+	// TODO: I'm not thrilled with this
+	//
+
 	static const double LN25 = MLOG(25);		// natural log of 25
 
 	TYPEREAL db = static_cast<int>(m_demodulator->GetSMeterAve());
@@ -507,6 +554,10 @@ int fmstream::signalstrength(void) const
 
 int fmstream::signaltonoise(void) const
 {
+	//
+	// TODO: I'm not thrilled with this
+	//
+
 	TYPEREAL db = static_cast<int>(m_demodulator->GetSMeterAve());
 
 	// The actual SNR is difficult to calculate and track (I tried), so use the

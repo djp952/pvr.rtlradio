@@ -25,6 +25,7 @@
 #pragma once
 
 #include <functional>
+#include <string>
 
 #include "DemuxPacket.h"
 #include "props.h"
@@ -78,6 +79,11 @@ public:
 	// Resets the demultiplexer
 	virtual void demuxreset(void) = 0;
 
+	// devicename
+	//
+	// Gets the device name associated with the stream
+	virtual std::string devicename(void) const = 0;
+
 	// enumproperties
 	//
 	// Enumerates the stream properties
@@ -87,6 +93,11 @@ public:
 	//
 	// Gets the length of the stream
 	virtual long long length(void) const = 0;
+
+	// muxname
+	//
+	// Gets the mux name associated with the stream
+	virtual std::string muxname(void) const = 0;
 
 	// position
 	//
@@ -107,6 +118,11 @@ public:
 	//
 	// Sets the stream pointer to a specific position
 	virtual long long seek(long long position, int whence) = 0;
+
+	// servicename
+	//
+	// Gets the service name associated with the stream
+	virtual std::string servicename(void) const = 0;
 
 	// signalstrength
 	//

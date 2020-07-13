@@ -668,9 +668,7 @@ char const* GetBackendVersion(void)
 
 char const* GetConnectionString(void)
 {
-	// TODO: I would like this to return either the local RTL-SDR device name
-	// or the IP address of the remote RTL-SDR device if using rtl_tcp
-	return "TODO";
+	return "";
 }
 
 //---------------------------------------------------------------------------
@@ -1374,11 +1372,16 @@ PVR_ERROR SignalStatus(PVR_SIGNAL_STATUS& status)
 {
 	if(!g_pvrstream) return PVR_ERROR::PVR_ERROR_FAILED;
 
-	// TODO: FILL IN MORE PROPERTIES
+	snprintf(status.strAdapterName, std::extent<decltype(status.strAdapterName)>::value, "%s", g_pvrstream->devicename().c_str());
+	snprintf(status.strAdapterStatus, std::extent<decltype(status.strAdapterStatus)>::value, "Active");
+	snprintf(status.strServiceName, std::extent<decltype(status.strServiceName)>::value, "%s", g_pvrstream->servicename().c_str());
+	snprintf(status.strProviderName, std::extent<decltype(status.strProviderName)>::value, "RTL-SDR");
+	snprintf(status.strMuxName, std::extent<decltype(status.strMuxName)>::value, "%s", g_pvrstream->muxname().c_str());
 
-	// Kodi expects these values to be based on a range of 0-65535
-	status.iSignal = g_pvrstream->signalstrength() * 655;
-	status.iSNR = g_pvrstream->signaltonoise() * 655;
+	status.iSNR = g_pvrstream->signaltonoise() * 655;			// Range: 0-65535
+	status.iSignal = g_pvrstream->signalstrength() * 655;		// Range: 0-65535
+	status.iBER = 0;
+	status.iUNC = 0;
 
 	return PVR_ERROR::PVR_ERROR_NO_ERROR;
 }

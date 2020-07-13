@@ -61,6 +61,11 @@ public:
 	// Cancels any pending asynchronous read operations from the device
 	virtual void cancel_async(void) const = 0;
 
+	// get_device_name
+	//
+	// Gets the name of the device
+	virtual char const* get_device_name(void) const = 0;
+
 	// get_valid_gains
 	//
 	// Gets the valid tuner gain values for the device

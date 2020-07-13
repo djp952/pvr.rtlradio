@@ -148,6 +148,11 @@ tcpdevice::tcpdevice(char const* host, uint16_t port)
 			// Parse the provided device information; only care about the tuner device type
 			if(memcmp(deviceinfo.magic, "RTL0", 4) == 0) m_tunertype = static_cast<rtlsdr_tuner>(ntohl(deviceinfo.tuner_type));
 			else throw string_exception("invalid device information returned from host");
+
+			// Generate a device name for this instance
+			char devicename[256];
+			snprintf(devicename, std::extent<decltype(devicename)>::value, "Realtek RTL2832U on %s:%d", host, port);
+			m_name.assign(devicename);
 		}
 
 		// Shutdown and close the socket on any exception
@@ -242,6 +247,20 @@ void tcpdevice::close_socket(int socket)
 std::unique_ptr<tcpdevice> tcpdevice::create(char const* host, uint16_t port)
 {
 	return std::unique_ptr<tcpdevice>(new tcpdevice(host, port));
+}
+
+//---------------------------------------------------------------------------
+// tcpdevice::get_device_name
+//
+// Gets the name of the device
+//
+// Arguments:
+//
+//	NONE
+
+char const* tcpdevice::get_device_name(void) const
+{
+	return m_name.c_str();
 }
 
 //---------------------------------------------------------------------------

@@ -60,12 +60,12 @@ public:
 	// canseek
 	//
 	// Flag indicating if the stream allows seek operations
-	bool canseek(void) const;
+	bool canseek(void) const override;
 
 	// close
 	//
 	// Closes the stream
-	void close(void);
+	void close(void) override;
 
 	// create (static)
 	//
@@ -76,62 +76,77 @@ public:
 	// demuxabort
 	//
 	// Aborts the demultiplexer
-	void demuxabort(void);
+	void demuxabort(void) override;
 
 	// demuxflush
 	//
 	// Flushes the demultiplexer
-	void demuxflush(void);
+	void demuxflush(void) override;
 
 	// demuxread
 	//
 	// Reads the next packet from the demultiplexer
-	DemuxPacket* demuxread(std::function<DemuxPacket*(int)> const& allocator);
+	DemuxPacket* demuxread(std::function<DemuxPacket*(int)> const& allocator) override;
 
 	// demuxreset
 	//
 	// Resets the demultiplexer
-	void demuxreset(void);
+	void demuxreset(void) override;
+
+	// devicename
+	//
+	// Gets the device name associated with the stream
+	std::string devicename(void) const override;
 
 	// enumproperties
 	//
 	// Enumerates the stream properties
-	void enumproperties(std::function<void(struct streamprops const& props)> const& callback);
+	void enumproperties(std::function<void(struct streamprops const& props)> const& callback) override;
 
 	// length
 	//
 	// Gets the length of the stream
-	long long length(void) const;
+	long long length(void) const override;
+
+	// muxname
+	//
+	// Gets the mux name associated with the stream
+	std::string muxname(void) const override;
 
 	// position
 	//
 	// Gets the current position of the stream
-	long long position(void) const;
+	long long position(void) const override;
 
 	// read
 	//
 	// Reads available data from the stream
-	size_t read(uint8_t* buffer, size_t count);
+	size_t read(uint8_t* buffer, size_t count) override;
 
 	// realtime
 	//
 	// Gets a flag indicating if the stream is real-time
-	bool realtime(void) const;
+	bool realtime(void) const override;
 
 	// seek
 	//
 	// Sets the stream pointer to a specific position
-	long long seek(long long position, int whence);
+	long long seek(long long position, int whence) override;
+
+	// servicename
+	//
+	// Gets the service name associated with the stream
+	std::string servicename(void) const override;
 
 	// signalstrength
 	//
 	// Gets the signal strength as a percentage
-	int signalstrength(void) const;
+	int signalstrength(void) const override;
 
 	// signaltonoise
 	//
 	// Gets the signal to noise ratio as a percentage
-	int signaltonoise(void) const;
+	int signaltonoise(void) const override;
 
 private:
 

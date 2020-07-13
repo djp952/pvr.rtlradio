@@ -26,6 +26,7 @@
 
 #include <memory>
 #include <rtl-sdr.h>
+#include <string>
 #include <vector>
 
 #include "rtldevice.h"
@@ -69,6 +70,11 @@ public:
 	//
 	// Factory method, creates a new tcpdevice instance
 	static std::unique_ptr<tcpdevice> create(char const* host, uint16_t port);
+
+	// get_device_name
+	//
+	// Gets the name of the device
+	char const* get_device_name(void) const override;
 
 	// get_valid_gains
 	//
@@ -174,6 +180,7 @@ private:
 
 	int				m_socket	= -1;						// TCP/IP socket
 	rtlsdr_tuner	m_tunertype = RTLSDR_TUNER_UNKNOWN;		// Tuner type
+	std::string		m_name;									// Device name
 
 	static std::vector<int> const	s_gaintable_e4k;		// RTLSDR_TUNER_E4000
 	static std::vector<int> const	s_gaintable_fc0012;		// RTLSDR_TUNER_FC0012

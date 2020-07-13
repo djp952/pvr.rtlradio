@@ -85,7 +85,7 @@ public:
 	// get_device_name
 	//
 	// Gets the name of the device
-	char const* get_device_name(void) const;
+	char const* get_device_name(void) const override;
 
 	// get_frequency_correction
 	//
