@@ -80,6 +80,10 @@ msgctxt "#30206"
 msgid "48.0 KHz"
 msgstr ""
 
+msgctxt "#30400"
+msgid "OK"
+msgstr ""
+
 msgctxt "#30500"
 msgid "Specifies the RTL-SDR device connection type. When set to Universal Serial Bus (USB), the device must be connected locally to this system. When set to Network (rtl_tcp), the device must be attached to a system running the rtl_tcp server application."
 msgstr ""

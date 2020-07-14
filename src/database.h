@@ -164,6 +164,11 @@ sqlite3* open_database(char const* connstring, int flags, bool initialize);
 // Renames a channel in the database
 void rename_channel(sqlite3* instance, unsigned int id, char const* newname);
 
+// update_channel_properties
+//
+// Gets the tuning properties of a channel from the database
+bool update_channel_properties(sqlite3* instance, unsigned int id, struct channelprops const& channelprops);
+
 //---------------------------------------------------------------------------
 
 #pragma warning(pop)

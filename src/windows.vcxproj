@@ -196,6 +196,9 @@
     <ClInclude Include="compat\pthread.h" />
     <ClInclude Include="database.h" />
     <ClInclude Include="dbtypes.h" />
+    <ClInclude Include="dialogchanneladd.h" />
+    <ClInclude Include="dialogchannelscan.h" />
+    <ClInclude Include="dialogchannelsettings.h" />
     <ClInclude Include="fmdsp\agc.h" />
     <ClInclude Include="fmdsp\datamodifier.h" />
     <ClInclude Include="fmdsp\datatypes.h" />
@@ -210,7 +213,6 @@
     <ClInclude Include="fmdsp\rbdsconstants.h" />
     <ClInclude Include="fmdsp\smeter.h" />
     <ClInclude Include="fmdsp\wfmdemod.h" />
-    <ClInclude Include="fmscanner.h" />
     <ClInclude Include="fmstream.h" />
     <ClInclude Include="libusb_exception.h" />
     <ClInclude Include="props.h" />
@@ -218,6 +220,7 @@
     <ClInclude Include="rdsdecoder.h" />
     <ClInclude Include="rtldevice.h" />
     <ClInclude Include="scalar_condition.h" />
+    <ClInclude Include="scanner.h" />
     <ClInclude Include="sqlite_exception.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="string_exception.h" />
@@ -615,6 +618,9 @@
       <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(IntDir)sqlite\</ObjectFileName>
     </ClCompile>
     <ClCompile Include="database.cpp" />
+    <ClCompile Include="dialogchanneladd.cpp" />
+    <ClCompile Include="dialogchannelscan.cpp" />
+    <ClCompile Include="dialogchannelsettings.cpp" />
     <ClCompile Include="fmdsp\agc.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
@@ -725,7 +731,6 @@
       <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">4244;4305</DisableSpecificWarnings>
       <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='Release|x64'">4244;4305</DisableSpecificWarnings>
     </ClCompile>
-    <ClCompile Include="fmscanner.cpp" />
     <ClCompile Include="fmstream.cpp" />
     <ClCompile Include="libusb_exception.cpp">
       <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(ProjectDir)..\depends\libusb\src\libusb;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -735,6 +740,7 @@
     </ClCompile>
     <ClCompile Include="pvr.cpp" />
     <ClCompile Include="rdsdecoder.cpp" />
+    <ClCompile Include="scanner.cpp" />
     <ClCompile Include="sqlite_exception.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>

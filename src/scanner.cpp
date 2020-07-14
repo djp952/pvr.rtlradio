@@ -1,4 +1,4 @@
-//-----------------------------------------------------------------------------
+//---------------------------------------------------------------------------
 // Copyright (c) 2020 Michael G. Brehm
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -18,56 +18,45 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
-//-----------------------------------------------------------------------------
+//---------------------------------------------------------------------------
 
-#ifndef __FMSCANNER_H_
-#define __FMSCANNER_H_
-#pragma once
-
-#include <functional>
-#include <memory>
-
-#include "props.h"
+#include "stdafx.h"
+#include "scanner.h"
 
 #pragma warning(push, 4)
 
-// fmscanner_scan_callback
+//---------------------------------------------------------------------------
+// scanner Constructor (private)
 //
-// Callback function passed to fmscanner::scan
-using scan_callback = std::function<void(struct channelprops const& channel)>;
+// Arguments:
+//
+//	device			- RTL-SDR device instance
+
+scanner::scanner(std::unique_ptr<rtldevice> device) : m_device(std::move(device))
+{
+}
 
 //---------------------------------------------------------------------------
-// Class fmscanner
-//
-// Implements the FM radio channel scanner
+// scanner destructor
 
-class fmscanner
+scanner::~scanner()
 {
-public:
+}
 
-	// scan_callback
-	//
-	// Callback function passed to scan()
-	using scan_callback = std::function<void(struct channelprops const& channel)>;
+//---------------------------------------------------------------------------
+// scanner::create (static)
+//
+// Factory method, creates a new scanner instance
+//
+// Arguments:
+//
+//	device			- RTL-SDR device instance
 
-	//-----------------------------------------------------------------------
-	// Member Functions
+std::unique_ptr<scanner> scanner::create(std::unique_ptr<rtldevice> device)
+{
+	return std::unique_ptr<scanner>(new scanner(std::move(device)));
+}
 
-	// scan (static)
-	//
-	// Scans for FM radio channels
-	static void scan(struct deviceprops const& deviceprops, scan_callback const& callback);
-
-private:
-
-	fmscanner() = delete;
-	fmscanner(fmscanner const&) = delete;
-	fmscanner& operator=(fmscanner const&) = delete;
-	~fmscanner() = delete;
-};
-
-//-----------------------------------------------------------------------------
+//---------------------------------------------------------------------------
 
 #pragma warning(pop)
-
-#endif	// __FMSCANNER_H_

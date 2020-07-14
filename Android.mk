@@ -86,11 +86,14 @@ LOCAL_SRC_FILES := \
     src/fmdsp/smeter.cpp \
     src/fmdsp/wfmdemod.cpp \
     src/database.cpp \
-    src/fmscanner.cpp \
+    src/dialogchanneladd.cpp \
+    src/dialogchannelscan.cpp \
+    src/dialogchannelsettings.cpp \
     src/fmstream.cpp \
     src/libusb_exception.cpp \
     src/pvr.cpp \
     src/rdsdecoder.cpp \
+    src/scanner.cpp \
     src/sqlite_exception.cpp \
     src/uecp.cpp \
     src/usbdevice.cpp \

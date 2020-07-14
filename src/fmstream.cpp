@@ -29,8 +29,6 @@
 
 #include "align.h"
 #include "string_exception.h"
-#include "usbdevice.h"
-#include "tcpdevice.h"
 
 #pragma warning(push, 4)
 
@@ -182,35 +180,13 @@ void fmstream::close(void)
 //
 // Arguments:
 //
-//	usbindex		- USB index of the local RTL-SDR device
+//	device			- RTL-SDR device instance
 //	channelprops	- Channel properties
 //	fmprops			- FM digital signal processor properties
 
-std::unique_ptr<fmstream> fmstream::create(uint32_t usbindex, struct channelprops const& channelprops,
+std::unique_ptr<fmstream> fmstream::create(std::unique_ptr<rtldevice> device, struct channelprops const& channelprops,
 	struct fmprops const& fmprops)
 {
-	std::unique_ptr<rtldevice> device = usbdevice::create(usbindex);
-	return std::unique_ptr<fmstream>(new fmstream(std::move(device), channelprops, fmprops));
-}
-
-//---------------------------------------------------------------------------
-// fmstream::create (static)
-//
-// Factory method, creates a new fmstream instance
-//
-// Arguments:
-//
-//	host			- IP address of the rtl_tcp network server
-//	port			- Port number of the rtl_tcp network server
-//	channelprops	- Channel properties
-//	fmprops			- FM digital signal processor properties
-
-std::unique_ptr<fmstream> fmstream::create(char const* host, uint16_t port, struct channelprops const& channelprops,
-	struct fmprops const& fmprops)
-{
-	if((host == nullptr) || (*host == '\0')) throw std::invalid_argument("host");
-
-	std::unique_ptr<rtldevice> device = tcpdevice::create(host, port);
 	return std::unique_ptr<fmstream>(new fmstream(std::move(device), channelprops, fmprops));
 }
 

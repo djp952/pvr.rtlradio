@@ -36,10 +36,16 @@
 
 #include "database.h"
 #include "dbtypes.h"
+#include "dialogchanneladd.h"
+#include "dialogchannelscan.h"
+#include "dialogchannelsettings.h"
 #include "fmstream.h"
 #include "pvrstream.h"
+#include "scanner.h"
 #include "string_exception.h"
 #include "sqlite_exception.h"
+#include "usbdevice.h"
+#include "tcpdevice.h"
 
 #pragma warning(push, 4)
 
@@ -147,7 +153,7 @@ static const PVR_ADDON_CAPABILITIES g_capabilities = {
 	false,			// bSupportsRecordingsUndelete
 	false,			// bSupportsTimers
 	false,			// bSupportsChannelGroups
-	false,			// bSupportsChannelScan
+	true,			// bSupportsChannelScan
 	true,			// bSupportsChannelSettings
 	true,			// bHandlesInputStream
 	true,			// bHandlesDemuxing
@@ -835,7 +841,31 @@ PVR_ERROR GetChannelGroupMembers(ADDON_HANDLE /*handle*/, PVR_CHANNEL_GROUP cons
 
 PVR_ERROR OpenDialogChannelScan(void)
 {
-	return PVR_ERROR::PVR_ERROR_NOT_IMPLEMENTED;
+	assert(g_gui);
+
+	// Create a copy of the current addon settings structure
+	struct addon_settings settings = copy_settings();
+
+	try {
+
+		// USB device
+		//
+		if(settings.device_connection == device_connection::usb)
+			dialogchannelscan::show(g_gui, scanner::create(usbdevice::create(settings.device_connection_usb_index)));
+
+		// Network (rtl_tcp) device
+		//
+		else if(settings.device_connection == device_connection::rtltcp)
+			dialogchannelscan::show(g_gui, scanner::create(tcpdevice::create(settings.device_connection_tcp_host.c_str(),
+				static_cast<uint16_t>(settings.device_connection_tcp_port))));
+
+		else throw string_exception("invalid device_connection type specified");
+	}
+	
+	catch(std::exception& ex) { return handle_stdexception(__func__, ex, PVR_ERROR::PVR_ERROR_FAILED); }
+	catch(...) { return handle_generalexception(__func__, PVR_ERROR::PVR_ERROR_FAILED); }
+
+	return PVR_ERROR::PVR_ERROR_NO_ERROR;
 }
 
 //---------------------------------------------------------------------------
@@ -951,9 +981,46 @@ PVR_ERROR RenameChannel(PVR_CHANNEL const& channel)
 //
 //	channel		- The channel to show the dialog for
 
-PVR_ERROR OpenDialogChannelSettings(PVR_CHANNEL const& /*channel*/)
+PVR_ERROR OpenDialogChannelSettings(PVR_CHANNEL const& channel)
 {
-	return PVR_ERROR::PVR_ERROR_NOT_IMPLEMENTED;
+	bool			changed = false;		// Flag if settings changed
+
+	assert(g_gui);
+
+	// Create a copy of the current addon settings structure
+	struct addon_settings settings = copy_settings();
+
+	try {
+
+		// Get the properties of the channel to be manipulated
+		struct channelprops channelprops = {};
+		if(!get_channel_properties(connectionpool::handle(g_connpool), channel.iUniqueId, channelprops)) {
+
+			// TODO: Error message
+		}
+
+		// USB device
+		//
+		if(settings.device_connection == device_connection::usb)
+			changed = dialogchannelsettings::show(g_gui, scanner::create(usbdevice::create(settings.device_connection_usb_index)),
+				channelprops);
+
+		// Network (rtl_tcp) device
+		//
+		else if(settings.device_connection == device_connection::rtltcp)
+			changed = dialogchannelsettings::show(g_gui, scanner::create(tcpdevice::create(settings.device_connection_tcp_host.c_str(),
+				static_cast<uint16_t>(settings.device_connection_tcp_port))), channelprops);
+
+		else throw string_exception("invalid device_connection type specified");
+
+		// If the channel properties were changed, update the database accordingly
+		if(changed) update_channel_properties(connectionpool::handle(g_connpool), channel.iUniqueId, channelprops);
+	}
+	
+	catch(std::exception& ex) { return handle_stdexception(__func__, ex, PVR_ERROR::PVR_ERROR_FAILED); }
+	catch(...) { return handle_generalexception(__func__, PVR_ERROR::PVR_ERROR_FAILED); }
+
+	return PVR_ERROR::PVR_ERROR_NO_ERROR;
 }
 
 //---------------------------------------------------------------------------
@@ -967,7 +1034,31 @@ PVR_ERROR OpenDialogChannelSettings(PVR_CHANNEL const& /*channel*/)
 
 PVR_ERROR OpenDialogChannelAdd(PVR_CHANNEL const& /*channel*/)
 {
-	return PVR_ERROR::PVR_ERROR_NOT_IMPLEMENTED;
+	assert(g_gui);
+
+	// Create a copy of the current addon settings structure
+	struct addon_settings settings = copy_settings();
+
+	try {
+
+		// USB device
+		//
+		if(settings.device_connection == device_connection::usb)
+			dialogchanneladd::show(g_gui, scanner::create(usbdevice::create(settings.device_connection_usb_index)));
+
+		// Network (rtl_tcp) device
+		//
+		else if(settings.device_connection == device_connection::rtltcp)
+			dialogchanneladd::show(g_gui, scanner::create(tcpdevice::create(settings.device_connection_tcp_host.c_str(),
+				static_cast<uint16_t>(settings.device_connection_tcp_port))));
+
+		else throw string_exception("invalid device_connection type specified");
+	}
+	
+	catch(std::exception& ex) { return handle_stdexception(__func__, ex, PVR_ERROR::PVR_ERROR_FAILED); }
+	catch(...) { return handle_generalexception(__func__, PVR_ERROR::PVR_ERROR_FAILED); }
+
+	return PVR_ERROR::PVR_ERROR_NO_ERROR;
 }
 
 //---------------------------------------------------------------------------
@@ -1254,14 +1345,20 @@ bool OpenLiveStream(PVR_CHANNEL const& channel)
 
 		// USB device
 		//
-		if(settings.device_connection == device_connection::usb)
-			g_pvrstream = fmstream::create(settings.device_connection_usb_index, channelprops, fmprops);
+		if(settings.device_connection == device_connection::usb) {
+
+			// TODO: log properties like pvr.hdhomerundvr does
+			g_pvrstream = fmstream::create(usbdevice::create(settings.device_connection_usb_index), channelprops, fmprops);
+		}
 
 		// Network (rtl_tcp) device
 		//
-		else if(settings.device_connection == device_connection::rtltcp)
-			g_pvrstream = fmstream::create(settings.device_connection_tcp_host.c_str(), static_cast<uint16_t>(settings.device_connection_tcp_port), 
-				channelprops, fmprops);
+		else if(settings.device_connection == device_connection::rtltcp) {
+
+			// TODO: log properties like pvr.hdhomerundvr does
+			g_pvrstream = fmstream::create(tcpdevice::create(settings.device_connection_tcp_host.c_str(),
+				static_cast<uint16_t>(settings.device_connection_tcp_port)), channelprops, fmprops);
+		}
 
 		else throw string_exception("invalid device_connection type specified");	
 	}

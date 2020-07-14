@@ -189,9 +189,6 @@
     <ClInclude Include="compat\pthread.h">
       <Filter>Header Files\compat</Filter>
     </ClInclude>
-    <ClInclude Include="fmscanner.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\depends\sqlite\sqlite3.h">
       <Filter>External Libraries\sqlite\Header Files</Filter>
     </ClInclude>
@@ -211,6 +208,18 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="tcpdevice.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="dialogchanneladd.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="dialogchannelsettings.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="dialogchannelscan.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="scanner.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -317,9 +326,6 @@
     <ClCompile Include="uecp.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="fmscanner.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\depends\sqlite\sqlite3.c">
       <Filter>External Libraries\sqlite\Source Files</Filter>
     </ClCompile>
@@ -333,6 +339,18 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="tcpdevice.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="dialogchanneladd.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="dialogchannelsettings.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="dialogchannelscan.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="scanner.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

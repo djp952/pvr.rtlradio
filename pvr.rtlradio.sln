@@ -96,6 +96,17 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "rtl_adsb", "src\rtl_adsb.vc
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "sqlite3", "src\sqlite3.vcxproj", "{FB973A22-FC5B-437A-8EA0-B4F1397A0E13}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "skins", "skins", "{14685018-1D53-45C5-BCF5-D9D2074AB355}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "skin.estuary", "skin.estuary", "{6B20BC22-7114-4DC6-BC1A-203C9078F5E5}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "xml", "xml", "{880E452A-4A32-4A49-A911-183912652C33}"
+	ProjectSection(SolutionItems) = preProject
+		pvr.rtlradio\resources\skins\skin.estuary\xml\channeladd.xml = pvr.rtlradio\resources\skins\skin.estuary\xml\channeladd.xml
+		pvr.rtlradio\resources\skins\skin.estuary\xml\channelscan.xml = pvr.rtlradio\resources\skins\skin.estuary\xml\channelscan.xml
+		pvr.rtlradio\resources\skins\skin.estuary\xml\channelsettings.xml = pvr.rtlradio\resources\skins\skin.estuary\xml\channelsettings.xml
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -196,6 +207,9 @@ Global
 		{03E257C2-B115-4D59-AB37-DB0AD52F5366} = {BC723F63-F0D7-4CC4-8789-D6A7DD8AA6E1}
 		{4702CBFF-0944-4364-BC2D-D7E3670681BC} = {BC723F63-F0D7-4CC4-8789-D6A7DD8AA6E1}
 		{4415EE2A-E557-49D4-973C-37C7278828CC} = {BC723F63-F0D7-4CC4-8789-D6A7DD8AA6E1}
+		{14685018-1D53-45C5-BCF5-D9D2074AB355} = {AE3C3D3D-5525-4E65-9944-3CFF8718778F}
+		{6B20BC22-7114-4DC6-BC1A-203C9078F5E5} = {14685018-1D53-45C5-BCF5-D9D2074AB355}
+		{880E452A-4A32-4A49-A911-183912652C33} = {6B20BC22-7114-4DC6-BC1A-203C9078F5E5}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {CDFD4BDC-0976-4BCA-B61E-33B151C24682}

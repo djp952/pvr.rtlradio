@@ -1,4 +1,4 @@
-//---------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 // Copyright (c) 2020 Michael G. Brehm
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -18,46 +18,56 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
-//---------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 
-#include "stdafx.h"
-#include "fmscanner.h"
+#ifndef __SCANNER_H_
+#define __SCANNER_H_
+#pragma once
 
-#include <string>
+#include <memory>
+
+#include "rtldevice.h"
 
 #pragma warning(push, 4)
 
 //---------------------------------------------------------------------------
-// fmscanner::scan (static)
+// Class scanner
 //
-// Scans for FM radio channels
-//
-// Arguments:
-//
-//	deviceprops		- RTL-SDR device properties
-//	callback		- Callback function to invoke when a channel is found
+// Implements the channel scanner
 
-void fmscanner::scan(struct deviceprops const& /*deviceprops*/, scan_callback const& callback)
+class scanner
 {
-	struct channelprops props = {};
+public:
 
-	// DUMMY CHANNEL 1 - 95.1 WRBS-FM
-	props.frequency = 95100000;
-	props.subchannel = 0;
-	props.name.assign("WRBS-FM");
-	props.autogain = false;
-	props.manualgain = 328;
-	callback(props);
+	// Destructor
+	//
+	~scanner();
 
-	// DUMMY CHANNEL 2 - 99.1 WDCH-FM
-	props.frequency = 99100000;
-	props.subchannel = 0;
-	props.name.assign("WDCH-FM");
-	props.autogain = false;
-	props.manualgain = 328;
-	callback(props);
-}
+	//-----------------------------------------------------------------------
+	// Member Functions
 
-//---------------------------------------------------------------------------
+	// create (static)
+	//
+	// Factory method, creates a new scanner instance
+	static std::unique_ptr<scanner> create(std::unique_ptr<rtldevice> device);
+
+private:
+
+	scanner(scanner const&) = delete;
+	scanner& operator=(scanner const&) = delete;
+
+	// Instance Constructor
+	//
+	scanner(std::unique_ptr<rtldevice> device);
+
+	//-----------------------------------------------------------------------
+	// Member Variables
+
+	std::unique_ptr<rtldevice>		m_device;		// RTL-SDR device instance
+};
+
+//-----------------------------------------------------------------------------
 
 #pragma warning(pop)
+
+#endif	// __SCANNER_H_

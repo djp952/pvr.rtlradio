@@ -501,8 +501,30 @@ sqlite3* open_database(char const* connstring, int flags, bool initialize)
 
 void rename_channel(sqlite3* instance, unsigned int id, char const* newname)
 {
-	execute_non_query(instance, "update channel set name = ?1 where frequency = ?2 and subchannel = ?3", 
+	if(instance == nullptr) throw std::invalid_argument("instance");
+
+	execute_non_query(instance, "update channel set name = ?1 where frequency = ?2 and subchannel = ?3",
 		(newname == nullptr) ? "" : newname, (id / 10) * 100000, id % 10);
+}
+
+//---------------------------------------------------------------------------
+// update_channel_properties
+//
+// Updates the tuning properties of a channel in the database
+//
+// Arguments:
+//
+//	instance		- SQLite database instance
+//	id				- Channel unique identifier
+//	channelprops	- Structure containing the updated channel properties
+
+bool update_channel_properties(sqlite3* instance, unsigned int id, struct channelprops const& channelprops)
+{
+	if(instance == nullptr) throw std::invalid_argument("instance");
+
+	return execute_non_query(instance, "update channel set name = ?1, autogain = ?2, manualgain = ?3 "
+		"where frequency = ?4 and subchannel = ?5", channelprops.name.c_str(), (channelprops.autogain) ? 1 : 0,
+		channelprops.manualgain, (id / 10) * 100000, id % 10) > 0;
 }
 
 //---------------------------------------------------------------------------
