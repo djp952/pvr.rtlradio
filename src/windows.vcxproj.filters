@@ -144,31 +144,13 @@
     <ClInclude Include="fmdsp\agc.h">
       <Filter>Header Files\fmdsp</Filter>
     </ClInclude>
-    <ClInclude Include="fmdsp\amdemod.h">
-      <Filter>Header Files\fmdsp</Filter>
-    </ClInclude>
     <ClInclude Include="fmdsp\downconvert.h">
       <Filter>Header Files\fmdsp</Filter>
     </ClInclude>
     <ClInclude Include="fmdsp\fastfir.h">
       <Filter>Header Files\fmdsp</Filter>
     </ClInclude>
-    <ClInclude Include="fmdsp\fmdemod.h">
-      <Filter>Header Files\fmdsp</Filter>
-    </ClInclude>
-    <ClInclude Include="fmdsp\fskdemod.h">
-      <Filter>Header Files\fmdsp</Filter>
-    </ClInclude>
-    <ClInclude Include="fmdsp\pskdemod.h">
-      <Filter>Header Files\fmdsp</Filter>
-    </ClInclude>
-    <ClInclude Include="fmdsp\samdemod.h">
-      <Filter>Header Files\fmdsp</Filter>
-    </ClInclude>
     <ClInclude Include="fmdsp\smeter.h">
-      <Filter>Header Files\fmdsp</Filter>
-    </ClInclude>
-    <ClInclude Include="fmdsp\ssbdemod.h">
       <Filter>Header Files\fmdsp</Filter>
     </ClInclude>
     <ClInclude Include="fmdsp\datatypes.h">
@@ -186,16 +168,7 @@
     <ClInclude Include="fmdsp\iir.h">
       <Filter>Header Files\fmdsp</Filter>
     </ClInclude>
-    <ClInclude Include="fmdsp\psktables.h">
-      <Filter>Header Files\fmdsp</Filter>
-    </ClInclude>
     <ClInclude Include="fmdsp\datamodifier.h">
-      <Filter>Header Files\fmdsp</Filter>
-    </ClInclude>
-    <ClInclude Include="fmdsp\fircoef.h">
-      <Filter>Header Files\fmdsp</Filter>
-    </ClInclude>
-    <ClInclude Include="fmdsp\noiseproc.h">
       <Filter>Header Files\fmdsp</Filter>
     </ClInclude>
     <ClInclude Include="fmdsp\rbdsconstants.h">
@@ -314,9 +287,6 @@
     <ClCompile Include="fmdsp\agc.cpp">
       <Filter>Source Files\fmdsp</Filter>
     </ClCompile>
-    <ClCompile Include="fmdsp\amdemod.cpp">
-      <Filter>Source Files\fmdsp</Filter>
-    </ClCompile>
     <ClCompile Include="fmdsp\datamodifier.cpp">
       <Filter>Source Files\fmdsp</Filter>
     </ClCompile>
@@ -332,28 +302,10 @@
     <ClCompile Include="fmdsp\fir.cpp">
       <Filter>Source Files\fmdsp</Filter>
     </ClCompile>
-    <ClCompile Include="fmdsp\fmdemod.cpp">
-      <Filter>Source Files\fmdsp</Filter>
-    </ClCompile>
-    <ClCompile Include="fmdsp\fskdemod.cpp">
-      <Filter>Source Files\fmdsp</Filter>
-    </ClCompile>
     <ClCompile Include="fmdsp\iir.cpp">
       <Filter>Source Files\fmdsp</Filter>
     </ClCompile>
-    <ClCompile Include="fmdsp\noiseproc.cpp">
-      <Filter>Source Files\fmdsp</Filter>
-    </ClCompile>
-    <ClCompile Include="fmdsp\pskdemod.cpp">
-      <Filter>Source Files\fmdsp</Filter>
-    </ClCompile>
-    <ClCompile Include="fmdsp\samdemod.cpp">
-      <Filter>Source Files\fmdsp</Filter>
-    </ClCompile>
     <ClCompile Include="fmdsp\smeter.cpp">
-      <Filter>Source Files\fmdsp</Filter>
-    </ClCompile>
-    <ClCompile Include="fmdsp\ssbdemod.cpp">
       <Filter>Source Files\fmdsp</Filter>
     </ClCompile>
     <ClCompile Include="fmdsp\wfmdemod.cpp">
