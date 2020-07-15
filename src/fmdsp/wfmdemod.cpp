@@ -280,7 +280,11 @@ int CWFmDemod::ProcessData(int InLength, TYPECPX* pInData, TYPEREAL* pOutData)
 	for(int i=0; i<InLength; i++)
 	{
 		m_D0 = pInData[i];
+	#ifdef FMDSP_USE_DOUBLE_PRECISION
 		pOutData[i] = FMDEMOD_GAIN*MATAN2( (m_D1.re*m_D0.im - m_D0.re*m_D1.im), (m_D1.re*m_D0.re + m_D1.im*m_D0.im));
+	#else
+		pOutData[i] = FMDEMOD_GAIN*arctan2((m_D1.re*m_D0.im - m_D0.re*m_D1.im), (m_D1.re*m_D0.re + m_D1.im*m_D0.im));
+	#endif
 		m_D1 = m_D0;
 	}
 	//decimate down close to final audio rate by dividing by 2's
@@ -325,8 +329,11 @@ TYPEREAL LminusR;
 	for(int i=0; i<InLength; i++)
 	{
 		m_D0 = pInData[i];
-//        m_RawFm[i] = FMDEMOD_GAIN*MATAN2( (m_D1.re*m_D0.im - m_D0.re*m_D1.im), (m_D1.re*m_D0.re + m_D1.im*m_D0.im));//~266 nSec/sample
-        m_RawFm[i] = FMDEMOD_GAIN*arctan2( (m_D1.re*m_D0.im - m_D0.re*m_D1.im), (m_D1.re*m_D0.re + m_D1.im*m_D0.im));//~266 nSec/sample
+	#ifdef FMDSP_USE_DOUBLE_PRECISION
+		m_RawFm[i] = FMDEMOD_GAIN*MATAN2( (m_D1.re*m_D0.im - m_D0.re*m_D1.im), (m_D1.re*m_D0.re + m_D1.im*m_D0.im));
+	#else
+		m_RawFm[i] = FMDEMOD_GAIN*arctan2( (m_D1.re*m_D0.im - m_D0.re*m_D1.im), (m_D1.re*m_D0.re + m_D1.im*m_D0.im));
+	#endif
 
 		m_D1 = m_D0;
 	}
