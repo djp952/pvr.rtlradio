@@ -674,7 +674,13 @@ char const* GetBackendVersion(void)
 
 char const* GetConnectionString(void)
 {
-	return "";
+	// Create a copy of the current addon settings structure
+	struct addon_settings settings = copy_settings();
+
+	// This property is fairly useless; just return the device connection type
+	if(settings.device_connection == device_connection::usb) return "usb";
+	else if(settings.device_connection == device_connection::rtltcp) return "network";
+	else return "unknown";
 }
 
 //---------------------------------------------------------------------------
