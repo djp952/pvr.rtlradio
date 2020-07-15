@@ -45,6 +45,11 @@ LOCAL_C_INCLUDES += \
 	tmp/version
 	
 LOCAL_CFLAGS += \
+	-Wall \
+	-Wno-unused-function \
+	-Wno-unused-variable \
+	-Wno-unused-const-variable \
+	-DNDEBUG \
 	-DSQLITE_THREADSAFE=2 \
 	-DSQLITE_TEMP_STORE=3
 	
@@ -54,7 +59,6 @@ LOCAL_CPP_FEATURES := \
 	
 LOCAL_CPPFLAGS += \
 	-std=c++14 \
-	-Wall \
 	-Wno-unknown-pragmas
 	
 LOCAL_STATIC_LIBRARIES += \
@@ -110,11 +114,9 @@ include $(BUILD_SHARED_LIBRARY)
 #	depends/libusb/$(TARGET_ABI)/include \
 #	depends/rtl-sdr/include
 #	
-# LOCAL_CPPFLAGS += \
-#	-std=c++14 \
-#	-Wall \
-#	-Wno-unknown-pragmas
-#	
+# LOCAL_CFLAGS += \
+#	-DNDEBUG
+#
 # LOCAL_STATIC_LIBRARIES += \
 #	libusb-prebuilt
 #
@@ -139,14 +141,12 @@ include $(BUILD_SHARED_LIBRARY)
 include $(CLEAR_VARS)
 LOCAL_MODULE := rtl_eeprom
 
+LOCAL_CFLAGS += \
+	-DNDEBUG
+
 LOCAL_C_INCLUDES += \
 	depends/libusb/$(TARGET_ABI)/include \
 	depends/rtl-sdr/include
-	
-LOCAL_CPPFLAGS += \
-	-std=c++14 \
-	-Wall \
-	-Wno-unknown-pragmas
 	
 LOCAL_STATIC_LIBRARIES += \
 	libusb-prebuilt
@@ -172,14 +172,12 @@ include $(BUILD_EXECUTABLE)
 include $(CLEAR_VARS)
 LOCAL_MODULE := rtl_fm
 
+LOCAL_CFLAGS += \
+	-DNDEBUG
+
 LOCAL_C_INCLUDES += \
 	depends/libusb/$(TARGET_ABI)/include \
 	depends/rtl-sdr/include
-	
-LOCAL_CPPFLAGS += \
-	-std=c++14 \
-	-Wall \
-	-Wno-unknown-pragmas
 	
 LOCAL_STATIC_LIBRARIES += \
 	libusb-prebuilt
@@ -209,11 +207,9 @@ LOCAL_C_INCLUDES += \
 	depends/libusb/$(TARGET_ABI)/include \
 	depends/rtl-sdr/include
 	
-LOCAL_CPPFLAGS += \
-	-std=c++14 \
-	-Wall \
-	-Wno-unknown-pragmas
-	
+LOCAL_CFLAGS += \
+	-DNDEBUG
+
 LOCAL_STATIC_LIBRARIES += \
 	libusb-prebuilt
 
@@ -242,11 +238,9 @@ LOCAL_C_INCLUDES += \
 	depends/libusb/$(TARGET_ABI)/include \
 	depends/rtl-sdr/include
 	
-LOCAL_CPPFLAGS += \
-	-std=c++14 \
-	-Wall \
-	-Wno-unknown-pragmas
-	
+LOCAL_CFLAGS += \
+	-DNDEBUG
+
 LOCAL_STATIC_LIBRARIES += \
 	libusb-prebuilt
 
@@ -275,11 +269,9 @@ LOCAL_C_INCLUDES += \
 	depends/libusb/$(TARGET_ABI)/include \
 	depends/rtl-sdr/include
 	
-LOCAL_CPPFLAGS += \
-	-std=c++14 \
-	-Wall \
-	-Wno-unknown-pragmas
-	
+LOCAL_CFLAGS += \
+	-DNDEBUG
+
 LOCAL_STATIC_LIBRARIES += \
 	libusb-prebuilt
 
@@ -308,11 +300,9 @@ LOCAL_C_INCLUDES += \
 	depends/libusb/$(TARGET_ABI)/include \
 	depends/rtl-sdr/include
 	
-LOCAL_CPPFLAGS += \
-	-std=c++14 \
-	-Wall \
-	-Wno-unknown-pragmas
-	
+LOCAL_CFLAGS += \
+	-DNDEBUG
+
 LOCAL_STATIC_LIBRARIES += \
 	libusb-prebuilt
 
@@ -340,11 +330,9 @@ LOCAL_MODULE := sqlite3
 LOCAL_C_INCLUDES += \
 	depends/sqlite
 	
-LOCAL_CPPFLAGS += \
-	-std=c++14 \
-	-Wall \
-	-Wno-unknown-pragmas
-	
+LOCAL_CFLAGS += \
+	-DNDEBUG
+
 LOCAL_LDLIBS += \
 	-llog
 

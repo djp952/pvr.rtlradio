@@ -130,8 +130,8 @@
 
     <PropertyGroup>
       <CPPFLAGS>-Wall -Wno-unknown-pragmas -I/usr/include/i386-linux-gnu -Idepends/xbmc/xbmc -Idepends/xbmc/xbmc/linux -Idepends/xbmc/xbmc/addons/kodi-addon-dev-kit/include/kodi -Idepends/xbmc/xbmc/cores/VideoPlayer/Interface/Addon -Idepends/libusb/linux-i686/include -Idepends/rtl-sdr/include -Idepends/sqlite -Itmp/version -L/usr/lib/gcc/i686-linux-gnu/4.9</CPPFLAGS>
-      <CFLAGS>-DNDEBUG -fPIC -m32 -Wno-unused-function -Wno-unused-variable -Wno-unused-but-set-variable</CFLAGS>
-      <CXXFLAGS>-DNDEBUG -fPIC -std=c++11 -m32 -DFMDSP_USE_DOUBLE_PRECISION</CXXFLAGS>
+      <CFLAGS>-DNDEBUG -O2 -fPIC -m32 -Wno-unused-function -Wno-unused-variable -Wno-unused-but-set-variable</CFLAGS>
+      <CXXFLAGS>-DNDEBUG -O2 -fPIC -std=c++11 -m32 -DFMDSP_USE_DOUBLE_PRECISION</CXXFLAGS>
     </PropertyGroup>
 
     <MakeDir Directories="out\linux-i686" ContinueOnError="false"/>
@@ -208,8 +208,8 @@
 
     <PropertyGroup>
       <CPPFLAGS>-Wall -Wno-unknown-pragmas -I/usr/include/x86_64-linux-gnu -Idepends/xbmc/xbmc -Idepends/xbmc/xbmc/linux -Idepends/xbmc/xbmc/addons/kodi-addon-dev-kit/include/kodi -Idepends/xbmc/xbmc/cores/VideoPlayer/Interface/Addon -Idepends/libusb/linux-x86_64/include -Idepends/rtl-sdr/include -Idepends/sqlite -Itmp/version -L/usr/lib/gcc/x86_64-linux-gnu/4.9</CPPFLAGS>
-      <CFLAGS>-DNDEBUG -fPIC -Wno-unused-function -Wno-unused-variable -Wno-unused-but-set-variable</CFLAGS>
-      <CXXFLAGS>-DNDEBUG -fPIC -std=c++11 -DFMDSP_USE_DOUBLE_PRECISION</CXXFLAGS>
+      <CFLAGS>-DNDEBUG -O2 -fPIC -Wno-unused-function -Wno-unused-variable -Wno-unused-but-set-variable</CFLAGS>
+      <CXXFLAGS>-DNDEBUG -O2 -fPIC -std=c++11 -DFMDSP_USE_DOUBLE_PRECISION</CXXFLAGS>
     </PropertyGroup>
 
     <MakeDir Directories="out\linux-x86_64" ContinueOnError="false"/>
@@ -286,8 +286,8 @@
 
     <PropertyGroup>
       <CPPFLAGS>-Wall -Wno-unknown-pragmas -Idepends/xbmc/xbmc -Idepends/xbmc/xbmc/linux -Idepends/xbmc/xbmc/addons/kodi-addon-dev-kit/include/kodi -Idepends/xbmc/xbmc/cores/VideoPlayer/Interface/Addon -Idepends/libusb/linux-armel/include -Idepends/rtl-sdr/include -Idepends/sqlite -Itmp/version</CPPFLAGS>
-      <CFLAGS>-DNDEBUG -fPIC -Wno-unused-function -Wno-unused-variable -Wno-unused-but-set-variable</CFLAGS>
-      <CXXFLAGS>-DNDEBUG -fPIC -std=c++11</CXXFLAGS>
+      <CFLAGS>-DNDEBUG -O2 -fPIC -Wno-unused-function -Wno-unused-variable -Wno-unused-but-set-variable</CFLAGS>
+      <CXXFLAGS>-DNDEBUG -O2 -fPIC -std=c++11</CXXFLAGS>
     </PropertyGroup>
 
     <MakeDir Directories="out\linux-armel" ContinueOnError="false"/>
@@ -364,8 +364,8 @@
 
     <PropertyGroup>
       <CPPFLAGS>-Wall -Wno-unknown-pragmas -Idepends/xbmc/xbmc -Idepends/xbmc/xbmc/linux -Idepends/xbmc/xbmc/addons/kodi-addon-dev-kit/include/kodi -Idepends/xbmc/xbmc/cores/VideoPlayer/Interface/Addon -Idepends/libusb/linux-armhf/include -Idepends/rtl-sdr/include -Idepends/sqlite -Itmp/version</CPPFLAGS>
-      <CFLAGS>-DNDEBUG -fPIC -Wno-unused-function -Wno-unused-variable -Wno-unused-but-set-variable</CFLAGS>
-      <CXXFLAGS>-DNDEBUG -fPIC -std=c++11</CXXFLAGS>
+      <CFLAGS>-DNDEBUG -O2 -fPIC -Wno-unused-function -Wno-unused-variable -Wno-unused-but-set-variable</CFLAGS>
+      <CXXFLAGS>-DNDEBUG -O2 -fPIC -std=c++11</CXXFLAGS>
     </PropertyGroup>
 
     <MakeDir Directories="out\linux-armhf" ContinueOnError="false"/>
@@ -442,8 +442,8 @@
 
     <PropertyGroup>
       <CPPFLAGS>-Wall -Wno-unknown-pragmas -Idepends/xbmc/xbmc -Idepends/xbmc/xbmc/linux -Idepends/xbmc/xbmc/addons/kodi-addon-dev-kit/include/kodi -Idepends/xbmc/xbmc/cores/VideoPlayer/Interface/Addon -Idepends/libusb/linux-aarch64/include -Idepends/rtl-sdr/include -Idepends/sqlite -Itmp/version</CPPFLAGS>
-      <CFLAGS>-DNDEBUG -fPIC -Wno-unused-function -Wno-unused-variable -Wno-unused-but-set-variable</CFLAGS>
-      <CXXFLAGS>-DNDEBUG -fPIC -std=c++11</CXXFLAGS>
+      <CFLAGS>-DNDEBUG -O2 -fPIC -Wno-unused-function -Wno-unused-variable -Wno-unused-but-set-variable</CFLAGS>
+      <CXXFLAGS>-DNDEBUG -O2 -fPIC -std=c++11</CXXFLAGS>
     </PropertyGroup>
 
     <MakeDir Directories="out\linux-aarch64" ContinueOnError="false"/>
@@ -521,8 +521,8 @@
     <PropertyGroup>
       <ENV>PATH+=:~/raspberrypi/arm-bcm2708/gcc-linaro-arm-linux-gnueabihf-raspbian-x64/bin</ENV>
       <CPPFLAGS>-Wall -Wno-unknown-pragmas -Idepends/xbmc/xbmc -Idepends/xbmc/xbmc/linux -Idepends/xbmc/xbmc/addons/kodi-addon-dev-kit/include/kodi -Idepends/xbmc/xbmc/cores/VideoPlayer/Interface/Addon -Idepends/libusb/raspbian-armhf/include -Idepends/rtl-sdr/include -Idepends/sqlite -Itmp/version</CPPFLAGS>
-      <CFLAGS>-DNDEBUG -fPIC -Wno-unused-function -Wno-unused-variable -Wno-unused-but-set-variable</CFLAGS>
-      <CXXFLAGS>-DNDEBUG -fPIC -std=c++11</CXXFLAGS>
+      <CFLAGS>-DNDEBUG -O2 -fPIC -Wno-unused-function -Wno-unused-variable -Wno-unused-but-set-variable</CFLAGS>
+      <CXXFLAGS>-DNDEBUG -O2 -fPIC -std=c++11</CXXFLAGS>
     </PropertyGroup>
 
     <MakeDir Directories="out\raspbian-armhf" ContinueOnError="false"/>
@@ -600,8 +600,8 @@
     <PropertyGroup>
       <ENV>OSXCROSS_NO_EXTENSION_WARNINGS=1 PATH+=:~/osxcross/target/bin</ENV>
       <CPPFLAGS>-mmacosx-version-min=10.9 -Wall -Wno-unknown-pragmas -Idepends/xbmc/xbmc -Idepends/xbmc/xbmc/linux -Idepends/xbmc/xbmc/addons/kodi-addon-dev-kit/include/kodi -Idepends/xbmc/xbmc/cores/VideoPlayer/Interface/Addon -Idepends/libusb/osx-x86_64/include -Idepends/rtl-sdr/include -Idepends/sqlite -Itmp/version</CPPFLAGS>
-      <CFLAGS>-DNDEBUG -fPIC -stdlib=libc++ -Wno-unused-function -Wno-unused-variable</CFLAGS>
-      <CXXFLAGS>-DNDEBUG -fPIC -std=c++11 -stdlib=libc++ -DFMDSP_USE_DOUBLE_PRECISION</CXXFLAGS>
+      <CFLAGS>-DNDEBUG -O2 -fPIC -stdlib=libc++ -Wno-unused-function -Wno-unused-variable</CFLAGS>
+      <CXXFLAGS>-DNDEBUG -O2 -fPIC -std=c++11 -stdlib=libc++ -DFMDSP_USE_DOUBLE_PRECISION</CXXFLAGS>
     </PropertyGroup>
 
     <MakeDir Directories="out\osx-x86_64" ContinueOnError="false"/>
