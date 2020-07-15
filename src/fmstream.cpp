@@ -292,15 +292,11 @@ DemuxPacket* fmstream::demuxread(std::function<DemuxPacket*(int)> const& allocat
 	size_t numsamples = (available / 2);
 	std::unique_ptr<TYPECPX[]> samples(new TYPECPX[numsamples]);
 
-	// On some platforms, accessing the data via a normal pointer as opposed
-	// to going through unique_ptr::operator[] was measurably faster
-	TYPECPX* sample = &samples[0];
-
 	for(size_t index = 0; index < numsamples; index++) {
 
 		// The demodulator expects the I/Q samples in the range of -32767.0 through +32767.0
 		// 256.996 = (32767.0 / 127.5) = 256.9960784313725
-		sample[index] = {
+		samples[index] = {
 
 #ifdef FMDSP_USE_DOUBLE_PRECISION
 			(static_cast<TYPEREAL>(m_buffer[tail]) - 127.5) * 256.996,			// I
@@ -332,7 +328,7 @@ DemuxPacket* fmstream::demuxread(std::function<DemuxPacket*(int)> const& allocat
 
 	// Resample the audio data directly into the allocated packet buffer
 	int stereopackets = m_resampler->Resample(audiopackets, m_demodulator->GetOutputRate() / m_pcmsamplerate, 
-		samples.get(), reinterpret_cast<TYPESTEREO16*>(packet->pData), 1.0);
+		samples.get(), reinterpret_cast<TYPESTEREO16*>(packet->pData));
 
 	// Calcuate the duration of the demultiplexer packet, in microseconds
 	double duration = ((stereopackets / static_cast<double>(m_pcmsamplerate)) US);

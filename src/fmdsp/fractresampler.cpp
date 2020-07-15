@@ -42,6 +42,8 @@
 
 #include "fractresampler.h"
 
+#include <cstring>
+
 //////////////////////////////////////////////////////////////////////
 // Local defines
 //////////////////////////////////////////////////////////////////////
@@ -58,23 +60,23 @@
 
 #define SINC_LENGTH	( (SINC_PERIODS)*SINC_PERIOD_PTS + 1)//number of total points in sinc table
 
-#define MAX_SOUNDCARDVAL 32767.0
-
+// SINC table was converted into a static vector<> with a one-time initialization
+// since it's non-trivial to construct every time, especially on platforms that
+// have poor floating point performance ...
+//
+std::vector<TYPEREAL> CFractResampler::s_sinc(SINC_LENGTH);
+std::once_flag CFractResampler::s_sinc_init;
 
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 CFractResampler::CFractResampler()
 {
-	m_pSinc = NULL;
 	m_pInputBuf = NULL;
-
 }
 
 CFractResampler::~CFractResampler()
 {
-	if(m_pSinc)
-		delete m_pSinc;
 	if(m_pInputBuf)
 		delete m_pInputBuf;
 }
@@ -85,34 +87,32 @@ CFractResampler::~CFractResampler()
 //////////////////////////////////////////////////////////////////////
 void CFractResampler::Init(int MaxInputSize)
 {
-int i;
-TYPEREAL fi;
-TYPEREAL window;
 	MaxInputSize += SINC_PERIODS;	//expand buffer size  to include wrap around
-	if(NULL == m_pSinc)
-		m_pSinc = new  TYPEREAL[SINC_LENGTH];
 	if(m_pInputBuf)
 		delete m_pInputBuf;
+	
 	m_pInputBuf = new TYPECPX[MaxInputSize];
-	for(i=0; i<MaxInputSize; i++)
-	{
-		m_pInputBuf[i].re = 0.0;
-		m_pInputBuf[i].im = 0.0;
-	}
-	for(i=0; i<SINC_LENGTH; i++)
-	{	//calc Blackman-Harris window points
-		window = (0.35875
-				- 0.48829*MCOS( (K_2PI*i)/(SINC_LENGTH-1) )
-				+ 0.14128*MCOS( (2.0*K_2PI*i)/(SINC_LENGTH-1) )
-				- 0.01168*MCOS( (3.0*K_2PI*i)/(SINC_LENGTH-1) ) );
-		//calculate sin(x)/x    sinc point * window
-		fi = K_PI*(TYPEREAL)(i - SINC_LENGTH/2)/(TYPEREAL)SINC_PERIOD_PTS ;
-		if(i != SINC_LENGTH/2)
-			m_pSinc[i] = window * (TYPEREAL)MSIN( (TYPEREAL)fi )/(TYPEREAL)fi;
-		else
-			m_pSinc[i] = 1.0;
+	memset(m_pInputBuf, 0, sizeof(TYPECPX) * MaxInputSize);
 
-	}
+	// The SINC table, once initialized, is static in nature.  Just do this the first
+	// time somebody calls Init(), it doesn't need to be done every time
+	std::call_once(s_sinc_init, [&]() {
+
+		for(int i = 0; i < SINC_LENGTH; i++)
+		{	//calc Blackman-Harris window points
+			TYPEREAL window = (0.35875
+				- 0.48829 * MCOS((K_2PI * i) / (SINC_LENGTH - 1))
+				+ 0.14128 * MCOS((2.0 * K_2PI * i) / (SINC_LENGTH - 1))
+				- 0.01168 * MCOS((3.0 * K_2PI * i) / (SINC_LENGTH - 1)));
+			//calculate sin(x)/x    sinc point * window
+			TYPEREAL fi = K_PI * (TYPEREAL)(i - SINC_LENGTH / 2) / (TYPEREAL)SINC_PERIOD_PTS;
+			if(i != SINC_LENGTH / 2)
+				s_sinc[i] = window * (TYPEREAL)MSIN((TYPEREAL)fi) / (TYPEREAL)fi;
+			else
+				s_sinc[i] = 1.0;
+		}
+	});
+
 	m_FloatTime = 0.0;		//init floating point time accumulator
 }
 
@@ -148,8 +148,8 @@ TYPECPX acc;
 		{
 			j = IntegerTime + i;	//temp integer time position for convolution loop
 			int sindx =  (int)(( (TYPEREAL)j - m_FloatTime) * (TYPEREAL)SINC_PERIOD_PTS );
-			acc.re += (m_pInputBuf[j].re * m_pSinc[sindx] );
-			acc.im += (m_pInputBuf[j].im * m_pSinc[sindx] );
+			acc.re += (m_pInputBuf[j].re * s_sinc[sindx] );
+			acc.im += (m_pInputBuf[j].im * s_sinc[sindx] );
 		}
 		pOutBuf[outsamples++] = acc;
 		m_FloatTime += dt;		//inc floating pt output time step
@@ -173,7 +173,7 @@ TYPECPX acc;
 //  the generated samples, especially if up converting  !!!!!
 // stereo Integer version
 //////////////////////////////////////////////////////////////////////
-int CFractResampler::Resample( int InLength, TYPEREAL Rate, TYPECPX* pInBuf, TYPESTEREO16* pOutBuf, TYPEREAL gain)
+int CFractResampler::Resample( int InLength, TYPEREAL Rate, TYPECPX* pInBuf, TYPESTEREO16* pOutBuf)
 {
 int i;
 int j;
@@ -200,22 +200,12 @@ TYPECPX acc;
 		{
 			j = IntegerTime + i;	//temp integer time position for convolution loop
 			int sindx =  (int)(( (TYPEREAL)j - m_FloatTime) * (TYPEREAL)SINC_PERIOD_PTS );
-			acc.re += (m_pInputBuf[j].re * m_pSinc[sindx] );
-			acc.im += (m_pInputBuf[j].im * m_pSinc[sindx] );
+			acc.re += (m_pInputBuf[j].re * s_sinc[sindx] );
+			acc.im += (m_pInputBuf[j].im * s_sinc[sindx] );
 		}
-		TYPECPX tmp;
-		tmp.re = (acc.re * gain);;
-		tmp.im = (acc.im * gain);;
-		if(tmp.re > MAX_SOUNDCARDVAL)
-			tmp.re = MAX_SOUNDCARDVAL;
-		if(tmp.re < -MAX_SOUNDCARDVAL)
-			tmp.re = -MAX_SOUNDCARDVAL;
-		if(tmp.im>MAX_SOUNDCARDVAL)
-			tmp.im = MAX_SOUNDCARDVAL;
-		if(tmp.im < -MAX_SOUNDCARDVAL)
-			tmp.im = -MAX_SOUNDCARDVAL;
-		pOutBuf[outsamples].re = (qint16)tmp.re;
-		pOutBuf[outsamples++].im = (qint16)tmp.im;
+
+		pOutBuf[outsamples].re = (qint16)(acc.re);
+		pOutBuf[outsamples++].im = (qint16)(acc.im);
 
 		m_FloatTime += dt;	//inc floating pt output time step
 		IntegerTime = (int)m_FloatTime;	//truncate to integer
@@ -262,7 +252,7 @@ TYPEREAL acc;
 		{
 			j = IntegerTime + i;	//temp integer time position for convolution loop
 			int sindx =  (int)(( (TYPEREAL)j - m_FloatTime) * (TYPEREAL)SINC_PERIOD_PTS );
-			acc += (m_pInputBuf[j].re * m_pSinc[sindx] );
+			acc += (m_pInputBuf[j].re * s_sinc[sindx] );
 		}
 		pOutBuf[outsamples++] = acc;
 		m_FloatTime += dt;
@@ -285,7 +275,7 @@ TYPEREAL acc;
 //  the generated samples, especially if up converting  !!!!!
 // short Integer version
 //////////////////////////////////////////////////////////////////////
-int CFractResampler::Resample( int InLength, TYPEREAL Rate, TYPEREAL* pInBuf, TYPEMONO16* pOutBuf, TYPEREAL gain)
+int CFractResampler::Resample( int InLength, TYPEREAL Rate, TYPEREAL* pInBuf, TYPEMONO16* pOutBuf)
 {
 int i;
 int j;
@@ -310,15 +300,10 @@ TYPEREAL acc;
 		{
 			j = IntegerTime + i;	//temp integer time position for convolution loop
 			int sindx =  (int)(( (TYPEREAL)j - m_FloatTime) * (TYPEREAL)SINC_PERIOD_PTS );
-			acc += (m_pInputBuf[j].re * m_pSinc[sindx] );
+			acc += (m_pInputBuf[j].re * s_sinc[sindx] );
 		}
-		TYPEREAL tmp;
-		tmp = (acc * gain);;
-		if(tmp > MAX_SOUNDCARDVAL)
-			tmp = MAX_SOUNDCARDVAL;
-		if(tmp < -MAX_SOUNDCARDVAL)
-			tmp = -MAX_SOUNDCARDVAL;
-		pOutBuf[outsamples++] = (TYPEMONO16)tmp;
+
+		pOutBuf[outsamples++] = (TYPEMONO16)acc;
 
 		m_FloatTime += dt;
 		IntegerTime = (int)m_FloatTime;

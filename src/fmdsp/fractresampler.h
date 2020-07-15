@@ -39,6 +39,9 @@
 #ifndef FRACTRESAMPLER_H
 #define FRACTRESAMPLER_H
 
+#include <mutex>
+#include <vector>
+
 #include "datatypes.h"
 
 class CFractResampler  
@@ -51,13 +54,15 @@ public:
 	//overloaded functions for processing different data types
 	int Resample( int InLength, TYPEREAL Rate, TYPEREAL* pInBuf, TYPEREAL* pOutBuf);
 	int Resample( int InLength, TYPEREAL Rate, TYPECPX* pInBuf, TYPECPX* pOutBuf);
-	int Resample( int InLength, TYPEREAL Rate, TYPEREAL* pInBuf, TYPEMONO16* pOutBuf, TYPEREAL gain);
-	int Resample( int InLength, TYPEREAL Rate, TYPECPX* pInBuf, TYPESTEREO16* pOutBuf, TYPEREAL gain);
+	int Resample( int InLength, TYPEREAL Rate, TYPEREAL* pInBuf, TYPEMONO16* pOutBuf);
+	int Resample( int InLength, TYPEREAL Rate, TYPECPX* pInBuf, TYPESTEREO16* pOutBuf);
 
 private:
 	TYPEREAL m_FloatTime;	//floating pt output time accumulator
-	TYPEREAL* m_pSinc;	//ptr to sinc table
 	TYPECPX* m_pInputBuf;	//internal working input sample buffer
+
+	static std::vector<TYPEREAL>	s_sinc;			// SINC table
+	static std::once_flag			s_sinc_init;	// SINC table initialization flag
 };
 
 #endif // FRACTRESAMPLER_H
