@@ -40,7 +40,7 @@ size_t const fmstream::DEFAULT_DEVICE_BLOCK_SIZE = (16 KiB);
 // fmstream::DEFAULT_DEVICE_SAMPLE_RATE
 //
 // Default device sample rate
-uint32_t const fmstream::DEFAULT_DEVICE_SAMPLE_RATE = (1 MHz);
+uint32_t const fmstream::DEFAULT_DEVICE_SAMPLE_RATE = (1024 KHz);
 
 // fmstream::DEFAULT_RINGBUFFER_SIZE
 //
@@ -314,7 +314,7 @@ DemuxPacket* fmstream::demuxread(std::function<DemuxPacket*(int)> const& allocat
 	// Modify the atomic<> tail position to mark the ring buffer space as free
 	m_buffertail.store(tail);
 
-	// Process the raw I/Q data, the original samples buffer can be reused/overwritten as it's processed
+	// Process the I/Q data, the original samples buffer can be reused/overwritten as it's processed
 	int audiopackets = m_demodulator->ProcessData(static_cast<int>(numsamples), samples.get(), samples.get());
 
 	// Process any RDS group data that was collected during demodulation
