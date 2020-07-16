@@ -854,16 +854,21 @@ PVR_ERROR OpenDialogChannelScan(void)
 
 	try {
 
+		// Determine RBDS vs. RDS (see TODO in OpenLiveStream)
+		bool isrbds = true;
+		if(settings.fmradio_rds_standard == rds_standard::automatic) isrbds = true;		// TODO
+		else isrbds = (settings.fmradio_rds_standard == rds_standard::rbds);
+
 		// USB device
 		//
 		if(settings.device_connection == device_connection::usb)
-			dialogchannelscan::show(g_gui, scanner::create(usbdevice::create(settings.device_connection_usb_index)));
+			dialogchannelscan::show(g_gui, scanner::create(usbdevice::create(settings.device_connection_usb_index), isrbds));
 
 		// Network (rtl_tcp) device
 		//
 		else if(settings.device_connection == device_connection::rtltcp)
 			dialogchannelscan::show(g_gui, scanner::create(tcpdevice::create(settings.device_connection_tcp_host.c_str(),
-				static_cast<uint16_t>(settings.device_connection_tcp_port))));
+				static_cast<uint16_t>(settings.device_connection_tcp_port)), isrbds));
 
 		else throw string_exception("invalid device_connection type specified");
 	}
@@ -1005,17 +1010,22 @@ PVR_ERROR OpenDialogChannelSettings(PVR_CHANNEL const& channel)
 			// TODO: Error message
 		}
 
+		// Determine RBDS vs. RDS (see TODO in OpenLiveStream)
+		bool isrbds = true;
+		if(settings.fmradio_rds_standard == rds_standard::automatic) isrbds = true;		// TODO
+		else isrbds = (settings.fmradio_rds_standard == rds_standard::rbds);
+
 		// USB device
 		//
 		if(settings.device_connection == device_connection::usb)
-			changed = dialogchannelsettings::show(g_gui, scanner::create(usbdevice::create(settings.device_connection_usb_index)),
+			changed = dialogchannelsettings::show(g_gui, scanner::create(usbdevice::create(settings.device_connection_usb_index), isrbds),
 				channelprops);
 
 		// Network (rtl_tcp) device
 		//
 		else if(settings.device_connection == device_connection::rtltcp)
 			changed = dialogchannelsettings::show(g_gui, scanner::create(tcpdevice::create(settings.device_connection_tcp_host.c_str(),
-				static_cast<uint16_t>(settings.device_connection_tcp_port))), channelprops);
+				static_cast<uint16_t>(settings.device_connection_tcp_port)), isrbds), channelprops);
 
 		else throw string_exception("invalid device_connection type specified");
 
@@ -1047,16 +1057,21 @@ PVR_ERROR OpenDialogChannelAdd(PVR_CHANNEL const& /*channel*/)
 
 	try {
 
+		// Determine RBDS vs. RDS (see TODO in OpenLiveStream)
+		bool isrbds = true;
+		if(settings.fmradio_rds_standard == rds_standard::automatic) isrbds = true;		// TODO
+		else isrbds = (settings.fmradio_rds_standard == rds_standard::rbds);
+
 		// USB device
 		//
 		if(settings.device_connection == device_connection::usb)
-			dialogchanneladd::show(g_gui, scanner::create(usbdevice::create(settings.device_connection_usb_index)));
+			dialogchanneladd::show(g_gui, scanner::create(usbdevice::create(settings.device_connection_usb_index), isrbds));
 
 		// Network (rtl_tcp) device
 		//
 		else if(settings.device_connection == device_connection::rtltcp)
 			dialogchanneladd::show(g_gui, scanner::create(tcpdevice::create(settings.device_connection_tcp_host.c_str(),
-				static_cast<uint16_t>(settings.device_connection_tcp_port))));
+				static_cast<uint16_t>(settings.device_connection_tcp_port)), isrbds));
 
 		else throw string_exception("invalid device_connection type specified");
 	}
