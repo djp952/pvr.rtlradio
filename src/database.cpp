@@ -225,9 +225,9 @@ void enumerate_channels(sqlite3* instance, enumerate_channels_callback const& ca
 
 	if(instance == nullptr) throw std::invalid_argument("instance");
 
-	// id | channel | subchannel | name
+	// id | channel | subchannel | name | hidden
 	auto sql = "select ((frequency / 100000) * 10) + subchannel as id, (frequency / 1000000) as channel, "
-		"(frequency % 1000000) / 100000 as subchannel, name as name from channel order by id asc";
+		"(frequency % 1000000) / 100000 as subchannel, name as name, hidden as hidden from channel order by id asc";
 
 	result = sqlite3_prepare_v2(instance, sql, -1, &statement, nullptr);
 	if(result != SQLITE_OK) throw sqlite_exception(result, sqlite3_errmsg(instance));
@@ -242,6 +242,7 @@ void enumerate_channels(sqlite3* instance, enumerate_channels_callback const& ca
 			item.channel = static_cast<unsigned int>(sqlite3_column_int(statement, 1));
 			item.subchannel = static_cast<unsigned int>(sqlite3_column_int(statement, 2));
 			item.name = reinterpret_cast<char const*>(sqlite3_column_text(statement, 3));
+			item.hidden = (sqlite3_column_int(statement, 4) != 0);
 
 			callback(item);						// Invoke caller-supplied callback
 		}
@@ -476,9 +477,10 @@ sqlite3* open_database(char const* connstring, int flags, bool initialize)
 
 			// table: channel
 			//
-			// frequency(pk) | subchannel(pk) | name | autogain | manualgain
+			// frequency(pk) | subchannel(pk) | hidden | name | autogain | manualgain
 			execute_non_query(instance, "create table if not exists channel(frequency integer not null, subchannel integer not null, "
-				"name text not null, autogain integer not null, manualgain integer not null, primary key(frequency, subchannel))");
+				"hidden integer not null, name text not null, autogain integer not null, manualgain integer not null, "
+				"primary key(frequency, subchannel))");
 		}
 	}
 
