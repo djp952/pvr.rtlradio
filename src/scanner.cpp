@@ -165,6 +165,8 @@ void scanner::set_automatic_gain(bool autogain)
 	assert(m_device);
 	
 	m_device->set_automatic_gain_control(autogain);
+	if(!autogain) m_device->set_gain(m_manualgain);
+	
 	m_autogain = autogain;
 }
 
