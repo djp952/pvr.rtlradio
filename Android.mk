@@ -51,6 +51,7 @@ LOCAL_CFLAGS += \
 	-Wno-unused-const-variable \
 	-DNDEBUG \
 	-DSQLITE_THREADSAFE=2 \
+	-DSQLITE_ENABLE_JSON1=1 \
 	-DSQLITE_TEMP_STORE=3
 	
 LOCAL_CPP_FEATURES := \
@@ -331,7 +332,8 @@ LOCAL_C_INCLUDES += \
 	depends/sqlite
 	
 LOCAL_CFLAGS += \
-	-DNDEBUG
+	-DNDEBUG \
+	-DSQLITE_ENABLE_JSON1=1
 
 LOCAL_LDLIBS += \
 	-llog
