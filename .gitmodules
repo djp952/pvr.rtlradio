@@ -13,3 +13,6 @@
 [submodule "xbmc"]
 	path = depends/xbmc
 	url = https://github.com/xbmc/xbmc.git
+[submodule "rapidjson"]
+	path = depends/rapidjson
+	url = https://github.com/Tencent/rapidjson.git

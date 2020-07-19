@@ -80,8 +80,28 @@ msgctxt "#30206"
 msgid "48.0 KHz"
 msgstr ""
 
-msgctxt "#30400"
+msgctxt "#30300"
 msgid "OK"
+msgstr ""
+
+msgctxt "#30400"
+msgid "Import channel data"
+msgstr ""
+
+msgctxt "#30401"
+msgid "Export channel data"
+msgstr ""
+
+msgctxt "#30402"
+msgid "Clear channel data"
+msgstr ""
+
+msgctxt "#30403"
+msgid "Select export folder"
+msgstr ""
+
+msgctxt "#30404"
+msgid "Select export folder"
 msgstr ""
 
 msgctxt "#30500"

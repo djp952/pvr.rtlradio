@@ -33,6 +33,9 @@
 #include <libXBMC_addon.h>
 #include <libKODI_guilib.h>
 #include <libXBMC_pvr.h>
+#include <rapidjson/document.h>
+#include <rapidjson/error/en.h>
+#include <rapidjson/prettywriter.h>
 
 #include "database.h"
 #include "dbtypes.h"
@@ -48,6 +51,17 @@
 #include "tcpdevice.h"
 
 #pragma warning(push, 4)
+
+//---------------------------------------------------------------------------
+// MACROS
+//---------------------------------------------------------------------------
+
+// MENUHOOK_XXXXXX
+//
+// Menu hook identifiers
+#define MENUHOOK_SETTING_IMPORTCHANNELS		10
+#define MENUHOOK_SETTING_EXPORTCHANNELS		11
+#define MENUHOOK_SETTING_CLEARCHANNELS		12
 
 //---------------------------------------------------------------------------
 // FUNCTION PROTOTYPES
@@ -373,6 +387,7 @@ static std::string rds_standard_to_string(enum rds_standard mode)
 
 ADDON_STATUS ADDON_Create(void* handle, void* props)
 {
+	PVR_MENUHOOK			menuhook;						// For registering menu hooks
 	int						nvalue = 0;						// Setting value
 	char					strvalue[1024] = { '\0' };		// Setting value 
 
@@ -432,6 +447,30 @@ ADDON_STATUS ADDON_Create(void* handle, void* props)
 				// Create the global pvr callbacks instance
 				g_pvr.reset(new CHelper_libXBMC_pvr());
 				if(!g_pvr->RegisterMe(handle)) throw string_exception(__func__, ": failed to register pvr addon handle (CHelper_libXBMC_pvr::RegisterMe)");
+
+				// MENUHOOK_SETTING_IMPORTCHANNELS
+				//
+				memset(&menuhook, 0, sizeof(PVR_MENUHOOK));
+				menuhook.iHookId = MENUHOOK_SETTING_IMPORTCHANNELS;
+				menuhook.iLocalizedStringId = 30400;
+				menuhook.category = PVR_MENUHOOK_SETTING;
+				g_pvr->AddMenuHook(&menuhook);
+
+				// MENUHOOK_SETTING_EXPORTCHANNELS
+				//
+				memset(&menuhook, 0, sizeof(PVR_MENUHOOK));
+				menuhook.iHookId = MENUHOOK_SETTING_EXPORTCHANNELS;
+				menuhook.iLocalizedStringId = 30401;
+				menuhook.category = PVR_MENUHOOK_SETTING;
+				g_pvr->AddMenuHook(&menuhook);
+
+				// MENUHOOK_SETTING_CLEARCHANNELS
+				//
+				memset(&menuhook, 0, sizeof(PVR_MENUHOOK));
+				menuhook.iHookId = MENUHOOK_SETTING_CLEARCHANNELS;
+				menuhook.iLocalizedStringId = 30402;
+				menuhook.category = PVR_MENUHOOK_SETTING;
+				g_pvr->AddMenuHook(&menuhook);
 
 				try {
 
@@ -703,8 +742,100 @@ PVR_ERROR GetDriveSpace(long long* /*total*/, long long* /*used*/)
 //	menuhook	- The hook to call
 //	item		- The selected item for which the hook is called
 
-PVR_ERROR CallMenuHook(PVR_MENUHOOK const& /*menuhook*/, PVR_MENUHOOK_DATA const& /*item*/)
+PVR_ERROR CallMenuHook(PVR_MENUHOOK const& menuhook, PVR_MENUHOOK_DATA const& /*item*/)
 {
+	assert(g_gui && g_pvr);
+
+	try {
+
+		// MENUHOOK_SETTING_IMPORTCHANNELS
+		//
+		if(menuhook.iHookId == MENUHOOK_SETTING_IMPORTCHANNELS) {
+
+			// TODO: LOG
+
+			g_pvr->TriggerChannelUpdate();
+			g_pvr->TriggerChannelGroupsUpdate();
+
+			return PVR_ERROR::PVR_ERROR_NO_ERROR;
+		}
+
+		// MENUHOOK_SETTING_EXPORTCHANNELS
+		//
+		else if(menuhook.iHookId == MENUHOOK_SETTING_EXPORTCHANNELS) {
+
+			char path[1024] = {};			// Export path
+
+			// The legacy Kodi GUI API doesn't provide a way to select both a folder and a file name, and doesn't support
+			// the source filters (like "local|network|removable"), this will have to be done with a fixed name file
+			// put into the Kodi home directory ...
+			if(g_gui->Dialog_FileBrowser_ShowAndGetFile(g_addon->TranslateSpecialProtocol("special://home"), "/w",
+				g_addon->GetLocalizedString(30403), path[0], 1024)) {
+
+				try {
+
+					rapidjson::Document		document;				// Resultant JSON document
+
+					// Generate the output file name based on the selected path
+					std::string filepath(path);
+					filepath.append("/channels.json");
+					log_notice(__func__, ": exporting channel data to file ", filepath.c_str());
+
+					// Export the channels from the database into a JSON string
+					std::string json = export_channels(connectionpool::handle(g_connpool));
+
+					// Parse the JSON data so that it can be pretty printed for the user
+					document.Parse(json.c_str());
+					if(document.HasParseError()) throw string_exception(__func__, ": JSON parse error during export: ",
+						rapidjson::GetParseError_En(document.GetParseError()));
+
+					// Pretty print the JSON data
+					rapidjson::StringBuffer sb;
+					rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(sb);
+					document.Accept(writer);
+
+					// Attempt to create the output file in the selected directory
+					void* handle = g_addon->OpenFileForWrite(filepath.c_str(), true);
+					if(handle == nullptr) throw string_exception(__func__, ": unable to open file ", filepath.c_str(), " for write");
+
+					ssize_t written = g_addon->WriteFile(handle, sb.GetString(), sb.GetSize());
+					g_addon->CloseFile(handle);
+
+					// If the file wasn't written properly, throw an exception
+					if(written != static_cast<ssize_t>(sb.GetSize()))
+						throw string_exception(__func__, ": short write occurred generating file ", filepath.c_str());
+				}
+
+				catch(...) {
+				
+					// Inform the user that the operation failed, but leave the details in the log
+					g_gui->Dialog_OK_ShowAndGetInput(g_addon->GetLocalizedString(30404),
+						"An error occurred exporting the channel data. Please review Kodi log for details.");
+
+					throw;
+				}
+			}
+
+			return PVR_ERROR::PVR_ERROR_NO_ERROR;
+		}
+
+		// MENUHOOK_SETTING_CLEARCHANNELS
+		//
+		else if(menuhook.iHookId == MENUHOOK_SETTING_EXPORTCHANNELS) {
+
+			// TODO: LOG
+
+			g_pvr->TriggerChannelUpdate();
+			g_pvr->TriggerChannelGroupsUpdate();
+
+			return PVR_ERROR::PVR_ERROR_NO_ERROR;
+		}
+	}
+
+	catch(std::exception& ex) { return handle_stdexception(__func__, ex, PVR_ERROR::PVR_ERROR_FAILED); }
+	catch(...) { return handle_generalexception(__func__, PVR_ERROR::PVR_ERROR_FAILED); }
+
+
 	return PVR_ERROR::PVR_ERROR_NOT_IMPLEMENTED;
 }
 

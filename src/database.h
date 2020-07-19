@@ -143,6 +143,11 @@ void delete_channel(sqlite3* instance, unsigned int id);
 // Enumerates the available channels
 void enumerate_channels(sqlite3* instance, enumerate_channels_callback const& callback);
 
+// export_channels
+//
+// Exports the channels into a JSON string
+std::string export_channels(sqlite3* instance);
+
 // get_channel_count
 //
 // Gets the number of available channels in the database

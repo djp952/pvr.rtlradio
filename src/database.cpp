@@ -38,6 +38,7 @@ static void bind_parameter(sqlite3_stmt* statement, int& paramindex, const char*
 static void bind_parameter(sqlite3_stmt* statement, int& paramindex, uint32_t value);
 template<typename... _parameters> static int execute_non_query(sqlite3* instance, char const* sql, _parameters&&... parameters);
 template<typename... _parameters> static int execute_scalar_int(sqlite3* instance, char const* sql, _parameters&&... parameters);
+template<typename... _parameters> static std::string execute_scalar_string(sqlite3* instance, char const* sql, _parameters&&... parameters);
 
 //---------------------------------------------------------------------------
 // CONNECTIONPOOL IMPLEMENTATION
@@ -351,6 +352,79 @@ static int execute_scalar_int(sqlite3* instance, char const* sql, _parameters&&.
 	}
 
 	catch(...) { sqlite3_finalize(statement); throw; }
+}
+
+//---------------------------------------------------------------------------
+// execute_scalar_string (local)
+//
+// Executes a database query and returns a scalar string result
+//
+// Arguments:
+//
+//	instance		- Database instance
+//	sql				- SQL query to execute
+//	parameters		- Parameters to be bound to the query
+
+template<typename... _parameters>
+static std::string execute_scalar_string(sqlite3* instance, char const* sql, _parameters&&... parameters)
+{
+	sqlite3_stmt*				statement;			// SQL statement to execute
+	int							paramindex = 1;		// Bound parameter index value
+	std::string					value;				// Result from the scalar function
+
+	if(instance == nullptr) throw std::invalid_argument("instance");
+	if(sql == nullptr) throw std::invalid_argument("sql");
+
+	// Suppress unreferenced local variable warning when there are no parameters to bind
+	(void)paramindex;
+
+	// Prepare the statement
+	int result = sqlite3_prepare_v2(instance, sql, -1, &statement, nullptr);
+	if(result != SQLITE_OK) throw sqlite_exception(result, sqlite3_errmsg(instance));
+
+	try {
+
+		// Bind the provided query parameter(s) by unpacking the parameter pack
+		int unpack[] = { 0, (static_cast<void>(bind_parameter(statement, paramindex, parameters)), 0) ... };
+		(void)unpack;
+
+		// Execute the query; only the first row returned will be used
+		result = sqlite3_step(statement);
+
+		if(result == SQLITE_ROW) {
+
+			char const* ptr = reinterpret_cast<char const*>(sqlite3_column_text(statement, 0));
+			if(ptr != nullptr) value.assign(ptr);
+		}
+		else if(result != SQLITE_DONE) throw sqlite_exception(result, sqlite3_errmsg(instance));
+
+		// Finalize the statement
+		sqlite3_finalize(statement);
+
+		// Return the resultant value from the scalar query
+		return value;
+	}
+
+	catch(...) { sqlite3_finalize(statement); throw; }
+}
+
+//---------------------------------------------------------------------------
+// export_channels
+//
+// Exports the channels into a JSON file
+//
+// Arguments:
+//
+//	instance	- SQLite database instance
+//	path		- Path to the output file to generate
+
+std::string export_channels(sqlite3* instance)
+{
+	if(instance == nullptr) throw std::invalid_argument("instance");
+
+	return execute_scalar_string(instance, "select json_group_array("
+		"json_object('frequency', frequency, 'subchannel', subchannel, 'hidden', hidden, "
+		"'name', name, 'autogain', autogain, 'manualgain', manualgain)) from channel");
 }
 
 //---------------------------------------------------------------------------

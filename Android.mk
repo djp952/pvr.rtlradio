@@ -40,6 +40,7 @@ LOCAL_C_INCLUDES += \
 	depends/xbmc/xbmc/addons/kodi-addon-dev-kit/include/kodi \
 	depends/xbmc/xbmc/cores/VideoPlayer/Interface/Addon \
 	depends/libusb/$(TARGET_ABI)/include \
+	depends/rapidjson/include \
 	depends/rtl-sdr/include \
 	depends/sqlite \
 	tmp/version
