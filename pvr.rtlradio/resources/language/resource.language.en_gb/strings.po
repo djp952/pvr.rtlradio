@@ -97,11 +97,11 @@ msgid "Clear channel data"
 msgstr ""
 
 msgctxt "#30403"
-msgid "Select export folder"
+msgid "Select channel export folder"
 msgstr ""
 
 msgctxt "#30404"
-msgid "Select export folder"
+msgid "Select channel import file"
 msgstr ""
 
 msgctxt "#30500"

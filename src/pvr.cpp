@@ -371,6 +371,149 @@ static std::string rds_standard_to_string(enum rds_standard mode)
 	return "Unknown";
 }
 
+// menuhook_clearchannels (local)
+//
+// Menu hook to delete all channels from the database
+static void menuhook_clearchannels(void)
+{
+	log_notice(__func__, ": clearing channel data");
+
+	try {
+
+		// Clear the channel data from the database and inform the user if successful
+		clear_channels(connectionpool::handle(g_connpool));
+		g_gui->Dialog_OK_ShowAndGetInput(g_addon->GetLocalizedString(30402), "Channel data successfully cleared");
+
+		// Trigger both a channel and a channel group update in Kodi
+		g_pvr->TriggerChannelUpdate();
+		g_pvr->TriggerChannelGroupsUpdate();
+	}
+
+	catch(std::exception& ex) {
+
+		// Inform the user that the operation failed, and re-throw the exception with this function name
+		g_gui->Dialog_OK_ShowAndGetInput(g_addon->GetLocalizedString(30402), "An error occurred clearing the channel data:", "", ex.what());
+		throw string_exception(__func__, ": ", ex.what());
+	}
+}
+
+// menuhook_exportchannels (local)
+//
+// Menu hook to export the channel information from the database
+static void menuhook_exportchannels(void)
+{
+	char path[1024] = {};			// Export folder path
+
+	// The legacy Kodi GUI API doesn't provide a way to select both a folder and a file name, and doesn't support
+	// the source filters (like "local|network|removable"), this will have to be done with a fixed name file
+	// put into the Kodi home directory; this can probably be adjusted in Kodi Matrix with the new API
+	if(g_gui->Dialog_FileBrowser_ShowAndGetFile(g_addon->TranslateSpecialProtocol("special://home"), "/w",
+		g_addon->GetLocalizedString(30403), path[0], 1024)) {
+
+		try {
+
+			rapidjson::Document		document;				// Resultant JSON document
+
+			// Generate the output file name based on the selected path
+			std::string filepath(path);
+			filepath.append("radiochannels.json");
+			log_notice(__func__, ": exporting channel data to file ", filepath.c_str());
+
+			// Export the channels from the database into a JSON string
+			std::string json = export_channels(connectionpool::handle(g_connpool));
+
+			// Parse the JSON data so that it can be pretty printed for the user
+			document.Parse(json.c_str());
+			if(document.HasParseError()) throw string_exception("JSON parse error during export - ",
+				rapidjson::GetParseError_En(document.GetParseError()));
+
+			// Pretty print the JSON data
+			rapidjson::StringBuffer sb;
+			rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(sb);
+			document.Accept(writer);
+
+			// Attempt to create the output file in the selected directory
+			void* handle = g_addon->OpenFileForWrite(filepath.c_str(), true);
+			if(handle == nullptr) throw string_exception("unable to open file ", filepath.c_str(), " for write access");
+
+			ssize_t written = g_addon->WriteFile(handle, sb.GetString(), sb.GetSize());
+			g_addon->CloseFile(handle);
+
+			// If the file wasn't written properly, throw an exception
+			if(written != static_cast<ssize_t>(sb.GetSize()))
+				throw string_exception("short write occurred generating file ", filepath.c_str());
+
+			// Inform the user that the operation was successful
+			g_gui->Dialog_OK_ShowAndGetInput(g_addon->GetLocalizedString(30401), "Channels successfully exported to:",
+				"", filepath.c_str());
+		}
+
+		catch(std::exception& ex) {
+
+			// Inform the user that the operation failed, and re-throw the exception with this function name
+			g_gui->Dialog_OK_ShowAndGetInput(g_addon->GetLocalizedString(30401), "An error occurred exporting the channel data:", "", ex.what());
+			throw string_exception(__func__, ": ", ex.what());
+		}
+	}
+}
+
+// menuhook_importchannels (local)
+//
+// Menu hook to import channel information into the database
+static void menuhook_importchannels(void)
+{
+	char path[1024] = {};			// Import file path
+
+	// The legacy Kodi GUI API doesn't support the source filters (like "local|network|removable"), so start
+	// in the Kodi home directory; this can be adjusted in Kodi Matrix with the new API
+	if(g_gui->Dialog_FileBrowser_ShowAndGetFile(g_addon->TranslateSpecialProtocol("special://home"), "*.json",
+		g_addon->GetLocalizedString(30404), path[0], 1024)) {
+
+		try {
+
+			std::string			json;			// The JSON data
+
+			log_notice(__func__, ": importing channel data from file ", path);
+
+			// Ensure the file exists before trying to open it
+			if(!g_addon->FileExists(path, false)) throw string_exception("input file ", path, " does not exist");
+
+			// Attempt to open the specified input file
+			void* handle = g_addon->OpenFile(path, 0);
+			if(handle == nullptr) throw string_exception("unable to open file ", path, " for read access");
+
+			// Read in the input file in 1KiB chunks; it shouldn't be that big
+			std::unique_ptr<char[]> buffer(new char[1 KiB]);
+			ssize_t read = g_addon->ReadFile(handle, &buffer[0], 1 KiB);
+			while(read > 0) {
+
+				json.append(&buffer[0], read);
+				read = g_addon->ReadFile(handle, &buffer[0], 1 KiB);
+			}
+
+			// Close the input file
+			g_addon->CloseFile(handle);
+
+			// Only try to import channels from the file if something was actually in there ...
+			if(json.length()) import_channels(connectionpool::handle(g_connpool), json.c_str());
+
+			// Inform the user that the operation was successful
+			g_gui->Dialog_OK_ShowAndGetInput(g_addon->GetLocalizedString(30400), "Channels successfully imported from:", "", path);
+
+			// Trigger both a channel and a channel group update in Kodi
+			g_pvr->TriggerChannelUpdate();
+			g_pvr->TriggerChannelGroupsUpdate();
+		}
+
+		catch(std::exception& ex) {
+
+			// Inform the user that the operation failed, and re-throw the exception with this function name
+			g_gui->Dialog_OK_ShowAndGetInput(g_addon->GetLocalizedString(30400), "An error occurred importing the channel data:", "", ex.what());
+			throw string_exception(__func__, ": ", ex.what());
+		}
+	}
+}
+
 //---------------------------------------------------------------------------
 // KODI ADDON ENTRY POINTS
 //---------------------------------------------------------------------------
@@ -744,99 +887,18 @@ PVR_ERROR GetDriveSpace(long long* /*total*/, long long* /*used*/)
 
 PVR_ERROR CallMenuHook(PVR_MENUHOOK const& menuhook, PVR_MENUHOOK_DATA const& /*item*/)
 {
-	assert(g_gui && g_pvr);
-
 	try {
 
-		// MENUHOOK_SETTING_IMPORTCHANNELS
-		//
-		if(menuhook.iHookId == MENUHOOK_SETTING_IMPORTCHANNELS) {
-
-			// TODO: LOG
-
-			g_pvr->TriggerChannelUpdate();
-			g_pvr->TriggerChannelGroupsUpdate();
-
-			return PVR_ERROR::PVR_ERROR_NO_ERROR;
-		}
-
-		// MENUHOOK_SETTING_EXPORTCHANNELS
-		//
-		else if(menuhook.iHookId == MENUHOOK_SETTING_EXPORTCHANNELS) {
-
-			char path[1024] = {};			// Export path
-
-			// The legacy Kodi GUI API doesn't provide a way to select both a folder and a file name, and doesn't support
-			// the source filters (like "local|network|removable"), this will have to be done with a fixed name file
-			// put into the Kodi home directory ...
-			if(g_gui->Dialog_FileBrowser_ShowAndGetFile(g_addon->TranslateSpecialProtocol("special://home"), "/w",
-				g_addon->GetLocalizedString(30403), path[0], 1024)) {
-
-				try {
-
-					rapidjson::Document		document;				// Resultant JSON document
-
-					// Generate the output file name based on the selected path
-					std::string filepath(path);
-					filepath.append("/channels.json");
-					log_notice(__func__, ": exporting channel data to file ", filepath.c_str());
-
-					// Export the channels from the database into a JSON string
-					std::string json = export_channels(connectionpool::handle(g_connpool));
-
-					// Parse the JSON data so that it can be pretty printed for the user
-					document.Parse(json.c_str());
-					if(document.HasParseError()) throw string_exception(__func__, ": JSON parse error during export: ",
-						rapidjson::GetParseError_En(document.GetParseError()));
-
-					// Pretty print the JSON data
-					rapidjson::StringBuffer sb;
-					rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(sb);
-					document.Accept(writer);
-
-					// Attempt to create the output file in the selected directory
-					void* handle = g_addon->OpenFileForWrite(filepath.c_str(), true);
-					if(handle == nullptr) throw string_exception(__func__, ": unable to open file ", filepath.c_str(), " for write");
-
-					ssize_t written = g_addon->WriteFile(handle, sb.GetString(), sb.GetSize());
-					g_addon->CloseFile(handle);
-
-					// If the file wasn't written properly, throw an exception
-					if(written != static_cast<ssize_t>(sb.GetSize()))
-						throw string_exception(__func__, ": short write occurred generating file ", filepath.c_str());
-				}
-
-				catch(...) {
-				
-					// Inform the user that the operation failed, but leave the details in the log
-					g_gui->Dialog_OK_ShowAndGetInput(g_addon->GetLocalizedString(30404),
-						"An error occurred exporting the channel data. Please review Kodi log for details.");
-
-					throw;
-				}
-			}
-
-			return PVR_ERROR::PVR_ERROR_NO_ERROR;
-		}
-
-		// MENUHOOK_SETTING_CLEARCHANNELS
-		//
-		else if(menuhook.iHookId == MENUHOOK_SETTING_EXPORTCHANNELS) {
-
-			// TODO: LOG
-
-			g_pvr->TriggerChannelUpdate();
-			g_pvr->TriggerChannelGroupsUpdate();
-
-			return PVR_ERROR::PVR_ERROR_NO_ERROR;
-		}
+		// Invoke the proper helper function to handle the menu hook implementation
+		if(menuhook.iHookId == MENUHOOK_SETTING_IMPORTCHANNELS) menuhook_importchannels();
+		else if(menuhook.iHookId == MENUHOOK_SETTING_EXPORTCHANNELS) menuhook_exportchannels();
+		else if(menuhook.iHookId == MENUHOOK_SETTING_CLEARCHANNELS) menuhook_clearchannels();
 	}
 
 	catch(std::exception& ex) { return handle_stdexception(__func__, ex, PVR_ERROR::PVR_ERROR_FAILED); }
 	catch(...) { return handle_generalexception(__func__, PVR_ERROR::PVR_ERROR_FAILED); }
 
-
-	return PVR_ERROR::PVR_ERROR_NOT_IMPLEMENTED;
+	return PVR_ERROR::PVR_ERROR_NO_ERROR;
 }
 
 //---------------------------------------------------------------------------

@@ -181,6 +181,22 @@ static void bind_parameter(sqlite3_stmt* statement, int& paramindex, uint32_t va
 }
 
 //---------------------------------------------------------------------------
+// clear_channels
+//
+// Clears all channels from the database
+//
+// Arguments:
+//
+//	instance		- Database instance
+
+void clear_channels(sqlite3* instance)
+{
+	if(instance == nullptr) throw std::invalid_argument("instance");
+
+	execute_non_query(instance, "delete from channel");
+}
+
+//---------------------------------------------------------------------------
 // close_database
 //
 // Closes a SQLite database handle
@@ -206,6 +222,8 @@ void close_database(sqlite3* instance)
 
 void delete_channel(sqlite3* instance, unsigned int id)
 {
+	if(instance == nullptr) throw std::invalid_argument("instance");
+
 	execute_non_query(instance, "delete from channel where frequency = ?1 and subchannel = ?2", (id / 10) * 100000, id % 10);
 }
 
@@ -497,6 +515,35 @@ bool get_channel_properties(sqlite3* instance, unsigned int id, struct channelpr
 	catch(...) { sqlite3_finalize(statement); throw; }
 
 	return found;
+}
+
+//---------------------------------------------------------------------------
+// import_channels
+//
+// Imports channels from a JSON string
+//
+// Arguments:
+//
+//	instance	- Database instance
+//	json		- JSON data to be imported
+
+void import_channels(sqlite3* instance, char const* json)
+{
+	if(instance == nullptr) throw std::invalid_argument("instance");
+	if((json == nullptr) || (*json == '\0')) throw std::invalid_argument("instance");
+
+	// Massage the input as much as possible, only the frequency and subchannel fields are actually required,
+	// the rest can be defaulted if not present. Also watch out for duplicates and the frequency range
+	execute_non_query(instance, "replace into channel "
+		"select cast(json_extract(entry.value, '$.frequency') as integer) as frequency, "
+		"cast(json_extract(entry.value, '$.subchannel') as integer) as subchannel, "
+		"cast(ifnull(json_extract(entry.value, '$.hidden'), 0) as integer) as hidden, "
+		"cast(ifnull(json_extract(entry.value, '$.name'), '') as text) as name, "
+		"cast(ifnull(json_extract(entry.value, '$.autogain'), 1) as integer) as autogain, "
+		"cast(ifnull(json_extract(entry.value, '$.manualgain'), 0) as integer) as manualgain "
+		"from json_each(?1) as entry "
+		"where frequency is not null and subchannel is not null and frequency between 87900000 and 107900000 "
+		"group by frequency, subchannel", json);
 }
 
 //---------------------------------------------------------------------------

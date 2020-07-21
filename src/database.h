@@ -128,6 +128,11 @@ private:
 // FUNCTION PROTOTYPES
 //---------------------------------------------------------------------------
 
+// clear_channels
+//
+// Clears all channels from the database
+void clear_channels(sqlite3* instance);
+
 // close_database
 //
 // Creates a SQLite database instance handle
@@ -157,6 +162,11 @@ int get_channel_count(sqlite3* instance);
 //
 // Gets the tuning properties of a channel from the database
 bool get_channel_properties(sqlite3* instance, unsigned int id, struct channelprops& channelprops);
+
+// import_channels
+//
+// Imports channels from a JSON string
+void import_channels(sqlite3* instance, char const* json);
 
 // open_database
 //
