@@ -145,8 +145,13 @@ void delete_channel(sqlite3* instance, unsigned int id);
 
 // enumerate_channels
 //
-// Enumerates the available channels
+// Enumerates all available channels
 void enumerate_channels(sqlite3* instance, enumerate_channels_callback const& callback);
+
+// enumerate_fmradio_channels
+//
+// Enumerates FM Radio channels
+void enumerate_fmradio_channels(sqlite3* instance, enumerate_channels_callback const& callback);
 
 // export_channels
 //

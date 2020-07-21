@@ -166,7 +166,7 @@ static const PVR_ADDON_CAPABILITIES g_capabilities = {
 	false,			// bSupportsRecordings
 	false,			// bSupportsRecordingsUndelete
 	false,			// bSupportsTimers
-	false,			// bSupportsChannelGroups
+	true,			// bSupportsChannelGroups
 	false,			// bSupportsChannelScan
 	false,			// bSupportsChannelSettings
 	true,			// bHandlesInputStream
@@ -991,7 +991,7 @@ PVR_ERROR GetEPGTagStreamProperties(EPG_TAG const* /*tag*/, PVR_NAMED_VALUE* /*p
 
 int GetChannelGroupsAmount(void)
 {
-	return -1;
+	return 1;				// "FM Radio"
 }
 
 //---------------------------------------------------------------------------
@@ -1004,9 +1004,20 @@ int GetChannelGroupsAmount(void)
 //	handle		- Handle to pass to the callack method
 //	radio		- True to get radio groups, false to get TV channel groups
 
-PVR_ERROR GetChannelGroups(ADDON_HANDLE /*handle*/, bool /*radio*/)
+PVR_ERROR GetChannelGroups(ADDON_HANDLE handle, bool radio)
 {
-	return PVR_ERROR::PVR_ERROR_NOT_IMPLEMENTED;
+	if(handle == nullptr) return PVR_ERROR::PVR_ERROR_INVALID_PARAMETERS;
+
+	// The PVR only supports radio channel groups
+	if(!radio) return PVR_ERROR::PVR_ERROR_NO_ERROR;
+
+	PVR_CHANNEL_GROUP group = {};
+
+	// FM Radio
+	snprintf(group.strGroupName, std::extent<decltype(group.strGroupName)>::value, "FM Radio");
+	g_pvr->TransferChannelGroup(handle, &group);
+
+	return PVR_ERROR::PVR_ERROR_NO_ERROR;
 }
 
 //---------------------------------------------------------------------------
@@ -1019,9 +1030,47 @@ PVR_ERROR GetChannelGroups(ADDON_HANDLE /*handle*/, bool /*radio*/)
 //	handle		- Handle to pass to the callack method
 //	group		- The group to get the members for
 
-PVR_ERROR GetChannelGroupMembers(ADDON_HANDLE /*handle*/, PVR_CHANNEL_GROUP const& /*group*/)
+PVR_ERROR GetChannelGroupMembers(ADDON_HANDLE handle, PVR_CHANNEL_GROUP const& group)
 {
-	return PVR_ERROR::PVR_ERROR_NOT_IMPLEMENTED;
+	assert(g_pvr);
+
+	if(handle == nullptr) return PVR_ERROR::PVR_ERROR_INVALID_PARAMETERS;
+
+	// There is currently only one channel group enumerator - "FM Radio"
+	std::function<void(sqlite3*, enumerate_channels_callback)> enumerator = nullptr;
+	if(strcmp(group.strGroupName, "FM Radio") == 0) enumerator = enumerate_fmradio_channels;
+
+	// If no enumerator was selected, there isn't any work to do here
+	if(enumerator == nullptr) return PVR_ERROR::PVR_ERROR_NO_ERROR;
+
+	try {
+
+		// Enumerate all of the channels in the specified group
+		enumerator(connectionpool::handle(g_connpool), [&](struct channel const& channel) -> void {
+
+			PVR_CHANNEL_GROUP_MEMBER member = {};					// PVR_CHANNEL_GROUP_MEMORY to send
+
+			// strGroupName (required)
+			snprintf(member.strGroupName, std::extent<decltype(member.strGroupName)>::value, "%s", group.strGroupName);
+
+			// iChannelUniqueId (required)
+			member.iChannelUniqueId = channel.id;
+
+			// iChannelNumber
+			member.iChannelNumber = channel.channel;
+
+			// iSubChannelNumber
+			member.iSubChannelNumber = channel.subchannel;
+
+			// Transfer the generated PVR_CHANNEL_GROUP_MEMBER structure over to Kodi
+			g_pvr->TransferChannelGroupMember(handle, &member);
+		});
+	}
+
+	catch(std::exception& ex) { return handle_stdexception(__func__, ex, PVR_ERROR::PVR_ERROR_FAILED); }
+	catch(...) { return handle_generalexception(__func__, PVR_ERROR::PVR_ERROR_FAILED); }
+
+	return PVR_ERROR::PVR_ERROR_NO_ERROR;
 }
 
 //---------------------------------------------------------------------------

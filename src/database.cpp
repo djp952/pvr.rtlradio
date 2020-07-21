@@ -273,6 +273,52 @@ void enumerate_channels(sqlite3* instance, enumerate_channels_callback const& ca
 }
 
 //---------------------------------------------------------------------------
+// enumerate_fmradio_channels
+//
+// Enumerates FM Radio channels
+//
+// Arguments:
+//
+//	instance	- Database instance
+//	callback	- Callback function
+
+void enumerate_fmradio_channels(sqlite3* instance, enumerate_channels_callback const& callback)
+{
+	sqlite3_stmt*				statement;			// SQL statement to execute
+	int							result;				// Result from SQLite function
+
+	if(instance == nullptr) throw std::invalid_argument("instance");
+
+	// id | channel | subchannel | name | hidden
+	auto sql = "select ((frequency / 100000) * 10) + subchannel as id, (frequency / 1000000) as channel, "
+		"(frequency % 1000000) / 100000 as sub, name as name, hidden as hidden from channel "
+		"where channel.subchannel = 0 order by id asc";
+
+	result = sqlite3_prepare_v2(instance, sql, -1, &statement, nullptr);
+	if(result != SQLITE_OK) throw sqlite_exception(result, sqlite3_errmsg(instance));
+
+	try {
+
+		// Execute the query and iterate over all returned rows
+		while(sqlite3_step(statement) == SQLITE_ROW) {
+
+			struct channel item = {};
+			item.id = static_cast<unsigned int>(sqlite3_column_int(statement, 0));
+			item.channel = static_cast<unsigned int>(sqlite3_column_int(statement, 1));
+			item.subchannel = static_cast<unsigned int>(sqlite3_column_int(statement, 2));
+			item.name = reinterpret_cast<char const*>(sqlite3_column_text(statement, 3));
+			item.hidden = (sqlite3_column_int(statement, 4) != 0);
+
+			callback(item);						// Invoke caller-supplied callback
+		}
+
+		sqlite3_finalize(statement);			// Finalize the SQLite statement
+	}
+
+	catch(...) { sqlite3_finalize(statement); throw; }
+}
+
+//---------------------------------------------------------------------------
 // execute_non_query (local)
 //
 // Executes a database query and returns the number of rows affected
