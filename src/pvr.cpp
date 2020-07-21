@@ -167,8 +167,8 @@ static const PVR_ADDON_CAPABILITIES g_capabilities = {
 	false,			// bSupportsRecordingsUndelete
 	false,			// bSupportsTimers
 	false,			// bSupportsChannelGroups
-	true,			// bSupportsChannelScan
-	true,			// bSupportsChannelSettings
+	false,			// bSupportsChannelScan
+	false,			// bSupportsChannelSettings
 	true,			// bHandlesInputStream
 	true,			// bHandlesDemuxing
 	false,			// bSupportsRecordingPlayCount
