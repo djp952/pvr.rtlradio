@@ -18,7 +18,13 @@
 	</extension>
 <# } #>	<extension point="xbmc.addon.metadata">
 		<summary lang="en_GB">RTL-SDR Radio PVR Client</summary>
-		<description lang="en_GB">RTL-SDR Radio PVR Client</description>
+		<description lang="en_GB">
+Realtek RTL28xxu Software Defined Radio (SDR) PVR client
+
+Concept based on project pvr.rtl.radiofm (https://github.com/AlwinEsch/pvr.rtl.radiofm) - Copyright (C)2015-2018 Alwin Esch
+
+Wideband FM Digital Signal Processing provided by CuteSDR (https://sourceforge.net/projects/cutesdr) - Copyright (C)2010 Moe Wheatley
+		</description>
 		<news>
 <#= File.ReadAllText(this.Host.ResolvePath(this.Host.ResolveParameterValue("", "", "changelogtxt"))) #>
 		</news>
