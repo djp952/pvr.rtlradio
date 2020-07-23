@@ -125,9 +125,6 @@ fmstream::fmstream(std::unique_ptr<rtldevice> device, struct channelprops const&
 	m_resampler = std::unique_ptr<CFractResampler>(new CFractResampler());
 	m_resampler->Init(m_demodulator->GetInputBufferLimit());
 
-	// Set the initial time_point from which to calculate PTS values
-	m_ptsstart = std::chrono::high_resolution_clock::now();
-
 	// Create a worker thread on which to perform the transfer operations
 	scalar_condition<bool> started{ false };
 	m_worker = std::thread(&fmstream::transfer, this, std::ref(started));
@@ -337,7 +334,10 @@ DemuxPacket* fmstream::demuxread(std::function<DemuxPacket*(int)> const& allocat
 	packet->iStreamId = STREAM_ID_AUDIO;
 	packet->iSize = stereopackets * sizeof(TYPESTEREO16);
 	packet->duration = duration;
-	packet->pts = std::chrono::duration<double, std::micro>(std::chrono::high_resolution_clock::now() - m_ptsstart).count();
+	packet->pts = m_pts;
+
+	// Increment the program time stamp value based on the calculated duration
+	m_pts += duration;
 
 	return packet;
 }
