@@ -45,7 +45,7 @@ msgid "rtl_tcp server port"
 msgstr ""
 
 msgctxt "#30104"
-msgid "Radio Data System (RDS) standard"
+msgid "Radio Data System (RDS) region"
 msgstr ""
 
 msgctxt "#30105"
