@@ -81,7 +81,7 @@
     </XmlPeek>
     <Error Condition="'$(PeekedDisplayVersion)' != '$(DisplayVersion)'" Text="DisplayVersion build property was not properly applied to the addon.xml text template"/>
     <Exec Command="$(ZipperExe) create out\zuki.pvr.rtlradio-windows-win32-$(KodiBaseline)-$(AddonVersion).zip manifest\windows-win32.manifest -sha256" ContinueOnError="false"/>
-    <Exec Command="$(ZipperExe) create out\tools-windows-win32.zip manifest\windows-win32-tools.manifest" ContinueOnError="false"/>
+    <Exec Command="$(ZipperExe) create out\rtlsdr-windows-win32-$(AddonVersion).zip manifest\windows-win32-tools.manifest" ContinueOnError="false"/>
 
     <GetFileSize filename="out\zuki.pvr.rtlradio-windows-win32-$(KodiBaseline)-$(AddonVersion).zip">
       <Output PropertyName="ZipFileSize" TaskParameter="size"/>
@@ -113,7 +113,7 @@
     </XmlPeek>
     <Error Condition="'$(PeekedDisplayVersion)' != '$(DisplayVersion)'" Text="DisplayVersion build property was not properly applied to the addon.xml text template"/>
     <Exec Command="$(ZipperExe) create out\zuki.pvr.rtlradio-windows-x64-$(KodiBaseline)-$(AddonVersion).zip manifest\windows-x64.manifest -sha256" ContinueOnError="false"/>
-    <Exec Command="$(ZipperExe) create out\tools-windows-x64.zip manifest\windows-x64-tools.manifest" ContinueOnError="false"/>
+    <Exec Command="$(ZipperExe) create out\rtlsdr-windows-x64-$(AddonVersion).zip manifest\windows-x64-tools.manifest" ContinueOnError="false"/>
 
     <GetFileSize filename="out\zuki.pvr.rtlradio-windows-x64-$(KodiBaseline)-$(AddonVersion).zip">
       <Output PropertyName="ZipFileSize" TaskParameter="size"/>
@@ -191,7 +191,7 @@
     </XmlPeek>
     <Error Condition="'$(PeekedDisplayVersion)' != '$(DisplayVersion)'" Text="DisplayVersion build property was not properly applied to the addon.xml text template"/>
     <Exec Command="$(ZipperExe) create out\zuki.pvr.rtlradio-linux-i686-$(KodiBaseline)-$(AddonVersion).zip manifest\linux-i686.manifest -sha256" ContinueOnError="false"/>
-    <Exec Command="$(ZipperExe) create out\tools-linux-i686.zip manifest\linux-i686-tools.manifest" ContinueOnError="false"/>
+    <Exec Command="$(ZipperExe) create out\rtlsdr-linux-i686-$(AddonVersion).zip manifest\linux-i686-tools.manifest" ContinueOnError="false"/>
 
     <GetFileSize filename="out\zuki.pvr.rtlradio-linux-i686-$(KodiBaseline)-$(AddonVersion).zip">
       <Output PropertyName="ZipFileSize" TaskParameter="size"/>
@@ -269,7 +269,7 @@
     </XmlPeek>
     <Error Condition="'$(PeekedDisplayVersion)' != '$(DisplayVersion)'" Text="DisplayVersion build property was not properly applied to the addon.xml text template"/>
     <Exec Command="$(ZipperExe) create out\zuki.pvr.rtlradio-linux-x86_64-$(KodiBaseline)-$(AddonVersion).zip manifest\linux-x86_64.manifest -sha256" ContinueOnError="false"/>
-    <Exec Command="$(ZipperExe) create out\tools-linux-x86_64.zip manifest\linux-x86_64-tools.manifest" ContinueOnError="false"/>
+    <Exec Command="$(ZipperExe) create out\rtlsdr-linux-x86_64-$(AddonVersion).zip manifest\linux-x86_64-tools.manifest" ContinueOnError="false"/>
 
     <GetFileSize filename="out\zuki.pvr.rtlradio-linux-x86_64-$(KodiBaseline)-$(AddonVersion).zip">
       <Output PropertyName="ZipFileSize" TaskParameter="size"/>
@@ -347,7 +347,7 @@
     </XmlPeek>
     <Error Condition="'$(PeekedDisplayVersion)' != '$(DisplayVersion)'" Text="DisplayVersion build property was not properly applied to the addon.xml text template"/>
     <Exec Command="$(ZipperExe) create out\zuki.pvr.rtlradio-linux-armel-$(KodiBaseline)-$(AddonVersion).zip manifest\linux-armel.manifest -sha256" ContinueOnError="false"/>
-    <Exec Command="$(ZipperExe) create out\tools-linux-armel.zip manifest\linux-armel-tools.manifest" ContinueOnError="false"/>
+    <Exec Command="$(ZipperExe) create out\rtlsdr-linux-armel-$(AddonVersion).zip manifest\linux-armel-tools.manifest" ContinueOnError="false"/>
 
     <GetFileSize filename="out\zuki.pvr.rtlradio-linux-armel-$(KodiBaseline)-$(AddonVersion).zip">
       <Output PropertyName="ZipFileSize" TaskParameter="size"/>
@@ -425,7 +425,7 @@
     </XmlPeek>
     <Error Condition="'$(PeekedDisplayVersion)' != '$(DisplayVersion)'" Text="DisplayVersion build property was not properly applied to the addon.xml text template"/>
     <Exec Command="$(ZipperExe) create out\zuki.pvr.rtlradio-linux-armhf-$(KodiBaseline)-$(AddonVersion).zip manifest\linux-armhf.manifest -sha256" ContinueOnError="false"/>
-    <Exec Command="$(ZipperExe) create out\tools-linux-armhf.zip manifest\linux-armhf-tools.manifest" ContinueOnError="false"/>
+    <Exec Command="$(ZipperExe) create out\rtlsdr-linux-armhf-$(AddonVersion).zip manifest\linux-armhf-tools.manifest" ContinueOnError="false"/>
 
     <GetFileSize filename="out\zuki.pvr.rtlradio-linux-armhf-$(KodiBaseline)-$(AddonVersion).zip">
       <Output PropertyName="ZipFileSize" TaskParameter="size"/>
@@ -503,7 +503,7 @@
     </XmlPeek>
     <Error Condition="'$(PeekedDisplayVersion)' != '$(DisplayVersion)'" Text="DisplayVersion build property was not properly applied to the addon.xml text template"/>
     <Exec Command="$(ZipperExe) create out\zuki.pvr.rtlradio-linux-aarch64-$(KodiBaseline)-$(AddonVersion).zip manifest\linux-aarch64.manifest -sha256" ContinueOnError="false"/>
-    <Exec Command="$(ZipperExe) create out\tools-linux-aarch64.zip manifest\linux-aarch64-tools.manifest" ContinueOnError="false"/>
+    <Exec Command="$(ZipperExe) create out\rtlsdr-linux-aarch64-$(AddonVersion).zip manifest\linux-aarch64-tools.manifest" ContinueOnError="false"/>
 
     <GetFileSize filename="out\zuki.pvr.rtlradio-linux-aarch64-$(KodiBaseline)-$(AddonVersion).zip">
       <Output PropertyName="ZipFileSize" TaskParameter="size"/>
@@ -582,7 +582,7 @@
     </XmlPeek>
     <Error Condition="'$(PeekedDisplayVersion)' != '$(DisplayVersion)'" Text="DisplayVersion build property was not properly applied to the addon.xml text template"/>
     <Exec Command="$(ZipperExe) create out\zuki.pvr.rtlradio-raspbian-armhf-$(KodiBaseline)-$(AddonVersion).zip manifest\raspbian-armhf.manifest -sha256" ContinueOnError="false"/>
-    <Exec Command="$(ZipperExe) create out\tools-raspbian-armhf.zip manifest\raspbian-armhf-tools.manifest" ContinueOnError="false"/>
+    <Exec Command="$(ZipperExe) create out\rtlsdr-raspbian-armhf-$(AddonVersion).zip manifest\raspbian-armhf-tools.manifest" ContinueOnError="false"/>
 
     <GetFileSize filename="out\zuki.pvr.rtlradio-raspbian-armhf-$(KodiBaseline)-$(AddonVersion).zip">
       <Output PropertyName="ZipFileSize" TaskParameter="size"/>
@@ -661,7 +661,7 @@
     </XmlPeek>
     <Error Condition="'$(PeekedDisplayVersion)' != '$(DisplayVersion)'" Text="DisplayVersion build property was not properly applied to the addon.xml text template"/>
     <Exec Command="$(ZipperExe) create out\zuki.pvr.rtlradio-osx-x86_64-$(KodiBaseline)-$(AddonVersion).zip manifest\osx-x86_64.manifest -sha256" ContinueOnError="false"/>
-    <Exec Command="$(ZipperExe) create out\tools-osx-x86_64.zip manifest\osx-x86_64-tools.manifest" ContinueOnError="false"/>
+    <Exec Command="$(ZipperExe) create out\rtlsdr-osx-x86_64-$(AddonVersion).zip manifest\osx-x86_64-tools.manifest" ContinueOnError="false"/>
 
     <GetFileSize filename="out\zuki.pvr.rtlradio-osx-x86_64-$(KodiBaseline)-$(AddonVersion).zip">
       <Output PropertyName="ZipFileSize" TaskParameter="size"/>
@@ -687,7 +687,7 @@
     </XmlPeek>
     <Error Condition="'$(PeekedDisplayVersion)' != '$(DisplayVersion)'" Text="DisplayVersion build property was not properly applied to the addon.xml text template"/>
     <Exec Command="$(ZipperExe) create out\zuki.pvr.rtlradio-android-arm-$(KodiBaseline)-$(AddonVersion).zip manifest\android-arm.manifest -sha256" ContinueOnError="false"/>
-    <Exec Command="$(ZipperExe) create out\tools-android-arm.zip manifest\android-arm-tools.manifest" ContinueOnError="false"/>
+    <Exec Command="$(ZipperExe) create out\rtlsdr-android-arm-$(AddonVersion).zip manifest\android-arm-tools.manifest" ContinueOnError="false"/>
 
     <GetFileSize filename="out\zuki.pvr.rtlradio-android-arm-$(KodiBaseline)-$(AddonVersion).zip">
       <Output PropertyName="ZipFileSize" TaskParameter="size"/>
@@ -713,7 +713,7 @@
     </XmlPeek>
     <Error Condition="'$(PeekedDisplayVersion)' != '$(DisplayVersion)'" Text="DisplayVersion build property was not properly applied to the addon.xml text template"/>
     <Exec Command="$(ZipperExe) create out\zuki.pvr.rtlradio-android-aarch64-$(KodiBaseline)-$(AddonVersion).zip manifest\android-aarch64.manifest -sha256" ContinueOnError="false"/>
-    <Exec Command="$(ZipperExe) create out\tools-android-aarch64.zip manifest\android-aarch64-tools.manifest" ContinueOnError="false"/>
+    <Exec Command="$(ZipperExe) create out\rtlsdr-android-aarch64-$(AddonVersion).zip manifest\android-aarch64-tools.manifest" ContinueOnError="false"/>
 
     <GetFileSize filename="out\zuki.pvr.rtlradio-android-aarch64-$(KodiBaseline)-$(AddonVersion).zip">
       <Output PropertyName="ZipFileSize" TaskParameter="size"/>
@@ -739,7 +739,7 @@
     </XmlPeek>
     <Error Condition="'$(PeekedDisplayVersion)' != '$(DisplayVersion)'" Text="DisplayVersion build property was not properly applied to the addon.xml text template"/>
     <Exec Command="$(ZipperExe) create out\zuki.pvr.rtlradio-android-x86-$(KodiBaseline)-$(AddonVersion).zip manifest\android-x86.manifest -sha256" ContinueOnError="false"/>
-    <Exec Command="$(ZipperExe) create out\tools-android-x86.zip manifest\android-x86-tools.manifest" ContinueOnError="false"/>
+    <Exec Command="$(ZipperExe) create out\rtlsdr-android-x86-$(AddonVersion).zip manifest\android-x86-tools.manifest" ContinueOnError="false"/>
 
     <GetFileSize filename="out\zuki.pvr.rtlradio-android-x86-$(KodiBaseline)-$(AddonVersion).zip">
       <Output PropertyName="ZipFileSize" TaskParameter="size"/>
