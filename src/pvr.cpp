@@ -1173,6 +1173,9 @@ PVR_ERROR GetChannels(ADDON_HANDLE handle, bool radio)
 			// strChannelName
 			if(item.name != nullptr) snprintf(channel.strChannelName, std::extent<decltype(channel.strChannelName)>::value, "%s", item.name);
 
+			// strIconPath
+			if(item.logourl != nullptr) snprintf(channel.strIconPath, std::extent<decltype(channel.strIconPath)>::value, "%s", item.logourl);
+
 			// bIsHidden
 			channel.bIsHidden = item.hidden;
 

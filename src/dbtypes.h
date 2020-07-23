@@ -49,6 +49,7 @@ struct channel {
 	unsigned int		subchannel;
 	char const*			name;
 	bool				hidden;
+	char const*			logourl;
 };
 
 //---------------------------------------------------------------------------

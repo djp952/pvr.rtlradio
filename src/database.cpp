@@ -246,7 +246,8 @@ void enumerate_channels(sqlite3* instance, enumerate_channels_callback const& ca
 
 	// id | channel | subchannel | name | hidden
 	auto sql = "select ((frequency / 100000) * 10) + subchannel as id, (frequency / 1000000) as channel, "
-		"(frequency % 1000000) / 100000 as subchannel, name as name, hidden as hidden from channel order by id asc";
+		"(frequency % 1000000) / 100000 as subchannel, name as name, hidden as hidden, logourl as logourl "
+		"from channel order by id asc";
 
 	result = sqlite3_prepare_v2(instance, sql, -1, &statement, nullptr);
 	if(result != SQLITE_OK) throw sqlite_exception(result, sqlite3_errmsg(instance));
@@ -262,6 +263,7 @@ void enumerate_channels(sqlite3* instance, enumerate_channels_callback const& ca
 			item.subchannel = static_cast<unsigned int>(sqlite3_column_int(statement, 2));
 			item.name = reinterpret_cast<char const*>(sqlite3_column_text(statement, 3));
 			item.hidden = (sqlite3_column_int(statement, 4) != 0);
+			item.logourl = reinterpret_cast<char const*>(sqlite3_column_text(statement, 5));
 
 			callback(item);						// Invoke caller-supplied callback
 		}
@@ -488,7 +490,8 @@ std::string export_channels(sqlite3* instance)
 
 	return execute_scalar_string(instance, "select json_group_array("
 		"json_object('frequency', frequency, 'subchannel', subchannel, 'hidden', hidden, "
-		"'name', name, 'autogain', autogain, 'manualgain', manualgain)) from channel");
+		"'name', name, 'autogain', autogain, 'manualgain', manualgain, 'logourl', logourl)) "
+		"from channel");
 }
 
 //---------------------------------------------------------------------------
@@ -586,7 +589,8 @@ void import_channels(sqlite3* instance, char const* json)
 		"cast(ifnull(json_extract(entry.value, '$.hidden'), 0) as integer) as hidden, "
 		"cast(ifnull(json_extract(entry.value, '$.name'), '') as text) as name, "
 		"cast(ifnull(json_extract(entry.value, '$.autogain'), 1) as integer) as autogain, "
-		"cast(ifnull(json_extract(entry.value, '$.manualgain'), 0) as integer) as manualgain "
+		"cast(ifnull(json_extract(entry.value, '$.manualgain'), 0) as integer) as manualgain, "
+		"json_extract(entry.value, '$.logourl') as logourl "	// <-- this one allows nulls
 		"from json_each(?1) as entry "
 		"where frequency is not null and subchannel is not null and frequency between 87900000 and 107900000 "
 		"group by frequency, subchannel", json);
@@ -642,12 +646,26 @@ sqlite3* open_database(char const* connstring, int flags, bool initialize)
 		// to ensure that this is set for only one connection otherwise locking issues can occur
 		if(initialize) {
 
-			// table: channel
+			// get the database schema version
 			//
-			// frequency(pk) | subchannel(pk) | hidden | name | autogain | manualgain
-			execute_non_query(instance, "create table if not exists channel(frequency integer not null, subchannel integer not null, "
-				"hidden integer not null, name text not null, autogain integer not null, manualgain integer not null, "
-				"primary key(frequency, subchannel))");
+			int dbversion = execute_scalar_int(instance, "pragma user_version");
+
+			// SCHEMA VERSION 0 - NEW DATABASE
+			//
+			if(dbversion == 0) {
+
+				// table: channel
+				//
+				// frequency(pk) | subchannel(pk) | hidden | name | autogain | manualgain | logourl
+				execute_non_query(instance, "drop table if exists channel");
+				execute_non_query(instance, "create table channel(frequency integer not null, subchannel integer not null, "
+					"hidden integer not null, name text not null, autogain integer not null, manualgain integer not null, logourl text null, "
+					"primary key(frequency, subchannel))");
+
+				execute_non_query(instance, "pragma user_version = 1");
+			}
+
+			// SCHEMA VERSION 1 - CURRENT SCHEMA
 		}
 	}
 
