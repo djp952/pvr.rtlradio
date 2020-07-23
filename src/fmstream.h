@@ -152,6 +152,11 @@ private:
 	fmstream(fmstream const&) = delete;
 	fmstream& operator=(fmstream const&) = delete;
 
+	// time_point
+	//
+	// Alias for the high resolution clock time_point
+	using time_point = std::chrono::high_resolution_clock::time_point;
+
 	// DEFAULT_DEVICE_BLOCK_SIZE
 	//
 	// Default device block size
@@ -195,12 +200,13 @@ private:
 	std::unique_ptr<rtldevice>			m_device;				// RTL-SDR device instance
 	std::unique_ptr<CDemodulator>		m_demodulator;			// CuteSDR demodulator instance
 	std::unique_ptr<CFractResampler>	m_resampler;			// CuteSDR resampler instance
+	bool const							m_decoderds;			// Flag to send decoded RDS data
 	rdsdecoder							m_rdsdecoder;			// RDS decoder instance
 
 	size_t const						m_blocksize;			// Device block size
 	uint32_t const						m_samplerate;			// Device sample rate
 	uint32_t const						m_pcmsamplerate;		// Output sample rate
-	double								m_pts{ 1 US };			// Current program time stamp
+	time_point							m_ptsstart;				// Starting PTS value
 
 	// STREAM CONTROL
 	//

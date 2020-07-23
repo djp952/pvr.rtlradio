@@ -67,8 +67,9 @@ int const fmstream::STREAM_ID_UECP = 2;
 //	fmprops			- FM digital signal processor properties
 
 fmstream::fmstream(std::unique_ptr<rtldevice> device, struct channelprops const& channelprops, struct fmprops const& fmprops) :
-	m_device(std::move(device)), m_rdsdecoder(fmprops.isrbds), m_blocksize(align::up(DEFAULT_DEVICE_BLOCK_SIZE, 16 KiB)),
-	m_samplerate(DEFAULT_DEVICE_SAMPLE_RATE), m_pcmsamplerate(fmprops.outputrate), m_buffersize(align::up(DEFAULT_RINGBUFFER_SIZE, 16 KiB))
+	m_device(std::move(device)), m_decoderds(fmprops.decoderds), m_rdsdecoder(fmprops.isrbds), 
+	m_blocksize(align::up(DEFAULT_DEVICE_BLOCK_SIZE, 16 KiB)), m_samplerate(DEFAULT_DEVICE_SAMPLE_RATE), 
+	m_pcmsamplerate(fmprops.outputrate), m_buffersize(align::up(DEFAULT_RINGBUFFER_SIZE, 16 KiB))
 {
 	// The only allowable output sample rates for this stream are 44100Hz and 48000Hz
 	if((m_pcmsamplerate != 44100) && (m_pcmsamplerate != 48000))
@@ -124,6 +125,9 @@ fmstream::fmstream(std::unique_ptr<rtldevice> device, struct channelprops const&
 	// Initialize the output resampler
 	m_resampler = std::unique_ptr<CFractResampler>(new CFractResampler());
 	m_resampler->Init(m_demodulator->GetInputBufferLimit());
+
+	// Set the initial time_point from which to calculate PTS values
+	m_ptsstart = std::chrono::high_resolution_clock::now();
 
 	// Create a worker thread on which to perform the transfer operations
 	scalar_condition<bool> started{ false };
@@ -233,18 +237,23 @@ DemuxPacket* fmstream::demuxread(std::function<DemuxPacket*(int)> const& allocat
 	uecp_data_packet uecp_packet;
 	if(m_rdsdecoder.pop_uecp_data_packet(uecp_packet) && (!uecp_packet.empty())) {
 
-		// Allocate and initialize the UECP demultiplexer packet
-		int packetsize = static_cast<int>(uecp_packet.size());
-		DemuxPacket* packet = allocator(packetsize);
-		if(packet == nullptr) return nullptr;
+		// The user may have opted to disable RDS.  The packet from the decoder still
+		// needs to be popped from the queue, but don't do anything with it ...
+		if(m_decoderds) {
 
-		packet->iStreamId = STREAM_ID_UECP;
-		packet->iSize = packetsize;
-		packet->pts = DVD_NOPTS_VALUE;
+			// Allocate and initialize the UECP demultiplexer packet
+			int packetsize = static_cast<int>(uecp_packet.size());
+			DemuxPacket* packet = allocator(packetsize);
+			if(packet == nullptr) return nullptr;
 
-		// Copy the UECP data into the demultiplexer packet and return it
-		memcpy(packet->pData, uecp_packet.data(), uecp_packet.size());
-		return packet;
+			packet->iStreamId = STREAM_ID_UECP;
+			packet->iSize = packetsize;
+			packet->pts = DVD_NOPTS_VALUE;
+
+			// Copy the UECP data into the demultiplexer packet and return it
+			memcpy(packet->pData, uecp_packet.data(), uecp_packet.size());
+			return packet;
+		}
 	}
 
 	// The demodulator only works properly in this use pattern if it's fed the exact
@@ -334,10 +343,7 @@ DemuxPacket* fmstream::demuxread(std::function<DemuxPacket*(int)> const& allocat
 	packet->iStreamId = STREAM_ID_AUDIO;
 	packet->iSize = stereopackets * sizeof(TYPESTEREO16);
 	packet->duration = duration;
-	packet->pts = m_pts;
-
-	// Increment the program time stamp value based on the calculated duration
-	m_pts += duration;
+	packet->pts = std::chrono::duration<double, std::micro>(std::chrono::high_resolution_clock::now() - m_ptsstart).count();
 
 	return packet;
 }
@@ -392,10 +398,13 @@ void fmstream::enumproperties(std::function<void(struct streamprops const& props
 
 	// UECP STREAM
 	//
-	streamprops uecp = {};
-	uecp.codec = "rds";
-	uecp.pid = STREAM_ID_UECP;
-	callback(uecp);
+	if(m_decoderds) {
+
+		streamprops uecp = {};
+		uecp.codec = "rds";
+		uecp.pid = STREAM_ID_UECP;
+		callback(uecp);
+	}
 }
 
 //---------------------------------------------------------------------------

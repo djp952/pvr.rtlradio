@@ -134,6 +134,11 @@ struct addon_settings {
 	// The port number of the rtl_tcp host to connect to
 	int device_connection_tcp_port;
 
+	// fmradio_enable_rds
+	//
+	// Enables passing decoded RDS information to Kodi
+	bool fmradio_enable_rds;
+
 	// fmradio_rds_standard
 	//
 	// Specifies the Radio Data System (RDS) standard
@@ -211,6 +216,7 @@ static addon_settings g_settings = {
 	0,									// device_connection_usb_index
 	"",									// device_connection_tcp_host
 	1234,								// device_connection_tcp_port
+	true,								// fmradio_enable_rds
 	rds_standard::automatic,			// fmradio_rds_standard
 	48000,								// fmradio_output_samplerate
 };
@@ -531,6 +537,7 @@ static void menuhook_importchannels(void)
 ADDON_STATUS ADDON_Create(void* handle, void* props)
 {
 	PVR_MENUHOOK			menuhook;						// For registering menu hooks
+	bool					bvalue = false;					// Setting value
 	int						nvalue = 0;						// Setting value
 	char					strvalue[1024] = { '\0' };		// Setting value 
 
@@ -578,6 +585,7 @@ ADDON_STATUS ADDON_Create(void* handle, void* props)
 			if(g_addon->GetSetting("device_connection_tcp_port", &nvalue)) g_settings.device_connection_tcp_port = nvalue;
 
 			// Load the FM Radio settings
+			if(g_addon->GetSetting("fmradio_enable_rds", &bvalue)) g_settings.fmradio_enable_rds = bvalue;
 			if(g_addon->GetSetting("fmradio_rds_standard", &nvalue)) g_settings.fmradio_rds_standard = static_cast<enum rds_standard>(nvalue);
 			if(g_addon->GetSetting("fmradio_output_samplerate", &nvalue)) g_settings.fmradio_output_samplerate = nvalue;
 
@@ -761,6 +769,18 @@ ADDON_STATUS ADDON_SetSetting(char const* name, void const* value)
 
 			g_settings.device_connection_tcp_port = nvalue;
 			log_notice(__func__, ": setting device_connection_tcp_port changed to ", g_settings.device_connection_tcp_port);
+		}
+	}
+
+	// fmradio_enable_rds
+	//
+	else if(strcmp(name, "fmradio_enable_rds") == 0) {
+
+		bool bvalue = *reinterpret_cast<bool const*>(value);
+		if(bvalue != g_settings.fmradio_enable_rds) {
+
+			g_settings.fmradio_enable_rds = bvalue;
+			log_notice(__func__, ": setting fmradio_enable_rds changed to ", (bvalue) ? "true" : "false");
 		}
 	}
 
@@ -1603,6 +1623,7 @@ bool OpenLiveStream(PVR_CHANNEL const& channel)
 
 		// Set up the FM digital signal processor properties
 		struct fmprops fmprops = {};
+		fmprops.decoderds = settings.fmradio_enable_rds;
 		if(settings.fmradio_rds_standard == rds_standard::automatic) fmprops.isrbds = true;		// <-- See above TODO
 		else fmprops.isrbds = (settings.fmradio_rds_standard == rds_standard::rbds);
 		fmprops.outputrate = settings.fmradio_output_samplerate;
