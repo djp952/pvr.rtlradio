@@ -70,7 +70,7 @@ public:
 	// create (static)
 	//
 	// Factory method, creates a new fmstream instance
-	static std::unique_ptr<fmstream> create(std::unique_ptr<rtldevice> device, struct channelprops const& channelprops, struct fmprops const& fmprops);
+	static std::unique_ptr<fmstream> create(std::shared_ptr<rtldevice> device, struct channelprops const& channelprops, struct fmprops const& fmprops);
 
 	// demuxabort
 	//
@@ -184,7 +184,7 @@ private:
 
 	// Instance Constructor
 	//
-	fmstream(std::unique_ptr<rtldevice> device, struct channelprops const& channelprops, struct fmprops const& fmprops);
+	fmstream(std::shared_ptr<rtldevice> device, struct channelprops const& channelprops, struct fmprops const& fmprops);
 
 	//-----------------------------------------------------------------------
 	// Private Member Functions
@@ -197,7 +197,7 @@ private:
 	//-----------------------------------------------------------------------
 	// Member Variables
 
-	std::unique_ptr<rtldevice>			m_device;				// RTL-SDR device instance
+	std::shared_ptr<rtldevice>			m_device;				// RTL-SDR device instance
 	std::unique_ptr<CDemodulator>		m_demodulator;			// CuteSDR demodulator instance
 	std::unique_ptr<CFractResampler>	m_resampler;			// CuteSDR resampler instance
 	bool const							m_decoderds;			// Flag to send decoded RDS data
