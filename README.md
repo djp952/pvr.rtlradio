@@ -62,7 +62,7 @@ UNATTENDED=1 osxcross/build.sh
 **INITIALIZE SOURCE TREE AND DEPENDENCIES**
 * Open "Developer Command Prompt for VS2017"   
 ```
-git clone https://github.com/djp952/pvr.rtlradio -b Leia
+git clone https://github.com/djp952/pvr.rtlradio -b Matrix
 cd pvr.rtlradio
 git submodule update --init
 ```

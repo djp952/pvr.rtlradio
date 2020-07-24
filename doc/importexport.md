@@ -4,15 +4,12 @@
 * Select __`Client specific settings`__
 
 ### Import channel data
-Selecting this client specific setting will open a file browser dialog that allows for selection of an existing __.json__ document to import into the PVR database.  Due to limitations the file must be located in the Kodi __Userdata__ folder (https://kodi.wiki/view/Userdata), or a subdirectory of that folder.   
-The file must adhere to the __JSON Schema__ described below.
+Selecting this client specific setting will open a file browser dialog that allows for selection of an existing __.json__ document to import into the PVR database. The file must adhere to the __JSON Schema__ described below.
 
 Channel data imported into the PVR database with this method will add or replace matching entries but will not remove any non-matching entries. To completely replace the contents of the database, first execute the __Clear channel data__ operation followed by the __Import channel data__ operation.
 
 ### Export channel data
-Selecting this client specific setting will open a folder browser dialog allows for selection of the folder to write the __radiochannels.json__ file. This file will contain the contents of the PVR database formatted to the __JSON Schema__ described below. Due to limitations the file name cannot be customized and the selected folder must be the Kodi __Userdata__ folder (https://kodi.wiki/view/Userdata), or a subdirectory of that folder.
-
-This operation can be used to transfer the PVR database information from one Kodi instance to another. Copy the __radiochannels.json__ file generated via __Export channel data__ on the source system to the __Userdata__ folder (https://kodi.wiki/view/Userdata) on the destination system, then execute an __Import channel data__ operation on the destination system.
+Selecting this client specific setting will open a folder browser dialog allows for selection of the folder to write the __radiochannels.json__ file. This file will contain the contents of the PVR database formatted to the __JSON Schema__ described below. Due to limitations the file name cannot be customized and will be set to __radiochannels.json__.
 
 ### Clear channel data
 Selecting this client specific setting will clear all existing channel data from the PVR database.

@@ -24,80 +24,9 @@
 #define __DIALOGCHANNELSETTINGS_H_
 #pragma once
 
-#include <libKODI_guilib.h>
-#include <memory>
-
-#include "props.h"
-#include "scanner.h"
-
-#pragma warning(push, 4)
-
-//---------------------------------------------------------------------------
-// Class dialogchannelsettings
 //
-// Implements the "Channel Settings" dialog
-
-class dialogchannelsettings
-{
-public:
-
-	// Destructor
-	//
-	~dialogchannelsettings();
-
-	//-----------------------------------------------------------------------
-	// Member Functions
-
-	// show (static)
-	//
-	// Executes the dialog as a modal dialog box
-	static bool show(std::unique_ptr<CHelper_libKODI_guilib> const& gui, std::unique_ptr<scanner> scanner, struct channelprops &channelprops);
-
-private:
-
-	dialogchannelsettings(dialogchannelsettings const&) = delete;
-	dialogchannelsettings& operator=(dialogchannelsettings const&) = delete;
-
-	// Instance Constructor
-	//
-	dialogchannelsettings(CHelper_libKODI_guilib* gui, CAddonGUIWindow* window, std::unique_ptr<scanner> scanner);
-
-	//-------------------------------------------------------------------------
-	// Private Member Functions
-
-	// onaction
-	//
-	// Receives action codes that are sent to this window
-	static bool onaction(GUIHANDLE handle, int actionid);
-	bool onaction(int actionid);
-
-	// onclick
-	//
-	// Receives click event notifications for a control
-	static bool onclick(GUIHANDLE handle, int controlid);
-	bool onclick(int controlid);
-
-	// onfocus
-	//
-	// Receives focus event notifications for a control
-	static bool onfocus(GUIHANDLE handle, int controlid);
-	bool onfocus(int controlid);
-
-	// oninit
-	//
-	// Called to initialize the window object
-	static bool oninit(GUIHANDLE handle);
-	bool oninit(void);
-
-	//-------------------------------------------------------------------------
-	// Member Variables
-
-	CHelper_libKODI_guilib* const	m_gui = nullptr;		// Kodi GUI API instance
-	CAddonGUIWindow* const			m_window = nullptr;		// Kodi GUI window instance
-	std::unique_ptr<scanner>		m_scanner;				// Channel scanner instance
-	struct channelprops				m_channelprops;			// Channel properties
-	bool							m_changed = false;		// Flag if properties changed
-};
+// TODO: Removed for Kodi "Matrix" port since it was non-functional
+// 
 
 //-----------------------------------------------------------------------------
 

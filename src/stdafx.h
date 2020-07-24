@@ -41,7 +41,28 @@
 #include <wchar.h>				// Prevents redefinition of WCHAR_MIN by libusb
 #define TARGET_WINDOWS
 
-#endif	// defined(_WINDOWS)
+
+// Android
+#elif defined(__ANDROID__)
+
+#define TARGET_POSIX
+#define TARGET_LINUX
+#define TARGET_ANDROID
+
+// MacOS
+#elif defined(__APPLE__)
+
+#define TARGET_POSIX
+#define TARGET_DARWIN
+#define TARGET_DARWIN_OSX
+
+// Linux
+#else
+
+#define TARGET_POSIX
+#define TARGET_LINUX
+
+#endif
 
 #include <assert.h>
 #include <stdint.h>

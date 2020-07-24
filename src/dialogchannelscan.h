@@ -24,77 +24,9 @@
 #define __DIALOGCHANNELSCAN_H_
 #pragma once
 
-#include <libKODI_guilib.h>
-#include <memory>
-
-#include "scanner.h"
-
-#pragma warning(push, 4)
-
-//---------------------------------------------------------------------------
-// Class dialogchannelscan
 //
-// Implements the "Channel Scan" dialog
-
-class dialogchannelscan
-{
-public:
-
-	// Destructor
-	//
-	~dialogchannelscan();
-
-	//-----------------------------------------------------------------------
-	// Member Functions
-
-	// show (static)
-	//
-	// Executes the dialog as a modal dialog box
-	static void show(std::unique_ptr<CHelper_libKODI_guilib> const& gui, std::unique_ptr<scanner> scanner);
-
-private:
-
-	dialogchannelscan(dialogchannelscan const&) = delete;
-	dialogchannelscan& operator=(dialogchannelscan const&) = delete;
-
-	// Instance Constructor
-	//
-	dialogchannelscan(CHelper_libKODI_guilib* gui, CAddonGUIWindow* window, std::unique_ptr<scanner> scanner);
-
-	//-------------------------------------------------------------------------
-	// Private Member Functions
-
-	// onaction
-	//
-	// Receives action codes that are sent to this window
-	static bool onaction(GUIHANDLE handle, int actionid);
-	bool onaction(int actionid);
-
-	// onclick
-	//
-	// Receives click event notifications for a control
-	static bool onclick(GUIHANDLE handle, int controlid);
-	bool onclick(int controlid);
-
-	// onfocus
-	//
-	// Receives focus event notifications for a control
-	static bool onfocus(GUIHANDLE handle, int controlid);
-	bool onfocus(int controlid);
-
-	// oninit
-	//
-	// Called to initialize the window object
-	static bool oninit(GUIHANDLE handle);
-	bool oninit(void);
-
-	//-------------------------------------------------------------------------
-	// Member Variables
-
-	CHelper_libKODI_guilib* const	m_gui = nullptr;		// Kodi GUI API instance
-	CAddonGUIWindow* const			m_window = nullptr;		// Kodi GUI window instance
-	std::unique_ptr<scanner>		m_scanner;				// Channel scanner instance
-};
+// TODO: Removed for Kodi "Matrix" port since it was non-functional
+// 
 
 //-----------------------------------------------------------------------------
 

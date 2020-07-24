@@ -37,7 +37,7 @@ LOCAL_MODULE := rtlradio
 LOCAL_C_INCLUDES += \
 	depends/xbmc/xbmc \
 	depends/xbmc/xbmc/linux \
-	depends/xbmc/xbmc/addons/kodi-addon-dev-kit/include/kodi \
+	depends/xbmc/xbmc/addons/kodi-addon-dev-kit/include \
 	depends/xbmc/xbmc/cores/VideoPlayer/Interface/Addon \
 	depends/libusb/$(TARGET_ABI)/include \
 	depends/rapidjson/include \
@@ -91,13 +91,13 @@ LOCAL_SRC_FILES := \
     src/fmdsp/iir.cpp \
     src/fmdsp/smeter.cpp \
     src/fmdsp/wfmdemod.cpp \
+    src/addon.cpp \
     src/database.cpp \
     src/dialogchanneladd.cpp \
     src/dialogchannelscan.cpp \
     src/dialogchannelsettings.cpp \
     src/fmstream.cpp \
     src/libusb_exception.cpp \
-    src/pvr.cpp \
     src/rdsdecoder.cpp \
     src/scanner.cpp \
     src/sqlite_exception.cpp \
