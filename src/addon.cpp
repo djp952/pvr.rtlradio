@@ -898,6 +898,9 @@ PVR_ERROR addon::GetChannelGroupsAmount(int& amount)
 
 PVR_ERROR addon::GetChannelGroupMembers(kodi::addon::PVRChannelGroup const& group, kodi::addon::PVRChannelGroupMembersResultSet& results)
 {
+	// Only interested in radio channel groups
+	if(!group.GetIsRadio()) return PVR_ERROR::PVR_ERROR_NO_ERROR;
+
 	// There is currently only one channel group enumerator - "FM Radio"
 	std::function<void(sqlite3*, enumerate_channels_callback)> enumerator = nullptr;
 	if(strcmp(group.GetGroupName().c_str(), "FM Radio") == 0) enumerator = enumerate_fmradio_channels;
@@ -948,6 +951,7 @@ PVR_ERROR addon::GetChannelGroups(bool radio, kodi::addon::PVRChannelGroupsResul
 	if(!radio) return PVR_ERROR::PVR_ERROR_NO_ERROR;
 
 	fmradio.SetGroupName("FM Radio");
+	fmradio.SetIsRadio(true);
 	results.Add(fmradio);
 
 	return PVR_ERROR::PVR_ERROR_NO_ERROR;
@@ -1023,7 +1027,8 @@ PVR_ERROR addon::GetChannelsAmount(int& amount)
 
 PVR_ERROR addon::GetSignalStatus(int /*channelUid*/, kodi::addon::PVRSignalStatus& signalStatus)
 {
-	if(!m_pvrstream) return PVR_ERROR::PVR_ERROR_FAILED;
+	// Kodi may call this function before the stream is open, avoid the error log
+	if(!m_pvrstream) return PVR_ERROR::PVR_ERROR_NO_ERROR;
 
 	signalStatus.SetAdapterName(m_pvrstream->devicename());
 	signalStatus.SetAdapterStatus("Active");
