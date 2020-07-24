@@ -221,9 +221,14 @@ private:
 	template<typename... _args> void log_warning(_args&&... args);
 
 	// Menu Hook Helpers
+	//
 	void menuhook_clearchannels(void);
 	void menuhook_exportchannels(void);
 	void menuhook_importchannels(void);
+
+	// Regional Helpers
+	//
+	enum rds_standard get_regional_rds_standard(enum rds_standard standard) const;
 
 	// Settings Helpers
 	//
