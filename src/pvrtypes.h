@@ -91,6 +91,11 @@ struct settings {
 	// The port number of the rtl_tcp host to connect to
 	int device_connection_tcp_port;
 
+	// interface_prepend_channel_numbers
+	//
+	// Flag to include the channel number in the channel name
+	bool interface_prepend_channel_numbers;
+
 	// fmradio_rds_standard
 	//
 	// Specifies the Radio Data System (RDS) standard

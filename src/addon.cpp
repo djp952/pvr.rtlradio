@@ -535,6 +535,9 @@ ADDON_STATUS addon::Create(void)
 			m_settings.device_connection_tcp_host = kodi::GetSettingString("device_connection_tcp_host");
 			m_settings.device_connection_tcp_port = kodi::GetSettingInt("device_connection_tcp_port", 1234);
 
+			// Load the Interface settings
+			m_settings.interface_prepend_channel_numbers = kodi::GetSettingBoolean("interface_prepend_channel_numbers", false);
+
 			// Load the FM Radio settings
 			m_settings.fmradio_rds_standard = kodi::GetSettingEnum("fmradio_rds_standard", rds_standard::automatic);
 			m_settings.fmradio_output_samplerate = kodi::GetSettingInt("fmradio_output_samplerate", 48000);
@@ -667,6 +670,22 @@ ADDON_STATUS addon::SetSetting(std::string const& settingName, kodi::CSettingVal
 
 			m_settings.device_connection_tcp_port = nvalue;
 			log_info(__func__, ": setting device_connection_tcp_port changed to ", m_settings.device_connection_tcp_port);
+		}
+	}
+
+	// interface_prepend_channel_numbers
+	//
+	else if(settingName == "interface_prepend_channel_numbers") {
+
+		bool bvalue = settingValue.GetBoolean();
+		if(bvalue != m_settings.interface_prepend_channel_numbers) {
+
+			m_settings.interface_prepend_channel_numbers = bvalue;
+			log_info(__func__, ": setting interface_prepend_channel_numbers changed to ", (bvalue) ? "true" : "false");
+
+			// Trigger channel and channel group updates to refresh the channel names
+			TriggerChannelUpdate();
+			TriggerChannelGroupsUpdate();
 		}
 	}
 
@@ -1009,6 +1028,9 @@ PVR_ERROR addon::GetChannels(bool radio, kodi::addon::PVRChannelsResultSet& resu
 	// The PVR only supports radio channels
 	if(!radio) return PVR_ERROR::PVR_ERROR_NO_ERROR;
 
+	// Create a copy of the current addon settings structure
+	struct settings settings = copy_settings();
+
 	try {
 
 		// Enumerate all of the channels in the database
@@ -1020,7 +1042,19 @@ PVR_ERROR addon::GetChannels(bool radio, kodi::addon::PVRChannelsResultSet& resu
 			channel.SetIsRadio(true);
 			channel.SetChannelNumber(item.channel);
 			channel.SetSubChannelNumber(item.subchannel);
-			if(item.name != nullptr) channel.SetChannelName(item.name);
+
+			if(item.name != nullptr) {
+
+				if(settings.interface_prepend_channel_numbers) {
+
+					char strChannelName[PVR_ADDON_NAME_STRING_LENGTH]{};
+					snprintf(strChannelName, std::extent<decltype(strChannelName)>::value, "%u.%u %s", item.channel, item.subchannel, item.name);
+					channel.SetChannelName(strChannelName);
+				}
+
+				else channel.SetChannelName(item.name);
+			}
+
 			if(item.logourl != nullptr) channel.SetIconPath(item.logourl);
 			channel.SetIsHidden(item.hidden);
 

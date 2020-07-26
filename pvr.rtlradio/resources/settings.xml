@@ -64,7 +64,19 @@
       </group>
     </category>
 
-    <category id="fmradio" label="30001">
+    <category id="interface" label="30001">
+      <group id="1" label="-1">
+
+        <setting id="interface_prepend_channel_numbers" type="boolean" label="30107" help="30507">
+          <level>0</level>
+          <default>false</default>
+          <control type="toggle"/>
+        </setting>
+        
+      </group>
+    </category>
+
+    <category id="fmradio" label="30002">
       <group id="1" label="-1">
 
         <setting id="fmradio_rds_standard" type="integer" label="30104" help="30504">
@@ -95,7 +107,7 @@
       </group>
     </category>
 
-    <category id="hdradio" label="30002">
+    <category id="hdradio" label="30003">
       <group id="1" label="-1">
 
       </group>

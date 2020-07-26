@@ -21,10 +21,14 @@ msgid "Device"
 msgstr ""
 
 msgctxt "#30001"
-msgid "FM Radio"
+msgid "Interface"
 msgstr ""
 
 msgctxt "#30002"
+msgid "FM Radio"
+msgstr ""
+
+msgctxt "#30003"
 msgid "HD Radio"
 msgstr ""
 
@@ -53,6 +57,10 @@ msgid "PCM output sample rate"
 msgstr ""
 
 # 30106 unused on Matrix but used on Leia - don't reuse
+
+msgctxt "#30107"
+msgid "Prepend channel numbers to channel names"
+msgstr ""
 
 msgctxt "#30200"
 msgid "Universal Serial Bus (USB)"
@@ -132,3 +140,6 @@ msgstr ""
 
 # 30506 unused on Matrix but used on Leia - don't reuse
 
+msgctxt "#30507"
+msgid "When set to ON the channel number will be prepended to the channel name when reported to Kodi."
+msgstr ""
