@@ -100,7 +100,6 @@ LOCAL_SRC_FILES := \
     src/libusb_exception.cpp \
     src/rdsdecoder.cpp \
     src/scanner.cpp \
-    src/scheduler.cpp \
     src/sqlite_exception.cpp \
     src/uecp.cpp \
     src/usbdevice.cpp \

@@ -51,10 +51,6 @@
 //
 ADDONCREATOR(addon)
 
-// Scheduled Task Names
-//
-char const* addon::RELEASE_DEVICE_TASK = "release_device_task";
-
 //---------------------------------------------------------------------------
 // addon Instance Constructor
 //
@@ -62,8 +58,7 @@ char const* addon::RELEASE_DEVICE_TASK = "release_device_task";
 //
 //	NONE
 
-addon::addon() : m_settings{},
-	m_scheduler([&](std::exception const& ex) -> void { handle_stdexception("scheduled task", ex); })
+addon::addon() : m_settings{}
 {
 }
 
@@ -91,6 +86,29 @@ inline struct settings addon::copy_settings(void) const
 {
 	std::unique_lock<std::mutex> settings_lock(m_settings_lock);
 	return m_settings;
+}
+
+//---------------------------------------------------------------------------
+// addon::create_device (private)
+//
+// Creates the RTL-SDR device instance
+//
+// Arguments:
+//
+//	settings		- Current addon settings structure
+
+std::unique_ptr<rtldevice> addon::create_device(struct settings const& settings)
+{
+	// USB device
+	if(settings.device_connection == device_connection::usb)
+		return usbdevice::create(settings.device_connection_usb_index);
+
+	// Network device
+	else if(settings.device_connection == device_connection::rtltcp)
+		return tcpdevice::create(settings.device_connection_tcp_host.c_str(), static_cast<uint16_t>(settings.device_connection_tcp_port));
+
+	// Unknown device type
+	else throw string_exception("invalid device_connection type specified");
 }
 
 //---------------------------------------------------------------------------
@@ -135,42 +153,6 @@ std::string addon::device_connection_to_string(enum device_connection connection
 	}
 
 	return "Unknown";
-}
-
-//---------------------------------------------------------------------------
-// addon::get_device (private)
-//
-// Acquires the RTL-SDR device instance to be accessed
-//
-// Arguments:
-//
-//	settings		- Current addon settings structure
-
-std::shared_ptr<rtldevice> addon::get_device(struct settings const& settings)
-{
-	std::unique_lock<std::mutex> lock(m_device_lock);
-
-	// If the cached device instance is still valid, use that. Otherwise create a
-	// new instance to be cached and returned for use for the caller
-	if(!m_device) {
-
-		// USB device
-		if(settings.device_connection == device_connection::usb)
-			m_device = usbdevice::create(settings.device_connection_usb_index);
-
-		// Network device
-		else if(settings.device_connection == device_connection::rtltcp)
-			m_device = tcpdevice::create(settings.device_connection_tcp_host.c_str(), static_cast<uint16_t>(settings.device_connection_tcp_port));
-
-		// Unknown device type
-		else throw string_exception("invalid device_connection type specified");
-	}
-
-	// Schedule a task to automatically release the cached device when it's no longer in use
-	m_scheduler.add(RELEASE_DEVICE_TASK, std::chrono::system_clock::now() + std::chrono::seconds(30),
-		&addon::release_device_task, this);
-
-	return m_device;
 }
 
 //---------------------------------------------------------------------------
@@ -506,29 +488,6 @@ std::string addon::rds_standard_to_string(enum rds_standard mode)
 }
 
 //---------------------------------------------------------------------------
-// addon::release_device_task (private)
-//
-// Scheduled task implementation to release the cached rtldevice instance
-//
-// Arguments:
-//
-//	cancel		- Condition variable used to cancel the operation
-
-void addon::release_device_task(scalar_condition<bool> const& /*cancel*/)
-{
-	std::unique_lock<std::mutex> lock(m_device_lock);
-
-	// If there is only one reference against the cached device instance, it's
-	// no longer being actively used.  Release the cached reference so that
-	// a network rtl_tcp server will disconnect, a USB device can be removed, etc
-	if(m_device.use_count() == 1) m_device.reset();
-
-	// If the device is still in use, check back in 30 seconds
-	else m_scheduler.add(RELEASE_DEVICE_TASK, std::chrono::system_clock::now() + std::chrono::seconds(30), 
-		&addon::release_device_task, this);
-}
-
-//---------------------------------------------------------------------------
 // CADDONBASE IMPLEMENTATION
 //---------------------------------------------------------------------------
 
@@ -596,10 +555,6 @@ ADDON_STATUS addon::Create(void)
 				log_error(__func__, ": unable to create/open the channels database ", databasefile, " - ", dbex.what());
 				throw;
 			}
-
-			// Attempt to start the task scheduler
-			try { m_scheduler.start(); } 
-			catch(...) { m_connpool.reset(); throw; }
 		}
 
 		catch(std::exception& ex) { handle_stdexception(__func__, ex); throw; }
@@ -632,13 +587,6 @@ void addon::Destroy(void) noexcept
 		log_info(__func__, ": ", VERSION_PRODUCTNAME_ANSI, " v", VERSION_VERSION3_ANSI, " unloading");
 
 		m_pvrstream.reset();					// Destroy any active stream instance
-		m_scheduler.stop();						// Stop the task scheduler
-		m_scheduler.clear();					// Clear all tasks from the scheduler
-
-		// Check for more than just the cached device reference during shutdown
-		long devicerefs = m_device.use_count();
-		if(devicerefs > 1) log_warning(__func__, ": m_device.use_count = ", m_device.use_count());
-		m_device.reset();
 
 		// Check for more than just the global connection pool reference during shutdown
 		long poolrefs = m_connpool.use_count();
@@ -671,14 +619,6 @@ ADDON_STATUS addon::SetSetting(std::string const& settingName, kodi::CSettingVal
 {
 	std::unique_lock<std::mutex> settings_lock(m_settings_lock);
 
-	// When the device type or properties have changed, any cached device instance must be
-	// released so that the setting can take effect with the next access of the device
-	auto on_device_switch = [&](void) -> void {
-
-		std::unique_lock<std::mutex> lock(m_device_lock);
-		m_device.reset();
-	};
-
 	// For comparison purposes
 	struct settings previous = m_settings;
 
@@ -691,8 +631,6 @@ ADDON_STATUS addon::SetSetting(std::string const& settingName, kodi::CSettingVal
 
 			m_settings.device_connection = value;
 			log_info(__func__, ": setting device_connection changed to ", device_connection_to_string(value).c_str());
-
-			on_device_switch();					// Device settings have changed
 		}
 	}
 
@@ -705,8 +643,6 @@ ADDON_STATUS addon::SetSetting(std::string const& settingName, kodi::CSettingVal
 
 			m_settings.device_connection_usb_index = nvalue;
 			log_info(__func__, ": setting device_connection_usb_index changed to ", m_settings.device_connection_usb_index);
-
-			on_device_switch();					// Device settings have changed
 		}
 	}
 
@@ -719,8 +655,6 @@ ADDON_STATUS addon::SetSetting(std::string const& settingName, kodi::CSettingVal
 
 			m_settings.device_connection_tcp_host = strvalue;
 			log_info(__func__, ": setting device_connection_tcp_host changed to ", strvalue.c_str());
-
-			on_device_switch();					// Device settings have changed
 		}
 	}
 
@@ -733,8 +667,6 @@ ADDON_STATUS addon::SetSetting(std::string const& settingName, kodi::CSettingVal
 
 			m_settings.device_connection_tcp_port = nvalue;
 			log_info(__func__, ": setting device_connection_tcp_port changed to ", m_settings.device_connection_tcp_port);
-
-			on_device_switch();					// Device settings have changed
 		}
 	}
 
@@ -805,8 +737,6 @@ PVR_ERROR addon::CallSettingsMenuHook(kodi::addon::PVRMenuhook const& menuhook)
 
 bool addon::CanSeekStream(void)
 {
-	std::unique_lock<std::mutex> lock(m_pvrstream_lock);
-
 	try { return (m_pvrstream) ? m_pvrstream->canseek() : false; }
 	catch(std::exception& ex) { return handle_stdexception(__func__, ex, false); }
 	catch(...) { return handle_generalexception(__func__, false); }
@@ -823,22 +753,10 @@ bool addon::CanSeekStream(void)
 
 void addon::CloseLiveStream(void)
 {
+	// Prevent race condition with GetSignalStatus()
 	std::unique_lock<std::mutex> lock(m_pvrstream_lock);
 
-	if(!m_pvrstream) return;
-
-	try {
-
-		// Before the stream is closed/reset, (re)schedule the task that would release 
-		// the device itself to occur in the future.  There is a chance that it could 
-		// run between a pair of CloseLiveStream/OpenLiveStream operations (channel change) 
-		// and defeat the entire purpose of caching it in the first place
-		m_scheduler.add(RELEASE_DEVICE_TASK, std::chrono::system_clock::now() + std::chrono::seconds(30),
-			&addon::release_device_task, this);
-			
-		m_pvrstream.reset();				// Release the active PVR stream
-	}
-
+	try { m_pvrstream.reset(); }
 	catch(std::exception& ex) { return handle_stdexception(__func__, ex); } 
 	catch(...) { return handle_generalexception(__func__); }
 }
@@ -872,8 +790,6 @@ PVR_ERROR addon::DeleteChannel(kodi::addon::PVRChannel const& channel)
 
 void addon::DemuxAbort(void)
 {
-	std::unique_lock<std::mutex> lock(m_pvrstream_lock);
-
 	try { if(m_pvrstream) m_pvrstream->demuxabort(); }
 	catch(std::exception& ex) { return handle_stdexception(__func__, ex); }
 	catch(...) { return handle_generalexception(__func__); }
@@ -890,8 +806,6 @@ void addon::DemuxAbort(void)
 
 void addon::DemuxFlush(void)
 {
-	std::unique_lock<std::mutex> lock(m_pvrstream_lock);
-
 	try { if(m_pvrstream) m_pvrstream->demuxflush(); }
 	catch(std::exception& ex) { return handle_stdexception(__func__, ex); } 
 	catch(...) { return handle_generalexception(__func__); }
@@ -908,8 +822,6 @@ void addon::DemuxFlush(void)
 
 DemuxPacket* addon::DemuxRead(void)
 {
-	std::unique_lock<std::mutex> lock(m_pvrstream_lock);
-
 	if(!m_pvrstream) return nullptr;
 
 	// Use an inline lambda to provide the stream an std::function to use to invoke AllocateDemuxPacket()
@@ -939,8 +851,6 @@ DemuxPacket* addon::DemuxRead(void)
 
 void addon::DemuxReset(void)
 {
-	std::unique_lock<std::mutex> lock(m_pvrstream_lock);
-
 	try { if(m_pvrstream) m_pvrstream->demuxreset(); }
 	catch(std::exception& ex) { return handle_stdexception(__func__, ex); }
 	catch(...) { return handle_generalexception(__func__); }
@@ -1154,6 +1064,7 @@ PVR_ERROR addon::GetChannelsAmount(int& amount)
 
 PVR_ERROR addon::GetSignalStatus(int /*channelUid*/, kodi::addon::PVRSignalStatus& signalStatus)
 {
+	// Prevent race condition with OpenLiveStream()/CloseLiveStream()
 	std::unique_lock<std::mutex> lock(m_pvrstream_lock);
 
 	// Kodi may call this function before the stream is open, avoid the error log
@@ -1188,8 +1099,6 @@ PVR_ERROR addon::GetSignalStatus(int /*channelUid*/, kodi::addon::PVRSignalStatu
 
 PVR_ERROR addon::GetStreamProperties(std::vector<kodi::addon::PVRStreamProperties>& properties)
 {
-	std::unique_lock<std::mutex> lock(m_pvrstream_lock);
-
 	if(!m_pvrstream) return PVR_ERROR::PVR_ERROR_FAILED;
 
 	// Enumerate the stream properties as specified by the PVR stream instance
@@ -1248,8 +1157,6 @@ PVR_ERROR addon::GetConnectionString(std::string& connection)
 
 bool addon::IsRealTimeStream(void)
 {
-	std::unique_lock<std::mutex> lock(m_pvrstream_lock);
-
 	try { return (m_pvrstream) ? m_pvrstream->realtime() : false; }
 	catch(std::exception& ex) { return handle_stdexception(__func__, ex, false); }
 	catch(...) { return handle_generalexception(__func__, false); }
@@ -1266,8 +1173,6 @@ bool addon::IsRealTimeStream(void)
 
 int64_t addon::LengthLiveStream(void)
 {
-	std::unique_lock<std::mutex> lock(m_pvrstream_lock);
-
 	try { return (m_pvrstream) ? m_pvrstream->length() : -1; }
 	catch(std::exception& ex) { return handle_stdexception(__func__, ex, -1); }
 	catch(...) { return handle_generalexception(__func__, -1); }
@@ -1284,6 +1189,7 @@ int64_t addon::LengthLiveStream(void)
 
 bool addon::OpenLiveStream(kodi::addon::PVRChannel const& channel)
 {
+	// Prevent race condition with GetSignalStatus()
 	std::unique_lock<std::mutex> lock(m_pvrstream_lock);
 
 	// Create a copy of the current addon settings structure
@@ -1305,7 +1211,7 @@ bool addon::OpenLiveStream(kodi::addon::PVRChannel const& channel)
 		fmprops.outputrate = settings.fmradio_output_samplerate;
 
 		// Create the FM radio stream, accessing the cached RTL-SDR device when possible
-		m_pvrstream = fmstream::create(get_device(settings), channelprops, fmprops);
+		m_pvrstream = fmstream::create(create_device(settings), channelprops, fmprops);
 	}
 
 	// Queue a notification for the user when a live stream cannot be opened, don't just silently log it
@@ -1365,8 +1271,6 @@ PVR_ERROR addon::RenameChannel(kodi::addon::PVRChannel const& channel)
 
 int64_t addon::SeekLiveStream(int64_t position, int whence)
 {
-	std::unique_lock<std::mutex> lock(m_pvrstream_lock);
-
 	try { return (m_pvrstream) ? m_pvrstream->seek(position, whence) : -1; }
 	catch(std::exception& ex) { return handle_stdexception(__func__, ex, -1); }
 	catch(...) { return handle_generalexception(__func__, -1); }

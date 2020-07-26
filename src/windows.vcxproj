@@ -223,7 +223,6 @@
     <ClInclude Include="rtldevice.h" />
     <ClInclude Include="scalar_condition.h" />
     <ClInclude Include="scanner.h" />
-    <ClInclude Include="scheduler.h" />
     <ClInclude Include="sqlite_exception.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="string_exception.h" />
@@ -744,7 +743,6 @@
     </ClCompile>
     <ClCompile Include="rdsdecoder.cpp" />
     <ClCompile Include="scanner.cpp" />
-    <ClCompile Include="scheduler.cpp" />
     <ClCompile Include="sqlite_exception.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>

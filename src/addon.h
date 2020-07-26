@@ -26,12 +26,12 @@
 
 #include <kodi/addon-instance/PVR.h>
 #include <memory>
+#include <mutex>
 
 #include "database.h"
 #include "pvrstream.h"
 #include "pvrtypes.h"
 #include "rtldevice.h"
-#include "scheduler.h"
 
 #pragma warning(push, 4)
 
@@ -210,7 +210,7 @@ private:
 
 	// Device Helpers
 	//
-	std::shared_ptr<rtldevice> get_device(struct settings const& settings);
+	std::unique_ptr<rtldevice> create_device(struct settings const& settings);
 
 	// Exception Helpers
 	//
@@ -237,14 +237,6 @@ private:
 	//
 	enum rds_standard get_regional_rds_standard(enum rds_standard standard) const;
 
-	// Scheduled Tasks
-	//
-	void release_device_task(scalar_condition<bool> const& cancel);
-
-	// Scheduled Task Names
-	//
-	static char const* RELEASE_DEVICE_TASK;
-
 	// Settings Helpers
 	//
 	struct settings copy_settings(void) const;
@@ -254,14 +246,11 @@ private:
 	//-------------------------------------------------------------------------
 	// Member Variables
 
-	std::shared_ptr<connectionpool>		m_connpool;			// Database connection pool
-	std::unique_ptr<pvrstream>			m_pvrstream;		// Active PVR stream instance
-	mutable std::mutex					m_pvrstream_lock;	// Synchronization object
-	std::shared_ptr<rtldevice>			m_device;			// Active RTL-SDR device instance
-	mutable std::mutex					m_device_lock;		// Synchronization object
-	struct settings						m_settings;			// Custom addon settings
-	mutable std::mutex					m_settings_lock;	// Synchronization object
-	scheduler							m_scheduler;		// Task scheduler
+	std::shared_ptr<connectionpool>	m_connpool;				// Database connection pool
+	std::unique_ptr<pvrstream>		m_pvrstream;			// Active PVR stream instance
+	mutable std::mutex				m_pvrstream_lock;		// Synchronization object
+	struct settings					m_settings;				// Custom addon settings
+	mutable std::mutex				m_settings_lock;		// Synchronization object
 };
 
 //-----------------------------------------------------------------------------
