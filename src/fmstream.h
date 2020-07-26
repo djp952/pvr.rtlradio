@@ -200,7 +200,6 @@ private:
 	std::shared_ptr<rtldevice>			m_device;				// RTL-SDR device instance
 	std::unique_ptr<CDemodulator>		m_demodulator;			// CuteSDR demodulator instance
 	std::unique_ptr<CFractResampler>	m_resampler;			// CuteSDR resampler instance
-	bool const							m_decoderds;			// Flag to send decoded RDS data
 	rdsdecoder							m_rdsdecoder;			// RDS decoder instance
 
 	size_t const						m_blocksize;			// Device block size

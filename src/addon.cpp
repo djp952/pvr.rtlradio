@@ -577,7 +577,6 @@ ADDON_STATUS addon::Create(void)
 			m_settings.device_connection_tcp_port = kodi::GetSettingInt("device_connection_tcp_port", 1234);
 
 			// Load the FM Radio settings
-			m_settings.fmradio_enable_rds = kodi::GetSettingBoolean("fmradio_enable_rds", true);
 			m_settings.fmradio_rds_standard = kodi::GetSettingEnum("fmradio_rds_standard", rds_standard::automatic);
 			m_settings.fmradio_output_samplerate = kodi::GetSettingInt("fmradio_output_samplerate", 48000);
 
@@ -736,18 +735,6 @@ ADDON_STATUS addon::SetSetting(std::string const& settingName, kodi::CSettingVal
 			log_info(__func__, ": setting device_connection_tcp_port changed to ", m_settings.device_connection_tcp_port);
 
 			on_device_switch();					// Device settings have changed
-		}
-	}
-
-	// fmradio_enable_rds
-	//
-	else if(settingName == "fmradio_enable_rds") {
-
-		bool bvalue = settingValue.GetBoolean();
-		if(bvalue != m_settings.fmradio_enable_rds) {
-
-			m_settings.fmradio_enable_rds = bvalue;
-			log_info(__func__, ": setting fmradio_enable_rds changed to ", (bvalue) ? "true" : "false");
 		}
 	}
 
@@ -1314,7 +1301,6 @@ bool addon::OpenLiveStream(kodi::addon::PVRChannel const& channel)
 
 		// Set up the FM digital signal processor properties
 		struct fmprops fmprops = {};
-		fmprops.decoderds = settings.fmradio_enable_rds;
 		fmprops.isrbds = (get_regional_rds_standard(settings.fmradio_rds_standard) == rds_standard::rbds);
 		fmprops.outputrate = settings.fmradio_output_samplerate;
 

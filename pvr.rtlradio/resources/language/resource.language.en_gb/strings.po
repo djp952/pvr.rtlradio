@@ -52,9 +52,7 @@ msgctxt "#30105"
 msgid "PCM output sample rate"
 msgstr ""
 
-msgctxt "#30106"
-msgid "Enable Radio Data System (RDS)"
-msgstr ""
+# 30106 unused on Matrix but used on Leia - don't reuse
 
 msgctxt "#30200"
 msgid "Universal Serial Bus (USB)"
@@ -132,7 +130,5 @@ msgctxt "#30505"
 msgid "Specifies the FM digital signal processor PCM output sample rate."
 msgstr ""
 
-msgctxt "#30506"
-msgid "When set to ON detected Radio Data System (RDS) data embedded in the FM signal will be decoded and processed."
-msgstr ""
+# 30506 unused on Matrix but used on Leia - don't reuse
 

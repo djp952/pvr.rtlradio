@@ -91,11 +91,6 @@ struct settings {
 	// The port number of the rtl_tcp host to connect to
 	int device_connection_tcp_port;
 
-	// fmradio_enable_rds
-	//
-	// Enables passing decoded RDS information to Kodi
-	bool fmradio_enable_rds;
-
 	// fmradio_rds_standard
 	//
 	// Specifies the Radio Data System (RDS) standard

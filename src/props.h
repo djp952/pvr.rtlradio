@@ -46,7 +46,6 @@ struct channelprops {
 // Defines properties for the FM digital signal processor
 struct fmprops {
 
-	bool			decoderds;		// Flag if RDS should be decoded or not
 	bool			isrbds;			// Flag if region is RBDS (North America)
 	uint32_t		outputrate;		// Output sample rate, in Hertz
 };
