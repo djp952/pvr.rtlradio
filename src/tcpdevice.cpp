@@ -427,7 +427,7 @@ int tcpdevice::set_gain(int db) const
 	}
 
 	// Attempt to set the gain to the detected nearest gain value
-	struct device_command command = { 0x04, htonl(db) };
+	struct device_command command = { 0x04, htonl(nearest) };
 	int result = send(m_socket, reinterpret_cast<char const*>(&command), sizeof(struct device_command), 0);
 	if(result != sizeof(struct device_command)) throw string_exception("send() failed");
 
