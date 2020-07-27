@@ -32,11 +32,6 @@
 
 #pragma warning(push, 4)
 
-// fmstream::DEFAULT_DEVICE_BLOCK_SIZE
-//
-// Default device block size
-size_t const fmstream::DEFAULT_DEVICE_BLOCK_SIZE = (16 KiB);
-
 // fmstream::DEFAULT_DEVICE_SAMPLE_RATE
 //
 // Default device sample rate
@@ -45,7 +40,7 @@ uint32_t const fmstream::DEFAULT_DEVICE_SAMPLE_RATE = (1024 KHz);
 // fmstream::DEFAULT_RINGBUFFER_SIZE
 //
 // Default ring buffer size
-size_t const fmstream::DEFAULT_RINGBUFFER_SIZE = (8 MiB);
+size_t const fmstream::DEFAULT_RINGBUFFER_SIZE = (4 MiB);
 
 // fmstream::STREAM_ID_AUDIO
 //
@@ -67,8 +62,8 @@ int const fmstream::STREAM_ID_UECP = 2;
 //	fmprops			- FM digital signal processor properties
 
 fmstream::fmstream(std::unique_ptr<rtldevice> device, struct channelprops const& channelprops, struct fmprops const& fmprops) :
-	m_device(std::move(device)), m_rdsdecoder(fmprops.isrbds), m_blocksize(align::up(DEFAULT_DEVICE_BLOCK_SIZE, 16 KiB)), 
-	m_samplerate(DEFAULT_DEVICE_SAMPLE_RATE), m_pcmsamplerate(fmprops.outputrate), m_buffersize(align::up(DEFAULT_RINGBUFFER_SIZE, 16 KiB))
+	m_device(std::move(device)), m_rdsdecoder(fmprops.isrbds), m_samplerate(DEFAULT_DEVICE_SAMPLE_RATE), 
+	m_pcmsamplerate(fmprops.outputrate), m_buffersize(align::up(DEFAULT_RINGBUFFER_SIZE, 16 KiB))
 {
 	// The only allowable output sample rates for this stream are 44100Hz and 48000Hz
 	if((m_pcmsamplerate != 44100) && (m_pcmsamplerate != 48000))
@@ -124,6 +119,12 @@ fmstream::fmstream(std::unique_ptr<rtldevice> device, struct channelprops const&
 	// Initialize the output resampler
 	m_resampler = std::unique_ptr<CFractResampler>(new CFractResampler());
 	m_resampler->Init(m_demodulator->GetInputBufferLimit());
+
+	// Set the device read block size
+	m_blocksize = (m_demodulator->GetInputBufferLimit() * 2);
+	
+	// Allocate the I/Q sample buffer
+	m_samples = std::unique_ptr<TYPECPX[]>(new TYPECPX[m_demodulator->GetInputBufferLimit()]);
 
 	// Create a worker thread on which to perform the transfer operations
 	scalar_condition<bool> started{ false };
@@ -286,14 +287,13 @@ DemuxPacket* fmstream::demuxread(std::function<DemuxPacket*(int)> const& allocat
 	available = std::min(available, minreadsize);
 
 	// Create a heap array in which to hold the converted I/Q samples
-	size_t numsamples = (available / 2);
-	std::unique_ptr<TYPECPX[]> samples(new TYPECPX[numsamples]);
+	size_t const numsamples = (available / 2);
 
 	for(size_t index = 0; index < numsamples; index++) {
 
 		// The demodulator expects the I/Q samples in the range of -32767.0 through +32767.0
 		// 256.996 = (32767.0 / 127.5) = 256.9960784313725
-		samples[index] = {
+		m_samples[index] = {
 
 #ifdef FMDSP_USE_DOUBLE_PRECISION
 			(static_cast<TYPEREAL>(m_buffer[tail]) - 127.5) * 256.996,			// I
@@ -312,7 +312,7 @@ DemuxPacket* fmstream::demuxread(std::function<DemuxPacket*(int)> const& allocat
 	m_buffertail.store(tail);
 
 	// Process the I/Q data, the original samples buffer can be reused/overwritten as it's processed
-	int audiopackets = m_demodulator->ProcessData(static_cast<int>(numsamples), samples.get(), samples.get());
+	int audiopackets = m_demodulator->ProcessData(static_cast<int>(numsamples), m_samples.get(), m_samples.get());
 
 	// Process any RDS group data that was collected during demodulation
 	tRDS_GROUPS rdsgroup = {};
@@ -325,7 +325,7 @@ DemuxPacket* fmstream::demuxread(std::function<DemuxPacket*(int)> const& allocat
 
 	// Resample the audio data directly into the allocated packet buffer
 	int stereopackets = m_resampler->Resample(audiopackets, m_demodulator->GetOutputRate() / m_pcmsamplerate, 
-		samples.get(), reinterpret_cast<TYPESTEREO16*>(packet->pData));
+		m_samples.get(), reinterpret_cast<TYPESTEREO16*>(packet->pData));
 
 	// Calcuate the duration of the demultiplexer packet, in microseconds
 	double duration = ((stereopackets / static_cast<double>(m_pcmsamplerate)) US);
@@ -589,13 +589,13 @@ void fmstream::transfer(scalar_condition<bool>& started)
 			// Calculate the total amount of available free space in the ring buffer
 			available = (head < tail) ? tail - head : (m_buffersize - head) + tail;
 
-		} while((available < DEFAULT_DEVICE_BLOCK_SIZE) && (m_stop.wait_until_equals(true, 10) == false));
+		} while((available < m_blocksize) && (m_stop.wait_until_equals(true, 10) == false));
 
 		// If the wait loop was broken due to a stop signal, terminate the thread
-		if(available < DEFAULT_DEVICE_BLOCK_SIZE) break;
+		if(available < m_blocksize) break;
 
 		// Transfer the available data from the device into the ring buffer
-		size_t count = DEFAULT_DEVICE_BLOCK_SIZE;
+		size_t count = m_blocksize;
 		while((count > 0) && (m_stop.test(false) == true)) {
 
 			// If the head is behind the tail linearly, take the data between them otherwise 
