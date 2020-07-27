@@ -152,6 +152,11 @@ private:
 	fmstream(fmstream const&) = delete;
 	fmstream& operator=(fmstream const&) = delete;
 
+	// DEFAULT_DEVICE_BLOCK_SIZE
+	//
+	// Default device block size
+	static size_t const DEFAULT_DEVICE_BLOCK_SIZE;
+
 	// DEFAULT_DEVICE_SAMPLE_RATE
 	//
 	// Default device sample rate
@@ -191,9 +196,8 @@ private:
 	std::unique_ptr<CDemodulator>		m_demodulator;			// CuteSDR demodulator instance
 	std::unique_ptr<CFractResampler>	m_resampler;			// CuteSDR resampler instance
 	rdsdecoder							m_rdsdecoder;			// RDS decoder instance
-	std::unique_ptr<TYPECPX[]>			m_samples;				// I/Q sample buffer
 
-	size_t								m_blocksize;			// Device block size
+	size_t const						m_blocksize;			// Device block size
 	uint32_t const						m_samplerate;			// Device sample rate
 	uint32_t const						m_pcmsamplerate;		// Output sample rate
 	double								m_pts{ 1 US };			// Current program time stamp
