@@ -175,6 +175,21 @@ public:
 	// Obtain the length of a live stream
 	int64_t LengthLiveStream(void) override;
 
+	// OpenDialogChannelAdd
+	//
+	// Show the dialog to add a channel on the backend
+	PVR_ERROR OpenDialogChannelAdd(kodi::addon::PVRChannel const& channel) override;
+
+	// OpenDialogChannelScan
+	//
+	// Show the channel scan dialog
+	PVR_ERROR OpenDialogChannelScan(void) override;
+
+	// OpenDialogChannelSettings
+	//
+	// Show the channel settings dialog
+	PVR_ERROR OpenDialogChannelSettings(kodi::addon::PVRChannel const& channel) override;
+
 	// OpenLiveStream
 	//
 	// Open a live stream on the backend

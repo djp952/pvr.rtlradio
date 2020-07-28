@@ -20,7 +20,7 @@
         <top>220</top>
         <width>290</width>
         <height>100</height>
-        <label>$ADDON[pvr.rtlradio 30400]</label>
+        <label>$ADDON[pvr.rtlradio 30300]</label>
         <align>center</align>
         <onleft>6</onleft>
         <onright>37</onright>

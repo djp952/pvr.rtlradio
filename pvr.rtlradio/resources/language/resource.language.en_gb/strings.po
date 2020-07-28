@@ -114,6 +114,10 @@ msgctxt "#30404"
 msgid "Select channel import file"
 msgstr ""
 
+msgctxt "#30405"
+msgid "RTL-SDR device in use"
+msgstr ""
+
 msgctxt "#30500"
 msgid "Specifies the RTL-SDR device connection type. When set to Universal Serial Bus (USB), the device must be connected locally to this system. When set to Network (rtl_tcp), the device must be attached to a system running the rtl_tcp server application."
 msgstr ""

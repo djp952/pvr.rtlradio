@@ -38,6 +38,9 @@
 #include <android/log.h>
 #endif
 
+#include "channeladd.h"
+#include "channelscan.h"
+#include "channelsettings.h"
 #include "dbtypes.h"
 #include "fmstream.h"
 #include "string_exception.h"
@@ -920,6 +923,8 @@ PVR_ERROR addon::GetCapabilities(kodi::addon::PVRCapabilities& capabilities)
 {
 	capabilities.SetSupportsRadio(true);
 	capabilities.SetSupportsChannelGroups(true);
+	capabilities.SetSupportsChannelScan(true);
+	capabilities.SetSupportsChannelSettings(true);
 	capabilities.SetHandlesInputStream(true);
 	capabilities.SetHandlesDemuxing(true);
 
@@ -1210,6 +1215,78 @@ int64_t addon::LengthLiveStream(void)
 	try { return (m_pvrstream) ? m_pvrstream->length() : -1; }
 	catch(std::exception& ex) { return handle_stdexception(__func__, ex, -1); }
 	catch(...) { return handle_generalexception(__func__, -1); }
+}
+
+//-----------------------------------------------------------------------------
+// addon::OpenDialogChannelAdd (CInstancePVRClient)
+//
+// Show the dialog to add a channel on the backend
+//
+// Arguments:
+//
+//	channel		- The channel to add
+
+PVR_ERROR addon::OpenDialogChannelAdd(kodi::addon::PVRChannel const& /*channel*/)
+{
+	channeladd					dialog;				// Dialog box instance
+
+	//
+	// TODO: Stub implementation
+	//
+
+	try { dialog.DoModal(); }
+	catch(std::exception& ex) { return handle_stdexception(__func__, ex, PVR_ERROR::PVR_ERROR_FAILED); }
+	catch(...) { return handle_generalexception(__func__, PVR_ERROR::PVR_ERROR_FAILED); }
+
+	return PVR_ERROR::PVR_ERROR_NO_ERROR;
+}
+
+//-----------------------------------------------------------------------------
+// addon::OpenDialogChannelScan (CInstancePVRClient)
+//
+// Show the channel scan dialog
+//
+// Arguments:
+//
+//	NONE
+
+PVR_ERROR addon::OpenDialogChannelScan(void)
+{
+	channelscan					dialog;				// Dialog box instance
+
+	//
+	// TODO: Stub implementation
+	//
+
+	try { dialog.DoModal(); }
+	catch(std::exception& ex) { return handle_stdexception(__func__, ex, PVR_ERROR::PVR_ERROR_FAILED); }
+	catch(...) { return handle_generalexception(__func__, PVR_ERROR::PVR_ERROR_FAILED); }
+
+	return PVR_ERROR::PVR_ERROR_NO_ERROR;
+}
+
+//-----------------------------------------------------------------------------
+// addon::OpenDialogChannelSettings (CInstancePVRClient)
+//
+// Show the channel settings dialog
+//
+// Arguments:
+//
+//	channel		- The channel to show the dialog for
+
+PVR_ERROR addon::OpenDialogChannelSettings(kodi::addon::PVRChannel const& /*channel*/)
+{
+	channelsettings				dialog;				// Dialog box instance
+
+	//
+	// TODO: Stub implementation
+	//
+
+	try { dialog.DoModal(); }
+	catch(std::exception& ex) { return handle_stdexception(__func__, ex, PVR_ERROR::PVR_ERROR_FAILED); }
+	catch(...) { return handle_generalexception(__func__, PVR_ERROR::PVR_ERROR_FAILED); }
+
+	return PVR_ERROR::PVR_ERROR_NO_ERROR;
 }
 
 //-----------------------------------------------------------------------------

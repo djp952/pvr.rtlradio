@@ -92,10 +92,10 @@ LOCAL_SRC_FILES := \
     src/fmdsp/smeter.cpp \
     src/fmdsp/wfmdemod.cpp \
     src/addon.cpp \
+    src/channeladd.cpp \
+    src/channelscan.cpp \
+    src/channelsettings.cpp \
     src/database.cpp \
-    src/dialogchanneladd.cpp \
-    src/dialogchannelscan.cpp \
-    src/dialogchannelsettings.cpp \
     src/fmstream.cpp \
     src/libusb_exception.cpp \
     src/rdsdecoder.cpp \

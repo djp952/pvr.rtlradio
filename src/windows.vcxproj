@@ -197,9 +197,9 @@
     <ClInclude Include="compat\pthread.h" />
     <ClInclude Include="database.h" />
     <ClInclude Include="dbtypes.h" />
-    <ClInclude Include="dialogchanneladd.h" />
-    <ClInclude Include="dialogchannelscan.h" />
-    <ClInclude Include="dialogchannelsettings.h" />
+    <ClInclude Include="channeladd.h" />
+    <ClInclude Include="channelscan.h" />
+    <ClInclude Include="channelsettings.h" />
     <ClInclude Include="fmdsp\agc.h" />
     <ClInclude Include="fmdsp\datamodifier.h" />
     <ClInclude Include="fmdsp\datatypes.h" />
@@ -621,9 +621,9 @@
     </ClCompile>
     <ClCompile Include="addon.cpp" />
     <ClCompile Include="database.cpp" />
-    <ClCompile Include="dialogchanneladd.cpp" />
-    <ClCompile Include="dialogchannelscan.cpp" />
-    <ClCompile Include="dialogchannelsettings.cpp" />
+    <ClCompile Include="channeladd.cpp" />
+    <ClCompile Include="channelscan.cpp" />
+    <ClCompile Include="channelsettings.cpp" />
     <ClCompile Include="fmdsp\agc.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
