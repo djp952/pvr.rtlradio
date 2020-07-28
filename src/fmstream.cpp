@@ -45,7 +45,7 @@ uint32_t const fmstream::DEFAULT_DEVICE_SAMPLE_RATE = (1024 KHz);
 // fmstream::DEFAULT_RINGBUFFER_SIZE
 //
 // Default ring buffer size
-size_t const fmstream::DEFAULT_RINGBUFFER_SIZE = (8 MiB);
+size_t const fmstream::DEFAULT_RINGBUFFER_SIZE = (4 MiB);
 
 // fmstream::STREAM_ID_AUDIO
 //
