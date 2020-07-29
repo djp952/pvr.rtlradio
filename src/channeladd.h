@@ -37,7 +37,7 @@
 //
 // Implements the "Channel Settings" dialog
 
-class channeladd : public kodi::gui::CWindow
+class ATTRIBUTE_HIDDEN channeladd : public kodi::gui::CWindow
 {
 public:
 
