@@ -24,13 +24,23 @@
 #define __CHANNELSETTINGS_H_
 #pragma once
 
+#include <kodi/gui/controls/Button.h>
+#include <kodi/gui/controls/Edit.h>
+#include <kodi/gui/controls/Image.h>
+#include <kodi/gui/controls/RadioButton.h>
+#include <kodi/gui/controls/SettingsSlider.h>
 #include <kodi/gui/Window.h>
 #include <memory>
 #include <vector>
 #include <string>
 #include <utility>
 
+#include "props.h"
+#include "scanner.h"
+
 #pragma warning(push, 4)
+
+using namespace kodi::gui::controls;
 
 //---------------------------------------------------------------------------
 // Class channelsettings
@@ -41,30 +51,40 @@ class ATTRIBUTE_HIDDEN channelsettings : public kodi::gui::CWindow
 {
 public:
 
-	// Instance Constructor
-	//
-	channelsettings();
-
 	// Destructor
 	//
 	virtual ~channelsettings();
-
+	
 	//-----------------------------------------------------------------------
 	// Member Functions
+
+	// create (static)
+	//
+	// Factory method, creates a new scanner instance
+	static std::unique_ptr<channelsettings> create(std::unique_ptr<scanner> scanner, struct channelprops const& channelprops);
+
+	// get_channel_properties
+	//
+	// Gets the updated channel properties from the dialog box
+	void get_channel_properties(struct channelprops& channelprops) const;
+
+	// get_dialog_result
+	//
+	// Gets the result code from the dialog box
+	bool get_dialog_result(void) const;
 
 private:
 
 	channelsettings(channelsettings const&) = delete;
 	channelsettings& operator=(channelsettings const&) = delete;
 
-	//-------------------------------------------------------------------------
-	// Private Member Functions
-
-	// GetContextButtons
+	// Instance Constructor
 	//
-	// Get context menu buttons for list entry
-	void GetContextButtons(int itemNumber, std::vector<std::pair<unsigned int, std::string>>& buttons) override;
-		
+	channelsettings(std::unique_ptr<scanner> scanner, struct channelprops const& channelprops);
+
+	//-------------------------------------------------------------------------
+	// CWindow Implementation
+
 	// OnAction
 	//
 	// Receives action codes that are sent to this window
@@ -75,20 +95,54 @@ private:
 	// Receives click event notifications for a control
 	bool OnClick(int controlId) override;
 
-	// OnContextButton
-	//
-	// Called after selection in context menu
-	bool OnContextButton(int itemNumber, unsigned int button) override;
-		
-	// OnFocus
-	//
-	// Receives focus event notifications for a control
-	bool OnFocus(int controlId) override;
-
 	// OnInit
 	//
 	// Called to initialize the window object
 	bool OnInit(void) override;
+
+	//-------------------------------------------------------------------------
+	// Private Member Functions
+
+	// gain_to_percent
+	//
+	// Converts a manual gain value into a percentage
+	int gain_to_percent(int gain) const;
+
+	// nearest_valid_gain
+	//
+	// Gets the closest valid value for a manual gain setting
+	int nearest_valid_gain(int gain) const;
+
+	// percent_to_gain
+	//
+	// Converts a percentage into a manual gain value
+	int percent_to_gain(int percent) const;
+
+	// update_signal_meter
+	//
+	// Updates the state of the signal meter
+	void update_signal_meter(void) const;
+
+	//-------------------------------------------------------------------------
+	// Member Variables
+
+	bool								m_result = false;		// Dialog result
+	std::unique_ptr<scanner> const		m_scanner;				// Scanner instance
+	struct channelprops					m_channelprops;			// Channel properties
+	std::vector<int>					m_manualgains;			// Manual gain values
+
+	// CONTROLS
+	//
+	std::unique_ptr<CEdit>				m_edit_frequency;		// Frequency
+	std::unique_ptr<CEdit>				m_edit_channelname;		// Channel name
+	std::unique_ptr<CButton>			m_button_channelicon;	// Channel icon
+	std::unique_ptr<CImage>				m_image_channelicon;	// Channel icon
+	std::unique_ptr<CRadioButton>		m_radio_autogain;		// Automatic gain
+	std::unique_ptr<CSettingsSlider>	m_slider_manualgain;	// Manual gain
+	std::unique_ptr<CImage>				m_image_signalmeter;	// Signal meter
+	std::unique_ptr<CEdit>				m_edit_signalgain;		// Active gain
+	std::unique_ptr<CEdit>				m_edit_signalpeak;		// Active peak
+	std::unique_ptr<CEdit>				m_edit_signalsnr;		// Active SNR
 };
 
 //-----------------------------------------------------------------------------

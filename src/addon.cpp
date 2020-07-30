@@ -39,10 +39,10 @@
 #endif
 
 #include "channeladd.h"
-#include "channelscan.h"
 #include "channelsettings.h"
 #include "dbtypes.h"
 #include "fmstream.h"
+#include "scanner.h"
 #include "string_exception.h"
 #include "sqlite_exception.h"
 #include "tcpdevice.h"
@@ -340,10 +340,13 @@ void addon::menuhook_clearchannels(void)
 
 	catch(std::exception& ex) {
 
-		// Inform the user that the operation failed, and re-throw the exception with this function name
+		// Log the error, inform the user that the operation failed, and re-throw the exception with this function name
+		handle_stdexception(__func__, ex);
 		kodi::gui::dialogs::OK::ShowAndGetInput(kodi::GetLocalizedString(30402), "An error occurred clearing the channel data:", "", ex.what());
 		throw string_exception(__func__, ": ", ex.what());
 	}
+
+	catch(...) { handle_generalexception(__func__); }
 }
 
 //---------------------------------------------------------------------------
@@ -402,10 +405,13 @@ void addon::menuhook_exportchannels(void)
 
 		catch(std::exception& ex) {
 
-			// Inform the user that the operation failed, and re-throw the exception with this function name
+			// Log the error, inform the user that the operation failed, and re-throw the exception with this function name
+			handle_stdexception(__func__, ex);
 			kodi::gui::dialogs::OK::ShowAndGetInput(kodi::GetLocalizedString(30401), "An error occurred exporting the channel data:", "", ex.what());
 			throw string_exception(__func__, ": ", ex.what());
 		}
+		
+		catch(...) { handle_generalexception(__func__); }
 	}
 }
 
@@ -462,10 +468,13 @@ void addon::menuhook_importchannels(void)
 
 		catch(std::exception& ex) {
 
-			// Inform the user that the operation failed, and re-throw the exception with this function name
+			// Log the error, inform the user that the operation failed, and re-throw the exception with this function name
+			handle_stdexception(__func__, ex);
 			kodi::gui::dialogs::OK::ShowAndGetInput(kodi::GetLocalizedString(30400), "An error occurred importing the channel data:", "", ex.what());
 			throw string_exception(__func__, ": ", ex.what());
 		}
+
+		catch(...) { handle_generalexception(__func__); }
 	}
 }
 
@@ -923,7 +932,6 @@ PVR_ERROR addon::GetCapabilities(kodi::addon::PVRCapabilities& capabilities)
 {
 	capabilities.SetSupportsRadio(true);
 	capabilities.SetSupportsChannelGroups(true);
-	capabilities.SetSupportsChannelScan(true);
 	capabilities.SetSupportsChannelSettings(true);
 	capabilities.SetHandlesInputStream(true);
 	capabilities.SetHandlesDemuxing(true);
@@ -1252,17 +1260,7 @@ PVR_ERROR addon::OpenDialogChannelAdd(kodi::addon::PVRChannel const& /*channel*/
 
 PVR_ERROR addon::OpenDialogChannelScan(void)
 {
-	channelscan					dialog;				// Dialog box instance
-
-	//
-	// TODO: Stub implementation
-	//
-
-	try { dialog.DoModal(); }
-	catch(std::exception& ex) { return handle_stdexception(__func__, ex, PVR_ERROR::PVR_ERROR_FAILED); }
-	catch(...) { return handle_generalexception(__func__, PVR_ERROR::PVR_ERROR_FAILED); }
-
-	return PVR_ERROR::PVR_ERROR_NO_ERROR;
+	return PVR_ERROR::PVR_ERROR_NOT_IMPLEMENTED;
 }
 
 //-----------------------------------------------------------------------------
@@ -1274,16 +1272,59 @@ PVR_ERROR addon::OpenDialogChannelScan(void)
 //
 //	channel		- The channel to show the dialog for
 
-PVR_ERROR addon::OpenDialogChannelSettings(kodi::addon::PVRChannel const& /*channel*/)
+PVR_ERROR addon::OpenDialogChannelSettings(kodi::addon::PVRChannel const& channel)
 {
-	channelsettings				dialog;				// Dialog box instance
+	// Prevent manipulation of the PVR stream (OpenLiveStream/CloseLiveStream)
+	std::unique_lock<std::mutex> lock(m_pvrstream_lock);
 
-	//
-	// TODO: Stub implementation
-	//
+	// The channel settings dialog can't be shown when there is an active stream
+	if(m_pvrstream) {
 
-	try { dialog.DoModal(); }
-	catch(std::exception& ex) { return handle_stdexception(__func__, ex, PVR_ERROR::PVR_ERROR_FAILED); }
+		// TODO: This message is terrible
+		kodi::gui::dialogs::OK::ShowAndGetInput(kodi::GetLocalizedString(30405), "Modifying PVR Radio channel settings requires "
+			"exclusive access to the connected RTL-SDR tuner device.", "", "Active playback of PVR Radio streams must be stopped before continuing.");
+
+		return PVR_ERROR::PVR_ERROR_NO_ERROR;
+	}
+
+	// Create a copy of the current addon settings structure
+	struct settings settings = copy_settings();
+
+	try {
+
+		// Get the properties of the channel to be manipulated
+		struct channelprops channelprops = {};
+		if(!get_channel_properties(connectionpool::handle(m_connpool), channel.GetUniqueId(), channelprops))
+			throw string_exception("Unable to retrieve properties for channel ", channel.GetChannelName().c_str());
+
+		// Attempt to create the channel scanner instance for the dialog box to use
+		bool isrbds = (get_regional_rds_standard(settings.fmradio_rds_standard) == rds_standard::rbds);
+		std::unique_ptr<scanner> scanner = scanner::create(create_device(settings), isrbds);
+
+		// Create and initialize the dialog box instance
+		std::unique_ptr<channelsettings> dialog = channelsettings::create(std::move(scanner), channelprops);
+		dialog->DoModal();
+
+		if(dialog->get_dialog_result()) {
+
+			// Retrieve the updated channel properties from the dialog box and persist them
+			dialog->get_channel_properties(channelprops);
+			update_channel_properties(connectionpool::handle(m_connpool), channel.GetUniqueId(), channelprops);
+
+			// Trigger a PVR channel update in the event the channel name or logo changed
+			TriggerChannelUpdate();
+			TriggerChannelGroupsUpdate();
+		}
+	}
+
+	catch(std::exception& ex) {
+
+		// Log the error and inform the user that the operation failed, do not return an error code
+		handle_stdexception(__func__, ex);
+		kodi::gui::dialogs::OK::ShowAndGetInput(kodi::GetLocalizedString(30407), "An error occurred displaying the "
+			"channel settings dialog:", "", ex.what());
+	}
+
 	catch(...) { return handle_generalexception(__func__, PVR_ERROR::PVR_ERROR_FAILED); }
 
 	return PVR_ERROR::PVR_ERROR_NO_ERROR;

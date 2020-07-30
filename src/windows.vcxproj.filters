@@ -222,9 +222,6 @@
     <ClInclude Include="channelsettings.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="channelscan.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="channeladd.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -354,9 +351,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="channeladd.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="channelscan.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

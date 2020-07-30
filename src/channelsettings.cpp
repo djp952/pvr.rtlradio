@@ -23,17 +23,40 @@
 #include "stdafx.h"
 #include "channelsettings.h"
 
+#include <kodi/General.h>
+#include <kodi/gui/dialogs/FileBrowser.h>
+
 #pragma warning(push, 4)
 
+// Control Identifiers
+//
+static const int CONTROL_BUTTON_OK				= 100;
+static const int CONTROL_BUTTON_CANCEL			= 101;
+static const int CONTROL_EDIT_FREQUENCY			= 200;
+static const int CONTROL_EDIT_CHANNELNAME		= 201;
+static const int CONTROL_BUTTON_CHANNELICON		= 202;
+static const int CONTROL_IMAGE_CHANNELICON		= 203;
+static const int CONTROL_RADIO_AUTOMATICGAIN	= 204;
+static const int CONTROL_SLIDER_MANUALGAIN		= 205;
+static const int CONTROL_IMAGE_SIGNALMETER		= 206;
+static const int CONTROL_EDIT_METERGAIN			= 207;
+static const int CONTROL_EDIT_METERPEAK			= 208;
+static const int CONTROL_EDIT_METERSNR			= 209;
+
 //---------------------------------------------------------------------------
-// channelsettings Constructor
+// channelsettings Constructor (private)
 //
 // Arguments:
 //
-//	NONE
+//	channelprops	- Channel properties
+//	scanner			- Scanner instance
 
-channelsettings::channelsettings() : kodi::gui::CWindow("channelsettings.xml", "skin.estuary", true)
+channelsettings::channelsettings(std::unique_ptr<scanner> scanner, struct channelprops const& channelprops) :
+	kodi::gui::CWindow("channelsettings.xml", "skin.estuary", true), m_scanner(std::move(scanner)), 
+	m_channelprops(channelprops)	
 {
+	// Get the vector<> of valid manual gain values for the attached device
+	m_scanner->get_valid_manual_gains(m_manualgains);
 }
 
 //---------------------------------------------------------------------------
@@ -41,25 +64,158 @@ channelsettings::channelsettings() : kodi::gui::CWindow("channelsettings.xml", "
 
 channelsettings::~channelsettings()
 {
+	// Stop the channel scanner
+	m_scanner->stop();
 }
 
 //---------------------------------------------------------------------------
-// channelsettings::GetContextButtons (private)
+// channelsettings::create (static)
 //
-// Get context menu buttons for list entry
+// Factory method, creates a new channelsettings instance
 //
 // Arguments:
 //
-//	itemNumber	- Selected list item entry
-//	buttons		- List of context menus to be added
+//	channelprops	- Channel properties
+//	scanner			- Scanner instance
 
-void channelsettings::GetContextButtons(int itemNumber, std::vector<std::pair<unsigned int, std::string>>& buttons)
+std::unique_ptr<channelsettings> channelsettings::create(std::unique_ptr<scanner> scanner, struct channelprops const& channelprops)
 {
-	return kodi::gui::CWindow::GetContextButtons(itemNumber, buttons);
+	return std::unique_ptr<channelsettings>(new channelsettings(std::move(scanner), channelprops));
 }
 
 //---------------------------------------------------------------------------
-// channelsettings::OnAction (private)
+// channelsettings::gain_to_percent (private)
+//
+// Converts a manual gain value into a percentage
+//
+// Arguments:
+//
+//	gain		- Gain to convert
+
+int channelsettings::gain_to_percent(int gain) const
+{
+	if(m_manualgains.empty()) return 0;
+
+	// Convert the gain into something that's valid for the tuner
+	gain = nearest_valid_gain(gain);
+
+	// Use the index within the gain table to generate the percentage
+	for(size_t index = 0; index < m_manualgains.size(); index++) {
+
+		if(gain == m_manualgains[index]) return static_cast<int>((index * 100) / (m_manualgains.size() - 1));
+	}
+
+	return 0;
+}
+
+//---------------------------------------------------------------------------
+// channelsettings::get_channel_properties
+//
+// Gets the updated channel properties from the dialog box
+//
+// Arguments:
+//
+//	channelprops	- Structure to receive the updated channel properties
+
+void channelsettings::get_channel_properties(struct channelprops& channelprops) const
+{
+	channelprops = m_channelprops;
+}
+
+//---------------------------------------------------------------------------
+// channelsettings::get_dialog_result
+//
+// Gets the result code from the dialog box
+//
+// Arguments:
+//
+//	NONE
+
+bool channelsettings::get_dialog_result(void) const
+{
+	return m_result;
+}
+
+//---------------------------------------------------------------------------
+// channelsettings::nearest_valid_gain (private)
+//
+// Gets the closest valid value for a manual gain setting
+//
+// Arguments:
+//
+//	gain		- Gain to adjust
+
+int channelsettings::nearest_valid_gain(int gain) const
+{
+	if(m_manualgains.empty()) return 0;
+
+	// Select the gain value that's closest to what has been requested
+	int nearest = m_manualgains[0];
+	for(size_t index = 0; index < m_manualgains.size(); index++) {
+
+		if(std::abs(gain - m_manualgains[index]) < std::abs(gain - nearest)) nearest = m_manualgains[index];
+	}
+
+	return nearest;
+}
+
+//---------------------------------------------------------------------------
+// channelsettings::percent_to_gain (private)
+//
+// Converts a percentage into a manual gain value
+//
+// Arguments:
+//
+//	percent		- Percentage to convert
+
+int channelsettings::percent_to_gain(int percent) const
+{
+	if(m_manualgains.empty()) return 0;
+
+	if(percent == 0) return m_manualgains.front();
+	else if(percent == 100) return m_manualgains.back();
+
+	return m_manualgains[(percent * m_manualgains.size()) / 100];
+}
+
+//---------------------------------------------------------------------------
+// channelsettings::update_signal_meter (private)
+//
+// Updates the state of the signal meter control
+//
+// Arguments:
+//
+//	NONE
+
+void channelsettings::update_signal_meter(void) const
+{
+	// Gain
+	//
+	if(!m_channelprops.autogain) {
+
+		// Convert the gain value from tenths of a decibel into XX.X dB format
+		char dbstr[64];
+		snprintf(dbstr, std::extent<decltype(dbstr)>::value, "%.1f dB", m_channelprops.manualgain / 10.0);
+		m_edit_signalgain->SetText(dbstr);
+	}
+
+	else m_edit_signalgain->SetText("Auto");
+
+	// Signal Strength
+	//
+	m_edit_signalpeak->SetText("N/A");
+
+	// Signal-to-noise
+	//
+	m_edit_signalsnr->SetText("N/A");
+}
+
+//---------------------------------------------------------------------------
+// CWINDOW IMPLEMENTATION
+//---------------------------------------------------------------------------
+
+//---------------------------------------------------------------------------
+// channelsettings::OnAction (CWindow)
 //
 // Receives action codes that are sent to this window
 //
@@ -75,7 +231,7 @@ bool channelsettings::OnAction(int actionId, uint32_t buttoncode, wchar_t unicod
 }
 
 //---------------------------------------------------------------------------
-// channelsettings::OnClick (private)
+// channelsettings::OnClick (CWindow)
 //
 // Receives click event notifications for a control
 //
@@ -83,40 +239,43 @@ bool channelsettings::OnAction(int actionId, uint32_t buttoncode, wchar_t unicod
 
 bool channelsettings::OnClick(int controlId)
 {
+	switch(controlId) {
+
+		case CONTROL_EDIT_CHANNELNAME:
+			m_channelprops.name = m_edit_channelname->GetText();
+			break;
+
+		case CONTROL_BUTTON_CHANNELICON:
+			kodi::gui::dialogs::FileBrowser::ShowAndGetImage("local|network|pictures", kodi::GetLocalizedString(30406), m_channelprops.logourl);
+			m_image_channelicon->SetFileName(m_channelprops.logourl, false);
+			return true;
+
+		case CONTROL_RADIO_AUTOMATICGAIN:
+			m_channelprops.autogain = m_radio_autogain->IsSelected();
+			m_slider_manualgain->SetEnabled(!m_channelprops.autogain);
+			update_signal_meter();
+			return true;
+
+		case CONTROL_SLIDER_MANUALGAIN:
+			m_channelprops.manualgain = percent_to_gain(static_cast<int>(m_slider_manualgain->GetPercentage()));
+			update_signal_meter();
+			return true;
+
+		case CONTROL_BUTTON_OK:
+			m_result = true;
+			Close();
+			return true;
+
+		case CONTROL_BUTTON_CANCEL:
+			Close();
+			return true;
+	}
+
 	return kodi::gui::CWindow::OnClick(controlId);
 }
 
 //---------------------------------------------------------------------------
-// channelsettings::OnContextButton (private)
-//
-// Called after selection in context menu
-//
-// Arguments:
-//
-//	itemNumber	- Selected list item entry
-//	button		- The pressed button id
-
-bool channelsettings::OnContextButton(int itemNumber, unsigned int button)
-{
-	return kodi::gui::CWindow::OnContextButton(itemNumber, button);
-}
-
-//---------------------------------------------------------------------------
-// channelsettings::OnFocus (private)
-//
-// Receives focus event notifications for a control
-//
-// Arguments:
-//
-//	controlId		- GUI control identifier
-
-bool channelsettings::OnFocus(int controlId)
-{
-	return kodi::gui::CWindow::OnFocus(controlId);
-}
-
-//---------------------------------------------------------------------------
-// channelsettings::OnInit (private)
+// channelsettings::OnInit (CWindow)
 //
 // Called to initialize the window object
 //
@@ -126,6 +285,43 @@ bool channelsettings::OnFocus(int controlId)
 
 bool channelsettings::OnInit(void)
 {
+	try {
+
+		// Get references to all of the manipulable dialog controls
+		m_edit_frequency = std::unique_ptr<CEdit>(new CEdit(this, CONTROL_EDIT_FREQUENCY));
+		m_edit_channelname = std::unique_ptr<CEdit>(new CEdit(this, CONTROL_EDIT_CHANNELNAME));
+		m_button_channelicon = std::unique_ptr<CButton>(new CButton(this, CONTROL_BUTTON_CHANNELICON));
+		m_image_channelicon = std::unique_ptr<CImage>(new CImage(this, CONTROL_IMAGE_CHANNELICON));
+		m_radio_autogain = std::unique_ptr<CRadioButton>(new CRadioButton(this, CONTROL_RADIO_AUTOMATICGAIN));
+		m_slider_manualgain = std::unique_ptr<CSettingsSlider>(new CSettingsSlider(this, CONTROL_SLIDER_MANUALGAIN));
+		m_image_signalmeter = std::unique_ptr<CImage>(new CImage(this, CONTROL_IMAGE_SIGNALMETER));
+		m_edit_signalgain = std::unique_ptr<CEdit>(new CEdit(this, CONTROL_EDIT_METERGAIN));
+		m_edit_signalpeak = std::unique_ptr<CEdit>(new CEdit(this, CONTROL_EDIT_METERPEAK));
+		m_edit_signalsnr = std::unique_ptr<CEdit>(new CEdit(this, CONTROL_EDIT_METERSNR));
+
+		// Set the channel frequency in XXX.X MHz format
+		char freqstr[128];
+		snprintf(freqstr, std::extent<decltype(freqstr)>::value, "%.1f MHz", (m_channelprops.frequency / 100000) / 10.0);
+		m_edit_frequency->SetText(freqstr);
+
+		// Set the channel name and logo/icon
+		m_edit_channelname->SetText(m_channelprops.name);
+		m_image_channelicon->SetFileName(m_channelprops.logourl, false);
+
+		// Adjust the manual gain value to match something that the tuner supports
+		m_channelprops.manualgain = nearest_valid_gain(m_channelprops.manualgain);
+
+		// Set the tuner gain parameters
+		m_radio_autogain->SetSelected(m_channelprops.autogain);
+		m_slider_manualgain->SetEnabled(!m_channelprops.autogain);
+		m_slider_manualgain->SetPercentage(static_cast<float>(gain_to_percent(m_channelprops.manualgain)));
+
+		// Update the signal meter
+		update_signal_meter();
+	}
+
+	catch(...) { return false; }
+
 	return kodi::gui::CWindow::OnInit();
 }
 

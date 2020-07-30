@@ -37,6 +37,7 @@ struct channelprops {
 	uint32_t		frequency;		// Station center frequency
 	uint32_t		subchannel;		// Subchannel (HD Radio only)
 	std::string		name;			// Station name / call sign
+	std::string		logourl;		// Station logo URL
 	bool			autogain;		// Flag indicating if automatic gain should be used
 	int				manualgain;		// Manual gain value as 10*dB (i.e. 32.8dB = 328)
 };

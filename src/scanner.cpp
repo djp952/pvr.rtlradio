@@ -183,7 +183,7 @@ void scanner::set_manual_gain(int manualgain)
 {
 	assert(m_device);
 
-	m_manualgain = m_device->set_gain(manualgain);
+	m_manualgain = (m_autogain) ? manualgain : m_device->set_gain(manualgain);
 }
 
 //---------------------------------------------------------------------------

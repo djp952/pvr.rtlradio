@@ -529,8 +529,8 @@ bool get_channel_properties(sqlite3* instance, unsigned int id, struct channelpr
 
 	if(instance == nullptr) throw std::invalid_argument("instance");
 
-	// frequency | subchannel | name | autogain | manualgain
-	auto sql = "select frequency, subchannel, name as callsign, autogain, manualgain from channel "
+	// frequency | subchannel | name | autogain | manualgain | logourl
+	auto sql = "select frequency, subchannel, name, autogain, manualgain, logourl from channel "
 		"where frequency = ?1 and subchannel = ?2";
 
 	result = sqlite3_prepare_v2(instance, sql, -1, &statement, nullptr);
@@ -554,6 +554,9 @@ bool get_channel_properties(sqlite3* instance, unsigned int id, struct channelpr
 
 			channelprops.autogain = (sqlite3_column_int(statement, 3) != 0);
 			channelprops.manualgain = sqlite3_column_int(statement, 4);
+
+			unsigned char const* logourl = sqlite3_column_text(statement, 5);
+			channelprops.logourl.assign((logourl == nullptr) ? "" : reinterpret_cast<char const*>(logourl));
 
 			found = true;						// Channel was found in the database
 		}
@@ -709,9 +712,9 @@ bool update_channel_properties(sqlite3* instance, unsigned int id, struct channe
 {
 	if(instance == nullptr) throw std::invalid_argument("instance");
 
-	return execute_non_query(instance, "update channel set name = ?1, autogain = ?2, manualgain = ?3 "
-		"where frequency = ?4 and subchannel = ?5", channelprops.name.c_str(), (channelprops.autogain) ? 1 : 0,
-		channelprops.manualgain, (id / 10) * 100000, id % 10) > 0;
+	return execute_non_query(instance, "update channel set name = ?1, autogain = ?2, manualgain = ?3, logourl = ?4"
+		"where frequency = ?5 and subchannel = ?6", channelprops.name.c_str(), (channelprops.autogain) ? 1 : 0,
+		channelprops.manualgain, channelprops.logourl.c_str(), (id / 10) * 100000, id % 10) > 0;
 }
 
 //---------------------------------------------------------------------------

@@ -198,7 +198,6 @@
     <ClInclude Include="database.h" />
     <ClInclude Include="dbtypes.h" />
     <ClInclude Include="channeladd.h" />
-    <ClInclude Include="channelscan.h" />
     <ClInclude Include="channelsettings.h" />
     <ClInclude Include="fmdsp\agc.h" />
     <ClInclude Include="fmdsp\datamodifier.h" />
@@ -622,7 +621,6 @@
     <ClCompile Include="addon.cpp" />
     <ClCompile Include="database.cpp" />
     <ClCompile Include="channeladd.cpp" />
-    <ClCompile Include="channelscan.cpp" />
     <ClCompile Include="channelsettings.cpp" />
     <ClCompile Include="fmdsp\agc.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>

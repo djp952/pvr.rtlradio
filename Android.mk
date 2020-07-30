@@ -93,7 +93,6 @@ LOCAL_SRC_FILES := \
     src/fmdsp/wfmdemod.cpp \
     src/addon.cpp \
     src/channeladd.cpp \
-    src/channelscan.cpp \
     src/channelsettings.cpp \
     src/database.cpp \
     src/fmstream.cpp \

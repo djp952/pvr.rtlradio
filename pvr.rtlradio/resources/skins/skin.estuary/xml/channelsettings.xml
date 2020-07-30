@@ -1,31 +1,194 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?>
-<window id="1102" type="dialog">
-  <defaultcontrol always="false">1</defaultcontrol>
+<?xml version="1.0" encoding="UTF-8"?>
+<window>
+  <defaultcontrol always="true">20</defaultcontrol>
   <include>Animation_DialogPopupOpenClose</include>
   <controls>
     <control type="group">
       <centertop>50%</centertop>
-      <height>830</height>
+      <height>600</height>
       <centerleft>50%</centerleft>
       <width>1820</width>
       <include content="DialogBackgroundCommons">
         <param name="width" value="1820" />
-        <param name="height" value="830" />
-        <param name="header_label" value="HELLO" />
+        <param name="height" value="600" />
+        <param name="header_label" value="Channel settings" />
         <param name="header_id" value="2" />
       </include>
-      <control type="button" id="1">
-        <description>OK</description>
-        <left>240</left>
-        <top>220</top>
-        <width>290</width>
-        <height>100</height>
-        <label>$ADDON[pvr.rtlradio 30300]</label>
-        <align>center</align>
-        <onleft>6</onleft>
-        <onright>37</onright>
-        <onup>31</onup>
-        <ondown>31</ondown>
+      <!-- Channel Properties -->
+      <control type="group">
+        <left>10</left>
+        <top>70</top>
+        <control type="label" id="9000">
+          <left>0</left>
+          <top>10</top>
+          <description>Tuning properties header</description>
+          <width>700</width>
+          <height>60</height>
+          <textoffsetx>26</textoffsetx>
+          <font>font12</font>
+          <label>Channel properties</label>
+          <aligny>center</aligny>
+          <textcolor>button_focus</textcolor>
+          <shadowcolor>black</shadowcolor>
+        </control>
+        <control type="grouplist" id="9000">
+          <top>50</top>
+          <onleft>60</onleft>
+          <onright>9000</onright>
+          <onup>34</onup>
+          <ondown>30</ondown>
+          <itemgap>-25</itemgap>
+          <control type="edit" id="200">
+            <description>Frequency</description>
+            <width>700</width>
+            <include>SettingsItemCommon</include>
+            <label>Frequency</label>
+            <enable>false</enable>
+            <disabledcolor>white</disabledcolor>
+          </control>
+          <control type="edit" id="201">
+            <description>Channel name</description>
+            <width>700</width>
+            <include>SettingsItemCommon</include>
+            <label>Name</label>
+          </control>
+          <control type="button" id="202">
+            <description>Channel logo button</description>
+            <width>700</width>
+            <include>SettingsItemCommon</include>
+            <label>Logo</label>
+          </control>
+        </control>
+        <control type="image" id="203">
+          <left>600</left>
+          <top>226</top>
+          <description>Channel logo image</description>
+          <width>70</width>
+          <height>48</height>
+          <aspectratio>keep</aspectratio>
+        </control>
+        <control type="label" id="9000">
+          <left>0</left>
+          <top>300</top>
+          <description>Tuner properties header</description>
+          <width>700</width>
+          <height>60</height>
+          <textoffsetx>26</textoffsetx>
+          <font>font12</font>
+          <label>Tuner properties</label>
+          <aligny>center</aligny>
+          <textcolor>button_focus</textcolor>
+          <shadowcolor>black</shadowcolor>
+        </control>
+        <control type="grouplist" id="9000">
+          <top>340</top>
+          <onleft>60</onleft>
+          <onright>9000</onright>
+          <onup>34</onup>
+          <ondown>30</ondown>
+          <itemgap>-25</itemgap>
+          <control type="radiobutton" id="204">
+            <description>Automatic gain</description>
+            <width>700</width>
+            <include>SettingsItemCommon</include>
+            <label>Automatic gain control</label>
+          </control>
+          <control type="sliderex" id="205">
+            <description>Manual gain</description>
+            <width>700</width>
+            <sliderwidth>150</sliderwidth>
+            <include>SettingsItemCommon</include>
+            <label>Manual gain</label>
+          </control>
+        </control>
+      </control>
+      <!-- Signal Meter -->
+      <control type="group">
+        <left>700</left>
+        <top>70</top>
+        <control type="label" id="9000">
+          <left>0</left>
+          <top>10</top>
+          <description>Signal Meter Header</description>
+          <width>700</width>
+          <height>60</height>
+          <textoffsetx>26</textoffsetx>
+          <font>font12</font>
+          <label>Signal meter</label>
+          <aligny>center</aligny>
+          <textcolor>button_focus</textcolor>
+          <shadowcolor>black</shadowcolor>
+        </control>
+        <control type="image" id="206">
+          <left>0</left>
+          <top>50</top>
+          <width>720</width>
+          <height>390</height>
+          <texture border="40">buttons/dialogbutton-nofo.png</texture>
+        </control>
+        <control type="edit" id="207">
+          <left>-14</left>
+          <top>415</top>
+          <texturefocus></texturefocus>
+          <texturenofocus></texturenofocus>
+          <alttexturefocus></alttexturefocus>
+          <alttexturenofocus></alttexturenofocus>
+          <description>Signal Meter gain</description>
+          <width>275</width>
+          <include>SettingsItemCommon</include>
+          <disabledcolor>white</disabledcolor>
+          <enable>false</enable>
+          <label>Gain:</label>
+        </control>
+        <control type="edit" id="208">
+          <left>225</left>
+          <top>415</top>
+          <texturefocus></texturefocus>
+          <texturenofocus></texturenofocus>
+          <alttexturefocus></alttexturefocus>
+          <alttexturenofocus></alttexturenofocus>
+          <description>Signal Meter peak</description>
+          <width>295</width>
+          <include>SettingsItemCommon</include>
+          <disabledcolor>white</disabledcolor>
+          <enable>false</enable>
+          <label>Peak:</label>
+        </control>
+        <control type="edit" id="209">
+          <left>485</left>
+          <top>415</top>
+          <texturefocus></texturefocus>
+          <texturenofocus></texturenofocus>
+          <alttexturefocus></alttexturefocus>
+          <alttexturenofocus></alttexturenofocus>
+          <description>Signal Meter SNR</description>
+          <width>250</width>
+          <include>SettingsItemCommon</include>
+          <disabledcolor>white</disabledcolor>
+          <enable>false</enable>
+          <label>SNR:</label>
+        </control>
+      </control>
+      <!-- Dialog Buttons -->
+      <control type="grouplist" id="9000">
+        <right>10</right>
+        <top>118</top>
+        <onleft>9002</onleft>
+        <onright>10</onright>
+        <itemgap>dialogbuttons_itemgap</itemgap>
+        <width>400</width>
+        <!-- OK -->
+        <include content="DefaultDialogButton">
+          <param name="width" value="400" />
+          <param name="id" value="100" />
+          <param name="label" value="$LOCALIZE[186]" />
+        </include>
+        <!-- Cancel -->
+        <include content="DefaultDialogButton">
+          <param name="width" value="400" />
+          <param name="id" value="101" />
+          <param name="label" value="$LOCALIZE[222]" />
+        </include>
       </control>
     </control>
   </controls>
