@@ -355,7 +355,7 @@ void tcpdevice::set_automatic_gain_control(bool enable) const
 {
 	assert(m_socket != -1);
 
-	struct device_command command = { 0x03, htonl((enable) ? 1 : 0) };
+	struct device_command command = { 0x03, htonl((enable) ? 0 : 1) };
 	int result = send(m_socket, reinterpret_cast<char const*>(&command), sizeof(struct device_command), 0);
 	if(result != sizeof(struct device_command)) throw string_exception("send() failed");
 }
