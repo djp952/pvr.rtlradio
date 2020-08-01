@@ -67,8 +67,8 @@ int const fmstream::STREAM_ID_UECP = 2;
 //	fmprops			- FM digital signal processor properties
 
 fmstream::fmstream(std::unique_ptr<rtldevice> device, struct channelprops const& channelprops, struct fmprops const& fmprops) :
-	m_device(std::move(device)), m_rdsdecoder(fmprops.isrbds), m_blocksize(align::up(DEFAULT_DEVICE_BLOCK_SIZE, 16 KiB)), 
-	m_samplerate(DEFAULT_DEVICE_SAMPLE_RATE), m_pcmsamplerate(fmprops.outputrate), m_buffersize(align::up(DEFAULT_RINGBUFFER_SIZE, 16 KiB))
+	m_device(std::move(device)), m_rdsdecoder(fmprops.isrbds), m_samplerate(DEFAULT_DEVICE_SAMPLE_RATE), 
+	m_pcmsamplerate(fmprops.outputrate), m_buffersize(align::up(DEFAULT_RINGBUFFER_SIZE, 16 KiB))
 {
 	// The only allowable output sample rates for this stream are 44100Hz and 48000Hz
 	if((m_pcmsamplerate != 44100) && (m_pcmsamplerate != 48000))
