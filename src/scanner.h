@@ -28,6 +28,7 @@
 #include <memory>
 #include <thread>
 
+#include "props.h"
 #include "rtldevice.h"
 #include "scalar_condition.h"
 
@@ -52,7 +53,8 @@ public:
 	// create (static)
 	//
 	// Factory method, creates a new scanner instance
-	static std::unique_ptr<scanner> create(std::unique_ptr<rtldevice> device, bool isrdbs);
+	static std::unique_ptr<scanner> create(std::unique_ptr<rtldevice> device, 
+		struct tunerprops const& tunerprops, bool isrdbs);
 
 	// get_automatic_gain
 	//
@@ -96,7 +98,7 @@ private:
 
 	// Instance Constructor
 	//
-	scanner(std::unique_ptr<rtldevice> device, bool isrbds);
+	scanner(std::unique_ptr<rtldevice> device, struct tunerprops const& tunerprops, bool isrbds);
 
 	// DEFAULT_DEVICE_FREQUENCY
 	//
@@ -114,12 +116,14 @@ private:
 	// start
 	//
 	// Worker thread procedure used to scan the channel information
-	void start(uint32_t frequency, uint32_t samplerate, bool isrdbs, scalar_condition<bool>& started);
+	void start(uint32_t frequency, uint32_t samplerate, int freqcorrection,
+		bool isrdbs, scalar_condition<bool>& started);
 
 	//-----------------------------------------------------------------------
 	// Member Variables
 
 	std::unique_ptr<rtldevice>	m_device;				// RTL-SDR device instance
+	struct tunerprops			m_tunerprops;			// Tuner device properties
 	bool const					m_isrbds;				// RBDS vs. RDS flag
 	bool						m_autogain = false;		// Automatic gain enabled/disabled
 	int							m_manualgain = 0;		// Current manual gain value

@@ -70,7 +70,8 @@ public:
 	// create (static)
 	//
 	// Factory method, creates a new fmstream instance
-	static std::unique_ptr<fmstream> create(std::unique_ptr<rtldevice> device, struct channelprops const& channelprops, struct fmprops const& fmprops);
+	static std::unique_ptr<fmstream> create(std::unique_ptr<rtldevice> device, struct tunerprops const& tunerprops, 
+		struct channelprops const& channelprops, struct fmprops const& fmprops);
 
 	// demuxabort
 	//
@@ -179,7 +180,8 @@ private:
 
 	// Instance Constructor
 	//
-	fmstream(std::unique_ptr<rtldevice> device, struct channelprops const& channelprops, struct fmprops const& fmprops);
+	fmstream(std::unique_ptr<rtldevice> device, struct tunerprops const& tunerprops, 
+		struct channelprops const& channelprops, struct fmprops const& fmprops);
 
 	//-----------------------------------------------------------------------
 	// Private Member Functions

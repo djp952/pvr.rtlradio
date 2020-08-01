@@ -546,6 +546,7 @@ ADDON_STATUS addon::Create(void)
 			m_settings.device_connection_usb_index = kodi::GetSettingInt("device_connection_usb_index", 0);
 			m_settings.device_connection_tcp_host = kodi::GetSettingString("device_connection_tcp_host");
 			m_settings.device_connection_tcp_port = kodi::GetSettingInt("device_connection_tcp_port", 1234);
+			m_settings.device_frequency_correction = kodi::GetSettingInt("device_frequency_correction", 0);
 
 			// Load the Interface settings
 			m_settings.interface_prepend_channel_numbers = kodi::GetSettingBoolean("interface_prepend_channel_numbers", false);
@@ -682,6 +683,18 @@ ADDON_STATUS addon::SetSetting(std::string const& settingName, kodi::CSettingVal
 
 			m_settings.device_connection_tcp_port = nvalue;
 			log_info(__func__, ": setting device_connection_tcp_port changed to ", m_settings.device_connection_tcp_port);
+		}
+	}
+
+	// device_frequency_correction
+	//
+	else if(settingName == "device_frequency_correction") {
+
+		int nvalue = settingValue.GetInt();
+		if(nvalue != m_settings.device_frequency_correction) {
+
+			m_settings.device_frequency_correction = nvalue;
+			log_info(__func__, ": setting device_frequency_correction changed to ", m_settings.device_frequency_correction);
 		}
 	}
 
@@ -1292,6 +1305,10 @@ PVR_ERROR addon::OpenDialogChannelSettings(kodi::addon::PVRChannel const& channe
 
 	try {
 
+		// Set up the tuner device properties
+		struct tunerprops tunerprops = {};
+		tunerprops.freqcorrection = settings.device_frequency_correction;
+
 		// Get the properties of the channel to be manipulated
 		struct channelprops channelprops = {};
 		if(!get_channel_properties(connectionpool::handle(m_connpool), channel.GetUniqueId(), channelprops))
@@ -1299,7 +1316,7 @@ PVR_ERROR addon::OpenDialogChannelSettings(kodi::addon::PVRChannel const& channe
 
 		// Attempt to create the channel scanner instance for the dialog box to use
 		bool isrbds = (get_regional_rds_standard(settings.fmradio_rds_standard) == rds_standard::rbds);
-		std::unique_ptr<scanner> scanner = scanner::create(create_device(settings), isrbds);
+		std::unique_ptr<scanner> scanner = scanner::create(create_device(settings), tunerprops, isrbds);
 
 		// Create and initialize the dialog box instance
 		std::unique_ptr<channelsettings> dialog = channelsettings::create(std::move(scanner), channelprops);
@@ -1347,8 +1364,12 @@ bool addon::OpenLiveStream(kodi::addon::PVRChannel const& channel)
 	// Create a copy of the current addon settings structure
 	struct settings settings = copy_settings();
 
-	try { 
-	
+	try {
+
+		// Set up the tuner device properties
+		struct tunerprops tunerprops = {};
+		tunerprops.freqcorrection = settings.device_frequency_correction;
+
 		// Retrieve the tuning properties for the channel from the database
 		struct channelprops channelprops = {};
 		if(!get_channel_properties(connectionpool::handle(m_connpool), channel.GetUniqueId(), channelprops))
@@ -1363,7 +1384,7 @@ bool addon::OpenLiveStream(kodi::addon::PVRChannel const& channel)
 		fmprops.outputrate = settings.fmradio_output_samplerate;
 
 		// Create the FM radio stream, accessing the cached RTL-SDR device when possible
-		m_pvrstream = fmstream::create(create_device(settings), channelprops, fmprops);
+		m_pvrstream = fmstream::create(create_device(settings), tunerprops, channelprops, fmprops);
 	}
 
 	// Queue a notification for the user when a live stream cannot be opened, don't just silently log it

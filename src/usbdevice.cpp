@@ -31,11 +31,6 @@
 
 #pragma warning(push, 4)
 
-// usbdevice::AUTOMATIC_BANDWIDTH (static)
-//
-// Specifies that automatic bandwidth selection should be used
-uint32_t const usbdevice::AUTOMATIC_BANDWIDTH = 0;
-
 // usbdevice::DEFAULT_DEVICE_INDEX (static)
 //
 // Default device index value
@@ -385,23 +380,6 @@ void usbdevice::set_automatic_gain_control(bool enable) const
 
 	int result = rtlsdr_set_tuner_gain_mode(m_device, (enable) ? 0 : 1);
 	if(result < 0) throw string_exception(__func__, ": failed to set device automatic gain control to ", (enable) ? "on" : "off");
-}
-
-//---------------------------------------------------------------------------
-// usbdevice::set_bandwidth
-//
-// Sets the bandwidth of the device
-//
-// Arguments:
-//
-//	hz		- Bandwidth to set, specified in hertz
-
-void usbdevice::set_bandwidth(uint32_t hz) const
-{
-	assert(m_device != nullptr);
-
-	int result = rtlsdr_set_tuner_bandwidth(m_device, hz);
-	if(result < 0) throw string_exception(__func__, ": failed to set device bandwidth to ", hz, "Hz");
 }
 
 //---------------------------------------------------------------------------

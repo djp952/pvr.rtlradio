@@ -86,6 +86,11 @@ struct settings {
 	// The IP address of the rtl_tcp host to connect to
 	std::string device_connection_tcp_host;
 
+	// device_frequency_correction
+	//
+	// Frequency correction calibration value for the device
+	int device_frequency_correction;
+
 	// device_connection_tcp_port
 	//
 	// The port number of the rtl_tcp host to connect to

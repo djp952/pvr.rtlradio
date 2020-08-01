@@ -63,6 +63,14 @@ struct streamprops {
 	int				bitspersample;	// Stream bits per sample
 };
 
+// tunerprops
+//
+// Defines tuner-specific properties
+struct tunerprops {
+
+	int			freqcorrection;		// Frequency correction (PPM)
+};
+
 //-----------------------------------------------------------------------------
 
 #pragma warning(pop)

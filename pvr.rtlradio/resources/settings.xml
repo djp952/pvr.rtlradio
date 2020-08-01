@@ -61,6 +61,17 @@
           </control>
         </setting>
 
+        <setting id="device_frequency_correction" type="integer" label="30108" help="30508">
+          <level>0</level>
+          <default>0</default>
+          <allowempty>false</allowempty>
+          <minimum>-1953</minimum>
+          <maximum>1953</maximum>
+          <control type="edit" format="integer">
+            <heading>30108</heading>
+          </control>
+        </setting>
+
       </group>
     </category>
 

@@ -44,11 +44,6 @@ class usbdevice : public rtldevice
 {
 public:
 
-	// AUTOMATIC_BANDWIDTH
-	//
-	// Specifies that automatic bandwidth selection should be used
-	static uint32_t const AUTOMATIC_BANDWIDTH;
-
 	// DEFAULT_DEVICE_INDEX
 	//
 	// Default device index number
@@ -137,11 +132,6 @@ public:
 	//
 	// Enables/disables the automatic gain control of the device
 	void set_automatic_gain_control(bool enable) const override;
-
-	// set_bandwidth
-	//
-	// Sets the bandwidth of the device
-	void set_bandwidth(uint32_t hz) const;
 
 	// set_center_frequency
 	//

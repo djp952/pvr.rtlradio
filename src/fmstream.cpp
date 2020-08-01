@@ -63,10 +63,12 @@ int const fmstream::STREAM_ID_UECP = 2;
 // Arguments:
 //
 //	device			- RTL-SDR device instance
+//	tunerprops		- Tuner device properties
 //	channelprops	- Channel properties
 //	fmprops			- FM digital signal processor properties
 
-fmstream::fmstream(std::unique_ptr<rtldevice> device, struct channelprops const& channelprops, struct fmprops const& fmprops) :
+fmstream::fmstream(std::unique_ptr<rtldevice> device, struct tunerprops const& tunerprops, 
+	struct channelprops const& channelprops, struct fmprops const& fmprops) :
 	m_device(std::move(device)), m_rdsdecoder(fmprops.isrbds), m_samplerate(DEFAULT_DEVICE_SAMPLE_RATE), 
 	m_pcmsamplerate(fmprops.outputrate), m_buffersize(align::up(DEFAULT_RINGBUFFER_SIZE, 16 KiB))
 {
@@ -79,6 +81,7 @@ fmstream::fmstream(std::unique_ptr<rtldevice> device, struct channelprops const&
 	if(!m_buffer) throw std::bad_alloc();
 
 	// Initialize the RTL-SDR device instance
+	m_device->set_frequency_correction(tunerprops.freqcorrection);
 	uint32_t samplerate = m_device->set_sample_rate(m_samplerate);
 	uint32_t frequency = m_device->set_center_frequency(channelprops.frequency + (m_samplerate / 4));	// DC offset
 
@@ -178,13 +181,14 @@ void fmstream::close(void)
 // Arguments:
 //
 //	device			- RTL-SDR device instance
+//	tunerprops		- Tunder device properties
 //	channelprops	- Channel properties
 //	fmprops			- FM digital signal processor properties
 
-std::unique_ptr<fmstream> fmstream::create(std::unique_ptr<rtldevice> device, struct channelprops const& channelprops,
-	struct fmprops const& fmprops)
+std::unique_ptr<fmstream> fmstream::create(std::unique_ptr<rtldevice> device, struct tunerprops const& tunerprops,
+	struct channelprops const& channelprops, struct fmprops const& fmprops)
 {
-	return std::unique_ptr<fmstream>(new fmstream(std::move(device), channelprops, fmprops));
+	return std::unique_ptr<fmstream>(new fmstream(std::move(device), tunerprops, channelprops, fmprops));
 }
 
 //---------------------------------------------------------------------------

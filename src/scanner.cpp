@@ -46,10 +46,11 @@ uint32_t const scanner::DEFAULT_DEVICE_SAMPLE_RATE = (1024 KHz);
 // Arguments:
 //
 //	device			- RTL-SDR device instance
+//	tunerprops		- Tuner device properties
 //	isrbds			- Flag indicating if RBDS should be used
 
-scanner::scanner(std::unique_ptr<rtldevice> device, bool isrbds) : 
-	m_device(std::move(device)), m_isrbds(isrbds)
+scanner::scanner(std::unique_ptr<rtldevice> device, struct tunerprops const& tunerprops, 
+	bool isrbds) : m_device(std::move(device)), m_tunerprops(tunerprops), m_isrbds(isrbds)
 {
 	// Disable automatic gain control by default
 	m_device->set_automatic_gain_control(false);
@@ -78,11 +79,13 @@ scanner::~scanner()
 // Arguments:
 //
 //	device			- RTL-SDR device instance
+//	tunerprops		- Tuner device properties
 //	isrbds			- Flag indicating if RBDS should be used
 
-std::unique_ptr<scanner> scanner::create(std::unique_ptr<rtldevice> device, bool isrbds)
+std::unique_ptr<scanner> scanner::create(std::unique_ptr<rtldevice> device, 
+	struct tunerprops const& tunerprops, bool isrbds)
 {
-	return std::unique_ptr<scanner>(new scanner(std::move(device), isrbds));
+	return std::unique_ptr<scanner>(new scanner(std::move(device), tunerprops, isrbds));
 }
 
 //---------------------------------------------------------------------------
@@ -145,7 +148,8 @@ void scanner::set_channel(uint32_t frequency)
 
 	// Start a new scanning thread at the requested frequency
 	scalar_condition<bool> started{ false };
-	m_worker = std::thread(&scanner::start, this, frequency, DEFAULT_DEVICE_SAMPLE_RATE, m_isrbds, std::ref(started));
+	m_worker = std::thread(&scanner::start, this, frequency, DEFAULT_DEVICE_SAMPLE_RATE, 
+		m_tunerprops.freqcorrection, m_isrbds, std::ref(started));
 	started.wait_until_equals(true);
 
 	m_frequency = frequency;
@@ -210,12 +214,13 @@ void scanner::stop(void)
 //
 // Arguments:
 //
-//	frequency	- Frequency to be tuned, in Hertz
-//	samplerate	- Sample rate of the RTL-SDR device
-//	isrdbs		- Flag to expect RDBS or RDS data
-//	started		- Condition variable to set when thread has started
+//	frequency		- Frequency to be tuned, in Hertz
+//	samplerate		- Sample rate of the RTL-SDR device
+//	freqcorrection	- Frequency correction offset
+//	isrdbs			- Flag to expect RDBS or RDS data
+//	started			- Condition variable to set when thread has started
 
-void scanner::start(uint32_t frequency, uint32_t samplerate, bool isrbds, scalar_condition<bool>& started)
+void scanner::start(uint32_t frequency, uint32_t samplerate, int freqcorrection, bool isrbds, scalar_condition<bool>& started)
 {
 	std::unique_ptr<CDemodulator>	demodulator;			// FM demodulator instance
 	rdsdecoder						rdsdecoder(isrbds);		// RDS decoder instance
@@ -223,6 +228,7 @@ void scanner::start(uint32_t frequency, uint32_t samplerate, bool isrbds, scalar
 	assert(m_device);
 
 	// Set the sample rate and adjust the frequency to apply the DC offset
+	m_device->set_frequency_correction(freqcorrection);
 	uint32_t rate = m_device->set_sample_rate(samplerate);
 	uint32_t hz = m_device->set_center_frequency(frequency + (rate / 4));
 
