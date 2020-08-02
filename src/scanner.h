@@ -53,13 +53,17 @@ public:
 	// create (static)
 	//
 	// Factory method, creates a new scanner instance
-	static std::unique_ptr<scanner> create(std::unique_ptr<rtldevice> device, 
-		struct tunerprops const& tunerprops, bool isrdbs);
+	static std::unique_ptr<scanner> create(std::unique_ptr<rtldevice> device, struct tunerprops const& tunerprops);
 
 	// get_automatic_gain
 	//
 	// Gets the currently set automatic gain value
 	bool get_automatic_gain(void) const;
+
+	// get_frequency
+	//
+	// Gets the currently set frequency
+	uint32_t get_frequency(void) const;
 
 	// get_manual_gain
 	//
@@ -76,15 +80,20 @@ public:
 	// Sets the automatic gain flag
 	void set_automatic_gain(bool autogain);
 
-	// set_channel
+	// set_frequency
 	//
-	// Sets the channel to be tuned
-	void set_channel(uint32_t frequency);
+	// Sets the frequency to be tuned
+	void set_frequency(uint32_t frequency);
 
 	// set_manual_gain
 	//
 	// Sets the manual gain value
 	void set_manual_gain(int manualgain);
+
+	// start
+	//
+	// Starts the scanner
+	void start(void);
 
 	// stop
 	//
@@ -98,7 +107,12 @@ private:
 
 	// Instance Constructor
 	//
-	scanner(std::unique_ptr<rtldevice> device, struct tunerprops const& tunerprops, bool isrbds);
+	scanner(std::unique_ptr<rtldevice> device, struct tunerprops const& tunerprops);
+
+	// DEFAULT_DEVICE_BLOCK_SIZE
+	//
+	// Default device block size
+	static size_t const DEFAULT_DEVICE_BLOCK_SIZE;
 
 	// DEFAULT_DEVICE_FREQUENCY
 	//
@@ -123,8 +137,6 @@ private:
 	// Member Variables
 
 	std::unique_ptr<rtldevice>	m_device;				// RTL-SDR device instance
-	struct tunerprops			m_tunerprops;			// Tuner device properties
-	bool const					m_isrbds;				// RBDS vs. RDS flag
 	bool						m_autogain = false;		// Automatic gain enabled/disabled
 	int							m_manualgain = 0;		// Current manual gain value
 	uint32_t					m_frequency = 0;		// Current frequency value

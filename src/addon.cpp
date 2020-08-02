@@ -1314,12 +1314,8 @@ PVR_ERROR addon::OpenDialogChannelSettings(kodi::addon::PVRChannel const& channe
 		if(!get_channel_properties(connectionpool::handle(m_connpool), channel.GetUniqueId(), channelprops))
 			throw string_exception("Unable to retrieve properties for channel ", channel.GetChannelName().c_str());
 
-		// Attempt to create the channel scanner instance for the dialog box to use
-		bool isrbds = (get_regional_rds_standard(settings.fmradio_rds_standard) == rds_standard::rbds);
-		std::unique_ptr<scanner> scanner = scanner::create(create_device(settings), tunerprops, isrbds);
-
-		// Create and initialize the dialog box instance
-		std::unique_ptr<channelsettings> dialog = channelsettings::create(std::move(scanner), channelprops);
+		// Create and initialize the dialog box against a new scanner instance
+		std::unique_ptr<channelsettings> dialog = channelsettings::create(scanner::create(create_device(settings), tunerprops), channelprops);
 		dialog->DoModal();
 
 		if(dialog->get_dialog_result()) {
