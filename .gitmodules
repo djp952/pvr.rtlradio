@@ -4,15 +4,15 @@
 [submodule "libusb"]
 	path = depends/libusb
 	url = https://github.com/djp952/prebuilt-libusb.git
+[submodule "rapidjson"]
+	path = depends/rapidjson
+	url = https://github.com/Tencent/rapidjson.git
 [submodule "rtl-sdr"]
 	path = depends/rtl-sdr
-	url = https://github.com/osmocom/rtl-sdr.git
+	url = https://github.com/djp952/external-rtl-sdr.git
 [submodule "sqlite"]
 	path = depends/sqlite
 	url = https://github.com/djp952/external-sqlite.git
 [submodule "xbmc"]
 	path = depends/xbmc
 	url = https://github.com/xbmc/xbmc.git
-[submodule "rapidjson"]
-	path = depends/rapidjson
-	url = https://github.com/Tencent/rapidjson.git
