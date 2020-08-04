@@ -106,6 +106,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "xml", "xml", "{880E452A-4A3
 		pvr.rtlradio\resources\skins\skin.estuary\xml\channelsettings.xml = pvr.rtlradio\resources\skins\skin.estuary\xml\channelsettings.xml
 	EndProjectSection
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "rtl_biast", "src\rtl_biast.vcxproj", "{F36BC675-E8EC-4A56-8350-3A666B0AA870}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -194,6 +196,14 @@ Global
 		{FB973A22-FC5B-437A-8EA0-B4F1397A0E13}.Release|Win32.Build.0 = Release|Win32
 		{FB973A22-FC5B-437A-8EA0-B4F1397A0E13}.Release|x64.ActiveCfg = Release|x64
 		{FB973A22-FC5B-437A-8EA0-B4F1397A0E13}.Release|x64.Build.0 = Release|x64
+		{F36BC675-E8EC-4A56-8350-3A666B0AA870}.Debug|Win32.ActiveCfg = Debug|Win32
+		{F36BC675-E8EC-4A56-8350-3A666B0AA870}.Debug|Win32.Build.0 = Debug|Win32
+		{F36BC675-E8EC-4A56-8350-3A666B0AA870}.Debug|x64.ActiveCfg = Debug|x64
+		{F36BC675-E8EC-4A56-8350-3A666B0AA870}.Debug|x64.Build.0 = Debug|x64
+		{F36BC675-E8EC-4A56-8350-3A666B0AA870}.Release|Win32.ActiveCfg = Release|Win32
+		{F36BC675-E8EC-4A56-8350-3A666B0AA870}.Release|Win32.Build.0 = Release|Win32
+		{F36BC675-E8EC-4A56-8350-3A666B0AA870}.Release|x64.ActiveCfg = Release|x64
+		{F36BC675-E8EC-4A56-8350-3A666B0AA870}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

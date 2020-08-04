@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <zip>
+  <file path="rtl_biast" source="out\android-aarch64\arm64-v8a\rtl_biast"/>
   <file path="rtl_eeprom" source="out\android-aarch64\arm64-v8a\rtl_eeprom"/>
   <file path="rtl_fm" source="out\android-aarch64\arm64-v8a\rtl_fm"/>
   <file path="rtl_power" source="out\android-aarch64\arm64-v8a\rtl_power"/>

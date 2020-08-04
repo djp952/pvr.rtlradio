@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <zip>
   <file path="rtl_adsb" source="out\linux-x86_64\rtl_adsb"/>
+  <file path="rtl_biast" source="out\linux-x86_64\rtl_biast"/>
   <file path="rtl_eeprom" source="out\linux-x86_64\rtl_eeprom"/>
   <file path="rtl_fm" source="out\linux-x86_64\rtl_fm"/>
   <file path="rtl_power" source="out\linux-x86_64\rtl_power"/>

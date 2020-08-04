@@ -1,0 +1,158 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="External Libraries">
+      <UniqueIdentifier>{eb0262dd-4497-479f-81a3-67548f7bddf8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="External Libraries\libusb">
+      <UniqueIdentifier>{e5313abb-fae4-4135-85ae-37f1f1defff5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="External Libraries\libusb\Header Files">
+      <UniqueIdentifier>{aacae194-b490-432a-aa2e-6fffa58b24b7}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="External Libraries\libusb\Source Files">
+      <UniqueIdentifier>{7aaa38df-7bdf-4576-9a05-dd50ee10a8b2}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="External Libraries\libusb\Source Files\os">
+      <UniqueIdentifier>{5f832204-7d85-4e26-83cf-fc45833bf513}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="External Libraries\libusb\Header Files\os">
+      <UniqueIdentifier>{782e59d7-42d7-4ba0-9fb8-405ada4c7e57}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="External Libraries\rtl-sdr">
+      <UniqueIdentifier>{60447c8d-d10b-4c79-ac30-45d55fdfd3a0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="External Libraries\rtl-sdr\Header Files">
+      <UniqueIdentifier>{19f6cf9e-899a-459e-9960-7fddb823192d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="External Libraries\rtl-sdr\Source Files">
+      <UniqueIdentifier>{98748055-eaa8-490c-bfd9-0a3e3ef969c8}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\depends\libusb\src\msvc\config.h">
+      <Filter>External Libraries\libusb\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\depends\libusb\src\libusb\hotplug.h">
+      <Filter>External Libraries\libusb\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\depends\libusb\src\libusb\libusb.h">
+      <Filter>External Libraries\libusb\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\depends\libusb\src\libusb\libusbi.h">
+      <Filter>External Libraries\libusb\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\depends\libusb\src\libusb\version.h">
+      <Filter>External Libraries\libusb\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\depends\libusb\src\libusb\version_nano.h">
+      <Filter>External Libraries\libusb\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\depends\libusb\src\libusb\os\poll_windows.h">
+      <Filter>External Libraries\libusb\Header Files\os</Filter>
+    </ClInclude>
+    <ClInclude Include="..\depends\libusb\src\libusb\os\threads_windows.h">
+      <Filter>External Libraries\libusb\Header Files\os</Filter>
+    </ClInclude>
+    <ClInclude Include="..\depends\libusb\src\libusb\os\windows_common.h">
+      <Filter>External Libraries\libusb\Header Files\os</Filter>
+    </ClInclude>
+    <ClInclude Include="..\depends\libusb\src\libusb\os\windows_nt_common.h">
+      <Filter>External Libraries\libusb\Header Files\os</Filter>
+    </ClInclude>
+    <ClInclude Include="..\depends\libusb\src\libusb\os\windows_nt_shared_types.h">
+      <Filter>External Libraries\libusb\Header Files\os</Filter>
+    </ClInclude>
+    <ClInclude Include="..\depends\libusb\src\libusb\os\windows_usbdk.h">
+      <Filter>External Libraries\libusb\Header Files\os</Filter>
+    </ClInclude>
+    <ClInclude Include="..\depends\libusb\src\libusb\os\windows_winusb.h">
+      <Filter>External Libraries\libusb\Header Files\os</Filter>
+    </ClInclude>
+    <ClInclude Include="..\depends\rtl-sdr\include\rtl-sdr.h">
+      <Filter>External Libraries\rtl-sdr\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\depends\rtl-sdr\src\convenience\convenience.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\depends\rtl-sdr\src\getopt\getopt.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\depends\libusb\src\libusb\core.c">
+      <Filter>External Libraries\libusb\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\libusb\src\libusb\descriptor.c">
+      <Filter>External Libraries\libusb\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\libusb\src\libusb\hotplug.c">
+      <Filter>External Libraries\libusb\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\libusb\src\libusb\io.c">
+      <Filter>External Libraries\libusb\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\libusb\src\libusb\strerror.c">
+      <Filter>External Libraries\libusb\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\libusb\src\libusb\sync.c">
+      <Filter>External Libraries\libusb\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\libusb\src\libusb\os\poll_windows.c">
+      <Filter>External Libraries\libusb\Source Files\os</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\libusb\src\libusb\os\threads_windows.c">
+      <Filter>External Libraries\libusb\Source Files\os</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\libusb\src\libusb\os\windows_nt_common.c">
+      <Filter>External Libraries\libusb\Source Files\os</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\libusb\src\libusb\os\windows_usbdk.c">
+      <Filter>External Libraries\libusb\Source Files\os</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\libusb\src\libusb\os\windows_winusb.c">
+      <Filter>External Libraries\libusb\Source Files\os</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\rtl-sdr\src\librtlsdr.c">
+      <Filter>External Libraries\rtl-sdr\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\rtl-sdr\src\tuner_e4k.c">
+      <Filter>External Libraries\rtl-sdr\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\rtl-sdr\src\tuner_fc0012.c">
+      <Filter>External Libraries\rtl-sdr\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\rtl-sdr\src\tuner_fc0013.c">
+      <Filter>External Libraries\rtl-sdr\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\rtl-sdr\src\tuner_fc2580.c">
+      <Filter>External Libraries\rtl-sdr\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\rtl-sdr\src\tuner_r82xx.c">
+      <Filter>External Libraries\rtl-sdr\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\rtl-sdr\src\getopt\getopt.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\rtl-sdr\src\convenience\convenience.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\rtl-sdr\src\rtl_biast.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>

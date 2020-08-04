@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <zip>
   <file path="rtl_adsb.exe" source="out\windows-Win32\Release\rtl_adsb.exe"/>
+  <file path="rtl_biast.exe" source="out\windows-Win32\Release\rtl_biast.exe"/>
   <file path="rtl_eeprom.exe" source="out\windows-Win32\Release\rtl_eeprom.exe"/>
   <file path="rtl_fm.exe" source="out\windows-Win32\Release\rtl_fm.exe"/>
   <file path="rtl_power.exe" source="out\windows-Win32\Release\rtl_power.exe"/>
