@@ -414,8 +414,10 @@ int usbdevice::set_frequency_correction(int ppm) const
 {
 	assert(m_device != nullptr);
 
+	// NOTE: rtlsdr_set_freq_correction will return -2 if the requested value matches what has
+	// already been applied to the device; this is not an error condition
 	int result = rtlsdr_set_freq_correction(m_device, ppm);
-	if(result < 0) throw string_exception(__func__, ": failed to set device frequency correction to ", ppm, "ppm");
+	if((result < 0) && (result != -2)) throw string_exception(__func__, ": failed to set device frequency correction to ", ppm, "ppm");
 
 	return rtlsdr_get_freq_correction(m_device);
 }
