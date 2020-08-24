@@ -42,7 +42,7 @@
 #include "channelsettings.h"
 #include "dbtypes.h"
 #include "fmstream.h"
-#include "scanner.h"
+#include "signalmeter.h"
 #include "string_exception.h"
 #include "sqlite_exception.h"
 #include "tcpdevice.h"
@@ -1314,8 +1314,8 @@ PVR_ERROR addon::OpenDialogChannelSettings(kodi::addon::PVRChannel const& channe
 		if(!get_channel_properties(connectionpool::handle(m_connpool), channel.GetUniqueId(), channelprops))
 			throw string_exception("Unable to retrieve properties for channel ", channel.GetChannelName().c_str());
 
-		// Create and initialize the dialog box against a new scanner instance
-		std::unique_ptr<channelsettings> dialog = channelsettings::create(scanner::create(create_device(settings), tunerprops), channelprops);
+		// Create and initialize the dialog box against a new signal meter instance
+		std::unique_ptr<channelsettings> dialog = channelsettings::create(signalmeter::create(create_device(settings), tunerprops), channelprops);
 		dialog->DoModal();
 
 		if(dialog->get_dialog_result()) {

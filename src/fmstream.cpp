@@ -299,13 +299,13 @@ DemuxPacket* fmstream::demuxread(std::function<DemuxPacket*(int)> const& allocat
 		// 256.996 = (32767.0 / 127.5) = 256.9960784313725
 		samples[index] = {
 
-#ifdef FMDSP_USE_DOUBLE_PRECISION
+		#ifdef FMDSP_USE_DOUBLE_PRECISION
 			(static_cast<TYPEREAL>(m_buffer[tail]) - 127.5) * 256.996,			// I
 			(static_cast<TYPEREAL>(m_buffer[tail + 1]) - 127.5) * 256.996,		// Q
-#else
+		#else
 			(static_cast<TYPEREAL>(m_buffer[tail]) - 127.5f) * 256.996f,		// I
 			(static_cast<TYPEREAL>(m_buffer[tail + 1]) - 127.5f) * 256.996f,	// Q
-#endif
+		#endif
 		};
 
 		tail += 2;								// Increment new tail position

@@ -127,8 +127,6 @@ void CDemodulator::SetDemod(int Mode, tDemodInfo CurrentDemodInfo)
 	}
 	m_CW_Offset = m_DemodInfo.Offset;
 	m_DownConvert.SetCwOffset(m_CW_Offset);
-	if(m_DemodMode != DEMOD_WFM)
-		m_FastFIR.SetupParameters(m_DemodInfo.LowCut, m_DemodInfo.HiCut,m_CW_Offset,m_DownConverterOutputRate);
 	m_Agc.SetParameters(m_DemodInfo.AgcOn, m_DemodInfo.AgcHangOn, m_DemodInfo.AgcThresh,
 						m_DemodInfo.AgcManualGain, m_DemodInfo.AgcSlope, m_DemodInfo.AgcDecay, m_DownConverterOutputRate);
 	//set input buffer limit so that decimated output is abt 10mSec or more of data

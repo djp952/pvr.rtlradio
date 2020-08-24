@@ -36,7 +36,7 @@
 #include <utility>
 
 #include "props.h"
-#include "scanner.h"
+#include "signalmeter.h"
 
 #pragma warning(push, 4)
 
@@ -60,8 +60,8 @@ public:
 
 	// create (static)
 	//
-	// Factory method, creates a new scanner instance
-	static std::unique_ptr<channelsettings> create(std::unique_ptr<scanner> scanner, struct channelprops const& channelprops);
+	// Factory method, creates a new channelsettings instance
+	static std::unique_ptr<channelsettings> create(std::unique_ptr<signalmeter> signalmeter, struct channelprops const& channelprops);
 
 	// get_channel_properties
 	//
@@ -80,7 +80,7 @@ private:
 
 	// Instance Constructor
 	//
-	channelsettings(std::unique_ptr<scanner> scanner, struct channelprops const& channelprops);
+	channelsettings(std::unique_ptr<signalmeter> signalmeter, struct channelprops const& channelprops);
 
 	//-------------------------------------------------------------------------
 	// CWindow Implementation
@@ -127,7 +127,7 @@ private:
 	// Member Variables
 
 	bool								m_result = false;		// Dialog result
-	std::unique_ptr<scanner> const		m_scanner;				// Scanner instance
+	std::unique_ptr<signalmeter> const	m_signalmeter;			// Signal meter instance
 	struct channelprops					m_channelprops;			// Channel properties
 	std::vector<int>					m_manualgains;			// Manual gain values
 

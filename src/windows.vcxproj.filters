@@ -147,9 +147,6 @@
     <ClInclude Include="fmdsp\downconvert.h">
       <Filter>Header Files\fmdsp</Filter>
     </ClInclude>
-    <ClInclude Include="fmdsp\fastfir.h">
-      <Filter>Header Files\fmdsp</Filter>
-    </ClInclude>
     <ClInclude Include="fmdsp\smeter.h">
       <Filter>Header Files\fmdsp</Filter>
     </ClInclude>
@@ -157,9 +154,6 @@
       <Filter>Header Files\fmdsp</Filter>
     </ClInclude>
     <ClInclude Include="fmdsp\fir.h">
-      <Filter>Header Files\fmdsp</Filter>
-    </ClInclude>
-    <ClInclude Include="fmdsp\fft.h">
       <Filter>Header Files\fmdsp</Filter>
     </ClInclude>
     <ClInclude Include="fmdsp\filtercoef.h">
@@ -210,9 +204,6 @@
     <ClInclude Include="tcpdevice.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="scanner.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="addon.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -223,6 +214,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="channeladd.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="signalmeter.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -302,12 +296,6 @@
     <ClCompile Include="fmdsp\downconvert.cpp">
       <Filter>Source Files\fmdsp</Filter>
     </ClCompile>
-    <ClCompile Include="fmdsp\fastfir.cpp">
-      <Filter>Source Files\fmdsp</Filter>
-    </ClCompile>
-    <ClCompile Include="fmdsp\fft.cpp">
-      <Filter>Source Files\fmdsp</Filter>
-    </ClCompile>
     <ClCompile Include="fmdsp\fir.cpp">
       <Filter>Source Files\fmdsp</Filter>
     </ClCompile>
@@ -341,9 +329,6 @@
     <ClCompile Include="tcpdevice.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="scanner.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="addon.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -351,6 +336,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="channeladd.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="signalmeter.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

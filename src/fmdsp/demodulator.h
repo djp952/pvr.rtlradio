@@ -37,7 +37,6 @@
 #define DEMODULATOR_H
 
 #include "downconvert.h"
-#include "fastfir.h"
 #include "smeter.h"
 #include "agc.h"
 #include "wfmdemod.h"
@@ -114,7 +113,6 @@ public:
 private:
 	void DeleteAllDemods();
 	CDownConvert m_DownConvert;
-	CFastFIR m_FastFIR;
 	CAgc m_Agc;
 	CSMeter m_SMeter;
 #ifdef FMDSP_THREAD_SAFE

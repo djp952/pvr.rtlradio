@@ -49,14 +49,14 @@ static const int CONTROL_EDIT_METERSNR			= 209;
 // Arguments:
 //
 //	channelprops	- Channel properties
-//	scanner			- Scanner instance
+//	signalmeter		- Signal meter instance
 
-channelsettings::channelsettings(std::unique_ptr<scanner> scanner, struct channelprops const& channelprops) :
-	kodi::gui::CWindow("channelsettings.xml", "skin.estuary", true), m_scanner(std::move(scanner)), 
+channelsettings::channelsettings(std::unique_ptr<signalmeter> signalmeter, struct channelprops const& channelprops) :
+	kodi::gui::CWindow("channelsettings.xml", "skin.estuary", true), m_signalmeter(std::move(signalmeter)),
 	m_channelprops(channelprops)	
 {
 	// Get the vector<> of valid manual gain values for the attached device
-	m_scanner->get_valid_manual_gains(m_manualgains);
+	m_signalmeter->get_valid_manual_gains(m_manualgains);
 }
 
 //---------------------------------------------------------------------------
@@ -64,8 +64,8 @@ channelsettings::channelsettings(std::unique_ptr<scanner> scanner, struct channe
 
 channelsettings::~channelsettings()
 {
-	// Stop the channel scanner
-	m_scanner->stop();
+	// Stop the signal meter
+	m_signalmeter->stop();
 }
 
 //---------------------------------------------------------------------------
@@ -76,11 +76,11 @@ channelsettings::~channelsettings()
 // Arguments:
 //
 //	channelprops	- Channel properties
-//	scanner			- Scanner instance
+//	signalmeter		- Signal meter instance
 
-std::unique_ptr<channelsettings> channelsettings::create(std::unique_ptr<scanner> scanner, struct channelprops const& channelprops)
+std::unique_ptr<channelsettings> channelsettings::create(std::unique_ptr<signalmeter> signalmeter, struct channelprops const& channelprops)
 {
-	return std::unique_ptr<channelsettings>(new channelsettings(std::move(scanner), channelprops));
+	return std::unique_ptr<channelsettings>(new channelsettings(std::move(signalmeter), channelprops));
 }
 
 //---------------------------------------------------------------------------
@@ -252,14 +252,14 @@ bool channelsettings::OnClick(int controlId)
 
 		case CONTROL_RADIO_AUTOMATICGAIN:
 			m_channelprops.autogain = m_radio_autogain->IsSelected();
-			m_scanner->set_automatic_gain(m_channelprops.autogain);
+			m_signalmeter->set_automatic_gain(m_channelprops.autogain);
 			m_slider_manualgain->SetEnabled(!m_channelprops.autogain);
 			update_signal_meter();
 			return true;
 
 		case CONTROL_SLIDER_MANUALGAIN:
 			m_channelprops.manualgain = percent_to_gain(static_cast<int>(m_slider_manualgain->GetPercentage()));
-			m_scanner->set_manual_gain(m_channelprops.manualgain);
+			m_signalmeter->set_manual_gain(m_channelprops.manualgain);
 			update_signal_meter();
 			return true;
 
@@ -318,11 +318,11 @@ bool channelsettings::OnInit(void)
 		m_slider_manualgain->SetEnabled(!m_channelprops.autogain);
 		m_slider_manualgain->SetPercentage(static_cast<float>(gain_to_percent(m_channelprops.manualgain)));
 
-		// Start the scanner instance
-		m_scanner->set_frequency(m_channelprops.frequency);
-		m_scanner->set_automatic_gain(m_channelprops.autogain);
-		m_scanner->set_manual_gain(m_channelprops.manualgain);
-		m_scanner->start();
+		// Start the signal meter instance
+		m_signalmeter->set_frequency(m_channelprops.frequency);
+		m_signalmeter->set_automatic_gain(m_channelprops.autogain);
+		m_signalmeter->set_manual_gain(m_channelprops.manualgain);
+		m_signalmeter->start();
 
 		// Update the signal meter
 		update_signal_meter();

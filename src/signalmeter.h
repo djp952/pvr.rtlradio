@@ -20,8 +20,8 @@
 // SOFTWARE.
 //-----------------------------------------------------------------------------
 
-#ifndef __SCANNER_H_
-#define __SCANNER_H_
+#ifndef __SIGNALMETER_H_
+#define __SIGNALMETER_H_
 #pragma once
 
 #include <atomic>
@@ -35,25 +35,34 @@
 #pragma warning(push, 4)
 
 //---------------------------------------------------------------------------
-// Class scanner
+// Class signalmeter
 //
-// Implements the channel scanner
+// Implements the signal meter
+//
+// Portions based on:
+//
+// rtl-sdr (rtl_power.c)
+// https://git.osmocom.org/rtl-sdr/
+// Copyright (C) 2012 by Steve Markgraf <steve@steve-m.de>
+// Copyright (C) 2012 by Hoernchen <la@tfc - server.de>
+// Copyright (C) 2012 by Kyle Keen <keenerd@gmail.com>
+// GPLv2
 
-class scanner
+class signalmeter
 {
 public:
 
 	// Destructor
 	//
-	~scanner();
+	~signalmeter();
 
 	//-----------------------------------------------------------------------
 	// Member Functions
 
 	// create (static)
 	//
-	// Factory method, creates a new scanner instance
-	static std::unique_ptr<scanner> create(std::unique_ptr<rtldevice> device, struct tunerprops const& tunerprops);
+	// Factory method, creates a new signalmeter instance
+	static std::unique_ptr<signalmeter> create(std::unique_ptr<rtldevice> device, struct tunerprops const& tunerprops);
 
 	// get_automatic_gain
 	//
@@ -92,22 +101,22 @@ public:
 
 	// start
 	//
-	// Starts the scanner
+	// Starts the signal meter
 	void start(void);
 
 	// stop
 	//
-	// Stops the scanner
+	// Stops the signal meter
 	void stop(void);
 
 private:
 
-	scanner(scanner const&) = delete;
-	scanner& operator=(scanner const&) = delete;
+	signalmeter(signalmeter const&) = delete;
+	signalmeter& operator=(signalmeter const&) = delete;
 
 	// Instance Constructor
 	//
-	scanner(std::unique_ptr<rtldevice> device, struct tunerprops const& tunerprops);
+	signalmeter(std::unique_ptr<rtldevice> device, struct tunerprops const& tunerprops);
 
 	// DEFAULT_DEVICE_BLOCK_SIZE
 	//
@@ -126,12 +135,6 @@ private:
 
 	//-----------------------------------------------------------------------
 	// Private Member Functions
-
-	// start
-	//
-	// Worker thread procedure used to scan the channel information
-	void start(uint32_t frequency, uint32_t samplerate, int freqcorrection,
-		bool isrdbs, scalar_condition<bool>& started);
 
 	//-----------------------------------------------------------------------
 	// Member Variables
@@ -152,4 +155,4 @@ private:
 
 #pragma warning(pop)
 
-#endif	// __SCANNER_H_
+#endif	// __SIGNALMETER_H_

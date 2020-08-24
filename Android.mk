@@ -84,8 +84,6 @@ LOCAL_SRC_FILES := \
     src/fmdsp/datamodifier.cpp \
     src/fmdsp/demodulator.cpp \
     src/fmdsp/downconvert.cpp \
-    src/fmdsp/fastfir.cpp \
-    src/fmdsp/fft.cpp \
     src/fmdsp/fir.cpp \
     src/fmdsp/fractresampler.cpp \
     src/fmdsp/iir.cpp \
@@ -98,7 +96,7 @@ LOCAL_SRC_FILES := \
     src/fmstream.cpp \
     src/libusb_exception.cpp \
     src/rdsdecoder.cpp \
-    src/scanner.cpp \
+    src/signalmeter.cpp \
     src/sqlite_exception.cpp \
     src/uecp.cpp \
     src/usbdevice.cpp \
