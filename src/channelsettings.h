@@ -88,7 +88,7 @@ private:
 	// OnAction
 	//
 	// Receives action codes that are sent to this window
-	bool OnAction(int actionId, uint32_t buttoncode, wchar_t unicode) override;
+	bool OnAction(ADDON_ACTION actionId) override;
 
 	// OnClick
 	//

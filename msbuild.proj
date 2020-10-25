@@ -131,9 +131,9 @@
   <Target Name="linux-i686" DependsOnTargets="AddonVersion">
 
     <PropertyGroup>
-      <CPPFLAGS>-Wall -Wno-unknown-pragmas -I/usr/include/i386-linux-gnu -Idepends/xbmc/xbmc -Idepends/xbmc/xbmc/linux -Idepends/xbmc/xbmc/addons/kodi-addon-dev-kit/include -Idepends/xbmc/xbmc/cores/VideoPlayer/Interface/Addon -Idepends/libusb/linux-i686/include -Idepends/rapidjson/include -Idepends/rtl-sdr/include -Idepends/sqlite -Itmp/version -L/usr/lib/gcc/i686-linux-gnu/4.9</CPPFLAGS>
+      <CPPFLAGS>-Wall -Wno-unknown-pragmas -I/usr/include/i386-linux-gnu -Idepends/xbmc/xbmc -Idepends/xbmc/xbmc/linux -Idepends/xbmc/xbmc/addons/kodi-dev-kit/include -Idepends/xbmc/xbmc/cores/VideoPlayer/Interface/Addon -Idepends/libusb/linux-i686/include -Idepends/rapidjson/include -Idepends/rtl-sdr/include -Idepends/sqlite -Itmp/version -L/usr/lib/gcc/i686-linux-gnu/4.9</CPPFLAGS>
       <CFLAGS>-DNDEBUG -O2 -fPIC -m32 -Wno-unused-function -Wno-unused-variable -Wno-unused-but-set-variable -Wno-unused-label</CFLAGS>
-      <CXXFLAGS>-DNDEBUG -O2 -fPIC -std=c++11 -m32 -DFMDSP_USE_DOUBLE_PRECISION</CXXFLAGS>
+      <CXXFLAGS>-DNDEBUG -O2 -fPIC -std=c++14 -m32 -DFMDSP_USE_DOUBLE_PRECISION</CXXFLAGS>
     </PropertyGroup>
 
     <MakeDir Directories="out\linux-i686" ContinueOnError="false"/>
@@ -208,9 +208,9 @@
   <Target Name="linux-x86_64" DependsOnTargets="AddonVersion">
 
     <PropertyGroup>
-      <CPPFLAGS>-Wall -Wno-unknown-pragmas -I/usr/include/x86_64-linux-gnu -Idepends/xbmc/xbmc -Idepends/xbmc/xbmc/linux -Idepends/xbmc/xbmc/addons/kodi-addon-dev-kit/include -Idepends/xbmc/xbmc/cores/VideoPlayer/Interface/Addon -Idepends/libusb/linux-x86_64/include -Idepends/rapidjson/include -Idepends/rtl-sdr/include -Idepends/sqlite -Itmp/version -L/usr/lib/gcc/x86_64-linux-gnu/4.9</CPPFLAGS>
+      <CPPFLAGS>-Wall -Wno-unknown-pragmas -I/usr/include/x86_64-linux-gnu -Idepends/xbmc/xbmc -Idepends/xbmc/xbmc/linux -Idepends/xbmc/xbmc/addons/kodi-dev-kit/include -Idepends/xbmc/xbmc/cores/VideoPlayer/Interface/Addon -Idepends/libusb/linux-x86_64/include -Idepends/rapidjson/include -Idepends/rtl-sdr/include -Idepends/sqlite -Itmp/version -L/usr/lib/gcc/x86_64-linux-gnu/4.9</CPPFLAGS>
       <CFLAGS>-DNDEBUG -O2 -fPIC -Wno-unused-function -Wno-unused-variable -Wno-unused-but-set-variable -Wno-unused-label</CFLAGS>
-      <CXXFLAGS>-DNDEBUG -O2 -fPIC -std=c++11 -DFMDSP_USE_DOUBLE_PRECISION</CXXFLAGS>
+      <CXXFLAGS>-DNDEBUG -O2 -fPIC -std=c++14 -DFMDSP_USE_DOUBLE_PRECISION</CXXFLAGS>
     </PropertyGroup>
 
     <MakeDir Directories="out\linux-x86_64" ContinueOnError="false"/>
@@ -285,9 +285,9 @@
   <Target Name="linux-armel" DependsOnTargets="AddonVersion">
 
     <PropertyGroup>
-      <CPPFLAGS>-Wall -Wno-unknown-pragmas -Idepends/xbmc/xbmc -Idepends/xbmc/xbmc/linux -Idepends/xbmc/xbmc/addons/kodi-addon-dev-kit/include -Idepends/xbmc/xbmc/cores/VideoPlayer/Interface/Addon -Idepends/libusb/linux-armel/include -Idepends/rapidjson/include -Idepends/rtl-sdr/include -Idepends/sqlite -Itmp/version</CPPFLAGS>
+      <CPPFLAGS>-Wall -Wno-unknown-pragmas -Idepends/xbmc/xbmc -Idepends/xbmc/xbmc/linux -Idepends/xbmc/xbmc/addons/kodi-dev-kit/include -Idepends/xbmc/xbmc/cores/VideoPlayer/Interface/Addon -Idepends/libusb/linux-armel/include -Idepends/rapidjson/include -Idepends/rtl-sdr/include -Idepends/sqlite -Itmp/version</CPPFLAGS>
       <CFLAGS>-DNDEBUG -O2 -fPIC -Wno-unused-function -Wno-unused-variable -Wno-unused-but-set-variable -Wno-unused-label</CFLAGS>
-      <CXXFLAGS>-DNDEBUG -O2 -fPIC -std=c++11</CXXFLAGS>
+      <CXXFLAGS>-DNDEBUG -O2 -fPIC -std=c++14</CXXFLAGS>
     </PropertyGroup>
 
     <MakeDir Directories="out\linux-armel" ContinueOnError="false"/>
@@ -362,9 +362,9 @@
   <Target Name="linux-armhf" DependsOnTargets="AddonVersion">
 
     <PropertyGroup>
-      <CPPFLAGS>-Wall -Wno-unknown-pragmas -Idepends/xbmc/xbmc -Idepends/xbmc/xbmc/linux -Idepends/xbmc/xbmc/addons/kodi-addon-dev-kit/include -Idepends/xbmc/xbmc/cores/VideoPlayer/Interface/Addon -Idepends/libusb/linux-armhf/include -Idepends/rapidjson/include -Idepends/rtl-sdr/include -Idepends/sqlite -Itmp/version</CPPFLAGS>
+      <CPPFLAGS>-Wall -Wno-unknown-pragmas -Idepends/xbmc/xbmc -Idepends/xbmc/xbmc/linux -Idepends/xbmc/xbmc/addons/kodi-dev-kit/include -Idepends/xbmc/xbmc/cores/VideoPlayer/Interface/Addon -Idepends/libusb/linux-armhf/include -Idepends/rapidjson/include -Idepends/rtl-sdr/include -Idepends/sqlite -Itmp/version</CPPFLAGS>
       <CFLAGS>-DNDEBUG -O2 -fPIC -Wno-unused-function -Wno-unused-variable -Wno-unused-but-set-variable -Wno-unused-label</CFLAGS>
-      <CXXFLAGS>-DNDEBUG -O2 -fPIC -std=c++11</CXXFLAGS>
+      <CXXFLAGS>-DNDEBUG -O2 -fPIC -std=c++14</CXXFLAGS>
     </PropertyGroup>
 
     <MakeDir Directories="out\linux-armhf" ContinueOnError="false"/>
@@ -439,9 +439,9 @@
   <Target Name="linux-aarch64" DependsOnTargets="AddonVersion">
 
     <PropertyGroup>
-      <CPPFLAGS>-Wall -Wno-unknown-pragmas -Idepends/xbmc/xbmc -Idepends/xbmc/xbmc/linux -Idepends/xbmc/xbmc/addons/kodi-addon-dev-kit/include -Idepends/xbmc/xbmc/cores/VideoPlayer/Interface/Addon -Idepends/libusb/linux-aarch64/include -Idepends/rapidjson/include -Idepends/rtl-sdr/include -Idepends/sqlite -Itmp/version</CPPFLAGS>
+      <CPPFLAGS>-Wall -Wno-unknown-pragmas -Idepends/xbmc/xbmc -Idepends/xbmc/xbmc/linux -Idepends/xbmc/xbmc/addons/kodi-dev-kit/include -Idepends/xbmc/xbmc/cores/VideoPlayer/Interface/Addon -Idepends/libusb/linux-aarch64/include -Idepends/rapidjson/include -Idepends/rtl-sdr/include -Idepends/sqlite -Itmp/version</CPPFLAGS>
       <CFLAGS>-DNDEBUG -O2 -fPIC -Wno-unused-function -Wno-unused-variable -Wno-unused-but-set-variable -Wno-unused-label</CFLAGS>
-      <CXXFLAGS>-DNDEBUG -O2 -fPIC -std=c++11</CXXFLAGS>
+      <CXXFLAGS>-DNDEBUG -O2 -fPIC -std=c++14</CXXFLAGS>
     </PropertyGroup>
 
     <MakeDir Directories="out\linux-aarch64" ContinueOnError="false"/>
@@ -512,92 +512,14 @@
 
   </Target>
 
-  <!-- BUILD: RASPBIAN-ARMHF -->
-  <Target Name="raspbian-armhf" DependsOnTargets="AddonVersion">
-
-    <PropertyGroup>
-      <ENV>PATH+=:~/raspberrypi/arm-bcm2708/gcc-linaro-arm-linux-gnueabihf-raspbian-x64/bin</ENV>
-      <CPPFLAGS>-Wall -Wno-unknown-pragmas -Idepends/xbmc/xbmc -Idepends/xbmc/xbmc/linux -Idepends/xbmc/xbmc/addons/kodi-addon-dev-kit/include -Idepends/xbmc/xbmc/cores/VideoPlayer/Interface/Addon -Idepends/libusb/raspbian-armhf/include -Idepends/rapidjson/include -Idepends/rtl-sdr/include -Idepends/sqlite -Itmp/version</CPPFLAGS>
-      <CFLAGS>-DNDEBUG -O2 -fPIC -Wno-unused-function -Wno-unused-variable -Wno-unused-but-set-variable -Wno-unused-label</CFLAGS>
-      <CXXFLAGS>-DNDEBUG -O2 -fPIC -std=c++11</CXXFLAGS>
-    </PropertyGroup>
-
-    <MakeDir Directories="out\raspbian-armhf" ContinueOnError="false"/>
-    <MakeDir Directories="out\repository" ContinueOnError="false"/>
-    <Exec Command="$(BashExe) -c &quot;$(ENV) arm-linux-gnueabihf-gcc $(CPPFLAGS) $(CFLAGS) -c depends/rtl-sdr/src/librtlsdr.c -o out/raspbian-armhf/librtlsdr.o&quot;" ContinueOnError="false"/>
-    <Exec Command="$(BashExe) -c &quot;$(ENV) arm-linux-gnueabihf-gcc $(CPPFLAGS) $(CFLAGS) -c depends/rtl-sdr/src/tuner_e4k.c -o out/raspbian-armhf/tuner_e4k.o&quot;" ContinueOnError="false"/>
-    <Exec Command="$(BashExe) -c &quot;$(ENV) arm-linux-gnueabihf-gcc $(CPPFLAGS) $(CFLAGS) -c depends/rtl-sdr/src/tuner_fc0012.c -o out/raspbian-armhf/tuner_fc0012.o&quot;" ContinueOnError="false"/>
-    <Exec Command="$(BashExe) -c &quot;$(ENV) arm-linux-gnueabihf-gcc $(CPPFLAGS) $(CFLAGS) -c depends/rtl-sdr/src/tuner_fc0013.c -o out/raspbian-armhf/tuner_fc0013.o&quot;" ContinueOnError="false"/>
-    <Exec Command="$(BashExe) -c &quot;$(ENV) arm-linux-gnueabihf-gcc $(CPPFLAGS) $(CFLAGS) -c depends/rtl-sdr/src/tuner_fc2580.c -o out/raspbian-armhf/tuner_fc2580.o&quot;" ContinueOnError="false"/>
-    <Exec Command="$(BashExe) -c &quot;$(ENV) arm-linux-gnueabihf-gcc $(CPPFLAGS) $(CFLAGS) -c depends/rtl-sdr/src/tuner_r82xx.c -o out/raspbian-armhf/tuner_r82xx.o&quot;" ContinueOnError="false"/>
-    <Exec Command="$(BashExe) -c &quot;$(ENV) arm-linux-gnueabihf-gcc $(CPPFLAGS) $(CFLAGS) -c depends/rtl-sdr/src/convenience/convenience.c -o out/raspbian-armhf/convenience.o&quot;" ContinueOnError="false"/>
-    <Exec Command="$(BashExe) -c &quot;$(ENV) arm-linux-gnueabihf-gcc $(CPPFLAGS) $(CFLAGS) -c depends/rtl-sdr/src/getopt/getopt.c -o out/raspbian-armhf/getopt.o&quot;" ContinueOnError="false"/>
-    <Exec Command="$(BashExe) -c &quot;$(ENV) arm-linux-gnueabihf-gcc $(CPPFLAGS) $(CFLAGS) -c depends/rtl-sdr/src/rtl_adsb.c -o out/raspbian-armhf/rtl_adsb.o&quot;" ContinueOnError="false"/>
-    <Exec Command="$(BashExe) -c &quot;$(ENV) arm-linux-gnueabihf-gcc $(CPPFLAGS) $(CFLAGS) -c depends/rtl-sdr/src/rtl_biast.c -o out/raspbian-armhf/rtl_biast.o&quot;" ContinueOnError="false"/>
-    <Exec Command="$(BashExe) -c &quot;$(ENV) arm-linux-gnueabihf-gcc $(CPPFLAGS) $(CFLAGS) -c depends/rtl-sdr/src/rtl_eeprom.c -o out/raspbian-armhf/rtl_eeprom.o&quot;" ContinueOnError="false"/>
-    <Exec Command="$(BashExe) -c &quot;$(ENV) arm-linux-gnueabihf-gcc $(CPPFLAGS) $(CFLAGS) -c depends/rtl-sdr/src/rtl_fm.c -o out/raspbian-armhf/rtl_fm.o&quot;" ContinueOnError="false"/>
-    <Exec Command="$(BashExe) -c &quot;$(ENV) arm-linux-gnueabihf-gcc $(CPPFLAGS) $(CFLAGS) -c depends/rtl-sdr/src/rtl_power.c -o out/raspbian-armhf/rtl_power.o&quot;" ContinueOnError="false"/>
-    <Exec Command="$(BashExe) -c &quot;$(ENV) arm-linux-gnueabihf-gcc $(CPPFLAGS) $(CFLAGS) -c depends/rtl-sdr/src/rtl_sdr.c -o out/raspbian-armhf/rtl_sdr.o&quot;" ContinueOnError="false"/>
-    <Exec Command="$(BashExe) -c &quot;$(ENV) arm-linux-gnueabihf-gcc $(CPPFLAGS) $(CFLAGS) -c depends/rtl-sdr/src/rtl_tcp.c -o out/raspbian-armhf/rtl_tcp.o&quot;" ContinueOnError="false"/>
-    <Exec Command="$(BashExe) -c &quot;$(ENV) arm-linux-gnueabihf-gcc $(CPPFLAGS) $(CFLAGS) -c depends/rtl-sdr/src/rtl_test.c -o out/raspbian-armhf/rtl_test.o&quot;" ContinueOnError="false"/>
-    <Exec Command="$(BashExe) -c &quot;$(ENV) arm-linux-gnueabihf-gcc $(CPPFLAGS) $(CFLAGS) -DSQLITE_THREADSAFE=2 -DSQLITE_ENABLE_JSON1=1 -DSQLITE_TEMP_STORE=3 -c depends/sqlite/sqlite3.c -o out/raspbian-armhf/sqlite3.o&quot;" ContinueOnError="false"/>
-    <Exec Command="$(BashExe) -c &quot;$(ENV) arm-linux-gnueabihf-gcc $(CPPFLAGS) $(CXXFLAGS) -c src/fmdsp/agc.cpp -o out/raspbian-armhf/agc.o&quot;" ContinueOnError="false"/>
-    <Exec Command="$(BashExe) -c &quot;$(ENV) arm-linux-gnueabihf-gcc $(CPPFLAGS) $(CXXFLAGS) -c src/fmdsp/datamodifier.cpp -o out/raspbian-armhf/datamodifier.o&quot;" ContinueOnError="false"/>
-    <Exec Command="$(BashExe) -c &quot;$(ENV) arm-linux-gnueabihf-gcc $(CPPFLAGS) $(CXXFLAGS) -c src/fmdsp/demodulator.cpp -o out/raspbian-armhf/demodulator.o&quot;" ContinueOnError="false"/>
-    <Exec Command="$(BashExe) -c &quot;$(ENV) arm-linux-gnueabihf-gcc $(CPPFLAGS) $(CXXFLAGS) -c src/fmdsp/downconvert.cpp -o out/raspbian-armhf/downconvert.o&quot;" ContinueOnError="false"/>
-    <Exec Command="$(BashExe) -c &quot;$(ENV) arm-linux-gnueabihf-gcc $(CPPFLAGS) $(CXXFLAGS) -c src/fmdsp/fir.cpp -o out/raspbian-armhf/fir.o&quot;" ContinueOnError="false"/>
-    <Exec Command="$(BashExe) -c &quot;$(ENV) arm-linux-gnueabihf-gcc $(CPPFLAGS) $(CXXFLAGS) -c src/fmdsp/fractresampler.cpp -o out/raspbian-armhf/fractresampler.o&quot;" ContinueOnError="false"/>
-    <Exec Command="$(BashExe) -c &quot;$(ENV) arm-linux-gnueabihf-gcc $(CPPFLAGS) $(CXXFLAGS) -c src/fmdsp/iir.cpp -o out/raspbian-armhf/iir.o&quot;" ContinueOnError="false"/>
-    <Exec Command="$(BashExe) -c &quot;$(ENV) arm-linux-gnueabihf-gcc $(CPPFLAGS) $(CXXFLAGS) -c src/fmdsp/smeter.cpp -o out/raspbian-armhf/smeter.o&quot;" ContinueOnError="false"/>
-    <Exec Command="$(BashExe) -c &quot;$(ENV) arm-linux-gnueabihf-gcc $(CPPFLAGS) $(CXXFLAGS) -c src/fmdsp/wfmdemod.cpp -o out/raspbian-armhf/wfmdemod.o&quot;" ContinueOnError="false"/>
-    <Exec Command="$(BashExe) -c &quot;$(ENV) arm-linux-gnueabihf-g++ $(CPPFLAGS) $(CXXFLAGS) -c src/addon.cpp -o out/raspbian-armhf/addon.o&quot;" ContinueOnError="false"/>
-    <Exec Command="$(BashExe) -c &quot;$(ENV) arm-linux-gnueabihf-g++ $(CPPFLAGS) $(CXXFLAGS) -c src/channeladd.cpp -o out/raspbian-armhf/channeladd.o&quot;" ContinueOnError="false"/>
-    <Exec Command="$(BashExe) -c &quot;$(ENV) arm-linux-gnueabihf-g++ $(CPPFLAGS) $(CXXFLAGS) -c src/channelsettings.cpp -o out/raspbian-armhf/channelsettings.o&quot;" ContinueOnError="false"/>
-    <Exec Command="$(BashExe) -c &quot;$(ENV) arm-linux-gnueabihf-g++ $(CPPFLAGS) $(CXXFLAGS) -c src/database.cpp -o out/raspbian-armhf/database.o&quot;" ContinueOnError="false"/>
-    <Exec Command="$(BashExe) -c &quot;$(ENV) arm-linux-gnueabihf-g++ $(CPPFLAGS) $(CXXFLAGS) -c src/fmstream.cpp -o out/raspbian-armhf/fmstream.o&quot;" ContinueOnError="false"/>
-    <Exec Command="$(BashExe) -c &quot;$(ENV) arm-linux-gnueabihf-g++ $(CPPFLAGS) $(CXXFLAGS) -c src/libusb_exception.cpp -o out/raspbian-armhf/libusb_exception.o&quot;" ContinueOnError="false"/>
-    <Exec Command="$(BashExe) -c &quot;$(ENV) arm-linux-gnueabihf-g++ $(CPPFLAGS) $(CXXFLAGS) -c src/rdsdecoder.cpp -o out/raspbian-armhf/rdsdecoder.o&quot;" ContinueOnError="false"/>
-    <Exec Command="$(BashExe) -c &quot;$(ENV) arm-linux-gnueabihf-g++ $(CPPFLAGS) $(CXXFLAGS) -c src/signalmeter.cpp -o out/raspbian-armhf/signalmeter.o&quot;" ContinueOnError="false"/>
-    <Exec Command="$(BashExe) -c &quot;$(ENV) arm-linux-gnueabihf-g++ $(CPPFLAGS) $(CXXFLAGS) -c src/sqlite_exception.cpp -o out/raspbian-armhf/sqlite_exception.o&quot;" ContinueOnError="false"/>
-    <Exec Command="$(BashExe) -c &quot;$(ENV) arm-linux-gnueabihf-g++ $(CPPFLAGS) $(CXXFLAGS) -c src/uecp.cpp -o out/raspbian-armhf/uecp.o&quot;" ContinueOnError="false"/>
-    <Exec Command="$(BashExe) -c &quot;$(ENV) arm-linux-gnueabihf-g++ $(CPPFLAGS) $(CXXFLAGS) -c src/usbdevice.cpp -o out/raspbian-armhf/usbdevice.o&quot;" ContinueOnError="false"/>
-    <Exec Command="$(BashExe) -c &quot;$(ENV) arm-linux-gnueabihf-g++ $(CPPFLAGS) $(CXXFLAGS) -c src/tcpdevice.cpp -o out/raspbian-armhf/tcpdevice.o&quot;" ContinueOnError="false"/>
-    <Exec Command="$(BashExe) -c &quot;$(ENV) arm-linux-gnueabihf-g++ $(CPPFLAGS) $(CXXFLAGS) -shared -Wl,--version-script=exportlist/exportlist.raspbian out/raspbian-armhf/agc.o out/raspbian-armhf/datamodifier.o out/raspbian-armhf/demodulator.o out/raspbian-armhf/downconvert.o out/raspbian-armhf/fir.o out/raspbian-armhf/fractresampler.o out/raspbian-armhf/iir.o out/raspbian-armhf/smeter.o out/raspbian-armhf/wfmdemod.o out/raspbian-armhf/addon.o out/raspbian-armhf/channeladd.o out/raspbian-armhf/channelsettings.o out/raspbian-armhf/database.o out/raspbian-armhf/fmstream.o out/raspbian-armhf/librtlsdr.o out/raspbian-armhf/libusb_exception.o out/raspbian-armhf/rdsdecoder.o out/raspbian-armhf/signalmeter.o out/raspbian-armhf/sqlite_exception.o out/raspbian-armhf/uecp.o out/raspbian-armhf/usbdevice.o out/raspbian-armhf/tcpdevice.o out/raspbian-armhf/tuner_e4k.o out/raspbian-armhf/tuner_fc0012.o out/raspbian-armhf/tuner_fc0013.o out/raspbian-armhf/tuner_fc2580.o out/raspbian-armhf/tuner_r82xx.o out/raspbian-armhf/sqlite3.o depends/libusb/raspbian-armhf/lib/libusb-1.0.a -ldl -lpthread -o out/raspbian-armhf/zuki.pvr.rtlradio.so&quot;" ContinueOnError="false"/>
-    <Exec Command="$(BashExe) -c &quot;$(ENV) arm-linux-gnueabihf-g++ $(CPPFLAGS) $(CXXFLAGS) out/raspbian-armhf/librtlsdr.o out/raspbian-armhf/tuner_e4k.o out/raspbian-armhf/tuner_fc0012.o out/raspbian-armhf/tuner_fc0013.o out/raspbian-armhf/tuner_fc2580.o out/raspbian-armhf/tuner_r82xx.o out/raspbian-armhf/convenience.o out/raspbian-armhf/getopt.o out/raspbian-armhf/rtl_adsb.o depends/libusb/raspbian-armhf/lib/libusb-1.0.a -ldl -lpthread -lrt -o out/raspbian-armhf/rtl_adsb&quot;" ContinueOnError="false"/>
-    <Exec Command="$(BashExe) -c &quot;$(ENV) arm-linux-gnueabihf-g++ $(CPPFLAGS) $(CXXFLAGS) out/raspbian-armhf/librtlsdr.o out/raspbian-armhf/tuner_e4k.o out/raspbian-armhf/tuner_fc0012.o out/raspbian-armhf/tuner_fc0013.o out/raspbian-armhf/tuner_fc2580.o out/raspbian-armhf/tuner_r82xx.o out/raspbian-armhf/convenience.o out/raspbian-armhf/getopt.o out/raspbian-armhf/rtl_biast.o depends/libusb/raspbian-armhf/lib/libusb-1.0.a -ldl -lpthread -lrt -o out/raspbian-armhf/rtl_biast&quot;" ContinueOnError="false"/>
-    <Exec Command="$(BashExe) -c &quot;$(ENV) arm-linux-gnueabihf-g++ $(CPPFLAGS) $(CXXFLAGS) out/raspbian-armhf/librtlsdr.o out/raspbian-armhf/tuner_e4k.o out/raspbian-armhf/tuner_fc0012.o out/raspbian-armhf/tuner_fc0013.o out/raspbian-armhf/tuner_fc2580.o out/raspbian-armhf/tuner_r82xx.o out/raspbian-armhf/convenience.o out/raspbian-armhf/getopt.o out/raspbian-armhf/rtl_eeprom.o depends/libusb/raspbian-armhf/lib/libusb-1.0.a -ldl -lpthread -lrt -o out/raspbian-armhf/rtl_eeprom&quot;" ContinueOnError="false"/>
-    <Exec Command="$(BashExe) -c &quot;$(ENV) arm-linux-gnueabihf-g++ $(CPPFLAGS) $(CXXFLAGS) out/raspbian-armhf/librtlsdr.o out/raspbian-armhf/tuner_e4k.o out/raspbian-armhf/tuner_fc0012.o out/raspbian-armhf/tuner_fc0013.o out/raspbian-armhf/tuner_fc2580.o out/raspbian-armhf/tuner_r82xx.o out/raspbian-armhf/convenience.o out/raspbian-armhf/getopt.o out/raspbian-armhf/rtl_fm.o depends/libusb/raspbian-armhf/lib/libusb-1.0.a -ldl -lpthread -lrt -o out/raspbian-armhf/rtl_fm&quot;" ContinueOnError="false"/>
-    <Exec Command="$(BashExe) -c &quot;$(ENV) arm-linux-gnueabihf-g++ $(CPPFLAGS) $(CXXFLAGS) out/raspbian-armhf/librtlsdr.o out/raspbian-armhf/tuner_e4k.o out/raspbian-armhf/tuner_fc0012.o out/raspbian-armhf/tuner_fc0013.o out/raspbian-armhf/tuner_fc2580.o out/raspbian-armhf/tuner_r82xx.o out/raspbian-armhf/convenience.o out/raspbian-armhf/getopt.o out/raspbian-armhf/rtl_power.o depends/libusb/raspbian-armhf/lib/libusb-1.0.a -ldl -lpthread -lrt -o out/raspbian-armhf/rtl_power&quot;" ContinueOnError="false"/>
-    <Exec Command="$(BashExe) -c &quot;$(ENV) arm-linux-gnueabihf-g++ $(CPPFLAGS) $(CXXFLAGS) out/raspbian-armhf/librtlsdr.o out/raspbian-armhf/tuner_e4k.o out/raspbian-armhf/tuner_fc0012.o out/raspbian-armhf/tuner_fc0013.o out/raspbian-armhf/tuner_fc2580.o out/raspbian-armhf/tuner_r82xx.o out/raspbian-armhf/convenience.o out/raspbian-armhf/getopt.o out/raspbian-armhf/rtl_sdr.o depends/libusb/raspbian-armhf/lib/libusb-1.0.a -ldl -lpthread -lrt -o out/raspbian-armhf/rtl_sdr&quot;" ContinueOnError="false"/>
-    <Exec Command="$(BashExe) -c &quot;$(ENV) arm-linux-gnueabihf-g++ $(CPPFLAGS) $(CXXFLAGS) out/raspbian-armhf/librtlsdr.o out/raspbian-armhf/tuner_e4k.o out/raspbian-armhf/tuner_fc0012.o out/raspbian-armhf/tuner_fc0013.o out/raspbian-armhf/tuner_fc2580.o out/raspbian-armhf/tuner_r82xx.o out/raspbian-armhf/convenience.o out/raspbian-armhf/getopt.o out/raspbian-armhf/rtl_tcp.o depends/libusb/raspbian-armhf/lib/libusb-1.0.a -ldl -lpthread -lrt -o out/raspbian-armhf/rtl_tcp&quot;" ContinueOnError="false"/>
-    <Exec Command="$(BashExe) -c &quot;$(ENV) arm-linux-gnueabihf-g++ $(CPPFLAGS) $(CXXFLAGS) out/raspbian-armhf/librtlsdr.o out/raspbian-armhf/tuner_e4k.o out/raspbian-armhf/tuner_fc0012.o out/raspbian-armhf/tuner_fc0013.o out/raspbian-armhf/tuner_fc2580.o out/raspbian-armhf/tuner_r82xx.o out/raspbian-armhf/convenience.o out/raspbian-armhf/getopt.o out/raspbian-armhf/rtl_test.o depends/libusb/raspbian-armhf/lib/libusb-1.0.a -ldl -lpthread -lrt -o out/raspbian-armhf/rtl_test&quot;" ContinueOnError="false"/>
-    <Exec Command="$(BashExe) -c &quot;$(ENV) arm-linux-gnueabihf-gcc $(CPPFLAGS) -DSQLITE_ENABLE_JSON1=1 depends/sqlite/sqlite3.c depends/sqlite/shell.c -o out/raspbian-armhf/sqlite3 -ldl -lpthread&quot;" ContinueOnError="false"/>
-    <Exec Command="TextTransform.exe template\addon.xml.tt -out tmp\addon-raspbian-armhf.xml -a !!platform!linux -a !!libraryplatform!linux -a !!libraryname!zuki.pvr.rtlradio.so -a !!changelogtxt!pvr.rtlradio\changelog.txt -a &quot;!!displayversion!$(DisplayVersion)&quot; -a &quot;!!repomanifest!raspbian-armhf.xml.gz&quot;" ContinueOnError="false"/>
-    <XmlPeek XmlInputPath="tmp\addon-raspbian-armhf.xml" Query="/addon/@version">
-      <Output TaskParameter="Result" PropertyName="PeekedDisplayVersion"/>
-    </XmlPeek>
-    <Error Condition="'$(PeekedDisplayVersion)' != '$(DisplayVersion)'" Text="DisplayVersion build property was not properly applied to the addon.xml text template"/>
-    <Exec Command="$(ZipperExe) create out\zuki.pvr.rtlradio-raspbian-armhf-$(KodiBaseline)-$(AddonVersion).zip manifest\raspbian-armhf.manifest -sha256" ContinueOnError="false"/>
-    <Exec Command="$(ZipperExe) create out\rtlsdr-toolkit-raspbian-armhf-$(AddonVersion).zip manifest\raspbian-armhf-tools.manifest" ContinueOnError="false"/>
-
-    <GetFileSize filename="out\zuki.pvr.rtlradio-raspbian-armhf-$(KodiBaseline)-$(AddonVersion).zip">
-      <Output PropertyName="ZipFileSize" TaskParameter="size"/>
-    </GetFileSize>
-
-    <Exec Command="TextTransform.exe template\addons.xml.tt -out &quot;tmp\repo-raspbian-armhf.xml&quot; -a !!platform!linux -a !!libraryplatform!linux -a !!libraryname!zuki.pvr.rtlradio.so -a &quot;!!displayversion!$(DisplayVersion)&quot; -a !!zipfilesize!$(ZipFileSize) -a !!zipfilename!zuki.pvr.rtlradio-raspbian-armhf-$(KodiBaseline)-$(AddonVersion).zip" ContinueOnError="false"/>
-    <Exec Command="$(BashExe) -c &quot;gzip -cf tmp/repo-raspbian-armhf.xml &gt; out/repository/raspbian-armhf.xml.gz&quot;" ContinueOnError="false"/>
-    <Exec Command="$(BashExe) -c &quot;pushd out/repository/ ; sha256sum raspbian-armhf.xml.gz &gt; raspbian-armhf.xml.gz.sha256 ; popd&quot;" ContinueOnError="false"/>
-
-  </Target>
-
   <!-- BUILD: OSX-X86_64 -->
   <Target Name="osx-x86_64" DependsOnTargets="AddonVersion">
 
     <PropertyGroup>
       <ENV>OSXCROSS_NO_EXTENSION_WARNINGS=1 PATH+=:~/osxcross/target/bin</ENV>
-      <CPPFLAGS>-mmacosx-version-min=10.9 -Wall -Wno-unknown-pragmas -Idepends/xbmc/xbmc -Idepends/xbmc/xbmc/linux -Idepends/xbmc/xbmc/addons/kodi-addon-dev-kit/include -Idepends/xbmc/xbmc/cores/VideoPlayer/Interface/Addon -Idepends/libusb/osx-x86_64/include -Idepends/rapidjson/include -Idepends/rtl-sdr/include -Idepends/sqlite -Itmp/version</CPPFLAGS>
+      <CPPFLAGS>-mmacosx-version-min=10.9 -Wall -Wno-unknown-pragmas -Idepends/xbmc/xbmc -Idepends/xbmc/xbmc/linux -Idepends/xbmc/xbmc/addons/kodi-dev-kit/include -Idepends/xbmc/xbmc/cores/VideoPlayer/Interface/Addon -Idepends/libusb/osx-x86_64/include -Idepends/rapidjson/include -Idepends/rtl-sdr/include -Idepends/sqlite -Itmp/version</CPPFLAGS>
       <CFLAGS>-DNDEBUG -O2 -fPIC -stdlib=libc++ -Wno-unused-function -Wno-unused-variable -Wno-unused-label</CFLAGS>
-      <CXXFLAGS>-DNDEBUG -O2 -fPIC -std=c++11 -stdlib=libc++ -DFMDSP_USE_DOUBLE_PRECISION</CXXFLAGS>
+      <CXXFLAGS>-DNDEBUG -O2 -fPIC -std=c++14 -stdlib=libc++ -DFMDSP_USE_DOUBLE_PRECISION</CXXFLAGS>
     </PropertyGroup>
 
     <MakeDir Directories="out\osx-x86_64" ContinueOnError="false"/>
@@ -749,11 +671,10 @@
   <!-- BUILD: PLATFORMS -->
   <Target Name="windows" DependsOnTargets="windows-win32;windows-x64"/>
   <Target Name="linux" DependsOnTargets="linux-i686;linux-x86_64;linux-armel;linux-armhf;linux-aarch64"/>
-  <Target Name="raspbian" DependsOnTargets="raspbian-armhf"/>
   <Target Name="osx" DependsOnTargets="osx-x86_64"/>
   <Target Name="android" DependsOnTargets="android-arm;android-aarch64;android-x86"/>
 
   <!-- BUILD: ALL -->
-  <Target Name="all" DependsOnTargets="windows;linux;raspbian;osx;android"/>
+  <Target Name="all" DependsOnTargets="windows;linux;osx;android"/>
 
 </Project>

@@ -22,7 +22,7 @@
     <ProjectGuid>{5B5A17F1-4312-4A64-A796-2818CE0906B4}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>zuki.pvr.rtlradio</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0.17763.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.18362.0</WindowsTargetPlatformVersion>
     <ProjectName>windows</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -101,7 +101,8 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;_CRT_SECURE_NO_WARNINGS;rtlsdr_STATIC;FMDSP_USE_DOUBLE_PRECISION;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(ProjectDir)..\depends\xbmc\xbmc;$(ProjectDir)..\depends\xbmc\xbmc\platform\win32;$(ProjectDir)..\depends\xbmc\xbmc\addons\kodi-addon-dev-kit\include;$(ProjectDir)..\depends\xbmc\xbmc\cores\VideoPlayer\Interface\Addon;$(ProjectDir)..\depends\rapidjson\include;$(ProjectDir)..\depends\rtl-sdr\include;$(ProjectDir)..\depends\sqlite;$(ProjectDir)..\tmp\version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\depends\xbmc\xbmc;$(ProjectDir)..\depends\xbmc\xbmc\platform\win32;$(ProjectDir)..\depends\xbmc\xbmc\addons\kodi-dev-kit\include;$(ProjectDir)..\depends\xbmc\xbmc\cores\VideoPlayer\Interface\Addon;$(ProjectDir)..\depends\rapidjson\include;$(ProjectDir)..\depends\rtl-sdr\include;$(ProjectDir)..\depends\sqlite;$(ProjectDir)..\tmp\version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp14</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -119,7 +120,8 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;_CRT_SECURE_NO_WARNINGS;rtlsdr_STATIC;FMDSP_USE_DOUBLE_PRECISION;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(ProjectDir)..\depends\xbmc\xbmc;$(ProjectDir)..\depends\xbmc\xbmc\platform\win32;$(ProjectDir)..\depends\xbmc\xbmc\addons\kodi-addon-dev-kit\include;$(ProjectDir)..\depends\xbmc\xbmc\cores\VideoPlayer\Interface\Addon;$(ProjectDir)..\depends\rapidjson\include;$(ProjectDir)..\depends\rtl-sdr\include;$(ProjectDir)..\depends\sqlite;$(ProjectDir)..\tmp\version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\depends\xbmc\xbmc;$(ProjectDir)..\depends\xbmc\xbmc\platform\win32;$(ProjectDir)..\depends\xbmc\xbmc\addons\kodi-dev-kit\include;$(ProjectDir)..\depends\xbmc\xbmc\cores\VideoPlayer\Interface\Addon;$(ProjectDir)..\depends\rapidjson\include;$(ProjectDir)..\depends\rtl-sdr\include;$(ProjectDir)..\depends\sqlite;$(ProjectDir)..\tmp\version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp14</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -139,7 +141,8 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;_CRT_SECURE_NO_WARNINGS;rtlsdr_STATIC;FMDSP_USE_DOUBLE_PRECISION;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(ProjectDir)..\depends\xbmc\xbmc;$(ProjectDir)..\depends\xbmc\xbmc\platform\win32;$(ProjectDir)..\depends\xbmc\xbmc\addons\kodi-addon-dev-kit\include;$(ProjectDir)..\depends\xbmc\xbmc\cores\VideoPlayer\Interface\Addon;$(ProjectDir)..\depends\rapidjson\include;$(ProjectDir)..\depends\rtl-sdr\include;$(ProjectDir)..\depends\sqlite;$(ProjectDir)..\tmp\version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\depends\xbmc\xbmc;$(ProjectDir)..\depends\xbmc\xbmc\platform\win32;$(ProjectDir)..\depends\xbmc\xbmc\addons\kodi-dev-kit\include;$(ProjectDir)..\depends\xbmc\xbmc\cores\VideoPlayer\Interface\Addon;$(ProjectDir)..\depends\rapidjson\include;$(ProjectDir)..\depends\rtl-sdr\include;$(ProjectDir)..\depends\sqlite;$(ProjectDir)..\tmp\version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp14</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -161,7 +164,8 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;_CRT_SECURE_NO_WARNINGS;rtlsdr_STATIC;FMDSP_USE_DOUBLE_PRECISION;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(ProjectDir)..\depends\xbmc\xbmc;$(ProjectDir)..\depends\xbmc\xbmc\platform\win32;$(ProjectDir)..\depends\xbmc\xbmc\addons\kodi-addon-dev-kit\include;$(ProjectDir)..\depends\xbmc\xbmc\cores\VideoPlayer\Interface\Addon;$(ProjectDir)..\depends\rapidjson\include;$(ProjectDir)..\depends\rtl-sdr\include;$(ProjectDir)..\depends\sqlite;$(ProjectDir)..\tmp\version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\depends\xbmc\xbmc;$(ProjectDir)..\depends\xbmc\xbmc\platform\win32;$(ProjectDir)..\depends\xbmc\xbmc\addons\kodi-dev-kit\include;$(ProjectDir)..\depends\xbmc\xbmc\cores\VideoPlayer\Interface\Addon;$(ProjectDir)..\depends\rapidjson\include;$(ProjectDir)..\depends\rtl-sdr\include;$(ProjectDir)..\depends\sqlite;$(ProjectDir)..\tmp\version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp14</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>

@@ -37,7 +37,7 @@ LOCAL_MODULE := rtlradio
 LOCAL_C_INCLUDES += \
 	depends/xbmc/xbmc \
 	depends/xbmc/xbmc/linux \
-	depends/xbmc/xbmc/addons/kodi-addon-dev-kit/include \
+	depends/xbmc/xbmc/addons/kodi-dev-kit/include \
 	depends/xbmc/xbmc/cores/VideoPlayer/Interface/Addon \
 	depends/libusb/$(TARGET_ABI)/include \
 	depends/rapidjson/include \

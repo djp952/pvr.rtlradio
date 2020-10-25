@@ -17,7 +17,6 @@ Wideband FM Digital Signal Processing provided by [__CuteSDR__](https://sourcefo
 
 **OPTIONAL COMPONENTS**   
 * Android NDK r20b for Windows 64-bit   
-* Raspberry Pi Cross-Compiler   
 * OSXCROSS Cross-Compiler (with Mac OSX 10.11 SDK)   
    
 **REQUIRED: CONFIGURE UBUNTU ON WINDOWS**   
@@ -37,14 +36,6 @@ Download the Android NDK r20b for Windows 64-bit:
 
 * Extract the contents of the .zip file somewhere   
 * Set a System Environment Variable named ANDROID_NDK_ROOT that points to the extracted android-ndk-r20b folder
-   
-**OPTIONAL: CONFIGURE RASPBERRY PI CROSS-COMPILER**   
-*Necessary to build Raspbian Targets*   
-   
-* Open "Ubuntu"   
-```
-git clone https://github.com/raspberrypi/tools.git raspberrypi --depth=1
-```
    
 **OPTIONAL: CONFIGURE OSXCROSS CROSS-COMPILER**   
 *Necessary to build OS X Targets*   
@@ -105,7 +96,6 @@ Examples:
 | linux-i686 | Linux X86 | /t:linux-i686 |
 | linux-x86\_64 | Linux X64 | /t:linux-x86\_64 |
 | osx-x86\_64 | Mac OS X X64 | /t:osx-x86\_64 |
-| raspbian-armhf | Raspbian ARM (hard float) | /t:raspbian-armhf |
 | windows-win32 | Windows X86 | /t:windows-win32 |
 | windows-x64 | Windows X64 | /t:windows-x64 |
    

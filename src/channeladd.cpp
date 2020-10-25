@@ -66,12 +66,10 @@ void channeladd::GetContextButtons(int itemNumber, std::vector<std::pair<unsigne
 // Arguments:
 //
 //	actionId	- The action id to perform
-//	buttoncode	- Button code associated with the action
-//	unicode		- Unicode character associated with the action
 
-bool channeladd::OnAction(int actionId, uint32_t buttoncode, wchar_t unicode)
+bool channeladd::OnAction(ADDON_ACTION actionId)
 {
-	return kodi::gui::CWindow::OnAction(actionId, buttoncode, unicode);
+	return kodi::gui::CWindow::OnAction(actionId);
 }
 
 //---------------------------------------------------------------------------

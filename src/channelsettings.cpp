@@ -222,12 +222,10 @@ void channelsettings::update_signal_meter(void) const
 // Arguments:
 //
 //	actionId	- The action id to perform
-//	buttoncode	- Button code associated with the action
-//	unicode		- Unicode character associated with the action
 
-bool channelsettings::OnAction(int actionId, uint32_t buttoncode, wchar_t unicode)
+bool channelsettings::OnAction(ADDON_ACTION actionId)
 {
-	return kodi::gui::CWindow::OnAction(actionId, buttoncode, unicode);
+	return kodi::gui::CWindow::OnAction(actionId);
 }
 
 //---------------------------------------------------------------------------
