@@ -327,9 +327,10 @@ DemuxPacket* fmstream::demuxread(std::function<DemuxPacket*(int)> const& allocat
 	DemuxPacket* packet = allocator(packetsize);
 	if(packet == nullptr) return nullptr;
 
-	// Resample the audio data directly into the allocated packet buffer
+	// Resample the audio data directly into the allocated packet buffer; attenuating the samples
+	// by 6dB to provide a better volume match with other audio sources
 	int stereopackets = m_resampler->Resample(audiopackets, m_demodulator->GetOutputRate() / m_pcmsamplerate, 
-		samples.get(), reinterpret_cast<TYPESTEREO16*>(packet->pData));
+		-6.0, samples.get(), reinterpret_cast<TYPESTEREO16*>(packet->pData));
 
 	// Calcuate the duration of the demultiplexer packet, in microseconds
 	double duration = ((stereopackets / static_cast<double>(m_pcmsamplerate)) US);

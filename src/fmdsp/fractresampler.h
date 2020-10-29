@@ -52,10 +52,12 @@ public:
 
 	void Init(int MaxInputSize);
 	//overloaded functions for processing different data types
-	int Resample( int InLength, TYPEREAL Rate, TYPEREAL* pInBuf, TYPEREAL* pOutBuf);
-	int Resample( int InLength, TYPEREAL Rate, TYPECPX* pInBuf, TYPECPX* pOutBuf);
-	int Resample( int InLength, TYPEREAL Rate, TYPEREAL* pInBuf, TYPEMONO16* pOutBuf);
-	int Resample( int InLength, TYPEREAL Rate, TYPECPX* pInBuf, TYPESTEREO16* pOutBuf);
+	int Resample(int InLength, TYPEREAL Rate, TYPEREAL* pInBuf, TYPEREAL* pOutBuf);
+	int Resample(int InLength, TYPEREAL Rate, TYPECPX* pInBuf, TYPECPX* pOutBuf);
+	int Resample(int InLength, TYPEREAL Rate, TYPEREAL* pInBuf, TYPEMONO16* pOutBuf);
+	int Resample(int InLength, TYPEREAL Rate, TYPEREAL Gain, TYPEREAL* pInBuf, TYPEMONO16* pOutBuf);
+	int Resample(int InLength, TYPEREAL Rate, TYPECPX* pInBuf, TYPESTEREO16* pOutBuf);
+	int Resample(int InLength, TYPEREAL Rate, TYPEREAL Gain, TYPECPX* pInBuf, TYPESTEREO16* pOutBuf);
 
 private:
 	TYPEREAL m_FloatTime;	//floating pt output time accumulator

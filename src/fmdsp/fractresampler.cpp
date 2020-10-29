@@ -173,7 +173,12 @@ TYPECPX acc;
 //  the generated samples, especially if up converting  !!!!!
 // stereo Integer version
 //////////////////////////////////////////////////////////////////////
-int CFractResampler::Resample( int InLength, TYPEREAL Rate, TYPECPX* pInBuf, TYPESTEREO16* pOutBuf)
+int CFractResampler::Resample(int InLength, TYPEREAL Rate, TYPECPX* pInBuf, TYPESTEREO16* pOutBuf)
+{
+	return Resample(InLength, Rate, 0.0, pInBuf, pOutBuf);
+}
+
+int CFractResampler::Resample( int InLength, TYPEREAL Rate, TYPEREAL Gain, TYPECPX* pInBuf, TYPESTEREO16* pOutBuf)
 {
 int i;
 int j;
@@ -181,6 +186,9 @@ int IntegerTime = (int)m_FloatTime;	//integer input time accumulator
 TYPEREAL dt = Rate;	//output delta time as function of input sample time (input rate/output rate)
 int outsamples = 0;
 TYPECPX acc;
+
+	// Calculate the gain factor for the integer samples
+	const TYPEREAL gainFactor = MPOW(10.0, (Gain / 10.0));
 
 	//copy input samples into buffer starting at position SINC_PERIODS
 	j = SINC_PERIODS;
@@ -204,8 +212,9 @@ TYPECPX acc;
 			acc.im += (m_pInputBuf[j].im * s_sinc[sindx] );
 		}
 
-		pOutBuf[outsamples].re = (qint16)(acc.re);
-		pOutBuf[outsamples++].im = (qint16)(acc.im);
+		// MGB: Attenuate the samples by -6dB during conversion
+		pOutBuf[outsamples].re = (qint16)(acc.re * gainFactor);
+		pOutBuf[outsamples++].im = (qint16)(acc.im * gainFactor);
 
 		m_FloatTime += dt;	//inc floating pt output time step
 		IntegerTime = (int)m_FloatTime;	//truncate to integer
@@ -275,7 +284,12 @@ TYPEREAL acc;
 //  the generated samples, especially if up converting  !!!!!
 // short Integer version
 //////////////////////////////////////////////////////////////////////
-int CFractResampler::Resample( int InLength, TYPEREAL Rate, TYPEREAL* pInBuf, TYPEMONO16* pOutBuf)
+int CFractResampler::Resample(int InLength, TYPEREAL Rate, TYPEREAL* pInBuf, TYPEMONO16* pOutBuf)
+{
+	return Resample(InLength, Rate, 0.0, pInBuf, pOutBuf);
+}
+
+int CFractResampler::Resample( int InLength, TYPEREAL Rate, TYPEREAL Gain, TYPEREAL* pInBuf, TYPEMONO16* pOutBuf)
 {
 int i;
 int j;
@@ -283,6 +297,9 @@ int IntegerTime = (int)m_FloatTime;	//integer input time accumulator
 TYPEREAL dt = Rate;	//output delta time as function of input sample time (input rate/output rate)
 int outsamples = 0;
 TYPEREAL acc;
+
+	// Calculate the gain factor for the integer samples
+	const TYPEREAL gainFactor = MPOW(10.0, (Gain / 10.0));
 
 	//copy input samples into buffer starting at position SINC_PERIODS
 	j = SINC_PERIODS;
@@ -303,7 +320,7 @@ TYPEREAL acc;
 			acc += (m_pInputBuf[j].re * s_sinc[sindx] );
 		}
 
-		pOutBuf[outsamples++] = (TYPEMONO16)acc;
+		pOutBuf[outsamples++] = (TYPEMONO16)(acc * gainFactor);
 
 		m_FloatTime += dt;
 		IntegerTime = (int)m_FloatTime;
