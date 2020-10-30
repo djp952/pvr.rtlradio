@@ -101,6 +101,11 @@ struct settings {
 	// Flag to include the channel number in the channel name
 	bool interface_prepend_channel_numbers;
 
+	// fmradio_enable_rds
+	//
+	// Enables passing decoded RDS information to Kodi
+	bool fmradio_enable_rds;
+
 	// fmradio_rds_standard
 	//
 	// Specifies the Radio Data System (RDS) standard
@@ -110,6 +115,11 @@ struct settings {
 	//
 	// Specifies the output sample rate for the FM DSP
 	int fmradio_output_samplerate;
+
+	// fmradio_output_gain
+	//
+	// Specified the output gain for the FM DSP
+	float fmradio_output_gain;
 };
 
 //---------------------------------------------------------------------------

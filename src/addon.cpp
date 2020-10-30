@@ -552,8 +552,10 @@ ADDON_STATUS addon::Create(void)
 			m_settings.interface_prepend_channel_numbers = kodi::GetSettingBoolean("interface_prepend_channel_numbers", false);
 
 			// Load the FM Radio settings
+			m_settings.fmradio_enable_rds = kodi::GetSettingBoolean("fmradio_enable_rds", true);
 			m_settings.fmradio_rds_standard = kodi::GetSettingEnum("fmradio_rds_standard", rds_standard::automatic);
 			m_settings.fmradio_output_samplerate = kodi::GetSettingInt("fmradio_output_samplerate", 48000);
+			m_settings.fmradio_output_gain = kodi::GetSettingFloat("fmradio_output_gain", -3.0f);
 
 			// Register the PVR_MENUHOOK_SETTING category menu hooks
 			AddMenuHook(kodi::addon::PVRMenuhook(MENUHOOK_SETTING_IMPORTCHANNELS, 30400, PVR_MENUHOOK_SETTING));
@@ -714,6 +716,18 @@ ADDON_STATUS addon::SetSetting(std::string const& settingName, kodi::CSettingVal
 		}
 	}
 
+	// fmradio_enable_rds
+	//
+	else if(settingName == "fmradio_enable_rds") {
+
+		bool bvalue = settingValue.GetBoolean();
+		if(bvalue != m_settings.fmradio_enable_rds) {
+
+			m_settings.fmradio_enable_rds = bvalue;
+			log_info(__func__, ": setting fmradio_enable_rds changed to ", (bvalue) ? "true" : "false");
+		}
+	}
+
 	// fmradio_rds_standard
 	//
 	else if(settingName == "fmradio_rds_standard") {
@@ -735,6 +749,18 @@ ADDON_STATUS addon::SetSetting(std::string const& settingName, kodi::CSettingVal
 
 			m_settings.fmradio_output_samplerate = nvalue;
 			log_info(__func__, ": setting fmradio_output_samplerate changed to ", nvalue, "Hz");
+		}
+	}
+
+	// fmradio_output_gain
+	//
+	else if(settingName == "fmradio_output_gain") {
+
+		float fvalue = settingValue.GetFloat();
+		if(fvalue != m_settings.fmradio_output_gain) {
+
+			m_settings.fmradio_output_gain = fvalue;
+			log_info(__func__, ": setting fmradio_output_gain changed to ", fvalue, "dB");
 		}
 	}
 
@@ -1376,6 +1402,7 @@ bool addon::OpenLiveStream(kodi::addon::PVRChannel const& channel)
 
 		// Set up the FM digital signal processor properties
 		struct fmprops fmprops = {};
+		fmprops.decoderds = settings.fmradio_enable_rds;
 		fmprops.isrbds = (get_regional_rds_standard(settings.fmradio_rds_standard) == rds_standard::rbds);
 		fmprops.outputrate = settings.fmradio_output_samplerate;
 

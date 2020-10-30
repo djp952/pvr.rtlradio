@@ -69,8 +69,9 @@ int const fmstream::STREAM_ID_UECP = 2;
 
 fmstream::fmstream(std::unique_ptr<rtldevice> device, struct tunerprops const& tunerprops, 
 	struct channelprops const& channelprops, struct fmprops const& fmprops) :
-	m_device(std::move(device)), m_rdsdecoder(fmprops.isrbds), m_samplerate(DEFAULT_DEVICE_SAMPLE_RATE), 
-	m_pcmsamplerate(fmprops.outputrate), m_buffersize(align::up(DEFAULT_RINGBUFFER_SIZE, 16 KiB))
+	m_device(std::move(device)), m_decoderds(fmprops.decoderds), m_rdsdecoder(fmprops.isrbds), 
+	m_samplerate(DEFAULT_DEVICE_SAMPLE_RATE), m_pcmsamplerate(fmprops.outputrate), m_pcmgain(static_cast<TYPEREAL>(fmprops.outputgain)),
+	m_buffersize(align::up(DEFAULT_RINGBUFFER_SIZE, 16 KiB))
 {
 	// The only allowable output sample rates for this stream are 44100Hz and 48000Hz
 	if((m_pcmsamplerate != 44100) && (m_pcmsamplerate != 48000))
@@ -237,18 +238,23 @@ DemuxPacket* fmstream::demuxread(std::function<DemuxPacket*(int)> const& allocat
 	uecp_data_packet uecp_packet;
 	if(m_rdsdecoder.pop_uecp_data_packet(uecp_packet) && (!uecp_packet.empty())) {
 
-		// Allocate and initialize the UECP demultiplexer packet
-		int packetsize = static_cast<int>(uecp_packet.size());
-		DemuxPacket* packet = allocator(packetsize);
-		if(packet == nullptr) return nullptr;
+		// The user may have opted to disable RDS.  The packet from the decoder still
+		// needs to be popped from the queue, but don't do anything with it ...
+		if(m_decoderds) {
 
-		packet->iStreamId = STREAM_ID_UECP;
-		packet->iSize = packetsize;
-		packet->pts = DVD_NOPTS_VALUE;
+			// Allocate and initialize the UECP demultiplexer packet
+			int packetsize = static_cast<int>(uecp_packet.size());
+			DemuxPacket* packet = allocator(packetsize);
+			if(packet == nullptr) return nullptr;
 
-		// Copy the UECP data into the demultiplexer packet and return it
-		memcpy(packet->pData, uecp_packet.data(), uecp_packet.size());
-		return packet;
+			packet->iStreamId = STREAM_ID_UECP;
+			packet->iSize = packetsize;
+			packet->pts = DVD_NOPTS_VALUE;
+
+			// Copy the UECP data into the demultiplexer packet and return it
+			memcpy(packet->pData, uecp_packet.data(), uecp_packet.size());
+			return packet;
+		}
 	}
 
 	// The demodulator only works properly in this use pattern if it's fed the exact
@@ -299,13 +305,13 @@ DemuxPacket* fmstream::demuxread(std::function<DemuxPacket*(int)> const& allocat
 		// 256.996 = (32767.0 / 127.5) = 256.9960784313725
 		samples[index] = {
 
-		#ifdef FMDSP_USE_DOUBLE_PRECISION
+#ifdef FMDSP_USE_DOUBLE_PRECISION
 			(static_cast<TYPEREAL>(m_buffer[tail]) - 127.5) * 256.996,			// I
 			(static_cast<TYPEREAL>(m_buffer[tail + 1]) - 127.5) * 256.996,		// Q
-		#else
+#else
 			(static_cast<TYPEREAL>(m_buffer[tail]) - 127.5f) * 256.996f,		// I
 			(static_cast<TYPEREAL>(m_buffer[tail + 1]) - 127.5f) * 256.996f,	// Q
-		#endif
+#endif
 		};
 
 		tail += 2;								// Increment new tail position
@@ -327,10 +333,9 @@ DemuxPacket* fmstream::demuxread(std::function<DemuxPacket*(int)> const& allocat
 	DemuxPacket* packet = allocator(packetsize);
 	if(packet == nullptr) return nullptr;
 
-	// Resample the audio data directly into the allocated packet buffer; attenuating the samples
-	// by 6dB to provide a better volume match with other audio sources
+	// Resample the audio data directly into the allocated packet buffer
 	int stereopackets = m_resampler->Resample(audiopackets, m_demodulator->GetOutputRate() / m_pcmsamplerate, 
-		-6.0, samples.get(), reinterpret_cast<TYPESTEREO16*>(packet->pData));
+		m_pcmgain, samples.get(), reinterpret_cast<TYPESTEREO16*>(packet->pData));
 
 	// Calcuate the duration of the demultiplexer packet, in microseconds
 	double duration = ((stereopackets / static_cast<double>(m_pcmsamplerate)) US);
@@ -397,10 +402,13 @@ void fmstream::enumproperties(std::function<void(struct streamprops const& props
 
 	// UECP STREAM
 	//
-	streamprops uecp = {};
-	uecp.codec = "rds";
-	uecp.pid = STREAM_ID_UECP;
-	callback(uecp);
+	if(m_decoderds) {
+
+		streamprops uecp = {};
+		uecp.codec = "rds";
+		uecp.pid = STREAM_ID_UECP;
+		callback(uecp);
+	}
 }
 
 //---------------------------------------------------------------------------

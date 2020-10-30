@@ -56,7 +56,9 @@ msgctxt "#30105"
 msgid "PCM output sample rate"
 msgstr ""
 
-# 30106 unused on Matrix but used on Leia - don't reuse
+msgctxt "#30106"
+msgid "Enable Radio Data System (RDS)"
+msgstr ""
 
 msgctxt "#30107"
 msgid "Prepend channel numbers to channel names"
@@ -64,6 +66,10 @@ msgstr ""
 
 msgctxt "#30108"
 msgid "Frequency correction calibration value (PPM)"
+msgstr ""
+
+msgctxt "#30109"
+msgid "PCM output gain"
 msgstr ""
 
 msgctxt "#30200"
@@ -154,7 +160,9 @@ msgctxt "#30505"
 msgid "Specifies the FM digital signal processor PCM output sample rate."
 msgstr ""
 
-# 30506 unused on Matrix but used on Leia - don't reuse
+msgctxt "#30506"
+msgid "When set to ON detected Radio Data System (RDS) data embedded in the FM signal will be decoded and processed."
+msgstr ""
 
 msgctxt "#30507"
 msgid "When set to ON the channel number will be prepended to the channel name when reported to Kodi."
@@ -163,3 +171,8 @@ msgstr ""
 msgctxt "#30508"
 msgid "Specifies the frequency correction calibration offset to apply to the RTL-SDR device. If the calibration offset for the device is not known, leave set to the default value 0."
 msgstr ""
+
+msgctxt "#30509"
+msgid "Specifies the FM digital signal processor PCM output audio gain."
+msgstr ""
+
