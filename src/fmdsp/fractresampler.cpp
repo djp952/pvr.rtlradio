@@ -212,7 +212,6 @@ TYPECPX acc;
 			acc.im += (m_pInputBuf[j].im * s_sinc[sindx] );
 		}
 
-		// MGB: Attenuate the samples by -6dB during conversion
 		pOutBuf[outsamples].re = (qint16)(acc.re * gainFactor);
 		pOutBuf[outsamples++].im = (qint16)(acc.im * gainFactor);
 
