@@ -250,7 +250,6 @@ DemuxPacket* fmstream::demuxread(std::function<DemuxPacket*(int)> const& allocat
 
 			packet->iStreamId = STREAM_ID_UECP;
 			packet->iSize = packetsize;
-			packet->pts = DVD_NOPTS_VALUE;
 
 			// Copy the UECP data into the demultiplexer packet and return it
 			memcpy(packet->pData, uecp_packet.data(), uecp_packet.size());
@@ -338,17 +337,9 @@ DemuxPacket* fmstream::demuxread(std::function<DemuxPacket*(int)> const& allocat
 	int stereopackets = m_resampler->Resample(audiopackets, m_demodulator->GetOutputRate() / m_pcmsamplerate, 
 		samples.get(), reinterpret_cast<TYPESTEREO16*>(packet->pData), m_pcmgain);
 
-	// Calcuate the duration of the demultiplexer packet, in microseconds
-	double duration = ((stereopackets / static_cast<double>(m_pcmsamplerate)) US);
-
-	// Set up the demultiplexer packet with the proper size, duration and pts
+	// Set up the demultiplexer packet with the proper stream identifier and size
 	packet->iStreamId = STREAM_ID_AUDIO;
 	packet->iSize = stereopackets * sizeof(TYPESTEREO16);
-	packet->duration = duration;
-	packet->pts = m_pts;
-
-	// Increment the program time stamp value based on the calculated duration
-	m_pts += duration;
 
 	return packet;
 }

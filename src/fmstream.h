@@ -203,7 +203,6 @@ private:
 	uint32_t const						m_samplerate;			// Device sample rate
 	uint32_t const						m_pcmsamplerate;		// Output sample rate
 	TYPEREAL const						m_pcmgain;				// Output gain
-	double								m_pts{ 1 US };			// Current program time stamp
 
 	// STREAM CONTROL
 	//
