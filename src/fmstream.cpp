@@ -70,7 +70,8 @@ int const fmstream::STREAM_ID_UECP = 2;
 fmstream::fmstream(std::unique_ptr<rtldevice> device, struct tunerprops const& tunerprops, 
 	struct channelprops const& channelprops, struct fmprops const& fmprops) :
 	m_device(std::move(device)), m_decoderds(fmprops.decoderds), m_rdsdecoder(fmprops.isrbds), 
-	m_samplerate(DEFAULT_DEVICE_SAMPLE_RATE), m_pcmsamplerate(fmprops.outputrate), m_pcmgain(static_cast<TYPEREAL>(fmprops.outputgain)),
+	m_samplerate(DEFAULT_DEVICE_SAMPLE_RATE), m_pcmsamplerate(fmprops.outputrate), 
+	m_pcmgain(MPOW(10.0, (fmprops.outputgain / 10.0))),
 	m_buffersize(align::up(DEFAULT_RINGBUFFER_SIZE, 16 KiB))
 {
 	// The only allowable output sample rates for this stream are 44100Hz and 48000Hz
@@ -335,7 +336,7 @@ DemuxPacket* fmstream::demuxread(std::function<DemuxPacket*(int)> const& allocat
 
 	// Resample the audio data directly into the allocated packet buffer
 	int stereopackets = m_resampler->Resample(audiopackets, m_demodulator->GetOutputRate() / m_pcmsamplerate, 
-		m_pcmgain, samples.get(), reinterpret_cast<TYPESTEREO16*>(packet->pData));
+		samples.get(), reinterpret_cast<TYPESTEREO16*>(packet->pData), m_pcmgain);
 
 	// Calcuate the duration of the demultiplexer packet, in microseconds
 	double duration = ((stereopackets / static_cast<double>(m_pcmsamplerate)) US);
