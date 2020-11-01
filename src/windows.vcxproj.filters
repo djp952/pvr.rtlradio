@@ -159,9 +159,6 @@
     <ClInclude Include="fmdsp\iir.h">
       <Filter>Header Files\fmdsp</Filter>
     </ClInclude>
-    <ClInclude Include="fmdsp\datamodifier.h">
-      <Filter>Header Files\fmdsp</Filter>
-    </ClInclude>
     <ClInclude Include="fmdsp\rbdsconstants.h">
       <Filter>Header Files\fmdsp</Filter>
     </ClInclude>
@@ -282,9 +279,6 @@
       <Filter>Source Files\fmdsp</Filter>
     </ClCompile>
     <ClCompile Include="fmdsp\fractresampler.cpp">
-      <Filter>Source Files\fmdsp</Filter>
-    </ClCompile>
-    <ClCompile Include="fmdsp\datamodifier.cpp">
       <Filter>Source Files\fmdsp</Filter>
     </ClCompile>
     <ClCompile Include="fmdsp\downconvert.cpp">
