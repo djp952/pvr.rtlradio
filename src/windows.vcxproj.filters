@@ -141,9 +141,6 @@
     <ClInclude Include="fmdsp\fractresampler.h">
       <Filter>Header Files\fmdsp</Filter>
     </ClInclude>
-    <ClInclude Include="fmdsp\agc.h">
-      <Filter>Header Files\fmdsp</Filter>
-    </ClInclude>
     <ClInclude Include="fmdsp\downconvert.h">
       <Filter>Header Files\fmdsp</Filter>
     </ClInclude>
@@ -285,9 +282,6 @@
       <Filter>Source Files\fmdsp</Filter>
     </ClCompile>
     <ClCompile Include="fmdsp\fractresampler.cpp">
-      <Filter>Source Files\fmdsp</Filter>
-    </ClCompile>
-    <ClCompile Include="fmdsp\agc.cpp">
       <Filter>Source Files\fmdsp</Filter>
     </ClCompile>
     <ClCompile Include="fmdsp\datamodifier.cpp">

@@ -38,7 +38,6 @@
 
 #include "downconvert.h"
 #include "smeter.h"
-#include "agc.h"
 #include "wfmdemod.h"
 
 #include <string>
@@ -113,7 +112,6 @@ public:
 private:
 	void DeleteAllDemods();
 	CDownConvert m_DownConvert;
-	CAgc m_Agc;
 	CSMeter m_SMeter;
 #ifdef FMDSP_THREAD_SAFE
 	mutable std::mutex m_Mutex;		//for keeping threads from stomping on each other

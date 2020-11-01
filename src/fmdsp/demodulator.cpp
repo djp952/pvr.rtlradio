@@ -127,8 +127,6 @@ void CDemodulator::SetDemod(int Mode, tDemodInfo CurrentDemodInfo)
 	}
 	m_CW_Offset = m_DemodInfo.Offset;
 	m_DownConvert.SetCwOffset(m_CW_Offset);
-	m_Agc.SetParameters(m_DemodInfo.AgcOn, m_DemodInfo.AgcHangOn, m_DemodInfo.AgcThresh,
-						m_DemodInfo.AgcManualGain, m_DemodInfo.AgcSlope, m_DemodInfo.AgcDecay, m_DownConverterOutputRate);
 	//set input buffer limit so that decimated output is abt 10mSec or more of data
 	m_InBufLimit = static_cast<int>((m_DemodOutputRate/100.0) * m_InputRate/m_DemodOutputRate);	//process abt .01sec of output samples at a time
 	m_InBufLimit &= 0xFFFFFF00;	//keep modulo 256 since decimation is only in power of 2
