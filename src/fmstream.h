@@ -30,6 +30,7 @@
 #include <condition_variable>
 #include <memory>
 #include <mutex>
+#include <queue>
 #include <thread>
 
 #include "fmdsp/demodulator.h"
@@ -153,20 +154,15 @@ private:
 	fmstream(fmstream const&) = delete;
 	fmstream& operator=(fmstream const&) = delete;
 
-	// DEFAULT_DEVICE_BLOCK_SIZE
-	//
-	// Default device block size
-	static size_t const DEFAULT_DEVICE_BLOCK_SIZE;
-
 	// DEFAULT_DEVICE_SAMPLE_RATE
 	//
 	// Default device sample rate
 	static uint32_t const DEFAULT_DEVICE_SAMPLE_RATE;
 
-	// DEFAULT_RINGBUFFER_SIZE
+	// MAX_SAMPLE_QUEUE
 	//
-	// Default ring buffer size
-	static size_t const DEFAULT_RINGBUFFER_SIZE;
+	// Maximum number of queued sample sets from device
+	static size_t const MAX_SAMPLE_QUEUE;
 
 	// STREAM_ID_AUDIO
 	//
@@ -182,6 +178,10 @@ private:
 	//
 	fmstream(std::unique_ptr<rtldevice> device, struct tunerprops const& tunerprops, 
 		struct channelprops const& channelprops, struct fmprops const& fmprops);
+
+	// todo move me
+	using sample_queue_item_t = std::unique_ptr<TYPECPX[]>;
+	using sample_queue_t = std::queue<sample_queue_item_t>;
 
 	//-----------------------------------------------------------------------
 	// Private Member Functions
@@ -203,21 +203,16 @@ private:
 	uint32_t const						m_samplerate;			// Device sample rate
 	uint32_t const						m_pcmsamplerate;		// Output sample rate
 	TYPEREAL const						m_pcmgain;				// Output gain
+	double								m_dts{ 0 };				// Current decode time stamp
 
 	// STREAM CONTROL
 	//
-	mutable std::mutex					m_lock;					// Synchronization object
+	sample_queue_t						m_queue;				// queue<> of prepared samples
+	mutable std::mutex					m_queuelock;			// Synchronization object
 	std::condition_variable				m_cv;					// Transfer event condvar
 	std::thread							m_worker;				// Data transfer thread
 	scalar_condition<bool>				m_stop{ false };		// Condition to stop data transfer
 	std::atomic<bool>					m_stopped{ false };		// Data transfer stopped flag
-
-	// RING BUFFER
-	//
-	size_t const						m_buffersize;			// Size of the ring buffer
-	std::unique_ptr<uint8_t[]>			m_buffer;				// Ring buffer stroage
-	std::atomic<size_t>					m_bufferhead{ 0 };		// Head (write) buffer position
-	std::atomic<size_t>					m_buffertail{ 0 };		// Tail (read) buffer position
 };
 
 //-----------------------------------------------------------------------------

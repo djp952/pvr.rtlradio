@@ -32,20 +32,15 @@
 
 #pragma warning(push, 4)
 
-// fmstream::DEFAULT_DEVICE_BLOCK_SIZE
-//
-// Default device block size
-size_t const fmstream::DEFAULT_DEVICE_BLOCK_SIZE = (16 KiB);
-
 // fmstream::DEFAULT_DEVICE_SAMPLE_RATE
 //
 // Default device sample rate
-uint32_t const fmstream::DEFAULT_DEVICE_SAMPLE_RATE = (1024 KHz);
+uint32_t const fmstream::DEFAULT_DEVICE_SAMPLE_RATE = (2048 KHz);
 
-// fmstream::DEFAULT_RINGBUFFER_SIZE
+// fmstream::MAX_SAMPLE_QUEUE
 //
-// Default ring buffer size
-size_t const fmstream::DEFAULT_RINGBUFFER_SIZE = (4 MiB);
+// Maximum number of queued sample sets from the device
+size_t const fmstream::MAX_SAMPLE_QUEUE = 100;
 
 // fmstream::STREAM_ID_AUDIO
 //
@@ -71,16 +66,11 @@ fmstream::fmstream(std::unique_ptr<rtldevice> device, struct tunerprops const& t
 	struct channelprops const& channelprops, struct fmprops const& fmprops) :
 	m_device(std::move(device)), m_decoderds(fmprops.decoderds), m_rdsdecoder(fmprops.isrbds), 
 	m_samplerate(DEFAULT_DEVICE_SAMPLE_RATE), m_pcmsamplerate(fmprops.outputrate), 
-	m_pcmgain(MPOW(10.0, (fmprops.outputgain / 10.0))),
-	m_buffersize(align::up(DEFAULT_RINGBUFFER_SIZE, 16 KiB))
+	m_pcmgain(MPOW(10.0, (fmprops.outputgain / 10.0)))
 {
 	// The only allowable output sample rates for this stream are 44100Hz and 48000Hz
 	if((m_pcmsamplerate != 44100) && (m_pcmsamplerate != 48000))
 		throw string_exception(__func__, ": FM DSP output sample rate must be set to either 44.1KHz or 48.0KHz");
-
-	// Allocate the ring buffer
-	m_buffer = std::unique_ptr<uint8_t[]>(new uint8_t[m_buffersize]);
-	if(!m_buffer) throw std::bad_alloc();
 
 	// Initialize the RTL-SDR device instance
 	m_device->set_frequency_correction(tunerprops.freqcorrection);
@@ -230,10 +220,22 @@ void fmstream::demuxflush(void)
 
 DemuxPacket* fmstream::demuxread(std::function<DemuxPacket*(int)> const& allocator)
 {
-	size_t				head = 0;				// Current head position
-	size_t				tail = 0;				// Current tail position
-	size_t				available = 0;			// Available bytes to read
 	bool				stopped = false;		// Flag if data transfer has stopped
+
+	// create_sync_packet (local)
+	//
+	// Creates a DMX_SPECIALID_STREAMCHANGE demultiplexer packet
+	auto create_sync_packet = [&](void) -> DemuxPacket* {
+
+		m_dts = 0;					// Reset the current decode time stamp
+
+		// Create a STREAMCHANGE packet that has no data but updates the DTS
+		DemuxPacket* packet = allocator(0);
+		if(packet) packet->iStreamId = DMX_SPECIALID_STREAMCHANGE;
+		packet->dts = packet->pts = m_dts;
+
+		return packet;				// Return the generated packet
+	};
 
 	// If there is an RDS UECP packet available, handle it before demodulating more audio
 	uecp_data_packet uecp_packet;
@@ -257,72 +259,23 @@ DemuxPacket* fmstream::demuxread(std::function<DemuxPacket*(int)> const& allocat
 		}
 	}
 
-	// The demodulator only works properly in this use pattern if it's fed the exact
-	// number of input bytes it's looking for.  Excess bytes will be discarded, and
-	// an insufficient number of bytes won't generate any output samples
-	size_t const minreadsize = m_demodulator->GetInputBufferLimit() * 2;
+	// Wait for there to be a packet of samples available for processing
+	std::unique_lock<std::mutex> lock(m_queuelock);
+	m_cv.wait(lock, [&]() -> bool { return ((m_queue.size() > 0) || m_stopped.load() == true); });
 
-	// Wait up to 10ms for there to be available data in the ring buffer
-	std::unique_lock<std::mutex> lock(m_lock);
-	if(m_cv.wait_until(lock, std::chrono::system_clock::now() + std::chrono::milliseconds(10), [&]() -> bool {
+	// If the worker thread was stopped, return an empty demultiplexer packet
+	if(stopped) return allocator(0);
 
-		tail = m_buffertail.load();				// Copy the atomic<> tail position
-		head = m_bufferhead.load();				// Copy the atomic<> head position
-		stopped = m_stopped.load();				// Copy the atomic<> stopped flag
+	// Pop off the topmost packet of samples from the queue<> and release the lock
+	std::unique_ptr<TYPECPX[]> samples(std::move(m_queue.front()));
+	m_queue.pop();
+	lock.unlock();
 
-		// Calculate the amount of space available in the buffer (2 byte alignment)
-		available = align::down((tail > head) ? (m_buffersize - tail) + head : head - tail, 2);
-
-		// The result from the predicate is true if data available or stopped
-		return ((available >= minreadsize) || (stopped));
-
-	}) == false) return nullptr;
-
-	// If the wait loop was broken by the worker thread stopping, make one more pass
-	// to ensure that no additional data was first written by the thread
-	if((available < minreadsize) && (stopped)) {
-
-		tail = m_buffertail.load();				// Copy the atomic<> tail position
-		head = m_bufferhead.load();				// Copy the atomic<> head position
-
-		// Calculate the amount of space available in the buffer (2 byte alignment)
-		available = align::down((tail > head) ? (m_buffersize - tail) + head : head - tail, 2);
-	}
-
-	// If there is still not enough data to be processed, return an empty demuxer packet
-	if(available < minreadsize) return allocator(0);
-
-	// Adjust the input size to match the optimal setting from the decoder
-	available = std::min(available, minreadsize);
-
-	// Create a heap array in which to hold the converted I/Q samples
-	size_t numsamples = (available / 2);
-	std::unique_ptr<TYPECPX[]> samples(new TYPECPX[numsamples]);
-
-	for(size_t index = 0; index < numsamples; index++) {
-
-		// The demodulator expects the I/Q samples in the range of -32767.0 through +32767.0
-		// 256.996 = (32767.0 / 127.5) = 256.9960784313725
-		samples[index] = {
-
-#ifdef FMDSP_USE_DOUBLE_PRECISION
-			(static_cast<TYPEREAL>(m_buffer[tail]) - 127.5) * 256.996,			// I
-			(static_cast<TYPEREAL>(m_buffer[tail + 1]) - 127.5) * 256.996,		// Q
-#else
-			(static_cast<TYPEREAL>(m_buffer[tail]) - 127.5f) * 256.996f,		// I
-			(static_cast<TYPEREAL>(m_buffer[tail + 1]) - 127.5f) * 256.996f,	// Q
-#endif
-		};
-
-		tail += 2;								// Increment new tail position
-		if(tail >= m_buffersize) tail = 0;		// Handle buffer rollover
-	}
-
-	// Modify the atomic<> tail position to mark the ring buffer space as free
-	m_buffertail.store(tail);
+	// If the packet of samples is null, the writer has indicated there is a problem
+	if(!samples) return create_sync_packet();
 
 	// Process the I/Q data, the original samples buffer can be reused/overwritten as it's processed
-	int audiopackets = m_demodulator->ProcessData(static_cast<int>(numsamples), samples.get(), samples.get());
+	int audiopackets = m_demodulator->ProcessData(m_demodulator->GetInputBufferLimit(), samples.get(), samples.get());
 
 	// Process any RDS group data that was collected during demodulation
 	tRDS_GROUPS rdsgroup = {};
@@ -337,9 +290,14 @@ DemuxPacket* fmstream::demuxread(std::function<DemuxPacket*(int)> const& allocat
 	int stereopackets = m_resampler->Resample(audiopackets, m_demodulator->GetOutputRate() / m_pcmsamplerate, 
 		samples.get(), reinterpret_cast<TYPESTEREO16*>(packet->pData), m_pcmgain);
 
-	// Set up the demultiplexer packet with the proper stream identifier and size
+	// Set up the demultiplexer packet with the proper size, duration and dts
 	packet->iStreamId = STREAM_ID_AUDIO;
 	packet->iSize = stereopackets * sizeof(TYPESTEREO16);
+	packet->duration = (10 MS);
+	packet->dts = packet->pts = m_dts;
+
+	// Increment the decode time stamp value based on the calculated duration
+	m_dts += (10 MS);
 
 	return packet;
 }
@@ -519,7 +477,7 @@ int fmstream::signalstrength(void) const
 	// TODO: I'm not thrilled with this
 	//
 
-	static const double LN25 = MLOG(25);		// natural log of 25
+	static double const LN25 = MLOG(25);		// natural log of 25
 
 	TYPEREAL db = static_cast<int>(m_demodulator->GetSMeterAve());
 
@@ -573,58 +531,65 @@ int fmstream::signaltonoise(void) const
 
 void fmstream::transfer(scalar_condition<bool>& started)
 {
+	assert(m_demodulator);
 	assert(m_device);
 
-	m_device->begin_stream();		// Begin streaming from the device
-	started = true;					// Signal that the thread has started
+	// The I/Q samples from the device come in as a pair of 8 bit unsigned integers
+	size_t const readsize = m_demodulator->GetInputBufferLimit() * 2;
 
-	// Loop until the worker thread has been signaled to stop
-	while(m_stop.test(false) == true) {
+	// read_callback_func (local)
+	//
+	// Asynchronous read callback function for the RTL-SDR device
+	auto read_callback_func = [&](uint8_t const* buffer, size_t count) -> void {
 
-		size_t		head = 0;				// Ring buffer head (write) position
-		size_t		tail = 0;				// Ring buffer tail (read) position
-		size_t		available = 0;			// Amount of available ring buffer space
+		std::unique_ptr<TYPECPX[]> samples;			// Array of I/Q samples to return
 
-		// Wait up to 10ms for the ring buffer to have enough space to write the next block
-		do {
+		// If the proper amount of data was returned by the callback, convert it into
+		// the floating-point I/Q sample data for the demodulator to process
+		if(count == readsize) {
 
-			head = m_bufferhead.load();			// Acquire the current buffer head position
-			tail = m_buffertail.load();			// Acquire the current buffer tail position
+			samples = std::unique_ptr<TYPECPX[]>(new TYPECPX[readsize]);
+			for(int index = 0; index < m_demodulator->GetInputBufferLimit(); index++) {
 
-			// Calculate the total amount of available free space in the ring buffer
-			available = (head < tail) ? tail - head : (m_buffersize - head) + tail;
+				// The demodulator expects the I/Q samples in the range of -32767.0 through +32767.0
+				// 256.996 = (32767.0 / 127.5) = 256.9960784313725
+				samples[index] = {
 
-		} while((available < DEFAULT_DEVICE_BLOCK_SIZE) && (m_stop.wait_until_equals(true, 10) == false));
-
-		// If the wait loop was broken due to a stop signal, terminate the thread
-		if(available < DEFAULT_DEVICE_BLOCK_SIZE) break;
-
-		// Transfer the available data from the device into the ring buffer
-		size_t count = DEFAULT_DEVICE_BLOCK_SIZE;
-		while((count > 0) && (m_stop.test(false) == true)) {
-
-			// If the head is behind the tail linearly, take the data between them otherwise 
-			// take the data between the end of the buffer and the head
-			size_t chunk = (head < tail) ? std::min(count, tail - head) : std::min(count, m_buffersize - head);
-
-			// Read the chunk directly into the ring buffer
-			try { chunk = m_device->read(&m_buffer[head], chunk); }
-			catch(...) { chunk = 0; }	// <--- TODO: Should report the exception somehow
-
-			head += chunk;				// Increment the head position
-			count -= chunk;				// Decrement remaining bytes to be transferred
-
-			// If the head has reached the end of the buffer, reset it back to zero
-			if(head >= m_buffersize) head = 0;
+				#ifdef FMDSP_USE_DOUBLE_PRECISION
+					(static_cast<TYPEREAL>(buffer[(index * 2)]) - 127.5) * 256.9960784313725,		// I
+					(static_cast<TYPEREAL>(buffer[(index * 2) + 1]) - 127.5) * 256.9960784313725,	// Q
+				#else
+					(static_cast<TYPEREAL>(buffer[(index * 2)]) - 127.5f) * 256.9960784313725f,		// I
+					(static_cast<TYPEREAL>(buffer[(index * 2) + 1]) - 127.5f) * 256.9960784313725f,	// Q
+				#endif
+				};
+			}
 		}
 
-		// Adjust the atomic<> head position and notify that new data is available
-		m_bufferhead.store(head);
-		m_cv.notify_all();
-	}
+		// Push the converted samples into the queue<> for processing.  If there is insufficient space
+		// left in the queue<>, the samples aren't being processed quickly enough to keep up with the rate
+		std::unique_lock<std::mutex> lock(m_queuelock);
+		if(m_queue.size() < MAX_SAMPLE_QUEUE) m_queue.push(std::move(samples));
+		else {
 
-	m_stopped.store(true);					// Thread is stopped
-	m_cv.notify_all();						// Notify any waiters
+			m_queue = sample_queue_t();							// Replace the queue<>
+			m_queue.push(nullptr);								// Push a resync packet (null)
+			if(samples) m_queue.push(std::move(samples));		// Push samples
+		}
+
+		// Notify any threads waiting on the lock that the queue<> has been updated
+		m_cv.notify_all();
+	};
+
+	// Begin streaming from the device and inform the caller that the thread is running
+	m_device->begin_stream();
+	started = true;
+
+	// Continuously read data from the device until cancel_async() has been called
+	m_device->read_async(read_callback_func, static_cast<uint32_t>(readsize));
+
+	// Thread is stopped once read_async() returns
+	m_stopped.store(true);
 }
 
 //---------------------------------------------------------------------------

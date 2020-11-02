@@ -30,6 +30,7 @@
 #include <vector>
 
 #include "rtldevice.h"
+#include "scalar_condition.h"
 
 #pragma warning(push, 4)
 
@@ -178,9 +179,14 @@ private:
 	//-----------------------------------------------------------------------
 	// Member Variables
 
-	int				m_socket	= -1;						// TCP/IP socket
-	rtlsdr_tuner	m_tunertype = RTLSDR_TUNER_UNKNOWN;		// Tuner type
-	std::string		m_name;									// Device name
+	int					m_socket	= -1;						// TCP/IP socket
+	rtlsdr_tuner		m_tunertype = RTLSDR_TUNER_UNKNOWN;		// Tuner type
+	std::string			m_name;									// Device name
+
+	// ASYNCHRONOUS SUPPORT
+	//
+	mutable scalar_condition<bool>	m_stop{ false };		// Flag to stop async
+	mutable scalar_condition<bool>	m_stopped{ true };		// Async stopped condition
 
 	static std::vector<int> const	s_gaintable_e4k;		// RTLSDR_TUNER_E4000
 	static std::vector<int> const	s_gaintable_fc0012;		// RTLSDR_TUNER_FC0012

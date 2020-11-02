@@ -23,6 +23,7 @@
 #include "stdafx.h"
 #include "tcpdevice.h"
 
+#include <algorithm>
 #include <arpa/inet.h>
 #include <cstring>
 #include <netinet/tcp.h>
@@ -30,6 +31,7 @@
 #include <sys/socket.h>
 #include <unistd.h>
 
+#include "align.h"
 #include "string_exception.h"
 
 #pragma warning(push, 4)
@@ -210,6 +212,11 @@ void tcpdevice::begin_stream(void) const
 
 void tcpdevice::cancel_async(void) const
 {
+	// If the asynchronous operation is stopped, do nothing
+	if(m_stopped.test(true) == true) return;
+
+	m_stop = true;							// Flag a stop condition
+	m_stopped.wait_until_equals(true);		// Wait for async to stop
 }
 
 //---------------------------------------------------------------------------
@@ -337,9 +344,61 @@ void tcpdevice::read_async(rtldevice::asynccallback const& callback, uint32_t bu
 //	numbuffers		- Number of device buffers
 //	bufferlength	- Device buffer length, must be multiple of 512
 
-void tcpdevice::read_async(rtldevice::asynccallback const& /*callback*/, uint32_t /*numbuffers*/, uint32_t /*bufferlength*/) const
+void tcpdevice::read_async(rtldevice::asynccallback const& callback, uint32_t /*numbuffers*/, uint32_t bufferlength) const
 {
-	throw string_exception("not implemented");
+	std::unique_ptr<uint8_t[]>	buffer(new uint8_t[256 KiB]);			// Input data buffer
+	std::unique_ptr<uint8_t[]>	overflow(new uint8_t[bufferlength]);	// Leftover data buffer
+	size_t						leftover = 0;							// Leftover data length
+
+	m_stop = false;
+	m_stopped = false;
+
+	try {
+
+		while(m_stop.test(true) == false) {
+
+			// rtl_tcp returns up to 256KiB of data per read request, that needs to be broken up
+			// into individual packets of data and sent into the callback function
+			size_t count = read(&buffer[0], 256 KiB);
+			size_t offset = 0;
+
+			// Deal with any leftover data from the previous read operation
+			if(leftover > 0) {
+
+				// Copy the remaining bytes for the packet into the overflow buffer and send it
+				memcpy(&overflow[leftover], &buffer[0], bufferlength - leftover);
+				callback(&overflow[0], bufferlength);
+
+				count -= leftover;				// Used some bytes
+				offset += leftover;				// Used some bytes
+				leftover = 0;					// No more bytes leftover
+			}
+			
+			// Handle any full packets of data that can be sent directly into the callback
+			size_t packets = align::down(count, bufferlength) / bufferlength;
+			while(packets > 0) {
+
+				callback(&buffer[offset], bufferlength);
+
+				offset += bufferlength;			// Advance the buffer offset
+				count -= bufferlength;			// Decrease available bytes
+				packets--;						// One less packet
+			}
+
+			// Save off the leftover data so it can become a full packet of data
+			// during the next loop iteration
+			if(count > 0) {
+
+				memcpy(&overflow[0], &buffer[offset], count);
+				leftover = count;
+			}
+		}
+
+		m_stopped = true;					// Operation has been stopped
+	}
+
+	// Ensure that the stopped condition is set on an exception
+	catch(...) { m_stopped = true; throw; }
 }
 
 //---------------------------------------------------------------------------
