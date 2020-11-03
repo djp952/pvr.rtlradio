@@ -179,8 +179,17 @@ private:
 	fmstream(std::unique_ptr<rtldevice> device, struct tunerprops const& tunerprops, 
 		struct channelprops const& channelprops, struct fmprops const& fmprops);
 
-	// todo move me
+	//-----------------------------------------------------------------------
+	// Private Type Declarations
+
+	// sample_queue_item_t
+	//
+	// Defines the type of a single sample_queue_t entry
 	using sample_queue_item_t = std::unique_ptr<TYPECPX[]>;
+
+	// sample_queue_t
+	//
+	// Defines the type of the input sample queue
 	using sample_queue_t = std::queue<sample_queue_item_t>;
 
 	//-----------------------------------------------------------------------
