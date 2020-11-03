@@ -222,21 +222,6 @@ DemuxPacket* fmstream::demuxread(std::function<DemuxPacket*(int)> const& allocat
 {
 	bool				stopped = false;		// Flag if data transfer has stopped
 
-	// create_sync_packet (local)
-	//
-	// Creates a DMX_SPECIALID_STREAMCHANGE demultiplexer packet
-	auto create_sync_packet = [&](void) -> DemuxPacket* {
-
-		m_dts = 0;					// Reset the current decode time stamp
-
-		// Create a STREAMCHANGE packet that has no data but updates the DTS
-		DemuxPacket* packet = allocator(0);
-		if(packet) packet->iStreamId = DMX_SPECIALID_STREAMCHANGE;
-		packet->dts = packet->pts = m_dts;
-
-		return packet;				// Return the generated packet
-	};
-
 	// If there is an RDS UECP packet available, handle it before demodulating more audio
 	uecp_data_packet uecp_packet;
 	if(m_rdsdecoder.pop_uecp_data_packet(uecp_packet) && (!uecp_packet.empty())) {
@@ -271,8 +256,18 @@ DemuxPacket* fmstream::demuxread(std::function<DemuxPacket*(int)> const& allocat
 	m_queue.pop();
 	lock.unlock();
 
-	// If the packet of samples is null, the writer has indicated there is a problem
-	if(!samples) return create_sync_packet();
+	// If the packet of samples is null, the writer has indicated there was a problem
+	if(!samples) {
+
+		m_dts = DVD_TIME_BASE;				// Reset the current decode time stamp
+
+		// Create a STREAMCHANGE packet that has no data but updates the DTS
+		DemuxPacket* packet = allocator(0);
+		if(packet) packet->iStreamId = DMX_SPECIALID_STREAMCHANGE;
+		//packet->dts = packet->pts = m_dts;
+
+		return packet;				// Return the generated packet
+	}
 
 	// Process the I/Q data, the original samples buffer can be reused/overwritten as it's processed
 	int audiopackets = m_demodulator->ProcessData(m_demodulator->GetInputBufferLimit(), samples.get(), samples.get());
@@ -293,11 +288,11 @@ DemuxPacket* fmstream::demuxread(std::function<DemuxPacket*(int)> const& allocat
 	// Set up the demultiplexer packet with the proper size, duration and dts
 	packet->iStreamId = STREAM_ID_AUDIO;
 	packet->iSize = stereopackets * sizeof(TYPESTEREO16);
-	packet->duration = (10 MS);
+	packet->duration = (DVD_TIME_BASE / 100.0);				// 10ms
 	packet->dts = packet->pts = m_dts;
 
 	// Increment the decode time stamp value based on the calculated duration
-	m_dts += (10 MS);
+	m_dts += (DVD_TIME_BASE / 100.0);						// 10ms
 
 	return packet;
 }

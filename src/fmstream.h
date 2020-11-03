@@ -203,7 +203,7 @@ private:
 	uint32_t const						m_samplerate;			// Device sample rate
 	uint32_t const						m_pcmsamplerate;		// Output sample rate
 	TYPEREAL const						m_pcmgain;				// Output gain
-	double								m_dts{ 0 };				// Current decode time stamp
+	double								m_dts{ DVD_TIME_BASE };	// Current decode time stamp
 
 	// STREAM CONTROL
 	//
