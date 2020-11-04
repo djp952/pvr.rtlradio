@@ -126,7 +126,6 @@ public:
 	//
 	// Asynchronously reads data from the device
 	void read_async(rtldevice::asynccallback const& callback, uint32_t bufferlength) const override;
-	void read_async(rtldevice::asynccallback const& callback, uint32_t numbuffers, uint32_t bufferlength) const override;
 
 	// set_automatic_gain_control
 	//

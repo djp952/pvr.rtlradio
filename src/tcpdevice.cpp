@@ -326,25 +326,9 @@ size_t tcpdevice::read(uint8_t* buffer, size_t count) const
 // Arguments:
 //
 //	callback		- Asynchronous read callback function
-//	bufferlength	- Device buffer length, must be multiple of 512
+//	bufferlength	- Output buffer length in bytes
 
 void tcpdevice::read_async(rtldevice::asynccallback const& callback, uint32_t bufferlength) const
-{
-	return read_async(callback, 0, bufferlength);
-}
-
-//---------------------------------------------------------------------------
-// tcpdevice::read_async
-//
-// Asynchronously reads data from the device
-//
-// Arguments:
-//
-//	callback		- Asynchronous read callback function
-//	numbuffers		- Number of device buffers
-//	bufferlength	- Device buffer length, must be multiple of 512
-
-void tcpdevice::read_async(rtldevice::asynccallback const& callback, uint32_t /*numbuffers*/, uint32_t bufferlength) const
 {
 	std::unique_ptr<uint8_t[]>	buffer(new uint8_t[256 KiB]);			// Input data buffer
 	std::unique_ptr<uint8_t[]>	overflow(new uint8_t[bufferlength]);	// Leftover data buffer

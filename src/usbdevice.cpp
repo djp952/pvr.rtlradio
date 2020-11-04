@@ -328,25 +328,9 @@ size_t usbdevice::read(uint8_t* buffer, size_t count) const
 // Arguments:
 //
 //	callback		- Asynchronous read callback function
-//	bufferlength	- Device buffer length, must be multiple of 512
+//	bufferlength	- Output buffer length in bytes
 
 void usbdevice::read_async(rtldevice::asynccallback const& callback, uint32_t bufferlength) const
-{
-	return read_async(callback, 0, bufferlength);
-}
-
-//---------------------------------------------------------------------------
-// usbdevice::read_async
-//
-// Asynchronously reads data from the device
-//
-// Arguments:
-//
-//	callback		- Asynchronous read callback function
-//	numbuffers		- Number of device buffers
-//	bufferlength	- Device buffer length, must be multiple of 512
-
-void usbdevice::read_async(rtldevice::asynccallback const& callback, uint32_t numbuffers, uint32_t bufferlength) const
 {
 	assert(m_device != nullptr);
 
@@ -361,7 +345,7 @@ void usbdevice::read_async(rtldevice::asynccallback const& callback, uint32_t nu
 	void const* pcallback = std::addressof(callback);
 
 	// rtlsdr_read_async returns the underlying libusb error code when it fails
-	int result = rtlsdr_read_async(m_device, callreadfunc, const_cast<void*>(pcallback), numbuffers, bufferlength);
+	int result = rtlsdr_read_async(m_device, callreadfunc, const_cast<void*>(pcallback), 0, bufferlength);
 	if(result < 0) throw string_exception(__func__, ": ", libusb_exception(result).what());
 }
 

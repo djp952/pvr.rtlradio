@@ -80,7 +80,6 @@ public:
 	//
 	// Asynchronously reads data from the device
 	virtual void read_async(asynccallback const& callback, uint32_t bufferlength) const = 0;
-	virtual void read_async(asynccallback const& callback, uint32_t numbuffers, uint32_t bufferlength) const = 0;
 
 	// set_automatic_gain_control
 	//
