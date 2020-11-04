@@ -32,11 +32,6 @@
 
 #pragma warning(push, 4)
 
-// fmstream::DEFAULT_DEVICE_SAMPLE_RATE
-//
-// Default device sample rate
-uint32_t const fmstream::DEFAULT_DEVICE_SAMPLE_RATE = (2048 KHz);
-
 // fmstream::MAX_SAMPLE_QUEUE
 //
 // Maximum number of queued sample sets from the device
@@ -65,9 +60,13 @@ int const fmstream::STREAM_ID_UECP = 2;
 fmstream::fmstream(std::unique_ptr<rtldevice> device, struct tunerprops const& tunerprops, 
 	struct channelprops const& channelprops, struct fmprops const& fmprops) :
 	m_device(std::move(device)), m_decoderds(fmprops.decoderds), m_rdsdecoder(fmprops.isrbds), 
-	m_samplerate(DEFAULT_DEVICE_SAMPLE_RATE), m_pcmsamplerate(fmprops.outputrate), 
+	m_samplerate(tunerprops.samplerate), m_pcmsamplerate(fmprops.outputrate), 
 	m_pcmgain(MPOW(10.0, (fmprops.outputgain / 10.0)))
 {
+	// The sample rate must be within 900001Hz - 3200000Hz
+	if((m_samplerate < 900001) || (m_samplerate > 3200000))
+		throw string_exception(__func__, ": Tuner device sample rate must be in the range of 900001Hz to 3200000Hz");
+
 	// The only allowable output sample rates for this stream are 44100Hz and 48000Hz
 	if((m_pcmsamplerate != 44100) && (m_pcmsamplerate != 48000))
 		throw string_exception(__func__, ": FM DSP output sample rate must be set to either 44.1KHz or 48.0KHz");

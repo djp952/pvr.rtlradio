@@ -34,12 +34,12 @@
 // Defines properties for a radio channel
 struct channelprops {
 
-	uint32_t		frequency;		// Station center frequency
-	uint32_t		subchannel;		// Subchannel (HD Radio only)
-	std::string		name;			// Station name / call sign
-	std::string		logourl;		// Station logo URL
-	bool			autogain;		// Flag indicating if automatic gain should be used
-	int				manualgain;		// Manual gain value as 10*dB (i.e. 32.8dB = 328)
+	uint32_t		frequency;			// Station center frequency
+	uint32_t		subchannel;			// Subchannel (HD Radio only)
+	std::string		name;				// Station name / call sign
+	std::string		logourl;			// Station logo URL
+	bool			autogain;			// Flag indicating if automatic gain should be used
+	int				manualgain;			// Manual gain value as 10*dB (i.e. 32.8dB = 328)
 };
 
 // fmprops
@@ -47,10 +47,10 @@ struct channelprops {
 // Defines properties for the FM digital signal processor
 struct fmprops {
 
-	bool			decoderds;		// Flag if RDS should be decoded or not
-	bool			isrbds;			// Flag if region is RBDS (North America)
-	uint32_t		outputrate;		// Output sample rate, in Hertz
-	float			outputgain;		// Output gain, in Decibels
+	bool			decoderds;			// Flag if RDS should be decoded or not
+	bool			isrbds;				// Flag if region is RBDS (North America)
+	uint32_t		outputrate;			// Output sample rate in Hertz
+	float			outputgain;			// Output gain in Decibels
 };
 
 // streamprops
@@ -58,11 +58,11 @@ struct fmprops {
 // Defines stream-specific properties
 struct streamprops {
 
-	char const*		codec;			// Stream codec name
-	int				pid;			// Stream PID
-	int				channels;		// Stream number of channels
-	int				samplerate;		// Stream sample rate
-	int				bitspersample;	// Stream bits per sample
+	char const*		codec;				// Stream codec name
+	int				pid;				// Stream PID
+	int				channels;			// Stream number of channels
+	int				samplerate;			// Stream sample rate
+	int				bitspersample;		// Stream bits per sample
 };
 
 // tunerprops
@@ -70,7 +70,8 @@ struct streamprops {
 // Defines tuner-specific properties
 struct tunerprops {
 
-	int			freqcorrection;		// Frequency correction (PPM)
+	uint32_t		samplerate;			// Input sample rate in Hertz
+	int				freqcorrection;		// Frequency correction (PPM)
 };
 
 //-----------------------------------------------------------------------------

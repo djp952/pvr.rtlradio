@@ -154,11 +154,6 @@ private:
 	fmstream(fmstream const&) = delete;
 	fmstream& operator=(fmstream const&) = delete;
 
-	// DEFAULT_DEVICE_SAMPLE_RATE
-	//
-	// Default device sample rate
-	static uint32_t const DEFAULT_DEVICE_SAMPLE_RATE;
-
 	// MAX_SAMPLE_QUEUE
 	//
 	// Maximum number of queued sample sets from device

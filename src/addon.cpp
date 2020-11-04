@@ -546,6 +546,7 @@ ADDON_STATUS addon::Create(void)
 			m_settings.device_connection_usb_index = kodi::GetSettingInt("device_connection_usb_index", 0);
 			m_settings.device_connection_tcp_host = kodi::GetSettingString("device_connection_tcp_host");
 			m_settings.device_connection_tcp_port = kodi::GetSettingInt("device_connection_tcp_port", 1234);
+			m_settings.device_sample_rate = kodi::GetSettingInt("device_sample_rate", (2400 KHz));
 			m_settings.device_frequency_correction = kodi::GetSettingInt("device_frequency_correction", 0);
 
 			// Load the Interface settings
@@ -688,6 +689,18 @@ ADDON_STATUS addon::SetSetting(std::string const& settingName, kodi::CSettingVal
 		}
 	}
 
+	// device_sample_rate
+	//
+	else if(settingName == "device_sample_rate") {
+
+		int nvalue = settingValue.GetInt();
+		if(nvalue != m_settings.device_sample_rate) {
+
+			m_settings.device_sample_rate = nvalue;
+			log_info(__func__, ": setting device_sample_rate changed to ", m_settings.device_sample_rate, "Hz");
+		}
+	}
+
 	// device_frequency_correction
 	//
 	else if(settingName == "device_frequency_correction") {
@@ -696,7 +709,7 @@ ADDON_STATUS addon::SetSetting(std::string const& settingName, kodi::CSettingVal
 		if(nvalue != m_settings.device_frequency_correction) {
 
 			m_settings.device_frequency_correction = nvalue;
-			log_info(__func__, ": setting device_frequency_correction changed to ", m_settings.device_frequency_correction);
+			log_info(__func__, ": setting device_frequency_correction changed to ", m_settings.device_frequency_correction, "PPM");
 		}
 	}
 
@@ -1333,6 +1346,7 @@ PVR_ERROR addon::OpenDialogChannelSettings(kodi::addon::PVRChannel const& channe
 
 		// Set up the tuner device properties
 		struct tunerprops tunerprops = {};
+		tunerprops.samplerate = settings.device_sample_rate;
 		tunerprops.freqcorrection = settings.device_frequency_correction;
 
 		// Get the properties of the channel to be manipulated
@@ -1390,6 +1404,7 @@ bool addon::OpenLiveStream(kodi::addon::PVRChannel const& channel)
 
 		// Set up the tuner device properties
 		struct tunerprops tunerprops = {};
+		tunerprops.samplerate = settings.device_sample_rate;
 		tunerprops.freqcorrection = settings.device_frequency_correction;
 
 		// Retrieve the tuning properties for the channel from the database

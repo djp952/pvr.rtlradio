@@ -72,6 +72,10 @@ msgctxt "#30109"
 msgid "PCM output gain"
 msgstr ""
 
+msgctxt "#30110"
+msgid "Input sample rate"
+msgstr ""
+
 msgctxt "#30200"
 msgid "Universal Serial Bus (USB)"
 msgstr ""
@@ -98,6 +102,38 @@ msgstr ""
 
 msgctxt "#30206"
 msgid "48.0 KHz"
+msgstr ""
+
+msgctxt "#30207"
+msgid "1.0 MHz"
+msgstr ""
+
+msgctxt "#30208"
+msgid "1.2 MHz"
+msgstr ""
+
+msgctxt "#30209"
+msgid "1.4 MHz"
+msgstr ""
+
+msgctxt "#30210"
+msgid "1.6 MHz"
+msgstr ""
+
+msgctxt "#30211"
+msgid "1.8 MHz"
+msgstr ""
+
+msgctxt "#30212"
+msgid "2.0 MHz"
+msgstr ""
+
+msgctxt "#30213"
+msgid "2.2 MHz"
+msgstr ""
+
+msgctxt "#30214"
+msgid "2.4 MHz"
 msgstr ""
 
 msgctxt "#30300"
@@ -174,5 +210,9 @@ msgstr ""
 
 msgctxt "#30509"
 msgid "Specifies the FM digital signal processor PCM output audio gain."
+msgstr ""
+
+msgctxt "#30510"
+msgid "Specifies the input sample rate for the device. Setting a lower sample rate will improve performance on slower systems, but with a reduction in the overall output audio quality."
 msgstr ""
 
