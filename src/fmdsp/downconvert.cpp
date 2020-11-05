@@ -41,6 +41,8 @@
 //==========================================================================================
 #include "downconvert.h"
 #include "filtercoef.h"
+#include <algorithm>
+#include <assert.h>
 
 //pick a method of calculating the NCO
 #define NCO_LIB 0		//normal sin cos library (188nS)
@@ -52,6 +54,59 @@
 
 #define MAX_HALF_BAND_BUFSIZE 32768
 
+//---------------------------------------------------------------------------
+// GenerateLanczosCoefficients (local)
+//
+// Creates the integer decimator lanczos coefficients table
+//
+// SoftFM (Filter.cc)
+// https://github.com/jorisvr/SoftFM
+// Copyright (C) 2013 Joris van Rantwijk
+// GPLv2
+//
+// pvr.rtl.radiofm (DownConvert.cpp)
+// https://github.com/AlwinEsch/pvr.rtl.radiofm)
+// Copyright (C) 2015-2018 Alwin Esch
+// GPLv2
+
+static TYPEREAL* GenerateLanczosCoefficients(int filter_order, double cutoff)
+{
+	// Create and initialize the TYPEREAL[] array to be returned
+	TYPEREAL* coeff = new TYPEREAL[filter_order + 3];
+	memset(coeff, 0, sizeof(TYPEREAL) * filter_order + 3);
+
+	// Prepare Lanczos FIR filter
+	//
+	//	t[i]     =  (i - order/2)
+	//	coeff[i] =  Sinc(2 * cutoff * t[i]) * Sinc(t[i] / (order/2 + 1))
+	//	coeff    /= sum(coeff)
+
+	TYPEREAL ysum = 0.0;
+
+	// Calculate filter kernel
+	for(int i = 1; i <= filter_order + 1; i++)
+	{
+		int t2 = 2 * i - filter_order;
+
+		TYPEREAL y;
+
+		if(t2 == 0) y = 1.0;
+		else
+		{
+			double x1 = cutoff * t2;
+			double x2 = t2 / double(filter_order + 2);
+			y = (MSIN(K_PI * x1) / K_PI / x1) * (MSIN(K_PI * x2) / K_PI / x2);
+		}
+
+		coeff[i] = y;
+		ysum += y;
+	}
+
+	//  Apply correction factor to ensure unit gain at DC
+	for(int i = 1; i <= filter_order + 1; i++) coeff[i] /= ysum;
+
+	return coeff;
+}
 
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
@@ -196,12 +251,19 @@ TYPEREAL f = InRate;
 	#endif
 
 		DeleteFilters();
+
 		//loop until closest output rate is found and list of pointers to decimate by 2 stages is generated
-		while( (f > 400000.0)  )
-		{
-			m_pDecimatorPtrs[n++] = new CDownConvert::CHalfBandDecimateBy2(HB51TAP_LENGTH, HB51TAP_H);
-			f /= 2.0;
-		}
+		//while( (f > 400000.0)  )
+		//{
+		//	m_pDecimatorPtrs[n++] = new CDownConvert::CHalfBandDecimateBy2(HB51TAP_LENGTH, HB51TAP_H);
+		//	f /= 2.0;
+		//}
+
+		// For Wideband FM, use a single integer factor decimation instead of multiple half-band decimations
+		int factor = 1;
+		while(f > 400000.0) { factor *= 2; f /= 2.0; }
+		m_pDecimatorPtrs[n++] = new CDownConvert::CIntegerFactorDecimate(factor);
+
 		m_OutputRate = f;
 	#ifdef FMDSP_THREAD_SAFE
 		lock.unlock();
@@ -499,3 +561,105 @@ TYPECPX even,odd;
 
 	return j;
 }
+
+//---------------------------------------------------------------------------
+// CDownConvert::CIntegerFactorDecimate Constructor
+
+CDownConvert::CIntegerFactorDecimate::CIntegerFactorDecimate(int factor) :
+	m_downsample_factor(std::max(1, factor))
+{
+	m_downsample_order = 8 * m_downsample_factor;
+	m_downsample_coeff = GenerateLanczosCoefficients(m_downsample_order - 1, 0.6 / m_downsample_factor);
+	
+	m_downsample_state = new TYPECPX[m_downsample_order];
+	memset(m_downsample_state, 0, sizeof(TYPECPX) * m_downsample_order);
+}
+
+//---------------------------------------------------------------------------
+// CDownConvert::CIntegerFactorDecimate Destructor
+
+CDownConvert::CIntegerFactorDecimate::~CIntegerFactorDecimate()
+{
+	if(m_downsample_coeff) delete[] m_downsample_coeff;
+	if(m_downsample_state) delete[] m_downsample_state;
+}
+
+//---------------------------------------------------------------------------
+// CDownConvert::CIntegerFactorDecimate::DecBy2 (private)
+//
+// SoftFM (Filter.cc)
+// https://github.com/jorisvr/SoftFM
+// Copyright (C) 2013 Joris van Rantwijk
+// GPLv2
+//
+// pvr.rtl.radiofm (DownConvert.cpp)
+// https://github.com/AlwinEsch/pvr.rtl.radiofm)
+// Copyright (C) 2015-2018 Alwin Esch
+// GPLv2
+
+int CDownConvert::CIntegerFactorDecimate::DecBy2(int numsamples, TYPECPX* insamples, TYPECPX* outsamples)
+{
+	assert(m_downsample_coeff && m_downsample_state);
+
+	int order = m_downsample_order;
+	int n = numsamples;
+	int i = 0;
+
+	// Integer downsample factor, no linear interpolation
+	int p = m_downsample_pos;
+	int pstep = m_downsample_factor;
+
+	// The first few samples need data from the state
+	for(; p < n && p < order; p += pstep, i++)
+	{
+		TYPECPX y = { 0, 0 };
+		for(int j = 1; j <= p; j++)
+		{
+			y.re = insamples[p - j].re * m_downsample_coeff[j];
+			y.im = insamples[p - j].im * m_downsample_coeff[j];
+		}
+		for(int j = p + 1; j <= order; j++)
+		{
+			y.re += m_downsample_state[order + p - j].re * m_downsample_coeff[j];
+			y.im += m_downsample_state[order + p - j].im * m_downsample_coeff[j];
+		}
+		outsamples[i] = y;
+	}
+
+	// Remaining samples only need data from samples_in
+	for(; p < n; p += pstep, i++)
+	{
+		TYPECPX y = { 0, 0 };
+		for(int j = 1; j <= order; j++)
+		{
+			y.re += insamples[p - j].re * m_downsample_coeff[j];
+			y.im += insamples[p - j].im * m_downsample_coeff[j];
+		}
+		outsamples[i] = y;
+	}
+
+	// Update index of start position in text sample block
+	m_downsample_pos = p - n;
+
+	// Update the state
+	int j;
+	if(numsamples < order)
+	{
+		j = 0;
+		for(int index = numsamples; index < order; index++)
+			m_downsample_state[j++] = m_downsample_state[index];
+
+		j = order - numsamples;
+		for(int index = 0; index < numsamples; index++)
+			m_downsample_state[j++] = insamples[index];
+	}
+	else
+	{
+		j = 0;
+		for(int index = numsamples - order; index < numsamples; index++)
+			m_downsample_state[j++] = insamples[index];
+	}
+
+	return i;
+}
+

@@ -128,6 +128,27 @@ private:
 		TYPECPX m_Xeven;
 	};
 
+	// CIntegerFactorDecimate
+	//
+	// Implements an integer factor decimator for Wideband FM demodulation
+	class CIntegerFactorDecimate : public CDec2
+	{
+	public:
+
+		CIntegerFactorDecimate(int factor);
+		~CIntegerFactorDecimate();
+
+		int DecBy2(int numsamples, TYPECPX* insamples, TYPECPX* outsamples);
+
+	private:
+
+		int	const		m_downsample_factor;		// Downsample factor
+		int				m_downsample_order;			// Downsample filter order
+		TYPEREAL*		m_downsample_coeff;			// Downsample coefficients
+		TYPECPX*		m_downsample_state;			// Downsample state buffer
+		int				m_downsample_pos = 0;		// Downsample state position
+	};
+
 private:
 	//private helper functions
 	void DeleteFilters();
