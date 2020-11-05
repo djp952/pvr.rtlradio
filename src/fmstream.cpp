@@ -71,14 +71,8 @@ fmstream::fmstream(std::unique_ptr<rtldevice> device, struct tunerprops const& t
 	if((m_pcmsamplerate != 44100) && (m_pcmsamplerate != 48000))
 		throw string_exception(__func__, ": FM DSP output sample rate must be set to either 44.1KHz or 48.0KHz");
 
-	// Initialize the RTL-SDR device instance
-	m_device->set_frequency_correction(tunerprops.freqcorrection);
-	uint32_t samplerate = m_device->set_sample_rate(m_samplerate);
-	uint32_t frequency = m_device->set_center_frequency(channelprops.frequency + (m_samplerate / 4));	// DC offset
-
-	// Adjust the device gain as specified by the channel properties
-	m_device->set_automatic_gain_control(channelprops.autogain);
-	if(channelprops.autogain == false) m_device->set_gain(channelprops.manualgain);
+	// Calcuate the actual frequency to be tuned (DC offset)
+	uint32_t frequency = channelprops.frequency + (m_samplerate / 4);
 
 	// Initialize the demodulator parameters
 	tDemodInfo demodinfo = {};
@@ -111,13 +105,22 @@ fmstream::fmstream(std::unique_ptr<rtldevice> device, struct tunerprops const& t
 	// Initialize the wideband FM demodulator
 	m_demodulator = std::unique_ptr<CDemodulator>(new CDemodulator());
 	m_demodulator->SetUSFmVersion(fmprops.isrbds);
-	m_demodulator->SetInputSampleRate(static_cast<TYPEREAL>(samplerate));
+	m_demodulator->SetInputSampleRate(static_cast<TYPEREAL>(m_samplerate));
 	m_demodulator->SetDemod(DEMOD_WFM, demodinfo);
 	m_demodulator->SetDemodFreq(static_cast<TYPEREAL>(frequency - channelprops.frequency));
 
 	// Initialize the output resampler
 	m_resampler = std::unique_ptr<CFractResampler>(new CFractResampler());
 	m_resampler->Init(m_demodulator->GetInputBufferLimit());
+
+	// Initialize the RTL-SDR device instance
+	m_device->set_frequency_correction(tunerprops.freqcorrection);				// +/- PPM
+	m_device->set_sample_rate(m_demodulator->GetInputBufferLimit() * 100);		// 10ms per read
+	m_device->set_center_frequency(frequency);									// + DC offset
+
+	// Adjust the device gain as specified by the channel properties
+	m_device->set_automatic_gain_control(channelprops.autogain);
+	if(channelprops.autogain == false) m_device->set_gain(channelprops.manualgain);
 
 	// Create a worker thread on which to perform the transfer operations
 	scalar_condition<bool> started{ false };
