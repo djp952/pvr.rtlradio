@@ -136,6 +136,10 @@ msgctxt "#30214"
 msgid "2.4 MHz"
 msgstr ""
 
+msgctxt "#30215"
+msgid "Native"
+msgstr ""
+
 msgctxt "#30300"
 msgid "OK"
 msgstr ""
@@ -193,7 +197,7 @@ msgid "Specifies the Radio Data System (RDS) region. When set to Automatic the r
 msgstr ""
 
 msgctxt "#30505"
-msgid "Specifies the FM digital signal processor PCM output sample rate."
+msgid "Specifies the FM digital signal processor PCM output sample rate. Native uses the native output rate of the Digital Signal Processor (DSP) and may improve performance on slower systems."
 msgstr ""
 
 msgctxt "#30506"

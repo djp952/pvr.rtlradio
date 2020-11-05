@@ -190,6 +190,11 @@ private:
 	//-----------------------------------------------------------------------
 	// Private Member Functions
 
+	// native_resample
+	//
+	// Resamples the output at the 'native' rate rather than downconverting
+	int native_resample(int numsamples, TYPECPX const* insamples, TYPESTEREO16* outsamples, TYPEREAL gain) const;
+
 	// transfer
 	//
 	// Worker thread procedure used to transfer data into the ring buffer
@@ -204,7 +209,7 @@ private:
 	bool const							m_decoderds;			// Flag to send decoded RDS data
 	rdsdecoder							m_rdsdecoder;			// RDS decoder instance
 
-	uint32_t const						m_pcmsamplerate;		// Output sample rate
+	uint32_t							m_pcmsamplerate = 0;	// Output sample rate
 	TYPEREAL const						m_pcmgain;				// Output gain
 	double								m_dts{ DVD_TIME_BASE };	// Current decode time stamp
 

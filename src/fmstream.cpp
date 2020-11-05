@@ -66,10 +66,6 @@ fmstream::fmstream(std::unique_ptr<rtldevice> device, struct tunerprops const& t
 	if((tunerprops.samplerate < 900001) || (tunerprops.samplerate > 3200000))
 		throw string_exception(__func__, ": Tuner device sample rate must be in the range of 900001Hz to 3200000Hz");
 
-	// The only allowable output sample rates for this stream are 44100Hz and 48000Hz
-	if((m_pcmsamplerate != 44100) && (m_pcmsamplerate != 48000))
-		throw string_exception(__func__, ": FM DSP output sample rate must be set to either 44.1KHz or 48.0KHz");
-
 	// Initialize the RTL-SDR device instance
 	m_device->set_frequency_correction(tunerprops.freqcorrection);
 	uint32_t samplerate = m_device->set_sample_rate(tunerprops.samplerate);
@@ -110,9 +106,15 @@ fmstream::fmstream(std::unique_ptr<rtldevice> device, struct tunerprops const& t
 	m_demodulator->SetDemod(DEMOD_WFM, demodinfo);
 	m_demodulator->SetDemodFreq(static_cast<TYPEREAL>(frequency - channelprops.frequency));
 
-	// Initialize the output resampler
-	m_resampler = std::unique_ptr<CFractResampler>(new CFractResampler());
-	m_resampler->Init(m_demodulator->GetInputBufferLimit());
+	// If the output sample rate is zero, use the demodulator output rate
+	if(m_pcmsamplerate == 0) m_pcmsamplerate = static_cast<uint32_t>(m_demodulator->GetOutputRate());
+
+	// Otherwise create an initialize the output resampler instance
+	else {
+
+		m_resampler = std::unique_ptr<CFractResampler>(new CFractResampler());
+		m_resampler->Init(m_demodulator->GetInputBufferLimit());
+	}
 
 	// Adjust the device gain as specified by the channel properties
 	m_device->set_automatic_gain_control(channelprops.autogain);
@@ -278,26 +280,20 @@ DemuxPacket* fmstream::demuxread(std::function<DemuxPacket*(int)> const& allocat
 	DemuxPacket* packet = allocator(packetsize);
 	if(packet == nullptr) return nullptr;
 
-	// Calculate the output resampling rate; this may need a correction to ensure that the
-	// correct number of output packets are generated
-	TYPEREAL correction = m_demodulator->GetOutputRate() / (audiopackets * 100);
-	TYPEREAL rate = (m_demodulator->GetOutputRate() / m_pcmsamplerate) * correction;
-
-	// Resample the audio data directly into the allocated packet buffer
-	audiopackets = m_resampler->Resample(audiopackets, rate, samples.get(),
-		reinterpret_cast<TYPESTEREO16*>(packet->pData), m_pcmgain);
-
-	// Calcuate the duration of the packet in microseconds
-	double duration = DVD_TIME_BASE * (audiopackets / static_cast<double>(m_pcmsamplerate));
+	// Resample the complex audio data directly into the packet data buffer.  If a fractional resampler was
+	// initialized, use that to downsample the data otherwise use the fast 1:1 'native' resampler
+	if(m_resampler) audiopackets = m_resampler->Resample(audiopackets, (m_demodulator->GetOutputRate() / m_pcmsamplerate),
+		samples.get(), reinterpret_cast<TYPESTEREO16*>(packet->pData), m_pcmgain);
+	else audiopackets = native_resample(audiopackets, samples.get(), reinterpret_cast<TYPESTEREO16*>(packet->pData), m_pcmgain);
 
 	// Set up the demultiplexer packet with the proper size, duration and dts
 	packet->iStreamId = STREAM_ID_AUDIO;
 	packet->iSize = audiopackets * sizeof(TYPESTEREO16);
-	packet->duration = duration;
+	packet->duration = 10000.0;
 	packet->dts = packet->pts = m_dts;
 
 	// Increment the decode time stamp value based on the calculated duration
-	m_dts += duration;
+	m_dts += 10000.0;
 
 	return packet;
 }
@@ -388,6 +384,35 @@ std::string fmstream::muxname(void) const
 {
 	// If the callsigbn for the station is known, use that with an -FM suffix, otherwise "Unknown"
 	return m_rdsdecoder.has_rbds_callsign() ? std::string(m_rdsdecoder.get_rbds_callsign()) + "-FM" : "Unknown";
+}
+
+//---------------------------------------------------------------------------
+// fmstream::native_resample
+//
+// Resamples the input data into stereo PCM samples at the native rate
+//
+// Arguments:
+//
+//	numsamples		- Number of input samples to process
+//	insamples		- Buffer containing the input samples
+//	outsamples		- Buffer to hold the output samples
+//	gain			- Gain value to apply to the samples
+
+int fmstream::native_resample(int numsamples, TYPECPX const* insamples, TYPESTEREO16* outsamples, TYPEREAL gain) const
+{
+	// Simple operation; just multiply the value by the gain and avoid over/underflow during conversion ...
+	for(int index = 0; index < numsamples; index++) {
+
+	#ifdef FMDSP_USE_DOUBLE_PRECISION
+		outsamples[index].re = static_cast<qint16>(std::max(-32767.0, std::min(32767.0, insamples[index].re * gain)));
+		outsamples[index].im = static_cast<qint16>(std::max(-32767.0, std::min(32767.0, insamples[index].im * gain)));
+	#else
+		outsamples[index].re = static_cast<qint16>(std::max(-32767.0f, std::min(32767.0f, insamples[index].re * gain)));
+		outsamples[index].im = static_cast<qint16>(std::max(-32767.0f, std::min(32767.0f, insamples[index].im * gain)));
+	#endif
+	}
+
+	return numsamples;
 }
 
 //---------------------------------------------------------------------------
