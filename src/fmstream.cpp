@@ -263,10 +263,9 @@ DemuxPacket* fmstream::demuxread(std::function<DemuxPacket*(int)> const& allocat
 
 		m_dts = DVD_TIME_BASE;				// Reset the current decode time stamp
 
-		// Create a STREAMCHANGE packet that has no data but updates the DTS
+		// Create a STREAMCHANGE packet that has no data
 		DemuxPacket* packet = allocator(0);
 		if(packet) packet->iStreamId = DMX_SPECIALID_STREAMCHANGE;
-		//packet->dts = packet->pts = m_dts;
 
 		return packet;				// Return the generated packet
 	}
@@ -283,18 +282,26 @@ DemuxPacket* fmstream::demuxread(std::function<DemuxPacket*(int)> const& allocat
 	DemuxPacket* packet = allocator(packetsize);
 	if(packet == nullptr) return nullptr;
 
+	// Calculate the output resampling rate; this may need a correction to ensure that the
+	// correct number of output packets are generated
+	TYPEREAL correction = m_demodulator->GetOutputRate() / (audiopackets * 100);
+	TYPEREAL rate = (m_demodulator->GetOutputRate() / m_pcmsamplerate) * correction;
+
 	// Resample the audio data directly into the allocated packet buffer
-	int stereopackets = m_resampler->Resample(audiopackets, m_demodulator->GetOutputRate() / m_pcmsamplerate, 
-		samples.get(), reinterpret_cast<TYPESTEREO16*>(packet->pData), m_pcmgain);
+	audiopackets = m_resampler->Resample(audiopackets, rate, samples.get(),
+		reinterpret_cast<TYPESTEREO16*>(packet->pData), m_pcmgain);
+
+	// Calcuate the duration of the packet in microseconds
+	double duration = DVD_TIME_BASE * (audiopackets / static_cast<double>(m_pcmsamplerate));
 
 	// Set up the demultiplexer packet with the proper size, duration and dts
 	packet->iStreamId = STREAM_ID_AUDIO;
-	packet->iSize = stereopackets * sizeof(TYPESTEREO16);
-	packet->duration = (DVD_TIME_BASE / 100.0);				// 10ms
+	packet->iSize = audiopackets * sizeof(TYPESTEREO16);
+	packet->duration = duration;
 	packet->dts = packet->pts = m_dts;
 
 	// Increment the decode time stamp value based on the calculated duration
-	m_dts += (DVD_TIME_BASE / 100.0);						// 10ms
+	m_dts += duration;
 
 	return packet;
 }
