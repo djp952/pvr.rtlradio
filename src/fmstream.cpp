@@ -60,19 +60,20 @@ int const fmstream::STREAM_ID_UECP = 2;
 fmstream::fmstream(std::unique_ptr<rtldevice> device, struct tunerprops const& tunerprops, 
 	struct channelprops const& channelprops, struct fmprops const& fmprops) :
 	m_device(std::move(device)), m_decoderds(fmprops.decoderds), m_rdsdecoder(fmprops.isrbds), 
-	m_samplerate(tunerprops.samplerate), m_pcmsamplerate(fmprops.outputrate), 
-	m_pcmgain(MPOW(10.0, (fmprops.outputgain / 10.0)))
+	m_pcmsamplerate(fmprops.outputrate), m_pcmgain(MPOW(10.0, (fmprops.outputgain / 10.0)))
 {
 	// The sample rate must be within 900001Hz - 3200000Hz
-	if((m_samplerate < 900001) || (m_samplerate > 3200000))
+	if((tunerprops.samplerate < 900001) || (tunerprops.samplerate > 3200000))
 		throw string_exception(__func__, ": Tuner device sample rate must be in the range of 900001Hz to 3200000Hz");
 
 	// The only allowable output sample rates for this stream are 44100Hz and 48000Hz
 	if((m_pcmsamplerate != 44100) && (m_pcmsamplerate != 48000))
 		throw string_exception(__func__, ": FM DSP output sample rate must be set to either 44.1KHz or 48.0KHz");
 
-	// Calcuate the actual frequency to be tuned (DC offset)
-	uint32_t frequency = channelprops.frequency + (m_samplerate / 4);
+	// Initialize the RTL-SDR device instance
+	m_device->set_frequency_correction(tunerprops.freqcorrection);
+	uint32_t samplerate = m_device->set_sample_rate(tunerprops.samplerate);
+	uint32_t frequency = m_device->set_center_frequency(channelprops.frequency + (samplerate / 4));		// DC offset
 
 	// Initialize the demodulator parameters
 	tDemodInfo demodinfo = {};
@@ -105,18 +106,13 @@ fmstream::fmstream(std::unique_ptr<rtldevice> device, struct tunerprops const& t
 	// Initialize the wideband FM demodulator
 	m_demodulator = std::unique_ptr<CDemodulator>(new CDemodulator());
 	m_demodulator->SetUSFmVersion(fmprops.isrbds);
-	m_demodulator->SetInputSampleRate(static_cast<TYPEREAL>(m_samplerate));
+	m_demodulator->SetInputSampleRate(static_cast<TYPEREAL>(samplerate));
 	m_demodulator->SetDemod(DEMOD_WFM, demodinfo);
 	m_demodulator->SetDemodFreq(static_cast<TYPEREAL>(frequency - channelprops.frequency));
 
 	// Initialize the output resampler
 	m_resampler = std::unique_ptr<CFractResampler>(new CFractResampler());
 	m_resampler->Init(m_demodulator->GetInputBufferLimit());
-
-	// Initialize the RTL-SDR device instance
-	m_device->set_frequency_correction(tunerprops.freqcorrection);				// +/- PPM
-	m_device->set_sample_rate(m_demodulator->GetInputBufferLimit() * 100);		// 10ms per read
-	m_device->set_center_frequency(frequency);									// + DC offset
 
 	// Adjust the device gain as specified by the channel properties
 	m_device->set_automatic_gain_control(channelprops.autogain);
