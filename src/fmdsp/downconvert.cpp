@@ -254,16 +254,18 @@ TYPEREAL f = InRate;
 		DeleteFilters();
 
 		//loop until closest output rate is found and list of pointers to decimate by 2 stages is generated
-		//while( (f > 400000.0)  )
-		//{
-		//	m_pDecimatorPtrs[n++] = new CDownConvert::CHalfBandDecimateBy2(HB51TAP_LENGTH, HB51TAP_H);
-		//	f /= 2.0;
-		//}
+		while( (f > 400000.0)  )
+		{
+			m_pDecimatorPtrs[n++] = new CDownConvert::CHalfBandDecimateBy2(HB51TAP_LENGTH, HB51TAP_H);
+			f /= 2.0;
+		}
 
+		// REMOVED FOR NOW:
+		//
 		// For Wideband FM, use a single integer factor decimation instead of multiple half-band decimations
-		int factor = 1;
-		while(f > 400000.0) { factor *= 2; f /= 2.0; }
-		m_pDecimatorPtrs[n++] = new CDownConvert::CIntegerFactorDecimate(factor);
+		// int factor = 1;
+		// while(f > 400000.0) { factor *= 2; f /= 2.0; }
+		// m_pDecimatorPtrs[n++] = new CDownConvert::CIntegerFactorDecimate(factor);
 
 		m_OutputRate = f;
 	#ifdef FMDSP_THREAD_SAFE

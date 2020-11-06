@@ -331,8 +331,8 @@ size_t tcpdevice::read(uint8_t* buffer, size_t count) const
 void tcpdevice::read_async(rtldevice::asynccallback const& callback, uint32_t bufferlength) const
 {
 	std::unique_ptr<uint8_t[]>	buffer(new uint8_t[256 KiB]);			// Input data buffer
-	std::unique_ptr<uint8_t[]>	overflow(new uint8_t[bufferlength]);	// Leftover data buffer
-	size_t						leftover = 0;							// Leftover data length
+	std::unique_ptr<uint8_t[]>	leftover(new uint8_t[bufferlength]);	// Left over data buffer
+	size_t						leftoverpos = 0;						// Left over data position
 
 	m_stop = false;
 	m_stopped = false;
@@ -346,16 +346,23 @@ void tcpdevice::read_async(rtldevice::asynccallback const& callback, uint32_t bu
 			size_t count = read(&buffer[0], 256 KiB);
 			size_t offset = 0;
 
-			// Deal with any leftover data from the previous read operation
-			if(leftover > 0) {
+			// Deal with any left over data from the previous read operation
+			if(leftoverpos > 0) {
 
 				// Copy the remaining bytes for the packet into the overflow buffer and send it
-				memcpy(&overflow[leftover], &buffer[0], bufferlength - leftover);
-				callback(&overflow[0], bufferlength);
+				size_t chunk = std::min(count, bufferlength - leftoverpos);
+				memcpy(&leftover[leftoverpos], &buffer[0], chunk);
 
-				count -= leftover;				// Used some bytes
-				offset += leftover;				// Used some bytes
-				leftover = 0;					// No more bytes leftover
+				count -= chunk;					// Used some bytes
+				offset += chunk;				// Used some bytes
+				leftoverpos += chunk;			// Added some bytes
+
+				// If there is now a full packet in the left over buffer, send it
+				if(leftoverpos >= bufferlength) {
+
+					callback(&leftover[0], bufferlength);
+					leftoverpos = 0;
+				}
 			}
 			
 			// Handle any full packets of data that can be sent directly into the callback
@@ -373,8 +380,8 @@ void tcpdevice::read_async(rtldevice::asynccallback const& callback, uint32_t bu
 			// during the next loop iteration
 			if(count > 0) {
 
-				memcpy(&overflow[0], &buffer[offset], count);
-				leftover = count;
+				memcpy(&leftover[0], &buffer[offset], count);
+				leftoverpos = count;
 			}
 		}
 
