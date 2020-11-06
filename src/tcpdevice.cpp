@@ -120,18 +120,6 @@ tcpdevice::tcpdevice(char const* host, uint16_t port)
 			result = setsockopt(m_socket, SOL_SOCKET, SO_LINGER, reinterpret_cast<char const*>(&linger), sizeof(struct linger));
 			if(result == -1) throw string_exception("setsockopt(SO_LINGER) failed");
 
-			// SO_RCVTIMEO
-			//
-#ifdef _WINDOWS
-			DWORD timeout = 1000;
-#else
-			struct timeval timeout;
-			timeout.tv_sec = 1;
-			timeout.tv_usec = 0;
-#endif
-			result = setsockopt(m_socket, SOL_SOCKET, SO_RCVTIMEO, reinterpret_cast<char const*>(&timeout), sizeof(timeout));
-			if(result == -1) throw string_exception("setsockopt(SO_RCVTIMEO) failed");
-
 			// Establish the TCP/IP socket connection
 			result = connect(m_socket, addrs->ai_addr, static_cast<int>(addrs->ai_addrlen));
 			if(result != 0) throw string_exception("connect() failed");
@@ -142,10 +130,34 @@ tcpdevice::tcpdevice(char const* host, uint16_t port)
 			result = setsockopt(m_socket, IPPROTO_TCP, TCP_NODELAY, reinterpret_cast<char const*>(&nodelay), sizeof(int));
 			if(result == -1) throw string_exception("setsockopt(TCP_NODELAY) failed");
 
+			// SO_RCVTIMEO (initial recv())
+			//
+		#ifdef _WINDOWS
+			DWORD timeout = 5000;
+		#else
+			struct timeval timeout;
+			timeout.tv_sec = 5;
+			timeout.tv_usec = 0;
+		#endif
+			result = setsockopt(m_socket, SOL_SOCKET, SO_RCVTIMEO, reinterpret_cast<char const*>(&timeout), sizeof(timeout));
+			if(result == -1) throw string_exception("setsockopt(SO_RCVTIMEO) failed");
+
 			// Retrieve the device information from the server
 			struct device_info deviceinfo = {};
 			result = recv(m_socket, reinterpret_cast<char*>(&deviceinfo), sizeof(struct device_info), 0);
 			if(result != sizeof(struct device_info)) throw string_exception("recv(struct device_info) failed");
+
+			// SO_RCVTIMEO (subsequent recv()s)
+			//
+		#ifdef _WINDOWS
+			timeout = 1000;
+		#else
+			timeout.tv_sec = 1;
+			timeout.tv_usec = 0;
+		#endif
+
+			result = setsockopt(m_socket, SOL_SOCKET, SO_RCVTIMEO, reinterpret_cast<char const*>(&timeout), sizeof(timeout));
+			if(result == -1) throw string_exception("setsockopt(SO_RCVTIMEO) failed");
 
 			// Parse the provided device information; only care about the tuner device type
 			if(memcmp(deviceinfo.magic, "RTL0", 4) == 0) m_tunertype = static_cast<rtlsdr_tuner>(ntohl(deviceinfo.tuner_type));
