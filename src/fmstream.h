@@ -209,6 +209,7 @@ private:
 	bool const							m_decoderds;			// Flag to send decoded RDS data
 	rdsdecoder							m_rdsdecoder;			// RDS decoder instance
 
+	float const							m_muxfrequency;			// Frequency to display as the "mux"
 	uint32_t							m_pcmsamplerate = 0;	// Output sample rate
 	TYPEREAL const						m_pcmgain;				// Output gain
 	double								m_dts{ DVD_TIME_BASE };	// Current decode time stamp

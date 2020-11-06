@@ -85,7 +85,6 @@ LOCAL_SRC_FILES := \
     src/fmdsp/fir.cpp \
     src/fmdsp/fractresampler.cpp \
     src/fmdsp/iir.cpp \
-    src/fmdsp/smeter.cpp \
     src/fmdsp/wfmdemod.cpp \
     src/addon.cpp \
     src/channeladd.cpp \

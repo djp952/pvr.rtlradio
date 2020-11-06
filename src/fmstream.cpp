@@ -60,7 +60,8 @@ int const fmstream::STREAM_ID_UECP = 2;
 fmstream::fmstream(std::unique_ptr<rtldevice> device, struct tunerprops const& tunerprops, 
 	struct channelprops const& channelprops, struct fmprops const& fmprops) :
 	m_device(std::move(device)), m_decoderds(fmprops.decoderds), m_rdsdecoder(fmprops.isrbds), 
-	m_pcmsamplerate(fmprops.outputrate), m_pcmgain(MPOW(10.0, (fmprops.outputgain / 10.0)))
+	m_muxfrequency(channelprops.frequency / 1000000.0f), m_pcmsamplerate(fmprops.outputrate), 
+	m_pcmgain(MPOW(10.0, (fmprops.outputgain / 10.0)))
 {
 	// The sample rate must be within 900001Hz - 3200000Hz
 	if((tunerprops.samplerate < 900001) || (tunerprops.samplerate > 3200000))
@@ -382,8 +383,13 @@ long long fmstream::length(void) const
 
 std::string fmstream::muxname(void) const
 {
-	// If the callsigbn for the station is known, use that with an -FM suffix, otherwise "Unknown"
-	return m_rdsdecoder.has_rbds_callsign() ? std::string(m_rdsdecoder.get_rbds_callsign()) + "-FM" : "Unknown";
+	// If the callsign for the station is known, use that with an -FM suffix, otherwise use the frequency
+	if(m_rdsdecoder.has_rbds_callsign()) return std::string(m_rdsdecoder.get_rbds_callsign()) + "-FM";
+
+	// Otherwise, use the channel frequency
+	char buf[64] = {0};
+	snprintf(buf, std::extent<decltype(buf)>::value, "%.1f FM", m_muxfrequency);
+	return std::string(buf);
 }
 
 //---------------------------------------------------------------------------
@@ -498,25 +504,7 @@ std::string fmstream::servicename(void) const
 
 int fmstream::signalstrength(void) const
 {
-	//
-	// TODO: I'm not thrilled with this
-	//
-
-	static double const LN25 = MLOG(25);		// natural log of 25
-
-	TYPEREAL db = static_cast<int>(m_demodulator->GetSMeterAve());
-
-	// The dynamic range of an 8-bit ADC is 48dB, use anything -48dB or more as 0%,
-	// and anything at or over 0dB as 100% signal strength
-	if(db <= -48.0) return 0;
-	else if(db >= 0.0) return 100;
-
-	// Convert db into a percentage based on a linear scale from -48dB to 0dB
-	db = (1.0 - (db / -48.0)) * 100;
-
-	// While this is certainly not technically accurate, scale the percentage
-	// using a natural logarithm to bump up the value into something realistic
-	return static_cast<int>(MLOG(db / 4) * (100 / LN25));
+	return 0;
 }
 
 //---------------------------------------------------------------------------
@@ -530,19 +518,7 @@ int fmstream::signalstrength(void) const
 
 int fmstream::signaltonoise(void) const
 {
-	//
-	// TODO: I'm not thrilled with this
-	//
-
-	TYPEREAL db = static_cast<int>(m_demodulator->GetSMeterAve());
-
-	// The actual SNR is difficult to calculate and track (I tried), so use the
-	// delta between the signal and -44dB (-48dB [ADC] + -4dB [device]) as the SNR
-
-	if(db <= -44.0) return 0;				// No signal
-	else if(db >= 0.0) return 100;			// Maximum signal
-
-	return static_cast<int>((fabs(-44.0 - db) * 100) / 44.0);
+	return 0;
 }
 
 //---------------------------------------------------------------------------

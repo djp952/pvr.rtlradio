@@ -37,7 +37,6 @@
 #define DEMODULATOR_H
 
 #include "downconvert.h"
-#include "smeter.h"
 #include "wfmdemod.h"
 
 #include <string>
@@ -81,9 +80,6 @@ public:
 
 	void SetInputSampleRate(TYPEREAL InputRate);
 	TYPEREAL GetOutputRate(){return m_DemodOutputRate;}
-	TYPEREAL GetSMeterPeak(){return m_SMeter.GetPeak();}
-	TYPEREAL GetSMeterAve(){return m_SMeter.GetAve();}
-	void SetSmeterOffset(TYPEREAL Offset){ m_SMeter.SetSMeterCalibration(Offset);}
 
 	void SetDemod(int Mode, tDemodInfo CurrentDemodInfo);
 	void SetDemodFreq(TYPEREAL Freq){m_DownConvert.SetCwOffset(m_CW_Offset);
@@ -112,7 +108,6 @@ public:
 private:
 	void DeleteAllDemods();
 	CDownConvert m_DownConvert;
-	CSMeter m_SMeter;
 #ifdef FMDSP_THREAD_SAFE
 	mutable std::mutex m_Mutex;		//for keeping threads from stomping on each other
 #endif

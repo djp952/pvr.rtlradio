@@ -153,9 +153,6 @@ int ret = 0;
 			//perform baseband tuning and decimation
 			int n = m_DownConvert.ProcessData(m_InBufPos, m_pDemodInBuf, m_pDemodInBuf);
 
-			//perform S-Meter processing for wideband FM
-			m_SMeter.ProcessData(n, m_pDemodInBuf, m_DownConverterOutputRate);
-
 			//perform the desired demod action
 			switch(m_DemodMode)
 			{
@@ -191,9 +188,6 @@ int ret = 0;
 
 			//perform baseband tuning and decimation
 			int n = m_DownConvert.ProcessData(m_InBufPos, m_pDemodInBuf, m_pDemodInBuf);
-
-			//perform S-Meter processing for wideband FM
-			m_SMeter.ProcessData(n, m_pDemodInBuf, m_DownConverterOutputRate);
 
 			//perform the desired demod action
 			switch(m_DemodMode)

@@ -144,9 +144,6 @@
     <ClInclude Include="fmdsp\downconvert.h">
       <Filter>Header Files\fmdsp</Filter>
     </ClInclude>
-    <ClInclude Include="fmdsp\smeter.h">
-      <Filter>Header Files\fmdsp</Filter>
-    </ClInclude>
     <ClInclude Include="fmdsp\datatypes.h">
       <Filter>Header Files\fmdsp</Filter>
     </ClInclude>
@@ -288,9 +285,6 @@
       <Filter>Source Files\fmdsp</Filter>
     </ClCompile>
     <ClCompile Include="fmdsp\iir.cpp">
-      <Filter>Source Files\fmdsp</Filter>
-    </ClCompile>
-    <ClCompile Include="fmdsp\smeter.cpp">
       <Filter>Source Files\fmdsp</Filter>
     </ClCompile>
     <ClCompile Include="fmdsp\wfmdemod.cpp">

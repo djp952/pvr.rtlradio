@@ -43,6 +43,7 @@
 #include "filtercoef.h"
 #include <algorithm>
 #include <assert.h>
+#include <string.h>
 
 //pick a method of calculating the NCO
 #define NCO_LIB 0		//normal sin cos library (188nS)
