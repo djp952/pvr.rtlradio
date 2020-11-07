@@ -219,7 +219,7 @@ void fmstream::demuxflush(void)
 //
 //	allocator		- DemuxPacket allocation function
 
-DemuxPacket* fmstream::demuxread(std::function<DemuxPacket*(int)> const& allocator)
+DEMUX_PACKET* fmstream::demuxread(std::function<DEMUX_PACKET*(int)> const& allocator)
 {
 	bool				stopped = false;		// Flag if data transfer has stopped
 
@@ -233,7 +233,7 @@ DemuxPacket* fmstream::demuxread(std::function<DemuxPacket*(int)> const& allocat
 
 			// Allocate and initialize the UECP demultiplexer packet
 			int packetsize = static_cast<int>(uecp_packet.size());
-			DemuxPacket* packet = allocator(packetsize);
+			DEMUX_PACKET* packet = allocator(packetsize);
 			if(packet == nullptr) return nullptr;
 
 			packet->iStreamId = STREAM_ID_UECP;
@@ -260,11 +260,11 @@ DemuxPacket* fmstream::demuxread(std::function<DemuxPacket*(int)> const& allocat
 	// If the packet of samples is null, the writer has indicated there was a problem
 	if(!samples) {
 
-		m_dts = DVD_TIME_BASE;				// Reset the current decode time stamp
+		m_dts = STREAM_TIME_BASE;			// Reset the current decode time stamp
 
 		// Create a STREAMCHANGE packet that has no data
-		DemuxPacket* packet = allocator(0);
-		if(packet) packet->iStreamId = DMX_SPECIALID_STREAMCHANGE;
+		DEMUX_PACKET* packet = allocator(0);
+		if(packet) packet->iStreamId = DEMUX_SPECIALID_STREAMCHANGE;
 
 		return packet;				// Return the generated packet
 	}
@@ -278,7 +278,7 @@ DemuxPacket* fmstream::demuxread(std::function<DemuxPacket*(int)> const& allocat
 
 	// Determine the size of the demultiplexer packet data and allocate it
 	int packetsize = audiopackets * sizeof(TYPESTEREO16);
-	DemuxPacket* packet = allocator(packetsize);
+	DEMUX_PACKET* packet = allocator(packetsize);
 	if(packet == nullptr) return nullptr;
 
 	// Resample the complex audio data directly into the packet data buffer.  If a fractional resampler was

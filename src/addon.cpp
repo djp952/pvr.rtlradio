@@ -903,12 +903,12 @@ void addon::DemuxFlush(void)
 //
 //	NONE
 
-DemuxPacket* addon::DemuxRead(void)
+DEMUX_PACKET* addon::DemuxRead(void)
 {
 	if(!m_pvrstream) return nullptr;
 
 	// Use an inline lambda to provide the stream an std::function to use to invoke AllocateDemuxPacket()
-	try { return m_pvrstream->demuxread([&](int size) -> DemuxPacket* { return AllocateDemuxPacket(size); }); }
+	try { return m_pvrstream->demuxread([&](int size) -> DEMUX_PACKET* { return AllocateDemuxPacket(size); }); }
 
 	catch(std::exception& ex) {
 

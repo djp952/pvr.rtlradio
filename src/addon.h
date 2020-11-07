@@ -103,7 +103,7 @@ public:
 	// DemuxRead
 	//
 	// Read the next packet from the demultiplexer
-	DemuxPacket* DemuxRead(void) override;
+	DEMUX_PACKET* DemuxRead(void) override;
 
 	// DemuxReset
 	//

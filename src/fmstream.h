@@ -24,8 +24,6 @@
 #define __FMSTREAM_H_
 #pragma once
 
-#pragma warning(push, 4)
-
 #include <atomic>
 #include <condition_variable>
 #include <memory>
@@ -41,6 +39,8 @@
 #include "rdsdecoder.h"
 #include "rtldevice.h"
 #include "scalar_condition.h"
+
+#pragma warning(push, 4)
 
 //---------------------------------------------------------------------------
 // Class fmstream
@@ -87,7 +87,7 @@ public:
 	// demuxread
 	//
 	// Reads the next packet from the demultiplexer
-	DemuxPacket* demuxread(std::function<DemuxPacket*(int)> const& allocator) override;
+	DEMUX_PACKET* demuxread(std::function<DEMUX_PACKET*(int)> const& allocator) override;
 
 	// demuxreset
 	//
@@ -203,25 +203,25 @@ private:
 	//-----------------------------------------------------------------------
 	// Member Variables
 
-	std::unique_ptr<rtldevice>			m_device;				// RTL-SDR device instance
-	std::unique_ptr<CDemodulator>		m_demodulator;			// CuteSDR demodulator instance
-	std::unique_ptr<CFractResampler>	m_resampler;			// CuteSDR resampler instance
-	bool const							m_decoderds;			// Flag to send decoded RDS data
-	rdsdecoder							m_rdsdecoder;			// RDS decoder instance
+	std::unique_ptr<rtldevice>			m_device;					// RTL-SDR device instance
+	std::unique_ptr<CDemodulator>		m_demodulator;				// CuteSDR demodulator instance
+	std::unique_ptr<CFractResampler>	m_resampler;				// CuteSDR resampler instance
+	bool const							m_decoderds;				// Flag to send decoded RDS data
+	rdsdecoder							m_rdsdecoder;				// RDS decoder instance
 
-	float const							m_muxfrequency;			// Frequency to display as the "mux"
-	uint32_t							m_pcmsamplerate = 0;	// Output sample rate
-	TYPEREAL const						m_pcmgain;				// Output gain
-	double								m_dts{ DVD_TIME_BASE };	// Current decode time stamp
+	float const							m_muxfrequency;				// Frequency to display as the "mux"
+	uint32_t							m_pcmsamplerate = 0;		// Output sample rate
+	TYPEREAL const						m_pcmgain;					// Output gain
+	double								m_dts{ STREAM_TIME_BASE };	// Current decode time stamp
 
 	// STREAM CONTROL
 	//
-	sample_queue_t						m_queue;				// queue<> of prepared samples
-	mutable std::mutex					m_queuelock;			// Synchronization object
-	std::condition_variable				m_cv;					// Transfer event condvar
-	std::thread							m_worker;				// Data transfer thread
-	scalar_condition<bool>				m_stop{ false };		// Condition to stop data transfer
-	std::atomic<bool>					m_stopped{ false };		// Data transfer stopped flag
+	sample_queue_t						m_queue;					// queue<> of prepared samples
+	mutable std::mutex					m_queuelock;				// Synchronization object
+	std::condition_variable				m_cv;						// Transfer event condvar
+	std::thread							m_worker;					// Data transfer thread
+	scalar_condition<bool>				m_stop{ false };			// Condition to stop data transfer
+	std::atomic<bool>					m_stopped{ false };			// Data transfer stopped flag
 };
 
 //-----------------------------------------------------------------------------
