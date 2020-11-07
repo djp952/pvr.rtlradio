@@ -1420,6 +1420,19 @@ bool addon::OpenLiveStream(kodi::addon::PVRChannel const& channel)
 		fmprops.decoderds = settings.fmradio_enable_rds;
 		fmprops.isrbds = (get_regional_rds_standard(settings.fmradio_rds_standard) == rds_standard::rbds);
 		fmprops.outputrate = settings.fmradio_output_samplerate;
+		fmprops.outputgain = settings.fmradio_output_gain;
+
+		// Log information about the stream for diagnostic purposes
+		log_info(__func__, ": Creating fmstream for channel \"", channelprops.name, "\"");
+		log_info(__func__, ": tunerprops.samplerate = ", tunerprops.samplerate, " Hz");
+		log_info(__func__, ": tunerprops.freqcorrection = ", tunerprops.freqcorrection, " PPM");
+		log_info(__func__, ": channelprops.frequency = ", channelprops.frequency, " Hz");
+		log_info(__func__, ": channelprops.autogain = ", (channelprops.autogain) ? "true" : "false");
+		log_info(__func__, ": channelprops.manualgain = ", channelprops.manualgain / 10, " dB");
+		log_info(__func__, ": fmprops.decoderds = ", (fmprops.decoderds) ? "true" : "false");
+		log_info(__func__, ": fmprops.isrbds = ", (fmprops.isrbds) ? "true" : "false");
+		log_info(__func__, ": fmprops.outputgain = ", fmprops.outputgain, " dB");
+		log_info(__func__, ": fmprops.outputrate = ", fmprops.outputrate, " Hz");
 
 		// Create the FM radio stream, accessing the cached RTL-SDR device when possible
 		m_pvrstream = fmstream::create(create_device(settings), tunerprops, channelprops, fmprops);
