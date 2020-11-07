@@ -51,25 +51,11 @@
 
 typedef struct _sdmd
 {
-	int HiCut;
-	int HiCutmin;	//not saved in settings
-	int HiCutmax;	//not saved in settings
-	int LowCut;
-	int LowCutmin;	//not saved in settings
-	int LowCutmax;	//not saved in settings
-	int DefFreqClickResolution;//not saved in settings
-	int FreqClickResolution;
-	int FilterClickResolution;//not saved in settings
+	int HiCutmax;
 	int Offset;
-	int SquelchValue;
-	int AgcSlope;
-	int AgcThresh;
-	int AgcManualGain;
-	int AgcDecay;
-	bool AgcOn;
-	bool AgcHangOn;
-	bool Symetric;	//not saved in settings
-	std::string txt;	//not saved in settings
+	enum class DownsampleQuality DownsampleQuality;
+	std::string txt;
+
 }tDemodInfo;
 
 class CDemodulator

@@ -75,30 +75,12 @@ fmstream::fmstream(std::unique_ptr<rtldevice> device, struct tunerprops const& t
 	// Initialize the demodulator parameters
 	tDemodInfo demodinfo = {};
 
-	// FIXED DEMODULATOR SETTINGS
+	// DEMODULATOR SETTINGS
 	//
 	demodinfo.txt.assign("WFM");
-	demodinfo.HiCutmin = 100000;						// Not used by demodulator
 	demodinfo.HiCutmax = 100000;
-	demodinfo.LowCutmax = -100000;						// Not used by demodulator
-	demodinfo.LowCutmin = -100000;
-	demodinfo.Symetric = true;							// Not used by demodulator
-	demodinfo.DefFreqClickResolution = 100000;			// Not used by demodulator
-	demodinfo.FilterClickResolution = 10000;			// Not used by demodulator
-
-	// VARIABLE DEMODULATOR SETTINGS
-	//
-	demodinfo.HiCut = 5000;								// Not used by demodulator
-	demodinfo.LowCut = -5000;							// Not used by demodulator
-	demodinfo.FreqClickResolution = 100000;				// Not used by demodulator
 	demodinfo.Offset = 0;
-	demodinfo.SquelchValue = -160;						// Not used by demodulator
-	demodinfo.AgcSlope = 0;								// Not used by demodulator
-	demodinfo.AgcThresh = -100;							// Not used by demodulator
-	demodinfo.AgcManualGain = 30;						// Not used by demodulator
-	demodinfo.AgcDecay = 200;							// Not used by demodulator
-	demodinfo.AgcOn = false;							// Not used by demodulator
-	demodinfo.AgcHangOn = false;						// Not used by demodulator
+	demodinfo.DownsampleQuality = DownsampleQuality::High;
 
 	// Initialize the wideband FM demodulator
 	m_demodulator = std::unique_ptr<CDemodulator>(new CDemodulator());

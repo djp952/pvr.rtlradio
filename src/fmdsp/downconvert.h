@@ -45,6 +45,13 @@
 
 #define MAX_DECSTAGES 10	//one more than max to make sure is a null at end of list
 
+enum class DownsampleQuality
+{
+	High = 0,			// 51 tap
+	Medium = 1,			// 27 tap
+	Low = 2,			// 11 tap
+};
+
 //////////////////////////////////////////////////////////////////////////////////
 // Main Downconverter Class
 //////////////////////////////////////////////////////////////////////////////////
@@ -58,6 +65,7 @@ public:
 	int ProcessData(int InLength, TYPECPX* pInData, TYPECPX* pOutData);
 	TYPEREAL SetDataRate(TYPEREAL InRate, TYPEREAL MaxBW);
 	TYPEREAL SetWfmDataRate(TYPEREAL InRate, TYPEREAL MaxBW);
+	void SetQuality(enum class DownsampleQuality Quality) { m_Quality = Quality; }
 
 private:
 	////////////
@@ -128,30 +136,11 @@ private:
 		TYPECPX m_Xeven;
 	};
 
-	// CIntegerFactorDecimate
-	//
-	// Implements an integer factor decimator for Wideband FM demodulation
-	class CIntegerFactorDecimate : public CDec2
-	{
-	public:
-
-		CIntegerFactorDecimate(int factor);
-		~CIntegerFactorDecimate();
-
-		int DecBy2(int numsamples, TYPECPX* insamples, TYPECPX* outsamples);
-
-	private:
-
-		int	const		m_downsample_factor;		// Downsample factor
-		int				m_downsample_order;			// Downsample filter order
-		TYPEREAL*		m_downsample_coeff;			// Downsample coefficients
-		TYPECPX*		m_downsample_state;			// Downsample state buffer
-		int				m_downsample_pos = 0;		// Downsample state position
-	};
-
 private:
 	//private helper functions
 	void DeleteFilters();
+
+	enum class DownsampleQuality m_Quality = DownsampleQuality::High;
 
 	TYPEREAL m_OutputRate;
 	TYPEREAL m_NcoFreq;

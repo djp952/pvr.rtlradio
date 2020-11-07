@@ -108,6 +108,8 @@ void CDemodulator::SetDemod(int Mode, tDemodInfo CurrentDemodInfo)
 	std::unique_lock<std::mutex> lock(m_Mutex);
 #endif
 
+	m_DownConvert.SetQuality(CurrentDemodInfo.DownsampleQuality);
+
 	m_DemodInfo = CurrentDemodInfo;
 	if(m_DemodMode != Mode)	//do only if changes
 	{
@@ -125,8 +127,10 @@ void CDemodulator::SetDemod(int Mode, tDemodInfo CurrentDemodInfo)
 				break;
 		}
 	}
+
 	m_CW_Offset = m_DemodInfo.Offset;
 	m_DownConvert.SetCwOffset(m_CW_Offset);
+
 	//set input buffer limit so that decimated output is abt 10mSec or more of data
 	m_InBufLimit = static_cast<int>((m_DemodOutputRate/100.0) * m_InputRate/m_DemodOutputRate);	//process abt .01sec of output samples at a time
 	m_InBufLimit &= 0xFFFFFF00;	//keep modulo 256 since decimation is only in power of 2
