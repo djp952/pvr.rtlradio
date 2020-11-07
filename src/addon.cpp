@@ -907,8 +907,17 @@ DEMUX_PACKET* addon::DemuxRead(void)
 {
 	if(!m_pvrstream) return nullptr;
 
-	// Use an inline lambda to provide the stream an std::function to use to invoke AllocateDemuxPacket()
-	try { return m_pvrstream->demuxread([&](int size) -> DEMUX_PACKET* { return AllocateDemuxPacket(size); }); }
+	try { 
+
+		// Use an inline lambda to provide the stream an std::function to use to invoke AllocateDemuxPacket()
+		DEMUX_PACKET* packet = m_pvrstream->demuxread([&](int size) -> DEMUX_PACKET* { return AllocateDemuxPacket(size); });
+
+		// Log a warning if a stream change packet was detected; this means the application isn't keeping up with the device
+		if((packet != nullptr) && (packet->iStreamId == DEMUX_SPECIALID_STREAMCHANGE))
+			log_warning(__func__, ": stream buffer has been flushed; device sample rate may need to be reduced");
+
+		return packet;
+	}
 
 	catch(std::exception& ex) {
 

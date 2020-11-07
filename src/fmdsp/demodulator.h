@@ -53,7 +53,7 @@ typedef struct _sdmd
 {
 	int HiCutmax;
 	int Offset;
-	enum class DownsampleQuality DownsampleQuality;
+	enum DownsampleQuality DownsampleQuality;
 	std::string txt;
 
 }tDemodInfo;

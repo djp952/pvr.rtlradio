@@ -65,7 +65,7 @@ public:
 	int ProcessData(int InLength, TYPECPX* pInData, TYPECPX* pOutData);
 	TYPEREAL SetDataRate(TYPEREAL InRate, TYPEREAL MaxBW);
 	TYPEREAL SetWfmDataRate(TYPEREAL InRate, TYPEREAL MaxBW);
-	void SetQuality(enum class DownsampleQuality Quality) { m_Quality = Quality; }
+	void SetQuality(enum DownsampleQuality Quality) { m_Quality = Quality; }
 
 private:
 	////////////
@@ -140,7 +140,7 @@ private:
 	//private helper functions
 	void DeleteFilters();
 
-	enum class DownsampleQuality m_Quality = DownsampleQuality::High;
+	enum DownsampleQuality m_Quality = DownsampleQuality::High;
 
 	TYPEREAL m_OutputRate;
 	TYPEREAL m_NcoFreq;
