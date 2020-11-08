@@ -150,7 +150,6 @@
             <options>
               <option label="30205">44100</option>
               <option label="30206">48000</option>
-              <option label="30215">0</option>
             </options>
           </constraints>
           <control type="spinner" format="integer"/>

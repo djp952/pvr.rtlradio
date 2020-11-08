@@ -140,10 +140,6 @@ msgctxt "#30214"
 msgid "2.4 MHz"
 msgstr ""
 
-msgctxt "#30215"
-msgid "Native"
-msgstr ""
-
 msgctxt "#30216"
 msgid "Fast"
 msgstr ""

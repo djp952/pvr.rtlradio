@@ -67,6 +67,10 @@ fmstream::fmstream(std::unique_ptr<rtldevice> device, struct tunerprops const& t
 	if((tunerprops.samplerate < 900001) || (tunerprops.samplerate > 3200000))
 		throw string_exception(__func__, ": Tuner device sample rate must be in the range of 900001Hz to 3200000Hz");
 
+	// The only allowable output sample rates for this stream are 44100Hz and 48000Hz
+	if((m_pcmsamplerate != 44100) && (m_pcmsamplerate != 48000))
+		throw string_exception(__func__, ": FM DSP output sample rate must be set to either 44.1KHz or 48.0KHz");
+
 	// Initialize the RTL-SDR device instance
 	m_device->set_frequency_correction(tunerprops.freqcorrection);
 	uint32_t samplerate = m_device->set_sample_rate(tunerprops.samplerate);
@@ -89,15 +93,9 @@ fmstream::fmstream(std::unique_ptr<rtldevice> device, struct tunerprops const& t
 	m_demodulator->SetDemod(DEMOD_WFM, demodinfo);
 	m_demodulator->SetDemodFreq(static_cast<TYPEREAL>(frequency - channelprops.frequency));
 
-	// If the output sample rate is zero, use the demodulator output rate
-	if(m_pcmsamplerate == 0) m_pcmsamplerate = static_cast<uint32_t>(m_demodulator->GetOutputRate());
-
-	// Otherwise create an initialize the output resampler instance
-	else {
-
-		m_resampler = std::unique_ptr<CFractResampler>(new CFractResampler());
-		m_resampler->Init(m_demodulator->GetInputBufferLimit());
-	}
+	// Initialize the output resampler
+	m_resampler = std::unique_ptr<CFractResampler>(new CFractResampler());
+	m_resampler->Init(m_demodulator->GetInputBufferLimit());
 
 	// Adjust the device gain as specified by the channel properties
 	m_device->set_automatic_gain_control(channelprops.autogain);
@@ -263,20 +261,21 @@ DEMUX_PACKET* fmstream::demuxread(std::function<DEMUX_PACKET*(int)> const& alloc
 	DEMUX_PACKET* packet = allocator(packetsize);
 	if(packet == nullptr) return nullptr;
 
-	// Resample the complex audio data directly into the packet data buffer.  If a fractional resampler was
-	// initialized, use that to downsample the data otherwise use the fast 1:1 'native' resampler
-	if(m_resampler) audiopackets = m_resampler->Resample(audiopackets, (m_demodulator->GetOutputRate() / m_pcmsamplerate),
+	// Resample the audio data directly into the allocated packet buffer
+	audiopackets = m_resampler->Resample(audiopackets, (m_demodulator->GetOutputRate() / m_pcmsamplerate),
 		samples.get(), reinterpret_cast<TYPESTEREO16*>(packet->pData), m_pcmgain);
-	else audiopackets = native_resample(audiopackets, samples.get(), reinterpret_cast<TYPESTEREO16*>(packet->pData), m_pcmgain);
+
+	// Calculate the proper duration for the packet
+	double duration = (audiopackets / static_cast<double>(m_pcmsamplerate)) * STREAM_TIME_BASE;
 
 	// Set up the demultiplexer packet with the proper size, duration and dts
 	packet->iStreamId = STREAM_ID_AUDIO;
 	packet->iSize = audiopackets * sizeof(TYPESTEREO16);
-	packet->duration = 10000.0;
+	packet->duration = duration;
 	packet->dts = packet->pts = m_dts;
 
 	// Increment the decode time stamp value based on the calculated duration
-	m_dts += 10000.0;
+	m_dts += duration;
 
 	return packet;
 }

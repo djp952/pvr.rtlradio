@@ -210,7 +210,7 @@ private:
 	rdsdecoder							m_rdsdecoder;				// RDS decoder instance
 
 	float const							m_muxfrequency;				// Frequency to display as the "mux"
-	uint32_t							m_pcmsamplerate = 0;		// Output sample rate
+	uint32_t const						m_pcmsamplerate;			// Output sample rate
 	TYPEREAL const						m_pcmgain;					// Output gain
 	double								m_dts{ STREAM_TIME_BASE };	// Current decode time stamp
 
