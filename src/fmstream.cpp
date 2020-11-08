@@ -35,7 +35,7 @@
 // fmstream::MAX_SAMPLE_QUEUE
 //
 // Maximum number of queued sample sets from the device
-size_t const fmstream::MAX_SAMPLE_QUEUE = 100;
+size_t const fmstream::MAX_SAMPLE_QUEUE = 200;		// ~2sec
 
 // fmstream::STREAM_ID_AUDIO
 //
