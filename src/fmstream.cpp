@@ -82,8 +82,6 @@ fmstream::fmstream(std::unique_ptr<rtldevice> device, struct tunerprops const& t
 	// DEMODULATOR SETTINGS
 	//
 	demodinfo.txt.assign("WFM");
-	demodinfo.HiCutmax = 100000;
-	demodinfo.Offset = 0;
 	demodinfo.DownsampleQuality = static_cast<enum DownsampleQuality>(fmprops.downsamplequality);
 
 	// Initialize the wideband FM demodulator

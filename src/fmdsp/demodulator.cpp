@@ -45,7 +45,6 @@
 //////////////////////////////////////////////////////////////////
 CDemodulator::CDemodulator()
 {
-	m_DesiredMaxOutputBandwidth = 48000.0;
 	m_DownConverterOutputRate = 48000.0;
 	m_DemodOutputRate = 48000.0;
 	m_pDemodInBuf = new TYPECPX[MAX_INBUFSIZE];
@@ -55,7 +54,6 @@ CDemodulator::CDemodulator()
 	m_DemodMode = -1;
 	m_pWFmDemod = NULL;
 	m_USFm = true;
-	m_PskRate = 31.25;
 	SetDemodFreq(0.0);
 }
 
@@ -115,8 +113,7 @@ void CDemodulator::SetDemod(int Mode, tDemodInfo CurrentDemodInfo)
 	{
 		DeleteAllDemods();		//remove current demod object
 		m_DemodMode = Mode;
-		m_DesiredMaxOutputBandwidth = m_DemodInfo.HiCutmax;
-
+		
 		//now create correct demodulator
 		switch(m_DemodMode)
 		{
@@ -127,9 +124,6 @@ void CDemodulator::SetDemod(int Mode, tDemodInfo CurrentDemodInfo)
 				break;
 		}
 	}
-
-	m_CW_Offset = m_DemodInfo.Offset;
-	m_DownConvert.SetCwOffset(m_CW_Offset);
 
 	//set input buffer limit so that decimated output is abt 10mSec or more of data
 	m_InBufLimit = static_cast<int>((m_DemodOutputRate/100.0) * m_InputRate/m_DemodOutputRate);	//process abt .01sec of output samples at a time

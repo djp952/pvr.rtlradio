@@ -61,7 +61,6 @@ public:
 	CDownConvert();
 	virtual ~CDownConvert();
 	void SetFrequency(TYPEREAL NcoFreq);
-	void SetCwOffset(TYPEREAL offset){m_CW_Offset= offset;}
 	int ProcessData(int InLength, TYPECPX* pInData, TYPECPX* pOutData);
 	TYPEREAL SetDataRate(TYPEREAL InRate, TYPEREAL MaxBW);
 	TYPEREAL SetWfmDataRate(TYPEREAL InRate, TYPEREAL MaxBW);
@@ -144,7 +143,6 @@ private:
 
 	TYPEREAL m_OutputRate;
 	TYPEREAL m_NcoFreq;
-	TYPEREAL m_CW_Offset;
 	TYPEREAL m_NcoInc;
 	TYPEREAL m_NcoTime;
 	TYPEREAL m_InRate;

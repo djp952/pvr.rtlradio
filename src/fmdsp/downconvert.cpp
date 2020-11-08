@@ -64,7 +64,6 @@ int i;
 	m_NcoInc = 0.0;
 	m_NcoTime = 0.0;
 	m_NcoFreq = 0.0;
-	m_CW_Offset = 0.0;
 	m_InRate = 100000.0;
 	m_MaxBW = 10000.0;
 	for(i=0; i<MAX_DECSTAGES; i++)
@@ -98,9 +97,7 @@ void CDownConvert::DeleteFilters()
 //////////////////////////////////////////////////////////////////////
 void CDownConvert::SetFrequency(TYPEREAL NcoFreq)
 {
-TYPEREAL tmpf = NcoFreq + m_CW_Offset;
-
-	m_NcoFreq = tmpf;
+	m_NcoFreq = NcoFreq;
 	m_NcoInc = K_2PI*m_NcoFreq/m_InRate;
 	m_OscCos = MCOS(m_NcoInc);
 	m_OscSin = MSIN(m_NcoInc);

@@ -51,8 +51,6 @@
 
 typedef struct _sdmd
 {
-	int HiCutmax;
-	int Offset;
 	enum DownsampleQuality DownsampleQuality;
 	std::string txt;
 
@@ -68,8 +66,7 @@ public:
 	TYPEREAL GetOutputRate(){return m_DemodOutputRate;}
 
 	void SetDemod(int Mode, tDemodInfo CurrentDemodInfo);
-	void SetDemodFreq(TYPEREAL Freq){m_DownConvert.SetCwOffset(m_CW_Offset);
-										m_DownConvert.SetFrequency(Freq);}
+	void SetDemodFreq(TYPEREAL Freq){m_DownConvert.SetFrequency(Freq);}
 
 	//overloaded functions to perform demod mono or stereo
 	int ProcessData(int InLength, TYPECPX* pInData, TYPEREAL* pOutData);
@@ -101,11 +98,8 @@ private:
 	TYPEREAL m_InputRate;
 	TYPEREAL m_DownConverterOutputRate;
 	TYPEREAL m_DemodOutputRate;
-	TYPEREAL m_DesiredMaxOutputBandwidth;
 	TYPECPX* m_pDemodInBuf;
 	TYPECPX* m_pDemodTmpBuf;
-	TYPEREAL m_CW_Offset;
-	TYPEREAL m_PskRate;
 	bool m_USFm;
 	int m_DemodMode;
 	int m_InBufPos;
