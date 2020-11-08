@@ -47,9 +47,9 @@
 
 enum class DownsampleQuality
 {
-	High = 0,			// 51 tap
+	Low = 0,			// 11 tap
 	Medium = 1,			// 27 tap
-	Low = 2,			// 11 tap
+	High = 2,			// 51 tap
 };
 
 //////////////////////////////////////////////////////////////////////////////////
