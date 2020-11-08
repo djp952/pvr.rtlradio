@@ -130,6 +130,19 @@
           <control type="spinner" format="integer"/>
         </setting>
 
+        <setting id="fmradio_downsample_quality" type="integer" label="30111" help="30511">
+          <level>0</level>
+          <default>2</default>
+          <constraints>
+            <options>
+              <option label="30216">0</option>
+              <option label="30217">1</option>
+              <option label="30218">2</option>
+            </options>
+          </constraints>
+          <control type="spinner" format="integer"/>
+        </setting>
+
         <setting id="fmradio_output_samplerate" type="integer" label="30105" help="30505">
           <level>0</level>
           <default>48000</default>

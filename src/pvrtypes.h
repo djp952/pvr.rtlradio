@@ -56,6 +56,16 @@ enum device_connection {
 	rtltcp = 1,				// Device connected via rtl_tcp
 };
 
+// downsample_quality
+//
+// Defines the FM DSP downsample quality factor
+enum downsample_quality {
+
+	fast = 0,				// Optimize for speed
+	normal = 1,				// Balanced between speed and quality
+	optimal = 2,				// Optimize for quality
+};
+
 // rds_standard
 //
 // Defines the Radio Data System (RDS) standard
@@ -115,6 +125,11 @@ struct settings {
 	//
 	// Specifies the Radio Data System (RDS) standard
 	enum rds_standard fmradio_rds_standard;
+
+	// fmradio_downsample_quality
+	//
+	// Specifies the FM DSP downsample quality factor
+	enum downsample_quality fmradio_downsample_quality;
 
 	// fmradio_output_samplerate
 	//

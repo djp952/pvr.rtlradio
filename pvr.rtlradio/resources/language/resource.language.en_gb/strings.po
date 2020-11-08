@@ -76,6 +76,10 @@ msgctxt "#30110"
 msgid "Input sample rate"
 msgstr ""
 
+msgctxt "#30111"
+msgid "Downsample quality"
+msgstr ""
+
 msgctxt "#30200"
 msgid "Universal Serial Bus (USB)"
 msgstr ""
@@ -140,6 +144,18 @@ msgctxt "#30215"
 msgid "Native"
 msgstr ""
 
+msgctxt "#30216"
+msgid "Fast"
+msgstr ""
+
+msgctxt "#30217"
+msgid "Normal"
+msgstr ""
+
+msgctxt "#30218"
+msgid "Optimal"
+msgstr ""
+
 msgctxt "#30300"
 msgid "OK"
 msgstr ""
@@ -197,7 +213,7 @@ msgid "Specifies the Radio Data System (RDS) region. When set to Automatic the r
 msgstr ""
 
 msgctxt "#30505"
-msgid "Specifies the FM digital signal processor PCM output sample rate. Native uses the native output rate of the Digital Signal Processor (DSP) and may improve performance on slower systems."
+msgid "Specifies the FM Digital Signal Processor (DSP) PCM output sample rate. Native uses the native output rate of the DSP and may improve performance on slower systems."
 msgstr ""
 
 msgctxt "#30506"
@@ -213,10 +229,14 @@ msgid "Specifies the frequency correction calibration offset to apply to the RTL
 msgstr ""
 
 msgctxt "#30509"
-msgid "Specifies the FM digital signal processor PCM output audio gain."
+msgid "Specifies the FM Digital Signal Processor (DSP) PCM output audio gain."
 msgstr ""
 
 msgctxt "#30510"
 msgid "Specifies the input sample rate for the device. Setting a lower sample rate will improve performance on slower systems, but with a reduction in the overall output audio quality."
+msgstr ""
+
+msgctxt "#30511"
+msgid "Specifies the FM Digital Signal Processor (DSP) downsample quality. When set to Fast, downsampling will be optimized for performance. When set to Normal, downsampling will favor quality over performance. When set to Optimal, downsampling will be optimized for quality."
 msgstr ""
 

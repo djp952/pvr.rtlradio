@@ -49,6 +49,7 @@ struct fmprops {
 
 	bool			decoderds;			// Flag if RDS should be decoded or not
 	bool			isrbds;				// Flag if region is RBDS (North America)
+	int				downsamplequality;	// Downsample quality setting
 	uint32_t		outputrate;			// Output sample rate in Hertz
 	float			outputgain;			// Output gain in Decibels
 };

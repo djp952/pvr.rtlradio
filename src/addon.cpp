@@ -115,6 +115,47 @@ std::unique_ptr<rtldevice> addon::create_device(struct settings const& settings)
 }
 
 //---------------------------------------------------------------------------
+// addon::downsample_quality_to_string (private, static)
+//
+// Converts a downsample_quality enumeration value into a string
+//
+// Arguments:
+//
+//	quality			- Downsample quality to convert into a string
+
+std::string addon::downsample_quality_to_string(enum downsample_quality quality)
+{
+	switch(quality) {
+
+		case downsample_quality::fast: return "Fast";
+		case downsample_quality::normal: return "Normal";
+		case downsample_quality::optimal: return "Optimal";
+	}
+
+	return "Unknown";
+}
+
+//---------------------------------------------------------------------------
+// addon::device_connection_to_string (private, static)
+//
+// Converts a device_connection enumeration value into a string
+//
+// Arguments:
+//
+//	connection		- Connection type to convert into a string
+
+std::string addon::device_connection_to_string(enum device_connection connection)
+{
+	switch(connection) {
+
+		case device_connection::usb: return "USB";
+		case device_connection::rtltcp: return "Network (rtl_tcp)";
+	}
+
+	return "Unknown";
+}
+
+//---------------------------------------------------------------------------
 // addon::get_regional_rds_standard (private, static)
 //
 // Figures out whether or not RDS or RBDS should be used in this region
@@ -136,26 +177,6 @@ enum rds_standard addon::get_regional_rds_standard(enum rds_standard standard) c
 	else if(language.find("-mx") != std::string::npos) return rds_standard::rbds;
 
 	return rds_standard::rds;			// Everyone else uses RDS
-}
-
-//---------------------------------------------------------------------------
-// addon::device_connection_to_string (private, static)
-//
-// Converts a device_connection enumeration value into a string
-//
-// Arguments:
-//
-//	connection		- Connection type to convert into a string
-
-std::string addon::device_connection_to_string(enum device_connection connection)
-{
-	switch(connection) {
-
-		case device_connection::usb: return "USB";
-		case device_connection::rtltcp: return "Network (rtl_tcp)";
-	}
-
-	return "Unknown";
 }
 
 //---------------------------------------------------------------------------
@@ -555,6 +576,7 @@ ADDON_STATUS addon::Create(void)
 			// Load the FM Radio settings
 			m_settings.fmradio_enable_rds = kodi::GetSettingBoolean("fmradio_enable_rds", true);
 			m_settings.fmradio_rds_standard = kodi::GetSettingEnum("fmradio_rds_standard", rds_standard::automatic);
+			m_settings.fmradio_downsample_quality = kodi::GetSettingEnum("fmradio_downsample_quality", downsample_quality::optimal);
 			m_settings.fmradio_output_samplerate = kodi::GetSettingInt("fmradio_output_samplerate", 48000);
 			m_settings.fmradio_output_gain = kodi::GetSettingFloat("fmradio_output_gain", -3.0f);
 
@@ -750,6 +772,18 @@ ADDON_STATUS addon::SetSetting(std::string const& settingName, kodi::CSettingVal
 
 			m_settings.fmradio_rds_standard = value;
 			log_info(__func__, ": setting fmradio_rds_standard changed to ", rds_standard_to_string(value).c_str());
+		}
+	}
+
+	// fmradio_downsample_quality
+	//
+	else if(settingName == "fmradio_downsample_quality") {
+
+		enum downsample_quality value = settingValue.GetEnum<enum downsample_quality>();
+		if(value != m_settings.fmradio_downsample_quality) {
+
+			m_settings.fmradio_downsample_quality = value;
+			log_info(__func__, ": setting fmradio_downsample_quality changed to ", downsample_quality_to_string(value).c_str());
 		}
 	}
 
@@ -1428,6 +1462,7 @@ bool addon::OpenLiveStream(kodi::addon::PVRChannel const& channel)
 		struct fmprops fmprops = {};
 		fmprops.decoderds = settings.fmradio_enable_rds;
 		fmprops.isrbds = (get_regional_rds_standard(settings.fmradio_rds_standard) == rds_standard::rbds);
+		fmprops.downsamplequality = static_cast<int>(settings.fmradio_downsample_quality);
 		fmprops.outputrate = settings.fmradio_output_samplerate;
 		fmprops.outputgain = settings.fmradio_output_gain;
 
@@ -1440,6 +1475,7 @@ bool addon::OpenLiveStream(kodi::addon::PVRChannel const& channel)
 		log_info(__func__, ": channelprops.manualgain = ", channelprops.manualgain / 10, " dB");
 		log_info(__func__, ": fmprops.decoderds = ", (fmprops.decoderds) ? "true" : "false");
 		log_info(__func__, ": fmprops.isrbds = ", (fmprops.isrbds) ? "true" : "false");
+		log_info(__func__, ": fmprops.downsamplequality = ", downsample_quality_to_string(static_cast<enum downsample_quality>(fmprops.downsamplequality)));
 		log_info(__func__, ": fmprops.outputgain = ", fmprops.outputgain, " dB");
 		log_info(__func__, ": fmprops.outputrate = ", fmprops.outputrate, " Hz");
 

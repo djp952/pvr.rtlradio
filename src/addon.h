@@ -256,6 +256,7 @@ private:
 	//
 	struct settings copy_settings(void) const;
 	static std::string device_connection_to_string(enum device_connection connection);
+	static std::string downsample_quality_to_string(enum downsample_quality quality);
 	static std::string rds_standard_to_string(enum rds_standard mode);
 
 	//-------------------------------------------------------------------------
