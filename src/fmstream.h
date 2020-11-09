@@ -190,11 +190,6 @@ private:
 	//-----------------------------------------------------------------------
 	// Private Member Functions
 
-	// native_resample
-	//
-	// Resamples the output at the 'native' rate rather than downconverting
-	int native_resample(int numsamples, TYPECPX const* insamples, TYPESTEREO16* outsamples, TYPEREAL gain) const;
-
 	// transfer
 	//
 	// Worker thread procedure used to transfer data into the ring buffer

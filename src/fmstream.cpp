@@ -372,35 +372,6 @@ std::string fmstream::muxname(void) const
 }
 
 //---------------------------------------------------------------------------
-// fmstream::native_resample
-//
-// Resamples the input data into stereo PCM samples at the native rate
-//
-// Arguments:
-//
-//	numsamples		- Number of input samples to process
-//	insamples		- Buffer containing the input samples
-//	outsamples		- Buffer to hold the output samples
-//	gain			- Gain value to apply to the samples
-
-int fmstream::native_resample(int numsamples, TYPECPX const* insamples, TYPESTEREO16* outsamples, TYPEREAL gain) const
-{
-	// Simple operation; just multiply the value by the gain and avoid over/underflow during conversion ...
-	for(int index = 0; index < numsamples; index++) {
-
-	#ifdef FMDSP_USE_DOUBLE_PRECISION
-		outsamples[index].re = static_cast<qint16>(std::max(-32767.0, std::min(32767.0, insamples[index].re * gain)));
-		outsamples[index].im = static_cast<qint16>(std::max(-32767.0, std::min(32767.0, insamples[index].im * gain)));
-	#else
-		outsamples[index].re = static_cast<qint16>(std::max(-32767.0f, std::min(32767.0f, insamples[index].re * gain)));
-		outsamples[index].im = static_cast<qint16>(std::max(-32767.0f, std::min(32767.0f, insamples[index].im * gain)));
-	#endif
-	}
-
-	return numsamples;
-}
-
-//---------------------------------------------------------------------------
 // fmstream::position
 //
 // Gets the current position of the stream
