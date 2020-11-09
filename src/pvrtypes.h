@@ -62,8 +62,8 @@ enum device_connection {
 enum downsample_quality {
 
 	fast = 0,				// Optimize for speed
-	normal = 1,				// Balanced between speed and quality
-	optimal = 2,				// Optimize for quality
+	standard = 1,			// Standard quality
+	maximum = 2,			// Optimize for quality
 };
 
 // rds_standard
@@ -71,7 +71,7 @@ enum downsample_quality {
 // Defines the Radio Data System (RDS) standard
 enum rds_standard {
 
-	automatic = 0,				// Automatically detect RDS standard
+	automatic = 0,			// Automatically detect RDS standard
 	rds = 1,				// Global RDS standard
 	rbds = 2,				// North American RBDS standard
 };

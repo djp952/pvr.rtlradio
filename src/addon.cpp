@@ -128,8 +128,8 @@ std::string addon::downsample_quality_to_string(enum downsample_quality quality)
 	switch(quality) {
 
 		case downsample_quality::fast: return "Fast";
-		case downsample_quality::normal: return "Normal";
-		case downsample_quality::optimal: return "Optimal";
+		case downsample_quality::standard: return "Standard";
+		case downsample_quality::maximum: return "Maximum";
 	}
 
 	return "Unknown";
@@ -567,7 +567,7 @@ ADDON_STATUS addon::Create(void)
 			m_settings.device_connection_usb_index = kodi::GetSettingInt("device_connection_usb_index", 0);
 			m_settings.device_connection_tcp_host = kodi::GetSettingString("device_connection_tcp_host");
 			m_settings.device_connection_tcp_port = kodi::GetSettingInt("device_connection_tcp_port", 1234);
-			m_settings.device_sample_rate = kodi::GetSettingInt("device_sample_rate", (2400 KHz));
+			m_settings.device_sample_rate = kodi::GetSettingInt("device_sample_rate", (1600 KHz));
 			m_settings.device_frequency_correction = kodi::GetSettingInt("device_frequency_correction", 0);
 
 			// Load the Interface settings
@@ -576,7 +576,7 @@ ADDON_STATUS addon::Create(void)
 			// Load the FM Radio settings
 			m_settings.fmradio_enable_rds = kodi::GetSettingBoolean("fmradio_enable_rds", true);
 			m_settings.fmradio_rds_standard = kodi::GetSettingEnum("fmradio_rds_standard", rds_standard::automatic);
-			m_settings.fmradio_downsample_quality = kodi::GetSettingEnum("fmradio_downsample_quality", downsample_quality::optimal);
+			m_settings.fmradio_downsample_quality = kodi::GetSettingEnum("fmradio_downsample_quality", downsample_quality::standard);
 			m_settings.fmradio_output_samplerate = kodi::GetSettingInt("fmradio_output_samplerate", 48000);
 			m_settings.fmradio_output_gain = kodi::GetSettingFloat("fmradio_output_gain", -3.0f);
 
