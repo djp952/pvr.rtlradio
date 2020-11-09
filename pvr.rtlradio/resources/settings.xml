@@ -63,7 +63,7 @@
 
         <setting id="device_sample_rate" type="integer" label="30110" help="30510">
           <level>0</level>
-          <default>2400000</default>
+          <default>1600000</default>
           <constraints>
             <options>
               <option label="30207">1000000</option>
@@ -132,7 +132,7 @@
 
         <setting id="fmradio_downsample_quality" type="integer" label="30111" help="30511">
           <level>0</level>
-          <default>2</default>
+          <default>1</default>
           <constraints>
             <options>
               <option label="30216">0</option>
