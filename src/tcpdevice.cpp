@@ -342,62 +342,27 @@ size_t tcpdevice::read(uint8_t* buffer, size_t count) const
 
 void tcpdevice::read_async(rtldevice::asynccallback const& callback, uint32_t bufferlength) const
 {
-	std::unique_ptr<uint8_t[]>	buffer(new uint8_t[256 KiB]);			// Input data buffer
-	std::unique_ptr<uint8_t[]>	leftover(new uint8_t[bufferlength]);	// Left over data buffer
-	size_t						leftoverpos = 0;						// Left over data position
+	std::unique_ptr<uint8_t[]>	buffer(new uint8_t[bufferlength]);		// Input data buffer
+	size_t						offset = 0;								// Buffer offset
 
 	m_stop = false;
 	m_stopped = false;
 
 	try {
 
+		// Continuously read data from the device until the stop condition is set
 		while(m_stop.test(true) == false) {
 
-			// rtl_tcp returns up to 256KiB of data per read request, that needs to be broken up
-			// into individual packets of data and sent into the callback function
-			size_t count = read(&buffer[0], 256 KiB);
-			size_t offset = 0;
+			// Try to read enough data to fill the input buffer
+			offset += read(&buffer[offset], bufferlength - offset);
+			if(offset == bufferlength) {
 
-			// Deal with any left over data from the previous read operation
-			if(leftoverpos > 0) {
-
-				// Copy the remaining bytes for the packet into the overflow buffer and send it
-				size_t chunk = std::min(count, bufferlength - leftoverpos);
-				memcpy(&leftover[leftoverpos], &buffer[0], chunk);
-
-				count -= chunk;					// Used some bytes
-				offset += chunk;				// Used some bytes
-				leftoverpos += chunk;			// Added some bytes
-
-				// If there is now a full packet in the left over buffer, send it
-				if(leftoverpos >= bufferlength) {
-
-					callback(&leftover[0], bufferlength);
-					leftoverpos = 0;
-				}
-			}
-			
-			// Handle any full packets of data that can be sent directly into the callback
-			size_t packets = align::down(count, bufferlength) / bufferlength;
-			while(packets > 0) {
-
-				callback(&buffer[offset], bufferlength);
-
-				offset += bufferlength;			// Advance the buffer offset
-				count -= bufferlength;			// Decrease available bytes
-				packets--;						// One less packet
-			}
-
-			// Save off the leftover data so it can become a full packet of data
-			// during the next loop iteration
-			if(count > 0) {
-
-				memcpy(&leftover[0], &buffer[offset], count);
-				leftoverpos = count;
+				callback(&buffer[0], offset);		// Buffer is full, invoke callback
+				offset = 0;							// Reset buffer offset
 			}
 		}
 
-		m_stopped = true;					// Operation has been stopped
+		m_stopped = true;							// Operation has been stopped
 	}
 
 	// Ensure that the stopped condition is set on an exception
