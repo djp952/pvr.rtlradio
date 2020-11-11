@@ -939,6 +939,9 @@ void addon::DemuxFlush(void)
 
 DEMUX_PACKET* addon::DemuxRead(void)
 {
+	// Prevent race condition with GetSignalStatus()
+	std::unique_lock<std::mutex> lock(m_pvrstream_lock);
+
 	if(!m_pvrstream) return nullptr;
 
 	try { 
@@ -1206,7 +1209,7 @@ PVR_ERROR addon::GetChannelsAmount(int& amount)
 
 PVR_ERROR addon::GetSignalStatus(int /*channelUid*/, kodi::addon::PVRSignalStatus& signalStatus)
 {
-	// Prevent race condition with OpenLiveStream()/CloseLiveStream()
+	// Prevent race condition with functions that modify m_pvrstream
 	std::unique_lock<std::mutex> lock(m_pvrstream_lock);
 
 	// Kodi may call this function before the stream is open, avoid the error log

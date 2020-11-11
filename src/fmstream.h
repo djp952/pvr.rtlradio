@@ -215,6 +215,7 @@ private:
 	mutable std::mutex					m_queuelock;				// Synchronization object
 	std::condition_variable				m_cv;						// Transfer event condvar
 	std::thread							m_worker;					// Data transfer thread
+	std::exception_ptr					m_worker_exception;			// Exception on worker thread
 	scalar_condition<bool>				m_stop{ false };			// Condition to stop data transfer
 	std::atomic<bool>					m_stopped{ false };			// Data transfer stopped flag
 };

@@ -199,8 +199,6 @@ void fmstream::demuxflush(void)
 
 DEMUX_PACKET* fmstream::demuxread(std::function<DEMUX_PACKET*(int)> const& allocator)
 {
-	bool				stopped = false;		// Flag if data transfer has stopped
-
 	// If there is an RDS UECP packet available, handle it before demodulating more audio
 	uecp_data_packet uecp_packet;
 	if(m_rdsdecoder.pop_uecp_data_packet(uecp_packet) && (!uecp_packet.empty())) {
@@ -227,8 +225,13 @@ DEMUX_PACKET* fmstream::demuxread(std::function<DEMUX_PACKET*(int)> const& alloc
 	std::unique_lock<std::mutex> lock(m_queuelock);
 	m_cv.wait(lock, [&]() -> bool { return ((m_queue.size() > 0) || m_stopped.load() == true); });
 
-	// If the worker thread was stopped, return an empty demultiplexer packet
-	if(stopped) return allocator(0);
+	// If the worker thread was stopped, check for and re-throw any exception that occurred,
+	// otherwise assume it was stopped normally and return an empty demultiplexer packet
+	if(m_stopped.load() == true) {
+
+		if(m_worker_exception) std::rethrow_exception(m_worker_exception);
+		else return allocator(0);
+	}
 
 	// Pop off the topmost packet of samples from the queue<> and release the lock
 	std::unique_ptr<TYPECPX[]> samples(std::move(m_queue.front()));
@@ -537,7 +540,8 @@ void fmstream::transfer(scalar_condition<bool>& started)
 	started = true;
 
 	// Continuously read data from the device until cancel_async() has been called
-	m_device->read_async(read_callback_func, static_cast<uint32_t>(readsize));
+	try { m_device->read_async(read_callback_func, static_cast<uint32_t>(readsize)); }
+	catch(...) { m_worker_exception = std::current_exception(); }
 
 	// Thread is stopped once read_async() returns
 	m_stopped.store(true);
