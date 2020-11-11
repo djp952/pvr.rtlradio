@@ -54,6 +54,13 @@ libusb_exception::libusb_exception(libusb_exception const& rhs) : m_what(rhs.m_w
 }
 
 //-----------------------------------------------------------------------------
+// libusb_exception Move Constructor
+
+libusb_exception::libusb_exception(libusb_exception&& rhs) : m_what(std::move(rhs.m_what))
+{
+}
+
+//-----------------------------------------------------------------------------
 // libusb_exception char const* conversion operator
 
 libusb_exception::operator char const*() const

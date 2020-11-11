@@ -32,13 +32,10 @@
 #include <unistd.h>
 
 #include "align.h"
+#include "socket_exception.h"
 #include "string_exception.h"
 
 #pragma warning(push, 4)
-
-//
-// TODO: create socket_exception to replace the string_exceptions() used here
-//
 
 // tcpdevice::s_gaintable_e4k
 //
@@ -94,13 +91,18 @@ tcpdevice::tcpdevice(char const* host, uint16_t port)
 
 	// Get the address information to connect to the host
 	int result = getaddrinfo(host, portstr, &hints, &addrs);
-	if(result != 0) throw string_exception("getaddrinfo() failed with result ", result);
+	if(result != 0) 
+#ifdef _WINDOWS
+		throw string_exception(__func__, ": getaddrinfo() failed: ", gai_strerrorA(result));
+#else
+		throw string_exception(__func__, ": getaddrinfo() failed: ", gai_strerror(result));
+#endif
 
 	try {
 
 		// Create the TCP/IP socket on which to communicate with the device
 		m_socket = static_cast<int>(socket(addrs->ai_family, addrs->ai_socktype, addrs->ai_protocol));
-		if(m_socket == -1) throw string_exception("socket() failed");
+		if(m_socket == -1) throw socket_exception(__func__, ": socket() failed");
 
 		try {
 
@@ -109,7 +111,7 @@ tcpdevice::tcpdevice(char const* host, uint16_t port)
 			int reuse = 1;
 
 			result = setsockopt(m_socket, SOL_SOCKET, SO_REUSEADDR, reinterpret_cast<char const*>(&reuse), sizeof(int));
-			if(result == -1) throw string_exception("setsockopt(SO_REUSEADDR) failed");
+			if(result == -1) throw socket_exception(__func__, ": setsockopt(SO_REUSEADDR) failed");
 
 			// SO_LINGER
 			//
@@ -118,17 +120,17 @@ tcpdevice::tcpdevice(char const* host, uint16_t port)
 			linger.l_linger = 0;
 
 			result = setsockopt(m_socket, SOL_SOCKET, SO_LINGER, reinterpret_cast<char const*>(&linger), sizeof(struct linger));
-			if(result == -1) throw string_exception("setsockopt(SO_LINGER) failed");
+			if(result == -1) throw socket_exception(__func__, ": setsockopt(SO_LINGER) failed");
 
 			// Establish the TCP/IP socket connection
 			result = connect(m_socket, addrs->ai_addr, static_cast<int>(addrs->ai_addrlen));
-			if(result != 0) throw string_exception("connect() failed");
+			if(result != 0) throw socket_exception(__func__, ": connect() failed");
 
 			// TCP_NODELAY
 			//
 			int nodelay = 1;
 			result = setsockopt(m_socket, IPPROTO_TCP, TCP_NODELAY, reinterpret_cast<char const*>(&nodelay), sizeof(int));
-			if(result == -1) throw string_exception("setsockopt(TCP_NODELAY) failed");
+			if(result == -1) throw socket_exception(__func__, ": setsockopt(TCP_NODELAY) failed");
 
 			// SO_RCVTIMEO (initial recv())
 			//
@@ -140,12 +142,12 @@ tcpdevice::tcpdevice(char const* host, uint16_t port)
 			timeout.tv_usec = 0;
 		#endif
 			result = setsockopt(m_socket, SOL_SOCKET, SO_RCVTIMEO, reinterpret_cast<char const*>(&timeout), sizeof(timeout));
-			if(result == -1) throw string_exception("setsockopt(SO_RCVTIMEO) failed");
+			if(result == -1) throw socket_exception(__func__, ": setsockopt(SO_RCVTIMEO) failed");
 
 			// Retrieve the device information from the server
 			struct device_info deviceinfo = {};
 			result = recv(m_socket, reinterpret_cast<char*>(&deviceinfo), sizeof(struct device_info), 0);
-			if(result != sizeof(struct device_info)) throw string_exception("recv(struct device_info) failed");
+			if(result != sizeof(struct device_info)) throw socket_exception(__func__, ": recv(struct device_info) failed");
 
 			// SO_RCVTIMEO (subsequent recv()s)
 			//
@@ -157,11 +159,11 @@ tcpdevice::tcpdevice(char const* host, uint16_t port)
 		#endif
 
 			result = setsockopt(m_socket, SOL_SOCKET, SO_RCVTIMEO, reinterpret_cast<char const*>(&timeout), sizeof(timeout));
-			if(result == -1) throw string_exception("setsockopt(SO_RCVTIMEO) failed");
+			if(result == -1) throw socket_exception(__func__, ": setsockopt(SO_RCVTIMEO) failed");
 
 			// Parse the provided device information; only care about the tuner device type
 			if(memcmp(deviceinfo.magic, "RTL0", 4) == 0) m_tunertype = static_cast<rtlsdr_tuner>(ntohl(deviceinfo.tuner_type));
-			else throw string_exception("invalid device information returned from host");
+			else throw string_exception(__func__, ": invalid device information returned from host");
 
 			// Generate a device name for this instance
 			char devicename[256];
@@ -325,7 +327,7 @@ size_t tcpdevice::read(uint8_t* buffer, size_t count) const
 	assert(m_socket != -1);
 
 	int read = recv(m_socket, reinterpret_cast<char*>(buffer), static_cast<int>(count), 0);
-	if(read == -1) throw string_exception("recv() failed");
+	if(read == -1) throw socket_exception(__func__, ": recv() failed");
 
 	return static_cast<size_t>(read);
 }
@@ -384,7 +386,7 @@ void tcpdevice::set_automatic_gain_control(bool enable) const
 
 	struct device_command command = { 0x03, htonl((enable) ? 0 : 1) };
 	int result = send(m_socket, reinterpret_cast<char const*>(&command), sizeof(struct device_command), 0);
-	if(result != sizeof(struct device_command)) throw string_exception("send() failed");
+	if(result != sizeof(struct device_command)) throw socket_exception(__func__, ": send() failed");
 }
 
 //---------------------------------------------------------------------------
@@ -402,7 +404,7 @@ uint32_t tcpdevice::set_center_frequency(uint32_t hz) const
 
 	struct device_command command = { 0x01, htonl(hz) };
 	int result = send(m_socket, reinterpret_cast<char const*>(&command), sizeof(struct device_command), 0);
-	if(result != sizeof(struct device_command)) throw string_exception("send() failed");
+	if(result != sizeof(struct device_command)) throw socket_exception(__func__, ": send() failed");
 
 	return hz;
 }
@@ -422,7 +424,7 @@ int tcpdevice::set_frequency_correction(int ppm) const
 
 	struct device_command command = { 0x05, htonl(ppm) };
 	int result = send(m_socket, reinterpret_cast<char const*>(&command), sizeof(struct device_command), 0);
-	if(result != sizeof(struct device_command)) throw string_exception("send() failed");
+	if(result != sizeof(struct device_command)) throw socket_exception(__func__, ": send() failed");
 
 	return ppm;
 }
@@ -456,7 +458,7 @@ int tcpdevice::set_gain(int db) const
 	// Attempt to set the gain to the detected nearest gain value
 	struct device_command command = { 0x04, htonl(nearest) };
 	int result = send(m_socket, reinterpret_cast<char const*>(&command), sizeof(struct device_command), 0);
-	if(result != sizeof(struct device_command)) throw string_exception("send() failed");
+	if(result != sizeof(struct device_command)) throw socket_exception(__func__, ": send() failed");
 
 	// Return the gain value that was actually used
 	return nearest;
@@ -477,7 +479,7 @@ uint32_t tcpdevice::set_sample_rate(uint32_t hz) const
 
 	struct device_command command = { 0x02, htonl(hz) };
 	int result = send(m_socket, reinterpret_cast<char const*>(&command), sizeof(struct device_command), 0);
-	if(result != sizeof(struct device_command)) throw string_exception("send() failed");
+	if(result != sizeof(struct device_command)) throw socket_exception(__func__, ": send() failed");
 
 	return hz;
 }
@@ -497,7 +499,7 @@ void tcpdevice::set_test_mode(bool enable) const
 
 	struct device_command command = { 0x07, htonl((enable) ? 1 : 0) };
 	int result = send(m_socket, reinterpret_cast<char const*>(&command), sizeof(struct device_command), 0);
-	if(result != sizeof(struct device_command)) throw string_exception("send() failed");
+	if(result != sizeof(struct device_command)) throw socket_exception(__func__, ": send() failed");
 }
 
 //---------------------------------------------------------------------------

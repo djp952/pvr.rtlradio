@@ -1,5 +1,5 @@
-//-----------------------------------------------------------------------------
-// Copyright (c) 2016-2020 Michael G. Brehm
+//---------------------------------------------------------------------------
+// Copyright (c) 2020 Michael G. Brehm
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -18,39 +18,38 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
-//-----------------------------------------------------------------------------
+//---------------------------------------------------------------------------
 
-#ifndef __SQLITE_EXCEPTION_H_
-#define __SQLITE_EXCEPTION_H_
+#ifndef __WIN32_EXCEPTION_H_
+#define __WIN32_EXCEPTION_H_
 #pragma once
 
 #include <exception>
 #include <string>
-#include <sqlite3.h>
 
 #pragma warning(push, 4)	
 
 //-----------------------------------------------------------------------------
-// Class sqlite_exception
+// Class win32_exception
 //
-// std::exception used to wrap SQLite error conditions
+// Exception-based class used to wrap Windows system error codes
 
-class sqlite_exception : public std::exception
+class win32_exception : public std::exception
 {
 public:
 
 	// Instance Constructors
 	//
-	sqlite_exception(int code);
-	sqlite_exception(int code, char const* message);
+	win32_exception(DWORD code);
+	win32_exception(HRESULT code);
 
 	// Copy Constructor
 	//
-	sqlite_exception(sqlite_exception const& rhs);
+	win32_exception(win32_exception const& rhs);
 
 	// Move Constructor
 	//
-	sqlite_exception(sqlite_exception&& rhs);
+	win32_exception(win32_exception&& rhs);
 
 	// char const* conversion operator
 	//
@@ -63,17 +62,25 @@ public:
 	//
 	// Gets a pointer to the exception message text
 	virtual char const* what(void) const noexcept override;
-		
+
 private:
+
+	//-------------------------------------------------------------------------
+	// Private Member Functions
+
+	// format_message
+	//
+	// Generates the formatted message string from the project resources
+	static std::string format_message(DWORD result);
 
 	//-------------------------------------------------------------------------
 	// Member Variables
 
-	std::string					m_what;			// SQLite error message
+	std::string					m_what;			// Win32 error message
 };
 
 //-----------------------------------------------------------------------------
 
 #pragma warning(pop)
 
-#endif	// __SQLITE_EXCEPTION_H_
+#endif	// __WIN32_EXCEPTION_H_

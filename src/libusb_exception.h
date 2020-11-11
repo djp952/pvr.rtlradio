@@ -46,6 +46,10 @@ public:
 	//
 	libusb_exception(libusb_exception const& rhs);
 
+	// Move Constructor
+	//
+	libusb_exception(libusb_exception&& rhs);
+
 	// char const* conversion operator
 	//
 	operator char const*() const;

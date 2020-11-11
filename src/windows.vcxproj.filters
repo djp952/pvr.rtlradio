@@ -210,6 +210,12 @@
     <ClInclude Include="signalmeter.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="socket_exception.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="win32_exception.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -321,6 +327,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="signalmeter.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="win32_exception.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
