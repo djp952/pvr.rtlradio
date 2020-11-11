@@ -454,7 +454,7 @@ std::string fmstream::servicename(void) const
 
 int fmstream::signalstrength(void) const
 {
-	return 0;
+	return static_cast<int>(2.5 * (m_demodulator->GetBasebandLevel() + 40));
 }
 
 //---------------------------------------------------------------------------

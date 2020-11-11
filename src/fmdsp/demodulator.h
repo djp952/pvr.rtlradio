@@ -88,6 +88,13 @@ public:
 		if(m_pWFmDemod) return m_pWFmDemod->GetNextRdsGroupData(pGroupData); else return false;
 	}
 
+	// Gets the baseband level in dB
+	TYPEREAL GetBasebandLevel(void) const
+	{
+		// The stored interface level is scaled to 32767.0 instead of 1.0
+		return 20 * MLOG10(m_BasebandLevel / 32767.0);
+	}
+
 private:
 	void DeleteAllDemods();
 	CDownConvert m_DownConvert;
@@ -106,6 +113,8 @@ private:
 	int m_InBufLimit;
 	//pointers to all the various implemented demodulator classes
 	CWFmDemod* m_pWFmDemod;
+
+	TYPEREAL m_BasebandLevel = 0;
 };
 
 #endif // DEMODULATOR_H

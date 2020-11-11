@@ -40,6 +40,29 @@
 //==========================================================================================
 #include "demodulator.h"
 
+//---------------------------------------------------------------------------
+// rms_level_approx
+//
+// Compute RMS level over a small prefix of the specified sample vector
+//
+// SoftFM (FmDecode.cc)
+// https://github.com/jorisvr/SoftFM
+// Copyright (C) 2013 Joris van Rantwijk
+// GPLv2
+
+static TYPEREAL rms_level_approx(int numsamples, TYPECPX const* samples)
+{
+	numsamples = (numsamples + 63) / 64;
+
+	TYPEREAL level = 0;
+	for(int i = 0; i < numsamples; i++) {
+		TYPECPX const& s = samples[i];
+		level += s.re * s.re + s.im * s.im;
+	}
+
+	return sqrt(level / numsamples);
+}
+
 //////////////////////////////////////////////////////////////////
 //	Constructor/Destructor
 //////////////////////////////////////////////////////////////////
@@ -151,6 +174,10 @@ int ret = 0;
 			//perform baseband tuning and decimation
 			int n = m_DownConvert.ProcessData(m_InBufPos, m_pDemodInBuf, m_pDemodInBuf);
 
+			// Calculate the approximate baseband level in dB (scaled to 32767.0)
+			TYPEREAL rms = rms_level_approx(n, m_pDemodInBuf);
+			m_BasebandLevel = 0.95 * m_BasebandLevel + 0.05 * rms;
+
 			//perform the desired demod action
 			switch(m_DemodMode)
 			{
@@ -186,6 +213,10 @@ int ret = 0;
 
 			//perform baseband tuning and decimation
 			int n = m_DownConvert.ProcessData(m_InBufPos, m_pDemodInBuf, m_pDemodInBuf);
+
+			// Calculate the approximate baseband level in dB (scaled to 32767.0)
+			TYPEREAL rms = rms_level_approx(n, m_pDemodInBuf);
+			m_BasebandLevel = 0.95 * m_BasebandLevel + 0.05 * rms;
 
 			//perform the desired demod action
 			switch(m_DemodMode)
