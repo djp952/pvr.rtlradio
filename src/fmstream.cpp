@@ -545,8 +545,8 @@ void fmstream::transfer(scalar_condition<bool>& started)
 	try { m_device->read_async(read_callback_func, static_cast<uint32_t>(readsize)); }
 	catch(...) { m_worker_exception = std::current_exception(); }
 
-	// Thread is stopped once read_async() returns
-	m_stopped.store(true);
+	m_stopped.store(true);					// Thread is stopped
+	m_cv.notify_all();						// Unblock any waiters
 }
 
 //---------------------------------------------------------------------------
