@@ -95,6 +95,23 @@ public:
 		return 20 * MLOG10(m_BasebandLevel / 32767.0);
 	}
 
+	// Get the noise level in dB
+	TYPEREAL GetNoiseLevel(void) const
+	{
+		// The stored noise level is scaled to 32767.0 instead of 1.0
+		return 20 * MLOG10(((m_pWFmDemod) ? m_pWFmDemod->GetNoiseLevel() : 32767.0) / 32767.0);
+	}
+
+	// Get the signal to noise ratio
+	TYPEREAL GetSignalToNoiseLevel(void) const
+	{
+		// The stored interface and noise levels are scaled to 32767.0 instead of 1.0
+		TYPEREAL s = m_BasebandLevel / 32767.0;
+		TYPEREAL n = ((m_pWFmDemod) ? m_pWFmDemod->GetNoiseLevel() : 32767.0) / 32767.0;
+
+		return 20 * MLOG10(s / n);
+	}
+
 private:
 	void DeleteAllDemods();
 	CDownConvert m_DownConvert;

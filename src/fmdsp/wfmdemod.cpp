@@ -55,6 +55,8 @@
 #define PHASE_ADJ_M -7.267e-6	//fudge factor slope to compensate for PLL delay
 #define PHASE_ADJ_B 3.677		//fudge factor intercept to compensate for PLL delay
 
+#define NOISE_FREQ 70000.0		// Noise frequency 
+
 //bunch of RDS constants
 #define USE_FEC 1	//set to zero to disable FEC correction
 
@@ -161,6 +163,29 @@ const TYPEREAL HILBLP_H[HILB_LENGTH] = {	//test wideband hilbert
 };
 #endif
 
+//---------------------------------------------------------------------------
+// rms_level_approx
+//
+// Compute RMS level over a small prefix of the specified sample vector
+//
+// SoftFM (FmDecode.cc)
+// https://github.com/jorisvr/SoftFM
+// Copyright (C) 2013 Joris van Rantwijk
+// GPLv2
+
+static TYPEREAL rms_level_approx(int numsamples, TYPECPX const* samples)
+{
+	numsamples = (numsamples + 63) / 64;
+
+	TYPEREAL level = 0;
+	for(int i = 0; i < numsamples; i++) {
+		TYPECPX const& s = samples[i];
+		level += s.re * s.re + s.im * s.im;
+	}
+
+	return sqrt(level / numsamples);
+}
+
 /////////////////////////////////////////////////////////////////////////////////
 //	Construct/destruct WFM demod object
 /////////////////////////////////////////////////////////////////////////////////
@@ -243,6 +268,9 @@ TYPEREAL CWFmDemod::SetSampleRate(TYPEREAL samplerate, bool USver)
 	//Create narrow BP filter around 19KHz pilot tone with Q=500
 	m_PilotBPFilter.InitBP(PILOTPLL_FREQ, 500, m_SampleRate);
 	InitPilotPll(m_SampleRate);
+
+	// Create narrow BP filter around noise floor frequency with Q = 500
+	m_NoiseFilter.InitBP(NOISE_FREQ, 500, m_SampleRate);
 
 	//create LP filter to roll off audio
 	m_LPFilter.InitLPFilter(0, 1.0,60.0, 15000.0,1.4*15000.0, m_OutRate);
@@ -340,6 +368,11 @@ TYPEREAL LminusR;
 
 	//create complex data from demodulator real data
 	m_HilbertFilter.ProcessFilter(InLength, m_RawFm, m_CpxRawFm);	//~173 nSec/sample
+
+	// Generate a hack job of a noise floor so SNR can be calculated
+	m_NoiseFilter.ProcessFilter(InLength, m_CpxRawFm, m_NoiseRawFm);
+	TYPEREAL noiserms = rms_level_approx(InLength, m_NoiseRawFm);
+	m_NoiseLevel = 0.95 * m_NoiseLevel + 0.05 * noiserms;
 
 	m_PilotBPFilter.ProcessFilter(InLength, m_CpxRawFm, pInData);//~173 nSec/sample, use input buffer for complex output storage
 	if(ProcessPilotPll(InLength, pInData) )

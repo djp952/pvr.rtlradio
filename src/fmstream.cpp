@@ -471,7 +471,10 @@ int fmstream::signalstrength(void) const
 
 int fmstream::signaltonoise(void) const
 {
-	return 0;
+	// Maximum SNR has been observed to be around 64dB, so report as a simple percentage
+	// of that observed value until somebody complains about it and I actually have to
+	// figure out the proper math ...
+	return static_cast<int>((m_demodulator->GetSignalToNoiseLevel() / 64.0) * 100.0);
 }
 
 //---------------------------------------------------------------------------

@@ -61,6 +61,11 @@ public:
 	bool GetNextRdsGroupData(tRDS_GROUPS* pGroupData);
 	int GetStereoLock(int* pPilotLock);
 
+	TYPEREAL GetNoiseLevel(void) const
+	{
+		return m_NoiseLevel;
+	}
+
 private:
 	void InitPll( TYPEREAL SampleRate );
 	void ProcessPll( int InLength, TYPECPX* pInData, TYPEREAL* pOutData );
@@ -81,6 +86,7 @@ private:
 	TYPEREAL m_OutRate;
 	TYPEREAL m_RawFm[PHZBUF_SIZE];
 	TYPECPX m_CpxRawFm[PHZBUF_SIZE];
+	TYPECPX m_NoiseRawFm[PHZBUF_SIZE];
 	CDecimateBy2* m_pDecBy2A;
 	CDecimateBy2* m_pDecBy2B;
 	CDecimateBy2* m_pDecBy2C;
@@ -149,6 +155,9 @@ private:
 	int m_BGroupOffset;
 	int m_BlockErrors;
 	quint16 m_BlockData[4];
+
+	CIir m_NoiseFilter;
+	TYPEREAL m_NoiseLevel = 0;
 };
 
 #endif // WFMDEMOD_H
