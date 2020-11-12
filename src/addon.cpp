@@ -1033,6 +1033,7 @@ PVR_ERROR addon::GetCapabilities(kodi::addon::PVRCapabilities& capabilities)
 	capabilities.SetSupportsChannelSettings(true);
 	capabilities.SetHandlesInputStream(true);
 	capabilities.SetHandlesDemuxing(true);
+	capabilities.SetSupportsEPG(true);
 
 	return PVR_ERROR::PVR_ERROR_NO_ERROR;
 }
@@ -1194,6 +1195,25 @@ PVR_ERROR addon::GetChannelsAmount(int& amount)
 	catch(std::exception& ex) { return handle_stdexception(__func__, ex, PVR_ERROR::PVR_ERROR_FAILED); }
 	catch(...) { return handle_generalexception(__func__, PVR_ERROR::PVR_ERROR_FAILED); }
 
+	return PVR_ERROR::PVR_ERROR_NO_ERROR;
+}
+
+//-----------------------------------------------------------------------------
+// addon::GetEPGForChannel (CInstancePVRClient)
+//
+// Request the EPG for a channel from the backend
+//
+// Arguments:
+//
+//	channelUid		- Channel identifier
+//	start			- Start of the requested time frame
+//	end				- End of the requested time frame
+//	results			- EPG tag result set
+
+PVR_ERROR addon::GetEPGForChannel(int /*channelUid*/, time_t /*start*/, time_t /*end*/, kodi::addon::PVREPGTagsResultSet& /*results*/)
+{
+	// This PVR doesn't support EPG, but if it doesn't claim that it does
+	// the radio and TV channels get all mixed up ...
 	return PVR_ERROR::PVR_ERROR_NO_ERROR;
 }
 

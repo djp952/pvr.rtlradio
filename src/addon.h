@@ -150,6 +150,11 @@ public:
 	// Gets the total amount of channels on the backend
 	PVR_ERROR GetChannelsAmount(int& amount) override;
 
+	// GetEPGForChannel
+	//
+	// Request the EPG for a channel from the backend
+	PVR_ERROR GetEPGForChannel(int channelUid, time_t start, time_t end, kodi::addon::PVREPGTagsResultSet& results) override;
+		
 	// GetSignalStatus
 	//
 	// Get the signal status of the stream that's currently open
