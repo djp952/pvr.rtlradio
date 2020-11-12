@@ -457,7 +457,8 @@ std::string fmstream::servicename(void) const
 
 int fmstream::signalstrength(void) const
 {
-	return static_cast<int>(2.5 * (m_demodulator->GetBasebandLevel() + 40));
+	int percent = static_cast<int>(((m_demodulator->GetBasebandLevel() + 64.0) / 64.0) * 100.0);
+	return std::max(std::min(percent, 100), 0);
 }
 
 //---------------------------------------------------------------------------
@@ -471,10 +472,8 @@ int fmstream::signalstrength(void) const
 
 int fmstream::signaltonoise(void) const
 {
-	// Maximum SNR has been observed to be around 64dB, so report as a simple percentage
-	// of that observed value until somebody complains about it and I actually have to
-	// figure out the proper math ...
-	return static_cast<int>((m_demodulator->GetSignalToNoiseLevel() / 64.0) * 100.0);
+	int percent = static_cast<int>((m_demodulator->GetSignalToNoiseLevel() / 64.0) * 100.0);
+	return std::max(std::min(percent, 100), 0);
 }
 
 //---------------------------------------------------------------------------
