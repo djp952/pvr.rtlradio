@@ -280,8 +280,8 @@
 
     <PropertyGroup>
       <CPPFLAGS>-Wall -Wno-unknown-pragmas -Idepends/xbmc/xbmc -Idepends/xbmc/xbmc/linux -Idepends/xbmc/xbmc/addons/kodi-dev-kit/include -Idepends/xbmc/xbmc/cores/VideoPlayer/Interface/Addon -Idepends/libusb/linux-armel/include -Idepends/rapidjson/include -Idepends/rtl-sdr/include -Idepends/sqlite -Itmp/version</CPPFLAGS>
-      <CFLAGS>-DNDEBUG -O2 -fPIC -Wno-unused-function -Wno-unused-variable -Wno-unused-but-set-variable -Wno-unused-label</CFLAGS>
-      <CXXFLAGS>-DNDEBUG -O2 -fPIC -std=c++14</CXXFLAGS>
+      <CFLAGS>-DNDEBUG -O2 -fPIC -march=armv6 -Wno-unused-function -Wno-unused-variable -Wno-unused-but-set-variable -Wno-unused-label</CFLAGS>
+      <CXXFLAGS>-DNDEBUG -O2 -fPIC -std=c++14 -march=armv6</CXXFLAGS>
     </PropertyGroup>
 
     <MakeDir Directories="out\linux-armel" ContinueOnError="false"/>
