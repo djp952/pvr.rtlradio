@@ -332,6 +332,12 @@
     <ClCompile Include="fmdsp\fft.cpp">
       <Filter>Source Files\fmdsp</Filter>
     </ClCompile>
+    <ClCompile Include="channelsettings_directx.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="channelsettings_opengl.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="..\tmp\version\version.rc">

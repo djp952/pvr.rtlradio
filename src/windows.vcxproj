@@ -620,6 +620,13 @@
       <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(IntDir)sqlite\</ObjectFileName>
     </ClCompile>
     <ClCompile Include="addon.cpp" />
+    <ClCompile Include="channelsettings_directx.cpp" />
+    <ClCompile Include="channelsettings_opengl.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="database.cpp" />
     <ClCompile Include="channelsettings.cpp" />
     <ClCompile Include="fmdsp\demodulator.cpp">

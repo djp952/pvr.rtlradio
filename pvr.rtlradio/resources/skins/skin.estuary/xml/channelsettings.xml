@@ -126,12 +126,11 @@
           <textcolor>button_focus</textcolor>
           <shadowcolor>black</shadowcolor>
         </control>
-        <control type="image" id="206">
+        <control type="renderaddon" id="206">
           <left>0</left>
           <top>50</top>
           <width>720</width>
           <height>390</height>
-          <texture border="40">buttons/dialogbutton-nofo.png</texture>
         </control>
         <control type="edit" id="207">
           <left>-14</left>

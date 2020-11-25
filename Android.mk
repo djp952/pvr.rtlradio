@@ -89,6 +89,7 @@ LOCAL_SRC_FILES := \
     src/fmdsp/wfmdemod.cpp \
     src/addon.cpp \
     src/channelsettings.cpp \
+    src/channelsettings_opengl.cpp \
     src/database.cpp \
     src/fmstream.cpp \
     src/libusb_exception.cpp \

@@ -39,7 +39,7 @@ static const int CONTROL_BUTTON_CHANNELICON		= 202;
 static const int CONTROL_IMAGE_CHANNELICON		= 203;
 static const int CONTROL_RADIO_AUTOMATICGAIN	= 204;
 static const int CONTROL_SLIDER_MANUALGAIN		= 205;
-static const int CONTROL_IMAGE_SIGNALMETER		= 206;
+static const int CONTROL_RENDER_SIGNALMETER		= 206;
 static const int CONTROL_EDIT_METERGAIN			= 207;
 static const int CONTROL_EDIT_METERPOWER		= 208;
 static const int CONTROL_EDIT_METERSNR			= 209;
@@ -217,6 +217,71 @@ void channelsettings::signal_meter_exception(std::exception const& ex)
 }
 
 //---------------------------------------------------------------------------
+// channelsettings::signal_meter_oncreate (private, static)
+//
+// Creates the rendering control for Kodi
+//
+// Arguments:
+//
+//	cbhdl	- Client context handle
+//	x		- Horizontal position
+//	y		- Vertical position
+//	w		- Width of control
+//	h		- Height of control
+//	device	- The device to use
+
+bool channelsettings::signal_meter_oncreate(kodi::gui::ClientHandle cbhdl, int x, int y, int w, int h, kodi::HardwareContext device)
+{
+	assert(cbhdl != nullptr);
+	return reinterpret_cast<channelsettings*>(cbhdl)->signal_meter_oncreate(x, y, w, h, device);
+}
+
+//---------------------------------------------------------------------------
+// channelsettings::signal_meter_ondirty (private, static)
+//
+// Determines if a render region is dirty
+//
+// Arguments:
+//
+//	cbhdl	- Client context handle
+
+bool channelsettings::signal_meter_ondirty(kodi::gui::ClientHandle cbhdl)
+{
+	assert(cbhdl != nullptr);
+	return reinterpret_cast<channelsettings*>(cbhdl)->signal_meter_ondirty();
+}
+
+//---------------------------------------------------------------------------
+// channelsettings::signal_meter_onrender (private, static)
+//
+// Invoked to render the control
+//
+// Arguments:
+//
+//	cbhdl	- Client context handle
+
+void channelsettings::signal_meter_onrender(kodi::gui::ClientHandle cbhdl)
+{
+	assert(cbhdl != nullptr);
+	return reinterpret_cast<channelsettings*>(cbhdl)->signal_meter_onrender();
+}
+
+//---------------------------------------------------------------------------
+// channelsettings::signal_meter_onstop (private, static)
+//
+// Invoked to stop the rendering process
+//
+// Arguments:
+//
+//	cbhdl	- Client context handle
+
+void channelsettings::signal_meter_onstop(kodi::gui::ClientHandle cbhdl)
+{
+	assert(cbhdl != nullptr);
+	return reinterpret_cast<channelsettings*>(cbhdl)->signal_meter_onstop();
+}
+
+//---------------------------------------------------------------------------
 // channelsettings::update_gain (private)
 //
 // Updates the state of the gain control
@@ -358,10 +423,14 @@ bool channelsettings::OnInit(void)
 		m_image_channelicon = std::unique_ptr<CImage>(new CImage(this, CONTROL_IMAGE_CHANNELICON));
 		m_radio_autogain = std::unique_ptr<CRadioButton>(new CRadioButton(this, CONTROL_RADIO_AUTOMATICGAIN));
 		m_slider_manualgain = std::unique_ptr<CSettingsSlider>(new CSettingsSlider(this, CONTROL_SLIDER_MANUALGAIN));
-		m_image_signalmeter = std::unique_ptr<CImage>(new CImage(this, CONTROL_IMAGE_SIGNALMETER));
+		m_render_signalmeter = std::unique_ptr<CRendering>(new CRendering(this, CONTROL_RENDER_SIGNALMETER));
 		m_edit_signalgain = std::unique_ptr<CEdit>(new CEdit(this, CONTROL_EDIT_METERGAIN));
 		m_edit_signalpower = std::unique_ptr<CEdit>(new CEdit(this, CONTROL_EDIT_METERPOWER));
 		m_edit_signalsnr = std::unique_ptr<CEdit>(new CEdit(this, CONTROL_EDIT_METERSNR));
+
+		// Register the callbacks for the signal meter rendering control
+		m_render_signalmeter->SetIndependentCallbacks(reinterpret_cast<kodi::gui::ClientHandle>(this), &channelsettings::signal_meter_oncreate,
+			&channelsettings::signal_meter_onrender, &channelsettings::signal_meter_onstop, &channelsettings::signal_meter_ondirty);
 
 		// Set the channel frequency in XXX.X MHz format
 		char freqstr[128];
