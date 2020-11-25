@@ -25,8 +25,13 @@
 #pragma once
 
 #include <atomic>
+#include <functional>
 #include <memory>
+#include <mutex>
 #include <thread>
+
+#include "fmdsp/demodulator.h"
+#include "fmdsp/fft.h"
 
 #include "props.h"
 #include "rtldevice.h"
@@ -38,15 +43,6 @@
 // Class signalmeter
 //
 // Implements the signal meter
-//
-// Portions based on:
-//
-// rtl-sdr (rtl_power.c)
-// https://git.osmocom.org/rtl-sdr/
-// Copyright (C) 2012 by Steve Markgraf <steve@steve-m.de>
-// Copyright (C) 2012 by Hoernchen <la@tfc - server.de>
-// Copyright (C) 2012 by Kyle Keen <keenerd@gmail.com>
-// GPLv2
 
 class signalmeter
 {
@@ -57,12 +53,44 @@ public:
 	~signalmeter();
 
 	//-----------------------------------------------------------------------
+	// Type Declarations
+
+	// signal_status
+	//
+	// Structure used to report the current signal status
+	struct signal_status {
+
+		TYPEREAL			power;				// Signal power level in dB
+		TYPEREAL			noise;				// Signal noise level in dB
+		TYPEREAL			snr;				// Signal-to-noise ratio in dB
+		bool				stereo;				// Flag if Stereo signal is present
+		bool				rds;				// Flag if RDS signal is present
+
+		int					fftheight;			// FFT height
+		int					fftwidth;			// FFT width
+		int32_t const*		fftdata;			// FFT data points
+	};
+
+	// exception_callback
+	//
+	// Callback function invoked when an exception has occurred on the worker thread
+	using exception_callback = std::function<void(std::exception const& ex)>;
+
+	// signal_status_callback
+	//
+	// Callback function invoked when the signal status has changed
+	using signal_status_callback = std::function<void(struct signal_status const& status)>;
+
+	//-----------------------------------------------------------------------
 	// Member Functions
 
 	// create (static)
 	//
 	// Factory method, creates a new signalmeter instance
-	static std::unique_ptr<signalmeter> create(std::unique_ptr<rtldevice> device, struct tunerprops const& tunerprops);
+	static std::unique_ptr<signalmeter> create(std::unique_ptr<rtldevice> device, struct tunerprops const& tunerprops, 
+		signal_status_callback const& onstatus, int onstatusrate);
+	static std::unique_ptr<signalmeter> create(std::unique_ptr<rtldevice> device, struct tunerprops const& tunerprops,
+		signal_status_callback const& onstatus, int onstatusrate, exception_callback const& onexception);
 
 	// get_automatic_gain
 	//
@@ -116,12 +144,8 @@ private:
 
 	// Instance Constructor
 	//
-	signalmeter(std::unique_ptr<rtldevice> device, struct tunerprops const& tunerprops);
-
-	// DEFAULT_DEVICE_BLOCK_SIZE
-	//
-	// Default device block size
-	static size_t const DEFAULT_DEVICE_BLOCK_SIZE;
+	signalmeter(std::unique_ptr<rtldevice> device, struct tunerprops const& tunerprops, signal_status_callback const& onstatus, 
+		int onstatusrate, exception_callback const& onexception);
 
 	// DEFAULT_DEVICE_FREQUENCY
 	//
@@ -133,22 +157,44 @@ private:
 	// Default device sample rate
 	static uint32_t const DEFAULT_DEVICE_SAMPLE_RATE;
 
+	// FFT_BIN_SIZE
+	//
+	// Fast fourier transform size (must be a power of two)
+	static int const FFT_BIN_SIZE;
+
+	// FFT_OUTPUT_HEIGHT
+	//
+	// Fast fourier transform output height (y-axis)
+	static int const FFT_OUTPUT_HEIGHT;
+
+	// FFT_OUTPUT_WIDTH
+	//
+	// Fast fourier transform output width (x-axis)
+	static int const FFT_OUTPUT_WIDTH;
+
 	//-----------------------------------------------------------------------
 	// Private Member Functions
 
+	// rollingaverage (static)
+	//
+	// Computes a rolling average of a value over a number of iterations
+	static TYPEREAL rollingaverage(int iterations, TYPEREAL average, TYPEREAL input);
+		
 	//-----------------------------------------------------------------------
 	// Member Variables
 
-	std::unique_ptr<rtldevice>	m_device;				// RTL-SDR device instance
-	bool						m_autogain = false;		// Automatic gain enabled/disabled
-	int							m_manualgain = 0;		// Current manual gain value
-	uint32_t					m_frequency = 0;		// Current frequency value
+	std::unique_ptr<rtldevice>		m_device;				// RTL-SDR device instance
+	bool							m_autogain = false;		// Automatic gain enabled/disabled
+	int								m_manualgain = 0;		// Current manual gain value
+	uint32_t						m_frequency = 0;		// Current frequency value
+	std::atomic<bool>				m_freqchange{ false };	// Frequency changed flag
+	std::thread						m_worker;				// Worker thread
+	scalar_condition<bool>			m_stop{ false };		// Condition to stop worker
+	std::atomic<bool>				m_stopped{ false };		// Worker stopped flag
 
-	// STREAM CONTROL
-	//
-	std::thread					m_worker;				// Data transfer thread
-	scalar_condition<bool>		m_stop{ false };		// Condition to stop data transfer
-	std::atomic<bool>			m_stopped{ false };		// Data transfer stopped flag
+	signal_status_callback const	m_onstatus;				// Status callback function
+	int const						m_onstatusrate;			// Status callback rate (milliseconds)
+	exception_callback const		m_onexception;			// Exception callback function
 };
 
 //-----------------------------------------------------------------------------

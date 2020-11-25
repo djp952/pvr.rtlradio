@@ -207,7 +207,7 @@ void rdsdecoder::decode_radiotext(tRDS_GROUPS const& rdsgroup)
 	// Group A contains two RadioText segments in block C and D
 	if(groupa) {
 
-		size_t offset = (textsegmentaddress << 2);
+		size_t offset = static_cast<size_t>(textsegmentaddress << 2);
 		m_rt_data[offset + 0] = (rdsgroup.BlockC >> 8) & 0xFF;
 		m_rt_data[offset + 1] = rdsgroup.BlockC & 0xFF;
 		m_rt_data[offset + 2] = (rdsgroup.BlockD >> 8) & 0xFF;
@@ -221,7 +221,7 @@ void rdsdecoder::decode_radiotext(tRDS_GROUPS const& rdsgroup)
 	// Group B contains one RadioText segment in block D
 	else {
 
-		size_t offset = (textsegmentaddress << 1);
+		size_t offset = static_cast<size_t>(textsegmentaddress << 1);
 		m_rt_data[offset + 0] = (rdsgroup.BlockD >> 8) & 0xFF;
 		m_rt_data[offset + 1] = rdsgroup.BlockD & 0xFF;
 
@@ -235,7 +235,7 @@ void rdsdecoder::decode_radiotext(tRDS_GROUPS const& rdsgroup)
 	while((hascr) && (++textsegmentaddress < 16)) {
 
 		// Clear any RT information that may have been previously set
-		size_t offset = (textsegmentaddress << 2);
+		size_t offset = static_cast<size_t>(textsegmentaddress << 2);
 		m_rt_data[offset + 0] = 0x00;
 		m_rt_data[offset + 1] = 0x00;
 		if(groupa) m_rt_data[offset + 2] = 0x00;

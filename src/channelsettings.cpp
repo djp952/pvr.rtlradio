@@ -23,6 +23,7 @@
 #include "stdafx.h"
 #include "channelsettings.h"
 
+#include <cmath>
 #include <kodi/General.h>
 #include <kodi/gui/dialogs/FileBrowser.h>
 
@@ -40,7 +41,7 @@ static const int CONTROL_RADIO_AUTOMATICGAIN	= 204;
 static const int CONTROL_SLIDER_MANUALGAIN		= 205;
 static const int CONTROL_IMAGE_SIGNALMETER		= 206;
 static const int CONTROL_EDIT_METERGAIN			= 207;
-static const int CONTROL_EDIT_METERPEAK			= 208;
+static const int CONTROL_EDIT_METERPOWER		= 208;
 static const int CONTROL_EDIT_METERSNR			= 209;
 
 //---------------------------------------------------------------------------
@@ -48,13 +49,19 @@ static const int CONTROL_EDIT_METERSNR			= 209;
 //
 // Arguments:
 //
+//	device			- Device instance
+//	tunerprops		- Tuner properties
 //	channelprops	- Channel properties
-//	signalmeter		- Signal meter instance
 
-channelsettings::channelsettings(std::unique_ptr<signalmeter> signalmeter, struct channelprops const& channelprops) :
-	kodi::gui::CWindow("channelsettings.xml", "skin.estuary", true), m_signalmeter(std::move(signalmeter)),
-	m_channelprops(channelprops)	
+channelsettings::channelsettings(std::unique_ptr<rtldevice> device, struct tunerprops const& tunerprops, struct channelprops const& channelprops) :
+	kodi::gui::CWindow("channelsettings.xml", "skin.estuary", true), m_channelprops(channelprops)
 {
+	assert(device);
+
+	// Create the signal meter instance with the specified device and tuner properties, set for a 500ms callback rate
+	m_signalmeter = signalmeter::create(std::move(device), tunerprops, std::bind(&channelsettings::update_signal_status, this, std::placeholders::_1), 
+		500, std::bind(&channelsettings::signal_meter_exception, this, std::placeholders::_1));
+
 	// Get the vector<> of valid manual gain values for the attached device
 	m_signalmeter->get_valid_manual_gains(m_manualgains);
 }
@@ -75,12 +82,29 @@ channelsettings::~channelsettings()
 //
 // Arguments:
 //
-//	channelprops	- Channel properties
-//	signalmeter		- Signal meter instance
+//	device			- Device instance
+//	tunerprops		- Tuner properties
 
-std::unique_ptr<channelsettings> channelsettings::create(std::unique_ptr<signalmeter> signalmeter, struct channelprops const& channelprops)
+std::unique_ptr<channelsettings> channelsettings::create(std::unique_ptr<rtldevice> device, struct tunerprops const& tunerprops)
 {
-	return std::unique_ptr<channelsettings>(new channelsettings(std::move(signalmeter), channelprops));
+	struct channelprops channelprops = {};
+	return std::unique_ptr<channelsettings>(new channelsettings(std::move(device), tunerprops, channelprops));
+}
+
+//---------------------------------------------------------------------------
+// channelsettings::create (static)
+//
+// Factory method, creates a new channelsettings instance
+//
+// Arguments:
+//
+//	device			- Device instance
+//	tunerprops		- Tuner properties
+//	channelprops	- Channel properties
+
+std::unique_ptr<channelsettings> channelsettings::create(std::unique_ptr<rtldevice> device, struct tunerprops const& tunerprops, struct channelprops const& channelprops)
+{
+	return std::unique_ptr<channelsettings>(new channelsettings(std::move(device), tunerprops, channelprops));
 }
 
 //---------------------------------------------------------------------------
@@ -179,35 +203,75 @@ int channelsettings::percent_to_gain(int percent) const
 }
 
 //---------------------------------------------------------------------------
-// channelsettings::update_signal_meter (private)
+// channelsettings::signal_meter_exception (private)
 //
-// Updates the state of the signal meter control
+// Callback to handle an exception raised by the signal meter
+//
+// Arguments:
+//
+//	ex		- Exception that was raised by the signal meter
+
+void channelsettings::signal_meter_exception(std::exception const& ex)
+{
+	kodi::QueueFormattedNotification(QueueMsg::QUEUE_ERROR, "Unable to read from device: %s", ex.what());
+}
+
+//---------------------------------------------------------------------------
+// channelsettings::update_gain (private)
+//
+// Updates the state of the gain control
 //
 // Arguments:
 //
 //	NONE
 
-void channelsettings::update_signal_meter(void) const
+void channelsettings::update_gain(void)
 {
-	// Gain
-	//
+	char strbuf[64] = {};						// snprintf() text buffer
+
 	if(!m_channelprops.autogain) {
 
 		// Convert the gain value from tenths of a decibel into XX.X dB format
-		char dbstr[64];
-		snprintf(dbstr, std::extent<decltype(dbstr)>::value, "%.1f dB", m_channelprops.manualgain / 10.0);
-		m_edit_signalgain->SetText(dbstr);
+		snprintf(strbuf, std::extent<decltype(strbuf)>::value, "%.1f dB", m_channelprops.manualgain / 10.0);
+		m_edit_signalgain->SetText(strbuf);
 	}
 
 	else m_edit_signalgain->SetText("Auto");
+}
+
+//---------------------------------------------------------------------------
+// channelsettings::update_signal_status (private)
+//
+// Updates the state of the signal meter
+//
+// Arguments:
+//
+//	status		- Updated signal status from the signal meter
+
+void channelsettings::update_signal_status(struct signalmeter::signal_status const& status)
+{
+	char strbuf[64] = {};						// snprintf() text buffer
 
 	// Signal Strength
 	//
-	m_edit_signalpeak->SetText("N/A");
+	if(!std::isnan(status.power)) {
+
+		snprintf(strbuf, std::extent<decltype(strbuf)>::value, "%.1F dB", status.power);
+		m_edit_signalpower->SetText(strbuf);
+	}
+	else m_edit_signalpower->SetText("N/A");
 
 	// Signal-to-noise
 	//
-	m_edit_signalsnr->SetText("N/A");
+	if(!std::isnan(status.snr)) {
+		snprintf(strbuf, std::extent<decltype(strbuf)>::value, "%d dB", static_cast<int>(status.snr));
+		m_edit_signalsnr->SetText(strbuf);
+	}
+	else m_edit_signalsnr->SetText("N/A");
+
+	// FFT
+	//
+	// TODO: Needs a rendering control rather than an image control
 }
 
 //---------------------------------------------------------------------------
@@ -252,13 +316,13 @@ bool channelsettings::OnClick(int controlId)
 			m_channelprops.autogain = m_radio_autogain->IsSelected();
 			m_signalmeter->set_automatic_gain(m_channelprops.autogain);
 			m_slider_manualgain->SetEnabled(!m_channelprops.autogain);
-			update_signal_meter();
+			update_gain();
 			return true;
 
 		case CONTROL_SLIDER_MANUALGAIN:
 			m_channelprops.manualgain = percent_to_gain(static_cast<int>(m_slider_manualgain->GetPercentage()));
 			m_signalmeter->set_manual_gain(m_channelprops.manualgain);
-			update_signal_meter();
+			update_gain();
 			return true;
 
 		case CONTROL_BUTTON_OK:
@@ -296,12 +360,12 @@ bool channelsettings::OnInit(void)
 		m_slider_manualgain = std::unique_ptr<CSettingsSlider>(new CSettingsSlider(this, CONTROL_SLIDER_MANUALGAIN));
 		m_image_signalmeter = std::unique_ptr<CImage>(new CImage(this, CONTROL_IMAGE_SIGNALMETER));
 		m_edit_signalgain = std::unique_ptr<CEdit>(new CEdit(this, CONTROL_EDIT_METERGAIN));
-		m_edit_signalpeak = std::unique_ptr<CEdit>(new CEdit(this, CONTROL_EDIT_METERPEAK));
+		m_edit_signalpower = std::unique_ptr<CEdit>(new CEdit(this, CONTROL_EDIT_METERPOWER));
 		m_edit_signalsnr = std::unique_ptr<CEdit>(new CEdit(this, CONTROL_EDIT_METERSNR));
 
 		// Set the channel frequency in XXX.X MHz format
 		char freqstr[128];
-		snprintf(freqstr, std::extent<decltype(freqstr)>::value, "%.1f MHz", (m_channelprops.frequency / 100000) / 10.0);
+		snprintf(freqstr, std::extent<decltype(freqstr)>::value, "%.1f", (m_channelprops.frequency / static_cast<double>(100000)) / 10.0);
 		m_edit_frequency->SetText(freqstr);
 
 		// Set the channel name and logo/icon
@@ -315,15 +379,17 @@ bool channelsettings::OnInit(void)
 		m_radio_autogain->SetSelected(m_channelprops.autogain);
 		m_slider_manualgain->SetEnabled(!m_channelprops.autogain);
 		m_slider_manualgain->SetPercentage(static_cast<float>(gain_to_percent(m_channelprops.manualgain)));
+		update_gain();
+
+		// Set the default text for the signal indicators
+		m_edit_signalpower->SetText("N/A");
+		m_edit_signalsnr->SetText("N/A");
 
 		// Start the signal meter instance
 		m_signalmeter->set_frequency(m_channelprops.frequency);
 		m_signalmeter->set_automatic_gain(m_channelprops.autogain);
 		m_signalmeter->set_manual_gain(m_channelprops.manualgain);
 		m_signalmeter->start();
-
-		// Update the signal meter
-		update_signal_meter();
 	}
 
 	catch(...) { return false; }

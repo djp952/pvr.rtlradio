@@ -82,12 +82,12 @@ LOCAL_SRC_FILES := \
     depends/sqlite/sqlite3.c \
     src/fmdsp/demodulator.cpp \
     src/fmdsp/downconvert.cpp \
+    src/fmdsp/fft.cpp \
     src/fmdsp/fir.cpp \
     src/fmdsp/fractresampler.cpp \
     src/fmdsp/iir.cpp \
     src/fmdsp/wfmdemod.cpp \
     src/addon.cpp \
-    src/channeladd.cpp \
     src/channelsettings.cpp \
     src/database.cpp \
     src/fmstream.cpp \

@@ -36,6 +36,7 @@
 #include <utility>
 
 #include "props.h"
+#include "rtldevice.h"
 #include "signalmeter.h"
 
 #pragma warning(push, 4)
@@ -61,7 +62,8 @@ public:
 	// create (static)
 	//
 	// Factory method, creates a new channelsettings instance
-	static std::unique_ptr<channelsettings> create(std::unique_ptr<signalmeter> signalmeter, struct channelprops const& channelprops);
+	static std::unique_ptr<channelsettings> create(std::unique_ptr<rtldevice> device, struct tunerprops const& tunerprops);
+	static std::unique_ptr<channelsettings> create(std::unique_ptr<rtldevice> device, struct tunerprops const& tunerprops, struct channelprops const& channelprops);
 
 	// get_channel_properties
 	//
@@ -80,7 +82,7 @@ private:
 
 	// Instance Constructor
 	//
-	channelsettings(std::unique_ptr<signalmeter> signalmeter, struct channelprops const& channelprops);
+	channelsettings(std::unique_ptr<rtldevice> device, struct tunerprops const& tunerprops, struct channelprops const& channelprops);
 
 	//-------------------------------------------------------------------------
 	// CWindow Implementation
@@ -118,18 +120,29 @@ private:
 	// Converts a percentage into a manual gain value
 	int percent_to_gain(int percent) const;
 
-	// update_signal_meter
+	// signal_meter_exception
+	//
+	// Callback to handle an exception raised by the signal meter
+	void signal_meter_exception(std::exception const& ex);
+
+	// update_gain
+	//
+	// Updates the state of the gain control
+	void update_gain(void);
+
+	// update_signal_status
 	//
 	// Updates the state of the signal meter
-	void update_signal_meter(void) const;
+	void update_signal_status(struct signalmeter::signal_status const& status);
 
 	//-------------------------------------------------------------------------
 	// Member Variables
 
-	bool								m_result = false;		// Dialog result
-	std::unique_ptr<signalmeter> const	m_signalmeter;			// Signal meter instance
+	std::unique_ptr<rtldevice> const	m_device;				// Device instance
 	struct channelprops					m_channelprops;			// Channel properties
+	std::unique_ptr<signalmeter>		m_signalmeter;			// Signal meter instance
 	std::vector<int>					m_manualgains;			// Manual gain values
+	bool								m_result = false;		// Dialog result
 
 	// CONTROLS
 	//
@@ -141,7 +154,7 @@ private:
 	std::unique_ptr<CSettingsSlider>	m_slider_manualgain;	// Manual gain
 	std::unique_ptr<CImage>				m_image_signalmeter;	// Signal meter
 	std::unique_ptr<CEdit>				m_edit_signalgain;		// Active gain
-	std::unique_ptr<CEdit>				m_edit_signalpeak;		// Active peak
+	std::unique_ptr<CEdit>				m_edit_signalpower;		// Active power
 	std::unique_ptr<CEdit>				m_edit_signalsnr;		// Active SNR
 };
 

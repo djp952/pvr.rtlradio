@@ -38,11 +38,9 @@
 #include <android/log.h>
 #endif
 
-#include "channeladd.h"
 #include "channelsettings.h"
 #include "dbtypes.h"
 #include "fmstream.h"
-#include "signalmeter.h"
 #include "string_exception.h"
 #include "sqlite_exception.h"
 #include "tcpdevice.h"
@@ -1354,17 +1352,11 @@ int64_t addon::LengthLiveStream(void)
 
 PVR_ERROR addon::OpenDialogChannelAdd(kodi::addon::PVRChannel const& /*channel*/)
 {
-	channeladd					dialog;				// Dialog box instance
-
 	//
 	// TODO: Stub implementation
 	//
 
-	try { dialog.DoModal(); }
-	catch(std::exception& ex) { return handle_stdexception(__func__, ex, PVR_ERROR::PVR_ERROR_FAILED); }
-	catch(...) { return handle_generalexception(__func__, PVR_ERROR::PVR_ERROR_FAILED); }
-
-	return PVR_ERROR::PVR_ERROR_NO_ERROR;
+	return PVR_ERROR::PVR_ERROR_NOT_IMPLEMENTED;
 }
 
 //-----------------------------------------------------------------------------
@@ -1421,7 +1413,7 @@ PVR_ERROR addon::OpenDialogChannelSettings(kodi::addon::PVRChannel const& channe
 			throw string_exception("Unable to retrieve properties for channel ", channel.GetChannelName().c_str());
 
 		// Create and initialize the dialog box against a new signal meter instance
-		std::unique_ptr<channelsettings> dialog = channelsettings::create(signalmeter::create(create_device(settings), tunerprops), channelprops);
+		std::unique_ptr<channelsettings> dialog = channelsettings::create(create_device(settings), tunerprops, channelprops);
 		dialog->DoModal();
 
 		if(dialog->get_dialog_result()) {

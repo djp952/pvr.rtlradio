@@ -6,6 +6,5 @@
   <file path="pvr.rtlradio\resources\icon.png" source="pvr.rtlradio\resources\icon.png"/>
   <file path="pvr.rtlradio\resources\settings.xml" source="pvr.rtlradio\resources\settings.xml" normalize="unix"/>
   <file path="pvr.rtlradio\resources\language\resource.language.en_gb\strings.po" source="pvr.rtlradio\resources\language\resource.language.en_gb\strings.po" normalize="unix"/>
-  <file path="pvr.rtlradio\resources\skins\skin.estuary\xml\channeladd.xml" source="pvr.rtlradio\resources\skins\skin.estuary\xml\channeladd.xml" normalize="unix"/>
   <file path="pvr.rtlradio\resources\skins\skin.estuary\xml\channelsettings.xml" source="pvr.rtlradio\resources\skins\skin.estuary\xml\channelsettings.xml" normalize="unix"/>
 </zip>

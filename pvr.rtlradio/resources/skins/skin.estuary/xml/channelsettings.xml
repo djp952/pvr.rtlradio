@@ -31,6 +31,13 @@
           <textcolor>button_focus</textcolor>
           <shadowcolor>black</shadowcolor>
         </control>
+        <control type="label" id="9000">
+          <top>77</top>
+          <left>595</left>
+          <width>80</width>
+          <align>right</align>
+          <label>MHz</label>
+        </control>
         <control type="grouplist" id="9000">
           <top>50</top>
           <onleft>60</onleft>
@@ -40,7 +47,7 @@
           <itemgap>-25</itemgap>
           <control type="edit" id="200">
             <description>Frequency</description>
-            <width>700</width>
+            <width>615</width>
             <include>SettingsItemCommon</include>
             <label>Frequency</label>
             <enable>false</enable>
@@ -147,12 +154,12 @@
           <texturenofocus></texturenofocus>
           <alttexturefocus></alttexturefocus>
           <alttexturenofocus></alttexturenofocus>
-          <description>Signal Meter peak</description>
-          <width>295</width>
+          <description>Signal Meter power</description>
+          <width>300</width>
           <include>SettingsItemCommon</include>
           <disabledcolor>white</disabledcolor>
           <enable>false</enable>
-          <label>Peak:</label>
+          <label>Power:</label>
         </control>
         <control type="edit" id="209">
           <left>485</left>

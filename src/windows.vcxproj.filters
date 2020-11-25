@@ -204,9 +204,6 @@
     <ClInclude Include="channelsettings.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="channeladd.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="signalmeter.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -215,6 +212,9 @@
     </ClInclude>
     <ClInclude Include="win32_exception.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="fmdsp\fft.h">
+      <Filter>Header Files\fmdsp</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -323,14 +323,14 @@
     <ClCompile Include="channelsettings.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="channeladd.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="signalmeter.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="win32_exception.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="fmdsp\fft.cpp">
+      <Filter>Source Files\fmdsp</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
