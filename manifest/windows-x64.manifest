@@ -6,5 +6,7 @@
   <file path="pvr.rtlradio\resources\icon.png" source="pvr.rtlradio\resources\icon.png"/>
   <file path="pvr.rtlradio\resources\settings.xml" source="pvr.rtlradio\resources\settings.xml" normalize="windows"/>
   <file path="pvr.rtlradio\resources\language\resource.language.en_gb\strings.po" source="pvr.rtlradio\resources\language\resource.language.en_gb\strings.po" normalize="windows"/>
+  <file path="pvr.rtlradio\resources\shaders\channelsettings_directx_pixelshader.cso" source="out\windows-x64\Release\channelsettings_directx_pixelshader.cso"/>
+  <file path="pvr.rtlradio\resources\shaders\channelsettings_directx_vertexshader.cso" source="out\windows-x64\Release\channelsettings_directx_vertexshader.cso"/>
   <file path="pvr.rtlradio\resources\skins\skin.estuary\xml\channelsettings.xml" source="pvr.rtlradio\resources\skins\skin.estuary\xml\channelsettings.xml" normalize="windows"/>
 </zip>
