@@ -41,26 +41,47 @@
 #include "demodulator.h"
 
 //---------------------------------------------------------------------------
-// rms_level_approx
+// get_signal_levels
 //
-// Compute RMS level over a small prefix of the specified sample vector
+// Gets the approximate signal levels of the input samples
 //
-// SoftFM (FmDecode.cc)
-// https://github.com/jorisvr/SoftFM
-// Copyright (C) 2013 Joris van Rantwijk
-// GPLv2
+// Arguments:
+//
+//	numsamples		- Number of samples in the buffer
+//	samples			- Pointer to the samples buffer
+//	rms				- Receives the RMS calculation
+//	noise			- Receives the Standard Deviation calculation
 
-static TYPEREAL rms_level_approx(int numsamples, TYPECPX const* samples)
+static void get_signal_levels(int numsamples, TYPECPX const* samples, TYPEREAL& rms, TYPEREAL& noise)
 {
 	numsamples = (numsamples + 63) / 64;
 
-	TYPEREAL level = 0;
-	for(int i = 0; i < numsamples; i++) {
-		TYPECPX const& s = samples[i];
-		level += s.re * s.re + s.im * s.im;
-	}
+	rms = 0;
+	noise = 0;
 
-	return sqrt(level / numsamples);
+	// MEAN POWER
+	//
+	TYPEREAL mean = 0;
+	for(int index = 0; index < numsamples; index++) {
+
+		TYPECPX const& sample = samples[index];
+		mean += sqrt((sample.re * sample.re) + (sample.im * sample.im));
+	}
+	mean /= numsamples;
+
+	// RMS POWER
+	//
+	rms = sqrt(mean * mean);
+
+	// STANDARD DEVIATION
+	//
+	for(int index = 0; index < numsamples; index++) {
+
+		TYPECPX const& sample = samples[index];
+		TYPEREAL power = sqrt((sample.re * sample.re) + (sample.im * sample.im)) - mean;
+		noise += (power * power);
+	}
+	noise = sqrt(noise / numsamples);
 }
 
 //////////////////////////////////////////////////////////////////
@@ -174,9 +195,17 @@ int ret = 0;
 			//perform baseband tuning and decimation
 			int n = m_DownConvert.ProcessData(m_InBufPos, m_pDemodInBuf, m_pDemodInBuf);
 
-			// Calculate the approximate baseband level in dB (scaled to 32767.0)
-			TYPEREAL rms = rms_level_approx(n, m_pDemodInBuf);
-			m_BasebandLevel = 0.95 * m_BasebandLevel + 0.05 * rms;
+			// Get the signal levels
+			TYPEREAL signal = 0, noise = 0;
+			get_signal_levels(n, m_pDemodInBuf, signal, noise);
+
+			// Smooth the signal level
+			if(isnan(m_SignalLevel)) m_SignalLevel = signal;
+			else m_SignalLevel = 0.95 * m_SignalLevel + 0.05 * signal;
+
+			// Smooth the noise level
+			if(isnan(m_NoiseLevel)) m_NoiseLevel = (noise);
+			else m_NoiseLevel = 0.95 * m_NoiseLevel + 0.05 * (noise);
 
 			//perform the desired demod action
 			switch(m_DemodMode)
@@ -214,9 +243,17 @@ int ret = 0;
 			//perform baseband tuning and decimation
 			int n = m_DownConvert.ProcessData(m_InBufPos, m_pDemodInBuf, m_pDemodInBuf);
 
-			// Calculate the approximate baseband level in dB (scaled to 32767.0)
-			TYPEREAL rms = rms_level_approx(n, m_pDemodInBuf);
-			m_BasebandLevel = 0.95 * m_BasebandLevel + 0.05 * rms;
+			// Get the signal levels
+			TYPEREAL signal = 0, noise = 0;
+			get_signal_levels(n, m_pDemodInBuf, signal, noise);
+
+			// Smooth the signal level
+			if(isnan(m_SignalLevel)) m_SignalLevel = signal;
+			else m_SignalLevel = 0.95 * m_SignalLevel + 0.05 * signal;
+
+			// Smooth the noise level
+			if(isnan(m_NoiseLevel)) m_NoiseLevel = (noise);
+			else m_NoiseLevel = 0.95 * m_NoiseLevel + 0.05 * (noise);
 
 			//perform the desired demod action
 			switch(m_DemodMode)

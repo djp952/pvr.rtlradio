@@ -457,7 +457,7 @@ std::string fmstream::servicename(void) const
 
 int fmstream::signalstrength(void) const
 {
-	int percent = static_cast<int>(((m_demodulator->GetBasebandLevel() + 64.0) / 64.0) * 100.0);
+	int percent = static_cast<int>(((m_demodulator->GetSignalLevel() + 48.0) / 48.0) * 100.0);
 	return std::max(std::min(percent, 100), 0);
 }
 
@@ -472,7 +472,7 @@ int fmstream::signalstrength(void) const
 
 int fmstream::signaltonoise(void) const
 {
-	int percent = static_cast<int>((m_demodulator->GetSignalToNoiseLevel() / 64.0) * 100.0);
+	int percent = static_cast<int>((m_demodulator->GetSignalToNoiseLevel() / 24.0) * 100.0);
 	return std::max(std::min(percent, 100), 0);
 }
 

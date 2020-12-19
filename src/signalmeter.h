@@ -173,14 +173,6 @@ private:
 	static int const FFT_OUTPUT_WIDTH;
 
 	//-----------------------------------------------------------------------
-	// Private Member Functions
-
-	// rollingaverage (static)
-	//
-	// Computes a rolling average of a value over a number of iterations
-	static TYPEREAL rollingaverage(int iterations, TYPEREAL average, TYPEREAL input);
-		
-	//-----------------------------------------------------------------------
 	// Member Variables
 
 	std::unique_ptr<rtldevice>		m_device;				// RTL-SDR device instance

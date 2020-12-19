@@ -88,28 +88,24 @@ public:
 		if(m_pWFmDemod) return m_pWFmDemod->GetNextRdsGroupData(pGroupData); else return false;
 	}
 
-	// Gets the baseband level in dB
-	TYPEREAL GetBasebandLevel(void) const
+	// Gets the signal level in dB
+	TYPEREAL GetSignalLevel(void) const
 	{
-		// The stored interface level is scaled to 32767.0 instead of 1.0
-		return 20 * MLOG10(m_BasebandLevel / 32767.0);
+		// The stored signal level is scaled to 32767.0
+		return 20 * MLOG10(m_SignalLevel / 32767.0);
 	}
 
 	// Get the noise level in dB
 	TYPEREAL GetNoiseLevel(void) const
 	{
-		// The stored noise level is scaled to 32767.0 instead of 1.0
-		return 20 * MLOG10(((m_pWFmDemod) ? m_pWFmDemod->GetNoiseLevel() : 32767.0) / 32767.0);
+		// The stored noise level is scaled to 32767.0
+		return 20 * MLOG10(m_NoiseLevel / 32767.0);
 	}
 
-	// Get the signal to noise ratio
+	// Get the signal to noise level in dB
 	TYPEREAL GetSignalToNoiseLevel(void) const
 	{
-		// The stored interface and noise levels are scaled to 32767.0 instead of 1.0
-		TYPEREAL s = m_BasebandLevel / 32767.0;
-		TYPEREAL n = ((m_pWFmDemod) ? m_pWFmDemod->GetNoiseLevel() : 32767.0) / 32767.0;
-
-		return 20 * MLOG10(s / n);
+		return 20 * MLOG10(m_SignalLevel / m_NoiseLevel);
 	}
 
 private:
@@ -131,7 +127,8 @@ private:
 	//pointers to all the various implemented demodulator classes
 	CWFmDemod* m_pWFmDemod;
 
-	TYPEREAL m_BasebandLevel = 0;
+	TYPEREAL m_SignalLevel = NAN;
+	TYPEREAL m_NoiseLevel = NAN;
 };
 
 #endif // DEMODULATOR_H

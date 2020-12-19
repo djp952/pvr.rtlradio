@@ -190,25 +190,6 @@ void signalmeter::get_valid_manual_gains(std::vector<int>& dbs) const
 }
 
 //---------------------------------------------------------------------------
-// signalmeter::rollingaverage (private, static)
-//
-// Computes a rolling average of a value over a number of iterations
-//
-// Arguments:
-//
-//	iterations		- Number of iterations for the average
-//	average			- The current averaged value
-//	input			- The new input to apply to the average
-
-TYPEREAL signalmeter::rollingaverage(int iterations, TYPEREAL average, TYPEREAL input)
-{
-	average -= average / iterations;
-	average += input / iterations;
-
-	return average;
-}
-
-//---------------------------------------------------------------------------
 // signalmeter::set_automatic_gain
 //
 // Sets the automatic gain mode of the device
@@ -289,11 +270,6 @@ void signalmeter::start(void)
 			size_t const numsamples = demodulator->GetInputBufferLimit();
 			size_t const numbytes = numsamples * 2;
 
-			// The signal levels are averaged based on the callback rate
-			TYPEREAL avgpower = std::numeric_limits<TYPEREAL>::quiet_NaN();
-			TYPEREAL avgnoise = std::numeric_limits<TYPEREAL>::quiet_NaN();
-			TYPEREAL avgsnr = std::numeric_limits<TYPEREAL>::quiet_NaN();
-
 			bool stereo = false;			// Flag if stereo has been detected
 			bool rds = false;				// Flag if RDS has been detected
 
@@ -321,10 +297,6 @@ void signalmeter::start(void)
 				// If the frequency changed everything needs to be reset
 				bool expected = true;
 				if(m_freqchange.compare_exchange_strong(expected, false)) {
-
-					avgpower = std::numeric_limits<TYPEREAL>::quiet_NaN();
-					avgnoise = std::numeric_limits<TYPEREAL>::quiet_NaN();
-					avgsnr = std::numeric_limits<TYPEREAL>::quiet_NaN();
 
 					stereo = false;
 					rds = false;
@@ -389,11 +361,6 @@ void signalmeter::start(void)
 				// Now run the I/Q samples through the demodulator
 				demodulator->ProcessData(static_cast<int>(numsamples), samples.get(), samples.get());
 
-				// Get the signal levels from the demodulator
-				TYPEREAL power = demodulator->GetBasebandLevel();
-				TYPEREAL noise = demodulator->GetNoiseLevel();
-				TYPEREAL snr = demodulator->GetSignalToNoiseLevel();
-
 				// Determine if there is a stereo lock
 				if(demodulator->GetStereoLock(nullptr)) stereo = true;
 
@@ -401,18 +368,13 @@ void signalmeter::start(void)
 				tRDS_GROUPS rdsgroup = {};
 				while(demodulator->GetNextRdsGroupData(&rdsgroup)) { rds = true; }
 
-				// Apply a rolling average on the values based on the callback rate
-				avgpower = (std::isnan(avgpower)) ? power : rollingaverage(m_onstatusrate, avgpower, power);
-				avgnoise = (std::isnan(avgnoise)) ? noise : rollingaverage(m_onstatusrate, avgnoise, noise);
-				avgsnr = (std::isnan(avgsnr)) ? snr : rollingaverage(m_onstatusrate, avgsnr, snr);
-
 				// Only invoke the callback at roughly the requested rate
 				if((++iterations % m_onstatusrate) == 0) {
 
 					struct signal_status status = {};
-					status.power = avgpower;
-					status.noise = avgnoise;
-					status.snr = avgsnr;
+					status.power = demodulator->GetSignalLevel();;
+					status.noise = demodulator->GetNoiseLevel();
+					status.snr = demodulator->GetSignalToNoiseLevel();;
 					status.stereo = stereo;
 					status.rds = rds;
 

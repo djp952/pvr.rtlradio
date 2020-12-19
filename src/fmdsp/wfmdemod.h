@@ -61,14 +61,7 @@ public:
 	bool GetNextRdsGroupData(tRDS_GROUPS* pGroupData);
 	int GetStereoLock(int* pPilotLock);
 
-	TYPEREAL GetNoiseLevel(void) const
-	{
-		return m_NoiseLevel;
-	}
-
 private:
-	void InitPll( TYPEREAL SampleRate );
-	void ProcessPll( int InLength, TYPECPX* pInData, TYPEREAL* pOutData );
 	void InitDeemphasis( TYPEREAL Time, TYPEREAL SampleRate);	//create De-emphasis LP filter
 	void ProcessDeemphasisFilter(int InLength, TYPEREAL* InBuf, TYPEREAL* OutBuf);
 	void ProcessDeemphasisFilter(int InLength, TYPECPX* InBuf, TYPECPX* OutBuf);
@@ -80,23 +73,17 @@ private:
 
 	void ProcessNewRdsBit(int bit);
 	quint32 CheckBlock(quint32 BlockOffset, int UseFec);
-	void CreateCallSign(quint16 PIcode);
 
 	TYPEREAL m_SampleRate;
 	TYPEREAL m_OutRate;
 	TYPEREAL m_RawFm[PHZBUF_SIZE];
 	TYPECPX m_CpxRawFm[PHZBUF_SIZE];
-	TYPECPX m_NoiseRawFm[PHZBUF_SIZE];
 	CDecimateBy2* m_pDecBy2A;
 	CDecimateBy2* m_pDecBy2B;
 	CDecimateBy2* m_pDecBy2C;
 
 	TYPECPX m_D0;		//complex delay line variables
 	TYPECPX m_D1;
-	TYPECPX m_D2;
-	TYPECPX m_D3;
-	TYPECPX m_D4;
-	TYPECPX m_D5;
 
 	TYPEREAL m_DeemphasisAveRe;
 	TYPEREAL m_DeemphasisAveIm;
@@ -112,7 +99,6 @@ private:
 	int m_LastPilotLocked;
 	TYPEREAL m_PilotNcoPhase;
 	TYPEREAL m_PilotNcoFreq;
-	TYPEREAL m_PilotNcoAcc;
 	TYPEREAL m_PilotNcoLLimit;
 	TYPEREAL m_PilotNcoHLimit;
 	TYPEREAL m_PilotPllAlpha;
@@ -124,7 +110,6 @@ private:
 
 	TYPEREAL m_RdsNcoPhase;		//variables for RDS PLL
 	TYPEREAL m_RdsNcoFreq;
-	TYPEREAL m_RdsNcoAcc;
 	TYPEREAL m_RdsNcoLLimit;
 	TYPEREAL m_RdsNcoHLimit;
 	TYPEREAL m_RdsPllAlpha;
@@ -155,9 +140,6 @@ private:
 	int m_BGroupOffset;
 	int m_BlockErrors;
 	quint16 m_BlockData[4];
-
-	CIir m_NoiseFilter;
-	TYPEREAL m_NoiseLevel = 0;
 };
 
 #endif // WFMDEMOD_H
