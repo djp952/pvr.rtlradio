@@ -41,21 +41,6 @@ uint32_t const signalmeter::DEFAULT_DEVICE_FREQUENCY = (87900 KHz);		// 87.9 MHz
 // Default device sample rate
 uint32_t const signalmeter::DEFAULT_DEVICE_SAMPLE_RATE = (1 MHz);
 
-// signalmeter::FFT_BIN_SIZE
-//
-// Fast fourier transform size (must be a power of two)
-int const signalmeter::FFT_BIN_SIZE = 4096;
-
-// FFT_OUTPUT_HEIGHT
-//
-// Fast fourier transform output height (y-axis)
-int const signalmeter::FFT_OUTPUT_HEIGHT = 512;
-
-// FFT_OUTPUT_WIDTH
-//
-// Fast fourier transform output width (x-axis)
-int const signalmeter::FFT_OUTPUT_WIDTH = 512;
-
 //---------------------------------------------------------------------------
 // signalmeter Constructor (private)
 //
@@ -63,12 +48,14 @@ int const signalmeter::FFT_OUTPUT_WIDTH = 512;
 //
 //	device			- RTL-SDR device instance
 //	tunerprops		- Tuner device properties
+//	fmprops			- FM Radio properties
 //	onstatus		- Signal status callback function
 //	statusrate		- Rate at which the status callback will be invoked (milliseconds)
 //	onexception		- Exception callback function
 
-signalmeter::signalmeter(std::unique_ptr<rtldevice> device, struct tunerprops const& tunerprops, signal_status_callback const& onstatus, 
-	int statusrate, exception_callback const& onexception) : m_device(std::move(device)), m_onstatus(onstatus), 
+signalmeter::signalmeter(std::unique_ptr<rtldevice> device, struct tunerprops const& tunerprops, struct fmprops const& fmprops, 
+	signal_status_callback const& onstatus, int statusrate, exception_callback const& onexception) : 
+	m_device(std::move(device)), m_tunerprops(tunerprops), m_fmprops(fmprops), m_onstatus(onstatus), 
 	m_onstatusrate(std::min(statusrate / 10, 10)), m_onexception(onexception)
 {
 	// Disable automatic gain control on the device by default
@@ -77,7 +64,7 @@ signalmeter::signalmeter(std::unique_ptr<rtldevice> device, struct tunerprops co
 	// Set the default frequency, sample rate, and frequency correction offset
 	m_device->set_center_frequency(DEFAULT_DEVICE_FREQUENCY);
 	m_device->set_sample_rate(DEFAULT_DEVICE_SAMPLE_RATE);
-	m_device->set_frequency_correction(tunerprops.freqcorrection);
+	m_device->set_frequency_correction(m_tunerprops.freqcorrection);
 
 	// Set the manual gain to the lowest value by default
 	std::vector<int> gains;
@@ -104,14 +91,15 @@ signalmeter::~signalmeter()
 //
 //	device			- RTL-SDR device instance
 //	tunerprops		- Tuner device properties
+//	fmprops			- FM Radio properties
 //	onstatus		- Signal status callback function
 //	onstatusrate	- Rate at which the status callback will be invoked (milliseconds)
 
 std::unique_ptr<signalmeter> signalmeter::create(std::unique_ptr<rtldevice> device, struct tunerprops const& tunerprops,
-	signal_status_callback const& onstatus, int onstatusrate)
+	struct fmprops const& fmprops, signal_status_callback const& onstatus, int onstatusrate)
 {
 	auto onexception = [](std::exception const&) -> void { /* DO NOTHING */ };
-	return std::unique_ptr<signalmeter>(new signalmeter(std::move(device), tunerprops, onstatus, onstatusrate, onexception));
+	return std::unique_ptr<signalmeter>(new signalmeter(std::move(device), tunerprops, fmprops, onstatus, onstatusrate, onexception));
 }
 
 //---------------------------------------------------------------------------
@@ -123,14 +111,15 @@ std::unique_ptr<signalmeter> signalmeter::create(std::unique_ptr<rtldevice> devi
 //
 //	device			- RTL-SDR device instance
 //	tunerprops		- Tuner device properties
+//	fmprops			- FM Radio properties
 //	onstatus		- Signal status callback function
 //	onstatusrate	- Rate at which the status callback will be invoked (milliseconds)
 //	onexception		- Exception callback function
 
 std::unique_ptr<signalmeter> signalmeter::create(std::unique_ptr<rtldevice> device, struct tunerprops const& tunerprops,
-	signal_status_callback const& onstatus, int onstatusrate, exception_callback const& onexception)
+	struct fmprops const& fmprops, signal_status_callback const& onstatus, int onstatusrate, exception_callback const& onexception)
 {
-	return std::unique_ptr<signalmeter>(new signalmeter(std::move(device), tunerprops, onstatus, onstatusrate, onexception));
+	return std::unique_ptr<signalmeter>(new signalmeter(std::move(device), tunerprops, fmprops, onstatus, onstatusrate, onexception));
 }
 
 //---------------------------------------------------------------------------
@@ -273,20 +262,10 @@ void signalmeter::start(void)
 			bool stereo = false;			// Flag if stereo has been detected
 			bool rds = false;				// Flag if RDS has been detected
 
-			// Create and initialize the fast fourtier transform instance
-			size_t const fftsize = FFT_BIN_SIZE;
-			std::unique_ptr<CFft> fft(new CFft());
-			fft->SetFFTParams(fftsize, false, 0, static_cast<TYPEREAL>(samplerate));
-
 			// Create the input buffers to hold the raw and converted I/Q samples read from the device
 			std::unique_ptr<uint8_t[]> buffer(new uint8_t[numbytes]);
 			std::unique_ptr<TYPECPX[]> samples(new TYPECPX[numsamples]);
 
-			// Create and initialize the output buffer for the fast fourier transform
-			std::unique_ptr<qint32[]> fftdata(new qint32[FFT_OUTPUT_WIDTH + 1]);
-			memset(&fftdata[0], 0, sizeof(qint32) * (FFT_OUTPUT_WIDTH + 1));
-			
-			size_t fftoffset = 0;				// Offset into the FFT output buffer
 			int iterations = 0;					// Counter for callback loop iterations
 
 			m_device->begin_stream();			// Begin streaming from the device
@@ -300,9 +279,6 @@ void signalmeter::start(void)
 
 					stereo = false;
 					rds = false;
-
-					fft->ResetFFT();
-					memset(&fftdata[0], 0, sizeof(qint32) * (FFT_OUTPUT_WIDTH + 1));
 				}
 
 				// Read the next block of raw 8-bit I/Q samples from the input device
@@ -326,39 +302,7 @@ void signalmeter::start(void)
 					};
 				}
 
-				// *** TODO: Clean this mess up or make a helper class
-				// Perform the fast fourier transform on the raw I/Q samples
-				size_t samplesoffset = 0;
-
-				// If there was leftover data from the last iteration, load the remaining data into the FFT
-				if(fftoffset > 0) {
-
-					size_t count = fftsize - fftoffset;
-					fft->PutInDisplayFFT(static_cast<qint32>(count), &samples[0]);
-					samplesoffset += count;
-					fftoffset = 0;
-				}
-
-				size_t fftchunks = align::down(numsamples - samplesoffset, fftsize) / fftsize;
-				while(fftchunks--) {
-
-					fft->PutInDisplayFFT(fftsize, &samples[samplesoffset]);
-					samplesoffset += fftsize;
-				}
-
-				fft->GetScreenIntegerFFTData(FFT_OUTPUT_HEIGHT, FFT_OUTPUT_WIDTH, 0.0, -64.0, -100 KHz, 100 KHz, &fftdata[0]);
-
-				if(samplesoffset < numsamples) {
-
-					size_t count = numsamples - samplesoffset;
-					assert(count < fftsize);
-
-					fft->PutInDisplayFFT(static_cast<qint32>(count), &samples[samplesoffset]);
-					fftoffset = count;
-				}
-				// ***
-
-				// Now run the I/Q samples through the demodulator
+				// Run the I/Q samples through the demodulator
 				demodulator->ProcessData(static_cast<int>(numsamples), samples.get(), samples.get());
 
 				// Determine if there is a stereo lock
@@ -377,10 +321,6 @@ void signalmeter::start(void)
 					status.snr = demodulator->GetSignalToNoiseLevel();;
 					status.stereo = stereo;
 					status.rds = rds;
-
-					status.fftheight = FFT_OUTPUT_HEIGHT;
-					status.fftwidth = FFT_OUTPUT_WIDTH;
-					status.fftdata = fftdata.get();
 
 					if(m_onstatus) m_onstatus(status);
 					iterations = 0;

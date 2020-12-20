@@ -1407,13 +1407,21 @@ PVR_ERROR addon::OpenDialogChannelSettings(kodi::addon::PVRChannel const& channe
 		tunerprops.samplerate = settings.device_sample_rate;
 		tunerprops.freqcorrection = settings.device_frequency_correction;
 
+		// Set up the FM digital signal processor properties
+		struct fmprops fmprops = {};
+		fmprops.decoderds = settings.fmradio_enable_rds;
+		fmprops.isrbds = (get_regional_rds_standard(settings.fmradio_rds_standard) == rds_standard::rbds);
+		fmprops.downsamplequality = static_cast<int>(settings.fmradio_downsample_quality);
+		fmprops.outputrate = settings.fmradio_output_samplerate;
+		fmprops.outputgain = settings.fmradio_output_gain;
+
 		// Get the properties of the channel to be manipulated
 		struct channelprops channelprops = {};
 		if(!get_channel_properties(connectionpool::handle(m_connpool), channel.GetUniqueId(), channelprops))
 			throw string_exception("Unable to retrieve properties for channel ", channel.GetChannelName().c_str());
 
 		// Create and initialize the dialog box against a new signal meter instance
-		std::unique_ptr<channelsettings> dialog = channelsettings::create(create_device(settings), tunerprops, channelprops);
+		std::unique_ptr<channelsettings> dialog = channelsettings::create(create_device(settings), tunerprops, fmprops, channelprops);
 		dialog->DoModal();
 
 		if(dialog->get_dialog_result()) {
@@ -1465,14 +1473,6 @@ bool addon::OpenLiveStream(kodi::addon::PVRChannel const& channel)
 		tunerprops.samplerate = settings.device_sample_rate;
 		tunerprops.freqcorrection = settings.device_frequency_correction;
 
-		// Retrieve the tuning properties for the channel from the database
-		struct channelprops channelprops = {};
-		if(!get_channel_properties(connectionpool::handle(m_connpool), channel.GetUniqueId(), channelprops))
-			throw string_exception("channel ", channel.GetUniqueId(), " (", channel.GetChannelName().c_str(), ") was not found in the database");
-
-		// TODO: subchannel numbers are reserved for HD Radio
-		assert(channelprops.subchannel == 0);
-
 		// Set up the FM digital signal processor properties
 		struct fmprops fmprops = {};
 		fmprops.decoderds = settings.fmradio_enable_rds;
@@ -1481,18 +1481,26 @@ bool addon::OpenLiveStream(kodi::addon::PVRChannel const& channel)
 		fmprops.outputrate = settings.fmradio_output_samplerate;
 		fmprops.outputgain = settings.fmradio_output_gain;
 
+		// Retrieve the tuning properties for the channel from the database
+		struct channelprops channelprops = {};
+		if(!get_channel_properties(connectionpool::handle(m_connpool), channel.GetUniqueId(), channelprops))
+			throw string_exception("channel ", channel.GetUniqueId(), " (", channel.GetChannelName().c_str(), ") was not found in the database");
+
+		// TODO: subchannel numbers are reserved for HD Radio
+		assert(channelprops.subchannel == 0);
+
 		// Log information about the stream for diagnostic purposes
 		log_info(__func__, ": Creating fmstream for channel \"", channelprops.name, "\"");
 		log_info(__func__, ": tunerprops.samplerate = ", tunerprops.samplerate, " Hz");
 		log_info(__func__, ": tunerprops.freqcorrection = ", tunerprops.freqcorrection, " PPM");
-		log_info(__func__, ": channelprops.frequency = ", channelprops.frequency, " Hz");
-		log_info(__func__, ": channelprops.autogain = ", (channelprops.autogain) ? "true" : "false");
-		log_info(__func__, ": channelprops.manualgain = ", channelprops.manualgain / 10, " dB");
 		log_info(__func__, ": fmprops.decoderds = ", (fmprops.decoderds) ? "true" : "false");
 		log_info(__func__, ": fmprops.isrbds = ", (fmprops.isrbds) ? "true" : "false");
 		log_info(__func__, ": fmprops.downsamplequality = ", downsample_quality_to_string(static_cast<enum downsample_quality>(fmprops.downsamplequality)));
 		log_info(__func__, ": fmprops.outputgain = ", fmprops.outputgain, " dB");
 		log_info(__func__, ": fmprops.outputrate = ", fmprops.outputrate, " Hz");
+		log_info(__func__, ": channelprops.frequency = ", channelprops.frequency, " Hz");
+		log_info(__func__, ": channelprops.autogain = ", (channelprops.autogain) ? "true" : "false");
+		log_info(__func__, ": channelprops.manualgain = ", channelprops.manualgain / 10, " dB");
 
 		// Create the FM radio stream, accessing the cached RTL-SDR device when possible
 		m_pvrstream = fmstream::create(create_device(settings), tunerprops, channelprops, fmprops);

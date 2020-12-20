@@ -63,8 +63,10 @@ public:
 	// create (static)
 	//
 	// Factory method, creates a new channelsettings instance
-	static std::unique_ptr<channelsettings> create(std::unique_ptr<rtldevice> device, struct tunerprops const& tunerprops);
-	static std::unique_ptr<channelsettings> create(std::unique_ptr<rtldevice> device, struct tunerprops const& tunerprops, struct channelprops const& channelprops);
+	static std::unique_ptr<channelsettings> create(std::unique_ptr<rtldevice> device, struct tunerprops const& tunerprops, 
+		struct fmprops const& fmprops);
+	static std::unique_ptr<channelsettings> create(std::unique_ptr<rtldevice> device, struct tunerprops const& tunerprops, 
+		struct fmprops const& fmprops, struct channelprops const& channelprops);
 
 	// get_channel_properties
 	//
@@ -83,7 +85,8 @@ private:
 
 	// Instance Constructor
 	//
-	channelsettings(std::unique_ptr<rtldevice> device, struct tunerprops const& tunerprops, struct channelprops const& channelprops);
+	channelsettings(std::unique_ptr<rtldevice> device, struct tunerprops const& tunerprops, struct fmprops const& fmprops, 
+		struct channelprops const& channelprops);
 
 	//-------------------------------------------------------------------------
 	// CWindow Implementation
@@ -121,44 +124,20 @@ private:
 	// Converts a percentage into a manual gain value
 	int percent_to_gain(int percent) const;
 
-	// signal_meter_oncreate
-	//
-	// Creates the rendering control for Kodi
-	bool signal_meter_oncreate(int x, int y, int w, int h, kodi::HardwareContext device);
-	static bool signal_meter_oncreate(kodi::gui::ClientHandle cbhdl, int x, int y, int w, int h, kodi::HardwareContext device);
-
-	// signal_meter_ondirty
-	//
-	// Determines if a render region is dirty
-	bool signal_meter_ondirty(void);
-	static bool signal_meter_ondirty(kodi::gui::ClientHandle cbhdl);
-
-	// signal_meter_onrender
-	//
-	// Invoked to render the control
-	void signal_meter_onrender(void);
-	static void signal_meter_onrender(kodi::gui::ClientHandle cbhdl);
-
-	// signal_meter_onstop
-	//
-	// Invoked to stop the rendering process
-	void signal_meter_onstop(void);
-	static void signal_meter_onstop(kodi::gui::ClientHandle cbhdl);
-
 	// signal_meter_exception
 	//
 	// Callback to handle an exception raised by the signal meter
 	void signal_meter_exception(std::exception const& ex);
 
+	// signal_meter_status
+	//
+	// Updates the state of the signal meter
+	void signal_meter_status(struct signalmeter::signal_status const& status);
+
 	// update_gain
 	//
 	// Updates the state of the gain control
 	void update_gain(void);
-
-	// update_signal_status
-	//
-	// Updates the state of the signal meter
-	void update_signal_status(struct signalmeter::signal_status const& status);
 
 	//-------------------------------------------------------------------------
 	// Member Variables
@@ -168,7 +147,6 @@ private:
 	std::unique_ptr<signalmeter>		m_signalmeter;			// Signal meter instance
 	std::vector<int>					m_manualgains;			// Manual gain values
 	bool								m_result = false;		// Dialog result
-	void*								m_gfx = nullptr;		// Graphics state
 
 	// CONTROLS
 	//

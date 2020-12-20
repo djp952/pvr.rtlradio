@@ -31,7 +31,6 @@
 #include <thread>
 
 #include "fmdsp/demodulator.h"
-#include "fmdsp/fft.h"
 
 #include "props.h"
 #include "rtldevice.h"
@@ -65,10 +64,6 @@ public:
 		TYPEREAL			snr;				// Signal-to-noise ratio in dB
 		bool				stereo;				// Flag if Stereo signal is present
 		bool				rds;				// Flag if RDS signal is present
-
-		int					fftheight;			// FFT height
-		int					fftwidth;			// FFT width
-		int32_t const*		fftdata;			// FFT data points
 	};
 
 	// exception_callback
@@ -88,9 +83,9 @@ public:
 	//
 	// Factory method, creates a new signalmeter instance
 	static std::unique_ptr<signalmeter> create(std::unique_ptr<rtldevice> device, struct tunerprops const& tunerprops, 
-		signal_status_callback const& onstatus, int onstatusrate);
+		struct fmprops const& fmprops, signal_status_callback const& onstatus, int onstatusrate);
 	static std::unique_ptr<signalmeter> create(std::unique_ptr<rtldevice> device, struct tunerprops const& tunerprops,
-		signal_status_callback const& onstatus, int onstatusrate, exception_callback const& onexception);
+		struct fmprops const& fmprops, signal_status_callback const& onstatus, int onstatusrate, exception_callback const& onexception);
 
 	// get_automatic_gain
 	//
@@ -144,8 +139,8 @@ private:
 
 	// Instance Constructor
 	//
-	signalmeter(std::unique_ptr<rtldevice> device, struct tunerprops const& tunerprops, signal_status_callback const& onstatus, 
-		int onstatusrate, exception_callback const& onexception);
+	signalmeter(std::unique_ptr<rtldevice> device, struct tunerprops const& tunerprops, struct fmprops const& fmprops, 
+		signal_status_callback const& onstatus, int onstatusrate, exception_callback const& onexception);
 
 	// DEFAULT_DEVICE_FREQUENCY
 	//
@@ -157,25 +152,13 @@ private:
 	// Default device sample rate
 	static uint32_t const DEFAULT_DEVICE_SAMPLE_RATE;
 
-	// FFT_BIN_SIZE
-	//
-	// Fast fourier transform size (must be a power of two)
-	static int const FFT_BIN_SIZE;
-
-	// FFT_OUTPUT_HEIGHT
-	//
-	// Fast fourier transform output height (y-axis)
-	static int const FFT_OUTPUT_HEIGHT;
-
-	// FFT_OUTPUT_WIDTH
-	//
-	// Fast fourier transform output width (x-axis)
-	static int const FFT_OUTPUT_WIDTH;
-
 	//-----------------------------------------------------------------------
 	// Member Variables
 
 	std::unique_ptr<rtldevice>		m_device;				// RTL-SDR device instance
+	struct tunerprops const			m_tunerprops;			// Tuner settings
+	struct fmprops const			m_fmprops;				// FM Radio settings
+
 	bool							m_autogain = false;		// Automatic gain enabled/disabled
 	int								m_manualgain = 0;		// Current manual gain value
 	uint32_t						m_frequency = 0;		// Current frequency value

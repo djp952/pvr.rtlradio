@@ -51,15 +51,16 @@ static const int CONTROL_EDIT_METERSNR			= 209;
 //
 //	device			- Device instance
 //	tunerprops		- Tuner properties
+//	fmprops			- FM Radio properties
 //	channelprops	- Channel properties
 
-channelsettings::channelsettings(std::unique_ptr<rtldevice> device, struct tunerprops const& tunerprops, struct channelprops const& channelprops) :
-	kodi::gui::CWindow("channelsettings.xml", "skin.estuary", true), m_channelprops(channelprops)
+channelsettings::channelsettings(std::unique_ptr<rtldevice> device, struct tunerprops const& tunerprops, struct fmprops const& fmprops, 
+	struct channelprops const& channelprops) : kodi::gui::CWindow("channelsettings.xml", "skin.estuary", true), m_channelprops(channelprops)
 {
 	assert(device);
 
 	// Create the signal meter instance with the specified device and tuner properties, set for a 500ms callback rate
-	m_signalmeter = signalmeter::create(std::move(device), tunerprops, std::bind(&channelsettings::update_signal_status, this, std::placeholders::_1), 
+	m_signalmeter = signalmeter::create(std::move(device), tunerprops, fmprops, std::bind(&channelsettings::signal_meter_status, this, std::placeholders::_1), 
 		500, std::bind(&channelsettings::signal_meter_exception, this, std::placeholders::_1));
 
 	// Get the vector<> of valid manual gain values for the attached device
@@ -84,11 +85,13 @@ channelsettings::~channelsettings()
 //
 //	device			- Device instance
 //	tunerprops		- Tuner properties
+//	fmprops			- FM Radio properties
 
-std::unique_ptr<channelsettings> channelsettings::create(std::unique_ptr<rtldevice> device, struct tunerprops const& tunerprops)
+std::unique_ptr<channelsettings> channelsettings::create(std::unique_ptr<rtldevice> device, struct tunerprops const& tunerprops,
+	struct fmprops const& fmprops)
 {
 	struct channelprops channelprops = {};
-	return std::unique_ptr<channelsettings>(new channelsettings(std::move(device), tunerprops, channelprops));
+	return std::unique_ptr<channelsettings>(new channelsettings(std::move(device), tunerprops, fmprops, channelprops));
 }
 
 //---------------------------------------------------------------------------
@@ -100,11 +103,13 @@ std::unique_ptr<channelsettings> channelsettings::create(std::unique_ptr<rtldevi
 //
 //	device			- Device instance
 //	tunerprops		- Tuner properties
+//	fmprops			- FM Radio properties
 //	channelprops	- Channel properties
 
-std::unique_ptr<channelsettings> channelsettings::create(std::unique_ptr<rtldevice> device, struct tunerprops const& tunerprops, struct channelprops const& channelprops)
+std::unique_ptr<channelsettings> channelsettings::create(std::unique_ptr<rtldevice> device, struct tunerprops const& tunerprops, 
+	struct fmprops const& fmprops, struct channelprops const& channelprops)
 {
-	return std::unique_ptr<channelsettings>(new channelsettings(std::move(device), tunerprops, channelprops));
+	return std::unique_ptr<channelsettings>(new channelsettings(std::move(device), tunerprops, fmprops, channelprops));
 }
 
 //---------------------------------------------------------------------------
@@ -217,68 +222,34 @@ void channelsettings::signal_meter_exception(std::exception const& ex)
 }
 
 //---------------------------------------------------------------------------
-// channelsettings::signal_meter_oncreate (private, static)
+// channelsettings::signal_meter_status (private)
 //
-// Creates the rendering control for Kodi
-//
-// Arguments:
-//
-//	cbhdl	- Client context handle
-//	x		- Horizontal position
-//	y		- Vertical position
-//	w		- Width of control
-//	h		- Height of control
-//	device	- The device to use
-
-bool channelsettings::signal_meter_oncreate(kodi::gui::ClientHandle cbhdl, int x, int y, int w, int h, kodi::HardwareContext device)
-{
-	assert(cbhdl != nullptr);
-	return reinterpret_cast<channelsettings*>(cbhdl)->signal_meter_oncreate(x, y, w, h, device);
-}
-
-//---------------------------------------------------------------------------
-// channelsettings::signal_meter_ondirty (private, static)
-//
-// Determines if a render region is dirty
+// Updates the state of the signal meter
 //
 // Arguments:
 //
-//	cbhdl	- Client context handle
+//	status		- Updated signal status from the signal meter
 
-bool channelsettings::signal_meter_ondirty(kodi::gui::ClientHandle cbhdl)
+void channelsettings::signal_meter_status(struct signalmeter::signal_status const& status)
 {
-	assert(cbhdl != nullptr);
-	return reinterpret_cast<channelsettings*>(cbhdl)->signal_meter_ondirty();
-}
+	char strbuf[64] = {};						// snprintf() text buffer
 
-//---------------------------------------------------------------------------
-// channelsettings::signal_meter_onrender (private, static)
-//
-// Invoked to render the control
-//
-// Arguments:
-//
-//	cbhdl	- Client context handle
+	// Signal Strength
+	//
+	if(!std::isnan(status.power)) {
 
-void channelsettings::signal_meter_onrender(kodi::gui::ClientHandle cbhdl)
-{
-	assert(cbhdl != nullptr);
-	return reinterpret_cast<channelsettings*>(cbhdl)->signal_meter_onrender();
-}
+		snprintf(strbuf, std::extent<decltype(strbuf)>::value, "%.1F dB", status.power);
+		m_edit_signalpower->SetText(strbuf);
+	}
+	else m_edit_signalpower->SetText("N/A");
 
-//---------------------------------------------------------------------------
-// channelsettings::signal_meter_onstop (private, static)
-//
-// Invoked to stop the rendering process
-//
-// Arguments:
-//
-//	cbhdl	- Client context handle
-
-void channelsettings::signal_meter_onstop(kodi::gui::ClientHandle cbhdl)
-{
-	assert(cbhdl != nullptr);
-	return reinterpret_cast<channelsettings*>(cbhdl)->signal_meter_onstop();
+	// Signal-to-noise
+	//
+	if(!std::isnan(status.snr)) {
+		snprintf(strbuf, std::extent<decltype(strbuf)>::value, "%d dB", static_cast<int>(status.snr));
+		m_edit_signalsnr->SetText(strbuf);
+	}
+	else m_edit_signalsnr->SetText("N/A");
 }
 
 //---------------------------------------------------------------------------
@@ -302,41 +273,6 @@ void channelsettings::update_gain(void)
 	}
 
 	else m_edit_signalgain->SetText("Auto");
-}
-
-//---------------------------------------------------------------------------
-// channelsettings::update_signal_status (private)
-//
-// Updates the state of the signal meter
-//
-// Arguments:
-//
-//	status		- Updated signal status from the signal meter
-
-void channelsettings::update_signal_status(struct signalmeter::signal_status const& status)
-{
-	char strbuf[64] = {};						// snprintf() text buffer
-
-	// Signal Strength
-	//
-	if(!std::isnan(status.power)) {
-
-		snprintf(strbuf, std::extent<decltype(strbuf)>::value, "%.1F dB", status.power);
-		m_edit_signalpower->SetText(strbuf);
-	}
-	else m_edit_signalpower->SetText("N/A");
-
-	// Signal-to-noise
-	//
-	if(!std::isnan(status.snr)) {
-		snprintf(strbuf, std::extent<decltype(strbuf)>::value, "%d dB", static_cast<int>(status.snr));
-		m_edit_signalsnr->SetText(strbuf);
-	}
-	else m_edit_signalsnr->SetText("N/A");
-
-	// FFT
-	//
-	// TODO: Needs a rendering control rather than an image control
 }
 
 //---------------------------------------------------------------------------
@@ -427,10 +363,6 @@ bool channelsettings::OnInit(void)
 		m_edit_signalgain = std::unique_ptr<CEdit>(new CEdit(this, CONTROL_EDIT_METERGAIN));
 		m_edit_signalpower = std::unique_ptr<CEdit>(new CEdit(this, CONTROL_EDIT_METERPOWER));
 		m_edit_signalsnr = std::unique_ptr<CEdit>(new CEdit(this, CONTROL_EDIT_METERSNR));
-
-		// Register the callbacks for the signal meter rendering control
-		m_render_signalmeter->SetIndependentCallbacks(reinterpret_cast<kodi::gui::ClientHandle>(this), &channelsettings::signal_meter_oncreate,
-			&channelsettings::signal_meter_onrender, &channelsettings::signal_meter_onstop, &channelsettings::signal_meter_ondirty);
 
 		// Set the channel frequency in XXX.X MHz format
 		char freqstr[128];
