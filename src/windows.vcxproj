@@ -219,7 +219,7 @@
     <ClInclude Include="rdsdecoder.h" />
     <ClInclude Include="rtldevice.h" />
     <ClInclude Include="scalar_condition.h" />
-    <ClInclude Include="signalmeter.h" />
+    <ClInclude Include="fmmeter.h" />
     <ClInclude Include="socket_exception.h" />
     <ClInclude Include="sqlite_exception.h" />
     <ClInclude Include="stdafx.h" />
@@ -689,7 +689,7 @@
       <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(ProjectDir)..\depends\libusb\src\libusb;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <ClCompile Include="rdsdecoder.cpp" />
-    <ClCompile Include="signalmeter.cpp" />
+    <ClCompile Include="fmmeter.cpp" />
     <ClCompile Include="sqlite_exception.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>

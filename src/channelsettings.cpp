@@ -60,8 +60,8 @@ channelsettings::channelsettings(std::unique_ptr<rtldevice> device, struct tuner
 	assert(device);
 
 	// Create the signal meter instance with the specified device and tuner properties, set for a 500ms callback rate
-	m_signalmeter = signalmeter::create(std::move(device), tunerprops, fmprops, std::bind(&channelsettings::signal_meter_status, this, std::placeholders::_1), 
-		500, std::bind(&channelsettings::signal_meter_exception, this, std::placeholders::_1));
+	m_signalmeter = fmmeter::create(std::move(device), tunerprops, fmprops, std::bind(&channelsettings::fm_meter_status, this, std::placeholders::_1), 
+		500, std::bind(&channelsettings::fm_meter_exception, this, std::placeholders::_1));
 
 	// Get the vector<> of valid manual gain values for the attached device
 	m_signalmeter->get_valid_manual_gains(m_manualgains);
@@ -110,6 +110,51 @@ std::unique_ptr<channelsettings> channelsettings::create(std::unique_ptr<rtldevi
 	struct fmprops const& fmprops, struct channelprops const& channelprops)
 {
 	return std::unique_ptr<channelsettings>(new channelsettings(std::move(device), tunerprops, fmprops, channelprops));
+}
+
+//---------------------------------------------------------------------------
+// channelsettings::fm_meter_exception (private)
+//
+// Callback to handle an exception raised by the signal meter
+//
+// Arguments:
+//
+//	ex		- Exception that was raised by the signal meter
+
+void channelsettings::fm_meter_exception(std::exception const& ex)
+{
+	kodi::QueueFormattedNotification(QueueMsg::QUEUE_ERROR, "Unable to read from device: %s", ex.what());
+}
+
+//---------------------------------------------------------------------------
+// channelsettings::fm_meter_status (private)
+//
+// Updates the state of the signal meter
+//
+// Arguments:
+//
+//	status		- Updated signal status from the signal meter
+
+void channelsettings::fm_meter_status(struct fmmeter::signal_status const& status)
+{
+	char strbuf[64] = {};						// snprintf() text buffer
+
+	// Signal Strength
+	//
+	if(!std::isnan(status.power)) {
+
+		snprintf(strbuf, std::extent<decltype(strbuf)>::value, "%.1F dB", status.power);
+		m_edit_signalpower->SetText(strbuf);
+	}
+	else m_edit_signalpower->SetText("N/A");
+
+	// Signal-to-noise
+	//
+	if(!std::isnan(status.snr)) {
+		snprintf(strbuf, std::extent<decltype(strbuf)>::value, "%d dB", static_cast<int>(status.snr));
+		m_edit_signalsnr->SetText(strbuf);
+	}
+	else m_edit_signalsnr->SetText("N/A");
 }
 
 //---------------------------------------------------------------------------
@@ -205,51 +250,6 @@ int channelsettings::percent_to_gain(int percent) const
 	else if(percent == 100) return m_manualgains.back();
 
 	return m_manualgains[(percent * m_manualgains.size()) / 100];
-}
-
-//---------------------------------------------------------------------------
-// channelsettings::signal_meter_exception (private)
-//
-// Callback to handle an exception raised by the signal meter
-//
-// Arguments:
-//
-//	ex		- Exception that was raised by the signal meter
-
-void channelsettings::signal_meter_exception(std::exception const& ex)
-{
-	kodi::QueueFormattedNotification(QueueMsg::QUEUE_ERROR, "Unable to read from device: %s", ex.what());
-}
-
-//---------------------------------------------------------------------------
-// channelsettings::signal_meter_status (private)
-//
-// Updates the state of the signal meter
-//
-// Arguments:
-//
-//	status		- Updated signal status from the signal meter
-
-void channelsettings::signal_meter_status(struct signalmeter::signal_status const& status)
-{
-	char strbuf[64] = {};						// snprintf() text buffer
-
-	// Signal Strength
-	//
-	if(!std::isnan(status.power)) {
-
-		snprintf(strbuf, std::extent<decltype(strbuf)>::value, "%.1F dB", status.power);
-		m_edit_signalpower->SetText(strbuf);
-	}
-	else m_edit_signalpower->SetText("N/A");
-
-	// Signal-to-noise
-	//
-	if(!std::isnan(status.snr)) {
-		snprintf(strbuf, std::extent<decltype(strbuf)>::value, "%d dB", static_cast<int>(status.snr));
-		m_edit_signalsnr->SetText(strbuf);
-	}
-	else m_edit_signalsnr->SetText("N/A");
 }
 
 //---------------------------------------------------------------------------

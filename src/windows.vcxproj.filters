@@ -204,13 +204,13 @@
     <ClInclude Include="channelsettings.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="signalmeter.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="socket_exception.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="win32_exception.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="fmmeter.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -320,10 +320,10 @@
     <ClCompile Include="channelsettings.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="signalmeter.cpp">
+    <ClCompile Include="win32_exception.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="win32_exception.cpp">
+    <ClCompile Include="fmmeter.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

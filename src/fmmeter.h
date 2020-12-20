@@ -20,8 +20,8 @@
 // SOFTWARE.
 //-----------------------------------------------------------------------------
 
-#ifndef __SIGNALMETER_H_
-#define __SIGNALMETER_H_
+#ifndef __FMMETER_H_
+#define __FMMETER_H_
 #pragma once
 
 #include <atomic>
@@ -39,17 +39,17 @@
 #pragma warning(push, 4)
 
 //---------------------------------------------------------------------------
-// Class signalmeter
+// Class fmmeter
 //
-// Implements the signal meter
+// Implements the FM signal meter
 
-class signalmeter
+class fmmeter
 {
 public:
 
 	// Destructor
 	//
-	~signalmeter();
+	~fmmeter();
 
 	//-----------------------------------------------------------------------
 	// Type Declarations
@@ -81,10 +81,10 @@ public:
 
 	// create (static)
 	//
-	// Factory method, creates a new signalmeter instance
-	static std::unique_ptr<signalmeter> create(std::unique_ptr<rtldevice> device, struct tunerprops const& tunerprops, 
+	// Factory method, creates a new fmmeter instance
+	static std::unique_ptr<fmmeter> create(std::unique_ptr<rtldevice> device, struct tunerprops const& tunerprops,
 		struct fmprops const& fmprops, signal_status_callback const& onstatus, int onstatusrate);
-	static std::unique_ptr<signalmeter> create(std::unique_ptr<rtldevice> device, struct tunerprops const& tunerprops,
+	static std::unique_ptr<fmmeter> create(std::unique_ptr<rtldevice> device, struct tunerprops const& tunerprops,
 		struct fmprops const& fmprops, signal_status_callback const& onstatus, int onstatusrate, exception_callback const& onexception);
 
 	// get_automatic_gain
@@ -134,12 +134,12 @@ public:
 
 private:
 
-	signalmeter(signalmeter const&) = delete;
-	signalmeter& operator=(signalmeter const&) = delete;
+	fmmeter(fmmeter const&) = delete;
+	fmmeter& operator=(fmmeter const&) = delete;
 
 	// Instance Constructor
 	//
-	signalmeter(std::unique_ptr<rtldevice> device, struct tunerprops const& tunerprops, struct fmprops const& fmprops, 
+	fmmeter(std::unique_ptr<rtldevice> device, struct tunerprops const& tunerprops, struct fmprops const& fmprops,
 		signal_status_callback const& onstatus, int onstatusrate, exception_callback const& onexception);
 
 	// DEFAULT_DEVICE_FREQUENCY
@@ -176,4 +176,4 @@ private:
 
 #pragma warning(pop)
 
-#endif	// __SIGNALMETER_H_
+#endif	// __FMMETER_H_

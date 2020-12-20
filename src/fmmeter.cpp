@@ -21,7 +21,7 @@
 //---------------------------------------------------------------------------
 
 #include "stdafx.h"
-#include "signalmeter.h"
+#include "fmmeter.h"
 
 #include <algorithm>
 #include <cmath>
@@ -31,18 +31,18 @@
 
 #pragma warning(push, 4)
 
-// signalmeter::DEFAULT_DEVICE_FREQUENCY
+// fmmeter::DEFAULT_DEVICE_FREQUENCY
 //
 // Default device frequency
-uint32_t const signalmeter::DEFAULT_DEVICE_FREQUENCY = (87900 KHz);		// 87.9 MHz
+uint32_t const fmmeter::DEFAULT_DEVICE_FREQUENCY = (87900 KHz);		// 87.9 MHz
 
-// signalmeter::DEFAULT_DEVICE_SAMPLE_RATE
+// fmmeter::DEFAULT_DEVICE_SAMPLE_RATE
 //
 // Default device sample rate
-uint32_t const signalmeter::DEFAULT_DEVICE_SAMPLE_RATE = (1 MHz);
+uint32_t const fmmeter::DEFAULT_DEVICE_SAMPLE_RATE = (1 MHz);
 
 //---------------------------------------------------------------------------
-// signalmeter Constructor (private)
+// fmmeter Constructor (private)
 //
 // Arguments:
 //
@@ -53,7 +53,7 @@ uint32_t const signalmeter::DEFAULT_DEVICE_SAMPLE_RATE = (1 MHz);
 //	statusrate		- Rate at which the status callback will be invoked (milliseconds)
 //	onexception		- Exception callback function
 
-signalmeter::signalmeter(std::unique_ptr<rtldevice> device, struct tunerprops const& tunerprops, struct fmprops const& fmprops, 
+fmmeter::fmmeter(std::unique_ptr<rtldevice> device, struct tunerprops const& tunerprops, struct fmprops const& fmprops,
 	signal_status_callback const& onstatus, int statusrate, exception_callback const& onexception) : 
 	m_device(std::move(device)), m_tunerprops(tunerprops), m_fmprops(fmprops), m_onstatus(onstatus), 
 	m_onstatusrate(std::min(statusrate / 10, 10)), m_onexception(onexception)
@@ -74,18 +74,18 @@ signalmeter::signalmeter(std::unique_ptr<rtldevice> device, struct tunerprops co
 }
 
 //---------------------------------------------------------------------------
-// signalmeter destructor
+// fmmeter destructor
 
-signalmeter::~signalmeter()
+fmmeter::~fmmeter()
 {
-	stop();						// Stop the signalmeter
+	stop();						// Stop the fmmeter
 	m_device.reset();			// Release the RTL-SDR device
 }
 
 //---------------------------------------------------------------------------
-// signalmeter::create (static)
+// fmmeter::create (static)
 //
-// Factory method, creates a new signalmeter instance
+// Factory method, creates a new fmmeter instance
 //
 // Arguments:
 //
@@ -95,17 +95,17 @@ signalmeter::~signalmeter()
 //	onstatus		- Signal status callback function
 //	onstatusrate	- Rate at which the status callback will be invoked (milliseconds)
 
-std::unique_ptr<signalmeter> signalmeter::create(std::unique_ptr<rtldevice> device, struct tunerprops const& tunerprops,
+std::unique_ptr<fmmeter> fmmeter::create(std::unique_ptr<rtldevice> device, struct tunerprops const& tunerprops,
 	struct fmprops const& fmprops, signal_status_callback const& onstatus, int onstatusrate)
 {
 	auto onexception = [](std::exception const&) -> void { /* DO NOTHING */ };
-	return std::unique_ptr<signalmeter>(new signalmeter(std::move(device), tunerprops, fmprops, onstatus, onstatusrate, onexception));
+	return std::unique_ptr<fmmeter>(new fmmeter(std::move(device), tunerprops, fmprops, onstatus, onstatusrate, onexception));
 }
 
 //---------------------------------------------------------------------------
-// signalmeter::create (static)
+// fmmeter::create (static)
 //
-// Factory method, creates a new signalmeter instance
+// Factory method, creates a new fmmeter instance
 //
 // Arguments:
 //
@@ -116,14 +116,14 @@ std::unique_ptr<signalmeter> signalmeter::create(std::unique_ptr<rtldevice> devi
 //	onstatusrate	- Rate at which the status callback will be invoked (milliseconds)
 //	onexception		- Exception callback function
 
-std::unique_ptr<signalmeter> signalmeter::create(std::unique_ptr<rtldevice> device, struct tunerprops const& tunerprops,
+std::unique_ptr<fmmeter> fmmeter::create(std::unique_ptr<rtldevice> device, struct tunerprops const& tunerprops,
 	struct fmprops const& fmprops, signal_status_callback const& onstatus, int onstatusrate, exception_callback const& onexception)
 {
-	return std::unique_ptr<signalmeter>(new signalmeter(std::move(device), tunerprops, fmprops, onstatus, onstatusrate, onexception));
+	return std::unique_ptr<fmmeter>(new fmmeter(std::move(device), tunerprops, fmprops, onstatus, onstatusrate, onexception));
 }
 
 //---------------------------------------------------------------------------
-// signalmeter::get_automatic_gain
+// fmmeter::get_automatic_gain
 //
 // Gets the automatic gain flag
 //
@@ -131,13 +131,13 @@ std::unique_ptr<signalmeter> signalmeter::create(std::unique_ptr<rtldevice> devi
 //
 //	NONE
 
-bool signalmeter::get_automatic_gain(void) const
+bool fmmeter::get_automatic_gain(void) const
 {
 	return m_autogain;
 }
 
 //---------------------------------------------------------------------------
-// signalmeter::get_frequency
+// fmmeter::get_frequency
 //
 // Gets the current tuned frequency
 //
@@ -145,13 +145,13 @@ bool signalmeter::get_automatic_gain(void) const
 //
 //	NONE
 
-uint32_t signalmeter::get_frequency(void) const
+uint32_t fmmeter::get_frequency(void) const
 {
 	return m_frequency;
 }
 
 //---------------------------------------------------------------------------
-// signalmeter::get_manual_gain
+// fmmeter::get_manual_gain
 //
 // Gets the manual gain value, specified in tenths of a decibel
 //
@@ -159,13 +159,13 @@ uint32_t signalmeter::get_frequency(void) const
 //
 //	NONE
 
-int signalmeter::get_manual_gain(void) const
+int fmmeter::get_manual_gain(void) const
 {
 	return m_manualgain;
 }
 
 //---------------------------------------------------------------------------
-// signalmeter::get_valid_manual_gains
+// fmmeter::get_valid_manual_gains
 //
 // Gets the valid tuner manual gain values for the device
 //
@@ -173,13 +173,13 @@ int signalmeter::get_manual_gain(void) const
 //
 //	dbs			- vector<> to retrieve the valid gain values
 
-void signalmeter::get_valid_manual_gains(std::vector<int>& dbs) const
+void fmmeter::get_valid_manual_gains(std::vector<int>& dbs) const
 {
 	return m_device->get_valid_gains(dbs);
 }
 
 //---------------------------------------------------------------------------
-// signalmeter::set_automatic_gain
+// fmmeter::set_automatic_gain
 //
 // Sets the automatic gain mode of the device
 //
@@ -187,7 +187,7 @@ void signalmeter::get_valid_manual_gains(std::vector<int>& dbs) const
 //
 //	autogain	- Flag to enable/disable automatic gain mode
 
-void signalmeter::set_automatic_gain(bool autogain)
+void fmmeter::set_automatic_gain(bool autogain)
 {
 	m_device->set_automatic_gain_control(autogain);
 	if(!autogain) m_device->set_gain(m_manualgain);
@@ -196,7 +196,7 @@ void signalmeter::set_automatic_gain(bool autogain)
 }
 
 //---------------------------------------------------------------------------
-// signalmeter::set_frequency
+// fmmeter::set_frequency
 //
 // Sets the frequency to be tuned
 //
@@ -204,13 +204,13 @@ void signalmeter::set_automatic_gain(bool autogain)
 //
 //	frequency		- Frequency to set, specified in hertz
 
-void signalmeter::set_frequency(uint32_t frequency)
+void fmmeter::set_frequency(uint32_t frequency)
 {
 	m_frequency = m_device->set_center_frequency(frequency);
 }
 
 //---------------------------------------------------------------------------
-// signalmeter::set_manual_gain
+// fmmeter::set_manual_gain
 //
 // Sets the manual gain value of the device
 //
@@ -218,13 +218,13 @@ void signalmeter::set_frequency(uint32_t frequency)
 //
 //	manualgain	- Gain to set, specified in tenths of a decibel
 
-void signalmeter::set_manual_gain(int manualgain)
+void fmmeter::set_manual_gain(int manualgain)
 {
 	m_manualgain = (m_autogain) ? manualgain : m_device->set_gain(manualgain);
 }
 
 //---------------------------------------------------------------------------
-// signalmeter::start
+// fmmeter::start
 //
 // Starts the signal meter
 //
@@ -232,7 +232,7 @@ void signalmeter::set_manual_gain(int manualgain)
 //
 //	NONE
 
-void signalmeter::start(void)
+void fmmeter::start(void)
 {
 	scalar_condition<bool>		started{ false };		// Thread start condition variable
 
@@ -339,7 +339,7 @@ void signalmeter::start(void)
 }
 
 //---------------------------------------------------------------------------
-// signalmeter::stop
+// fmmeter::stop
 //
 // Stops the signal meter
 //
@@ -347,7 +347,7 @@ void signalmeter::start(void)
 //
 //	NONE
 
-void signalmeter::stop(void)
+void fmmeter::stop(void)
 {
 	m_stop = true;								// Signal worker thread to stop
 	if(m_device) m_device->cancel_async();		// Cancel any async read operations

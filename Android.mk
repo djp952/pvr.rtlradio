@@ -90,9 +90,9 @@ LOCAL_SRC_FILES := \
     src/channelsettings.cpp \
     src/database.cpp \
     src/fmstream.cpp \
+    src/fmmeter.cpp \
     src/libusb_exception.cpp \
     src/rdsdecoder.cpp \
-    src/signalmeter.cpp \
     src/sqlite_exception.cpp \
     src/uecp.cpp \
     src/usbdevice.cpp \

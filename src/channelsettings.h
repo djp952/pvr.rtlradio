@@ -36,9 +36,9 @@
 #include <string>
 #include <utility>
 
+#include "fmmeter.h"
 #include "props.h"
 #include "rtldevice.h"
-#include "signalmeter.h"
 
 #pragma warning(push, 4)
 
@@ -109,6 +109,16 @@ private:
 	//-------------------------------------------------------------------------
 	// Private Member Functions
 
+	// fm_meter_exception
+	//
+	// Callback to handle an exception raised by the signal meter
+	void fm_meter_exception(std::exception const& ex);
+
+	// fm_meter_status
+	//
+	// Updates the state of the signal meter
+	void fm_meter_status(struct fmmeter::signal_status const& status);
+
 	// gain_to_percent
 	//
 	// Converts a manual gain value into a percentage
@@ -124,16 +134,6 @@ private:
 	// Converts a percentage into a manual gain value
 	int percent_to_gain(int percent) const;
 
-	// signal_meter_exception
-	//
-	// Callback to handle an exception raised by the signal meter
-	void signal_meter_exception(std::exception const& ex);
-
-	// signal_meter_status
-	//
-	// Updates the state of the signal meter
-	void signal_meter_status(struct signalmeter::signal_status const& status);
-
 	// update_gain
 	//
 	// Updates the state of the gain control
@@ -144,7 +144,7 @@ private:
 
 	std::unique_ptr<rtldevice> const	m_device;				// Device instance
 	struct channelprops					m_channelprops;			// Channel properties
-	std::unique_ptr<signalmeter>		m_signalmeter;			// Signal meter instance
+	std::unique_ptr<fmmeter>			m_signalmeter;			// Signal meter instance
 	std::vector<int>					m_manualgains;			// Manual gain values
 	bool								m_result = false;		// Dialog result
 
