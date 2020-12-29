@@ -2,7 +2,7 @@
 
 Realtek RTL2832U RTL-SDR FM Radio PVR Client   
    
-Copyright (C)2020 Michael G. Brehm    
+Copyright (C)2020-2021 Michael G. Brehm    
 [MIT LICENSE](https://opensource.org/licenses/MIT)   
    
 Concept based on [__pvr.rtl.radiofm__](https://github.com/AlwinEsch/pvr.rtl.radiofm) - Copyright (C) 2015-2018 Alwin Esch   
