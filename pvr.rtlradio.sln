@@ -55,6 +55,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "manifest", "manifest", "{03
 		manifest\linux-i686.manifest = manifest\linux-i686.manifest
 		manifest\linux-x86_64-tools.manifest = manifest\linux-x86_64-tools.manifest
 		manifest\linux-x86_64.manifest = manifest\linux-x86_64.manifest
+		manifest\osx-x86_64-tools.manifest = manifest\osx-x86_64-tools.manifest
+		manifest\osx-x86_64.manifest = manifest\osx-x86_64.manifest
 		manifest\windows-win32-tools.manifest = manifest\windows-win32-tools.manifest
 		manifest\windows-win32.manifest = manifest\windows-win32.manifest
 		manifest\windows-x64-tools.manifest = manifest\windows-x64-tools.manifest
@@ -65,6 +67,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "exportlist", "exportlist", 
 	ProjectSection(SolutionItems) = preProject
 		exportlist\exportlist.android = exportlist\exportlist.android
 		exportlist\exportlist.linux = exportlist\exportlist.linux
+		exportlist\exportlist.osx = exportlist\exportlist.osx
 		exportlist\exportlist.windows = exportlist\exportlist.windows
 	EndProjectSection
 EndProject
