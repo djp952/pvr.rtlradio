@@ -8,6 +8,10 @@ Copyright (C)2020-2021 Michael G. Brehm
 Concept based on [__pvr.rtl.radiofm__](https://github.com/AlwinEsch/pvr.rtl.radiofm) - Copyright (C) 2015-2018 Alwin Esch   
 Wideband FM Digital Signal Processing provided by [__CuteSDR__](https://sourceforge.net/projects/cutesdr/) - Copyright (C) 2010 Moe Wheatley   
    
+[__LIBUSB__](https://libusb.info/) - Copyright (C)2012-2020 libusb   
+[__RAPIDJSON__](https://rapidjson.org/) - Copyright (C)2015 THL A29 Limited, a Tencent company, and Milo Yip   
+[__RTL-SDR__](https://osmocom.org/projects/rtl-sdr/wiki/Rtl-sdr/) - Copyright (C)2012-2013 Steve Markgraf, Dimitri Stolnikov   
+   
 ## BUILD ENVIRONMENT
 **REQUIRED COMPONENTS**   
 * Windows 10 x64 1909 (18363) "November 2019 Update"   
@@ -110,6 +114,13 @@ Examples:
 | windows (default) | All Windows targets | /t:windows |
    
 ## ADDITIONAL LICENSE INFORMATION
+   
+**LIBUSB**   
+[https://www.gnu.org/licenses/gpl-faq.html#LGPLStaticVsDynamic](https://www.gnu.org/licenses/gpl-faq.html#LGPLStaticVsDynamic)   
+This library statically links with code licensed under the GNU Lesser Public License, v2.1 [(LGPLv2.1)](https://www.gnu.org/licenses/old-licenses/lgpl-2.1.en.html).  As per the terms of that license, the maintainer (djp952) must provide the library in an object (or source) format and allow the user to modify and relink against a different version(s) of the LGPL 2.1 libraries.  To use a different or custom version of libusb the user may alter the contents of the depends/libusb source directory prior to building this library.   
+   
+**RTL-SDR**   
+The RTL-SDR library is licensed under the GNU Public License, v2 [(GPLv2)](https://www.gnu.org/licenses/old-licenses/gpl-2.0.html). The overarching license model for this project is assumed to be compatible with GPLv2 given the [(commentary)](https://www.gnu.org/licenses/license-list.en.html#GPLCompatibleLicenses) on this matter. If this project is deemed to be incompatible or otherwise in violation of the GPLv2 license, please contact the maintainer (djp952) so that appropriate remedies can be applied.
    
 **XCODE AND APPLE SDKS AGREEMENT**   
 The instructions provided above indirectly reference the use of intellectual material that is the property of Apple, Inc.  This intellectual material is not FOSS (Free and Open Source Software) and by using it you agree to be bound by the terms and conditions set forth by Apple, Inc. in the [Xcode and Apple SDKs Agreement](https://www.apple.com/legal/sla/docs/xcode.pdf).
