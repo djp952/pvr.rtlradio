@@ -578,6 +578,20 @@ ADDON_STATUS addon::Create(void)
 			m_settings.fmradio_output_samplerate = kodi::GetSettingInt("fmradio_output_samplerate", 48000);
 			m_settings.fmradio_output_gain = kodi::GetSettingFloat("fmradio_output_gain", -3.0f);
 
+			// Log the setting values; these are for diagnostic purposes just use the raw values
+			log_info(__func__, ": m_settings.device_connection                 = ", static_cast<int>(m_settings.device_connection));
+			log_info(__func__, ": m_settings.device_connection_tcp_host        = ", m_settings.device_connection_tcp_host);
+			log_info(__func__, ": m_settings.device_connection_tcp_port        = ", m_settings.device_connection_tcp_port);
+			log_info(__func__, ": m_settings.device_connection_usb_index       = ", m_settings.device_connection_usb_index);
+			log_info(__func__, ": m_settings.device_frequency_correction       = ", m_settings.device_frequency_correction);
+			log_info(__func__, ": m_settings.device_sample_rate                = ", m_settings.device_sample_rate);
+			log_info(__func__, ": m_settings.fmradio_downsample_quality        = ", static_cast<int>(m_settings.fmradio_downsample_quality));
+			log_info(__func__, ": m_settings.fmradio_enable_rds                = ", m_settings.fmradio_enable_rds);
+			log_info(__func__, ": m_settings.fmradio_output_gain               = ", m_settings.fmradio_output_gain);
+			log_info(__func__, ": m_settings.fmradio_output_samplerate         = ", m_settings.fmradio_output_samplerate);
+			log_info(__func__, ": m_settings.fmradio_rds_standard              = ", static_cast<int>(m_settings.fmradio_rds_standard));
+			log_info(__func__, ": m_settings.interface_prepend_channel_numbers = ", m_settings.interface_prepend_channel_numbers);
+
 			// Register the PVR_MENUHOOK_SETTING category menu hooks
 			AddMenuHook(kodi::addon::PVRMenuhook(MENUHOOK_SETTING_IMPORTCHANNELS, 30400, PVR_MENUHOOK_SETTING));
 			AddMenuHook(kodi::addon::PVRMenuhook(MENUHOOK_SETTING_EXPORTCHANNELS, 30401, PVR_MENUHOOK_SETTING));
