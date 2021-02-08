@@ -1,2 +1,2 @@
-v1.0.0 (2020.06.XX)
+v1.0.0 (2021.02.xx)
   - Initial release

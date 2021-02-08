@@ -741,7 +741,7 @@ ADDON_STATUS addon::SetSetting(std::string const& settingName, kodi::CSettingVal
 		if(bvalue != m_settings.interface_prepend_channel_numbers) {
 
 			m_settings.interface_prepend_channel_numbers = bvalue;
-			log_info(__func__, ": setting interface_prepend_channel_numbers changed to ", (bvalue) ? "true" : "false");
+			log_info(__func__, ": setting interface_prepend_channel_numbers changed to ", bvalue);
 
 			// Trigger channel and channel group updates to refresh the channel names
 			TriggerChannelUpdate();
@@ -757,7 +757,7 @@ ADDON_STATUS addon::SetSetting(std::string const& settingName, kodi::CSettingVal
 		if(bvalue != m_settings.fmradio_enable_rds) {
 
 			m_settings.fmradio_enable_rds = bvalue;
-			log_info(__func__, ": setting fmradio_enable_rds changed to ", (bvalue) ? "true" : "false");
+			log_info(__func__, ": setting fmradio_enable_rds changed to ", bvalue);
 		}
 	}
 
