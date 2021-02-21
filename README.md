@@ -14,21 +14,22 @@ Wideband FM Digital Signal Processing provided by [__CuteSDR__](https://sourcefo
    
 ## BUILD ENVIRONMENT
 **REQUIRED COMPONENTS**   
-* Windows 10 x64 1909 (18363) "November 2019 Update"   
-* Visual Studio 2017 (Windows 10 SDK (10.0.17763.0)   
-* Windows Subsystem for Linux   
-* [Ubuntu on Windows 16.04 LTS](https://www.microsoft.com/store/productId/9PJN388HP8C9)   
+* Windows 10 x64 20H2 (19042)   
+* Visual Studio 2017 (Windows 10 SDK (10.0.17763.0), and C++ Universal Windows Platform Tools)   
+* [Windows Subsystem for Linux](https://docs.microsoft.com/en-us/windows/wsl/install-win10) (WSL v1 recommended)   
+* [WSL Ubuntu 18.04 LTS Distro](https://www.microsoft.com/store/productId/9N9TNGVNDL3Q)   
 
 **OPTIONAL COMPONENTS**   
 * Android NDK r20b for Windows 64-bit   
 * OSXCROSS Cross-Compiler (with Mac OSX 10.11 SDK)   
    
 **REQUIRED: CONFIGURE UBUNTU ON WINDOWS**   
-* Open "Ubuntu"   
+* Open "Ubuntu 18.04 LTS"   
 ```
 sudo dpkg --add-architecture i386
+sudo add-apt-repository 'deb http://archive.ubuntu.com/ubuntu/ xenial main universe'
 sudo apt-get update
-sudo apt-get install gcc-4.9 g++-4.9 libc6-dev:i386 libstdc++-4.9-dev:i386 lib32gcc-4.9-dev 
+sudo apt-get install gcc-4.9 g++-4.9 libc6-dev:i386 libstdc++-4.9-dev:i386 lib32gcc-4.9-dev
 sudo apt-get install gcc-4.9-arm-linux-gnueabihf g++-4.9-arm-linux-gnueabihf gcc-4.9-arm-linux-gnueabi g++-4.9-arm-linux-gnueabi gcc-4.9-aarch64-linux-gnu g++-4.9-aarch64-linux-gnu
 ```
    
@@ -45,7 +46,7 @@ Download the Android NDK r20b for Windows 64-bit:
 *Necessary to build OS X Targets*   
 
 * Generate the MAC OSX 10.11 SDK Package for OSXCROSS by following the instructions provided at [PACKAGING THE SDK](https://github.com/tpoechtrager/osxcross#packaging-the-sdk).  The suggested version of Xcode to use when generating the SDK package is Xcode 7.3.1 (May 3, 2016).
-* Open "Ubuntu"   
+* Open "Ubuntu 18.04 LTS"   
 ```
 sudo apt-get install cmake clang llvm-dev libxml2-dev uuid-dev libssl-dev libbz2-dev zlib1g-dev
 git clone https://github.com/tpoechtrager/osxcross --depth=1
