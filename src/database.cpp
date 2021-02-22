@@ -595,7 +595,7 @@ void import_channels(sqlite3* instance, char const* json)
 		"cast(ifnull(json_extract(entry.value, '$.manualgain'), 0) as integer) as manualgain, "
 		"json_extract(entry.value, '$.logourl') as logourl "	// <-- this one allows nulls
 		"from json_each(?1) as entry "
-		"where frequency is not null and subchannel is not null and frequency between 87900000 and 107900000 "
+		"where frequency is not null and subchannel is not null and frequency between 87500000 and 107900000 "
 		"group by frequency, subchannel", json);
 }
 
