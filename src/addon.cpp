@@ -1421,21 +1421,13 @@ PVR_ERROR addon::OpenDialogChannelSettings(kodi::addon::PVRChannel const& channe
 		tunerprops.samplerate = settings.device_sample_rate;
 		tunerprops.freqcorrection = settings.device_frequency_correction;
 
-		// Set up the FM digital signal processor properties
-		struct fmprops fmprops = {};
-		fmprops.decoderds = settings.fmradio_enable_rds;
-		fmprops.isrbds = (get_regional_rds_standard(settings.fmradio_rds_standard) == rds_standard::rbds);
-		fmprops.downsamplequality = static_cast<int>(settings.fmradio_downsample_quality);
-		fmprops.outputrate = settings.fmradio_output_samplerate;
-		fmprops.outputgain = settings.fmradio_output_gain;
-
 		// Get the properties of the channel to be manipulated
 		struct channelprops channelprops = {};
 		if(!get_channel_properties(connectionpool::handle(m_connpool), channel.GetUniqueId(), channelprops))
 			throw string_exception("Unable to retrieve properties for channel ", channel.GetChannelName().c_str());
 
 		// Create and initialize the dialog box against a new signal meter instance
-		std::unique_ptr<channelsettings> dialog = channelsettings::create(create_device(settings), tunerprops, fmprops, channelprops);
+		std::unique_ptr<channelsettings> dialog = channelsettings::create(create_device(settings), tunerprops, channelprops);
 		dialog->DoModal();
 
 		if(dialog->get_dialog_result()) {

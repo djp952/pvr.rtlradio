@@ -51,16 +51,15 @@ static const int CONTROL_EDIT_METERSNR			= 209;
 //
 //	device			- Device instance
 //	tunerprops		- Tuner properties
-//	fmprops			- FM Radio properties
 //	channelprops	- Channel properties
 
-channelsettings::channelsettings(std::unique_ptr<rtldevice> device, struct tunerprops const& tunerprops, struct fmprops const& fmprops, 
-	struct channelprops const& channelprops) : kodi::gui::CWindow("channelsettings.xml", "skin.estuary", true), m_channelprops(channelprops)
+channelsettings::channelsettings(std::unique_ptr<rtldevice> device, struct tunerprops const& tunerprops, struct channelprops const& channelprops) 
+	: kodi::gui::CWindow("channelsettings.xml", "skin.estuary", true), m_channelprops(channelprops)
 {
 	assert(device);
 
 	// Create the signal meter instance with the specified device and tuner properties, set for a 500ms callback rate
-	m_signalmeter = fmmeter::create(std::move(device), tunerprops, fmprops, std::bind(&channelsettings::fm_meter_status, this, std::placeholders::_1), 
+	m_signalmeter = fmmeter::create(std::move(device), tunerprops, std::bind(&channelsettings::fm_meter_status, this, std::placeholders::_1), 
 		500, std::bind(&channelsettings::fm_meter_exception, this, std::placeholders::_1));
 
 	// Get the vector<> of valid manual gain values for the attached device
@@ -85,13 +84,11 @@ channelsettings::~channelsettings()
 //
 //	device			- Device instance
 //	tunerprops		- Tuner properties
-//	fmprops			- FM Radio properties
 
-std::unique_ptr<channelsettings> channelsettings::create(std::unique_ptr<rtldevice> device, struct tunerprops const& tunerprops,
-	struct fmprops const& fmprops)
+std::unique_ptr<channelsettings> channelsettings::create(std::unique_ptr<rtldevice> device, struct tunerprops const& tunerprops)
 {
 	struct channelprops channelprops = {};
-	return std::unique_ptr<channelsettings>(new channelsettings(std::move(device), tunerprops, fmprops, channelprops));
+	return std::unique_ptr<channelsettings>(new channelsettings(std::move(device), tunerprops, channelprops));
 }
 
 //---------------------------------------------------------------------------
@@ -103,13 +100,12 @@ std::unique_ptr<channelsettings> channelsettings::create(std::unique_ptr<rtldevi
 //
 //	device			- Device instance
 //	tunerprops		- Tuner properties
-//	fmprops			- FM Radio properties
 //	channelprops	- Channel properties
 
 std::unique_ptr<channelsettings> channelsettings::create(std::unique_ptr<rtldevice> device, struct tunerprops const& tunerprops, 
-	struct fmprops const& fmprops, struct channelprops const& channelprops)
+	struct channelprops const& channelprops)
 {
-	return std::unique_ptr<channelsettings>(new channelsettings(std::move(device), tunerprops, fmprops, channelprops));
+	return std::unique_ptr<channelsettings>(new channelsettings(std::move(device), tunerprops, channelprops));
 }
 
 //---------------------------------------------------------------------------

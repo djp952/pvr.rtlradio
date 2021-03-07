@@ -63,10 +63,9 @@ public:
 	// create (static)
 	//
 	// Factory method, creates a new channelsettings instance
+	static std::unique_ptr<channelsettings> create(std::unique_ptr<rtldevice> device, struct tunerprops const& tunerprops);
 	static std::unique_ptr<channelsettings> create(std::unique_ptr<rtldevice> device, struct tunerprops const& tunerprops, 
-		struct fmprops const& fmprops);
-	static std::unique_ptr<channelsettings> create(std::unique_ptr<rtldevice> device, struct tunerprops const& tunerprops, 
-		struct fmprops const& fmprops, struct channelprops const& channelprops);
+		struct channelprops const& channelprops);
 
 	// get_channel_properties
 	//
@@ -85,8 +84,7 @@ private:
 
 	// Instance Constructor
 	//
-	channelsettings(std::unique_ptr<rtldevice> device, struct tunerprops const& tunerprops, struct fmprops const& fmprops, 
-		struct channelprops const& channelprops);
+	channelsettings(std::unique_ptr<rtldevice> device, struct tunerprops const& tunerprops, struct channelprops const& channelprops);
 
 	//-------------------------------------------------------------------------
 	// CWindow Implementation

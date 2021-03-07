@@ -83,9 +83,9 @@ public:
 	//
 	// Factory method, creates a new fmmeter instance
 	static std::unique_ptr<fmmeter> create(std::unique_ptr<rtldevice> device, struct tunerprops const& tunerprops,
-		struct fmprops const& fmprops, signal_status_callback const& onstatus, int onstatusrate);
+		signal_status_callback const& onstatus, int onstatusrate);
 	static std::unique_ptr<fmmeter> create(std::unique_ptr<rtldevice> device, struct tunerprops const& tunerprops,
-		struct fmprops const& fmprops, signal_status_callback const& onstatus, int onstatusrate, exception_callback const& onexception);
+		signal_status_callback const& onstatus, int onstatusrate, exception_callback const& onexception);
 
 	// get_automatic_gain
 	//
@@ -139,8 +139,8 @@ private:
 
 	// Instance Constructor
 	//
-	fmmeter(std::unique_ptr<rtldevice> device, struct tunerprops const& tunerprops, struct fmprops const& fmprops,
-		signal_status_callback const& onstatus, int onstatusrate, exception_callback const& onexception);
+	fmmeter(std::unique_ptr<rtldevice> device, struct tunerprops const& tunerprops, signal_status_callback const& onstatus, 
+		int onstatusrate, exception_callback const& onexception);
 
 	// DEFAULT_DEVICE_FREQUENCY
 	//
@@ -157,7 +157,6 @@ private:
 
 	std::unique_ptr<rtldevice>		m_device;				// RTL-SDR device instance
 	struct tunerprops const			m_tunerprops;			// Tuner settings
-	struct fmprops const			m_fmprops;				// FM Radio settings
 
 	bool							m_autogain = false;		// Automatic gain enabled/disabled
 	int								m_manualgain = 0;		// Current manual gain value

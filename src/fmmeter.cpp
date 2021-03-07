@@ -48,14 +48,13 @@ uint32_t const fmmeter::DEFAULT_DEVICE_SAMPLE_RATE = (1 MHz);
 //
 //	device			- RTL-SDR device instance
 //	tunerprops		- Tuner device properties
-//	fmprops			- FM Radio properties
 //	onstatus		- Signal status callback function
 //	statusrate		- Rate at which the status callback will be invoked (milliseconds)
 //	onexception		- Exception callback function
 
-fmmeter::fmmeter(std::unique_ptr<rtldevice> device, struct tunerprops const& tunerprops, struct fmprops const& fmprops,
+fmmeter::fmmeter(std::unique_ptr<rtldevice> device, struct tunerprops const& tunerprops,
 	signal_status_callback const& onstatus, int statusrate, exception_callback const& onexception) : 
-	m_device(std::move(device)), m_tunerprops(tunerprops), m_fmprops(fmprops), m_onstatus(onstatus), 
+	m_device(std::move(device)), m_tunerprops(tunerprops), m_onstatus(onstatus), 
 	m_onstatusrate(std::min(statusrate / 10, 10)), m_onexception(onexception)
 {
 	// Disable automatic gain control on the device by default
@@ -91,15 +90,14 @@ fmmeter::~fmmeter()
 //
 //	device			- RTL-SDR device instance
 //	tunerprops		- Tuner device properties
-//	fmprops			- FM Radio properties
 //	onstatus		- Signal status callback function
 //	onstatusrate	- Rate at which the status callback will be invoked (milliseconds)
 
 std::unique_ptr<fmmeter> fmmeter::create(std::unique_ptr<rtldevice> device, struct tunerprops const& tunerprops,
-	struct fmprops const& fmprops, signal_status_callback const& onstatus, int onstatusrate)
+	signal_status_callback const& onstatus, int onstatusrate)
 {
 	auto onexception = [](std::exception const&) -> void { /* DO NOTHING */ };
-	return std::unique_ptr<fmmeter>(new fmmeter(std::move(device), tunerprops, fmprops, onstatus, onstatusrate, onexception));
+	return std::unique_ptr<fmmeter>(new fmmeter(std::move(device), tunerprops, onstatus, onstatusrate, onexception));
 }
 
 //---------------------------------------------------------------------------
@@ -111,15 +109,14 @@ std::unique_ptr<fmmeter> fmmeter::create(std::unique_ptr<rtldevice> device, stru
 //
 //	device			- RTL-SDR device instance
 //	tunerprops		- Tuner device properties
-//	fmprops			- FM Radio properties
 //	onstatus		- Signal status callback function
 //	onstatusrate	- Rate at which the status callback will be invoked (milliseconds)
 //	onexception		- Exception callback function
 
 std::unique_ptr<fmmeter> fmmeter::create(std::unique_ptr<rtldevice> device, struct tunerprops const& tunerprops,
-	struct fmprops const& fmprops, signal_status_callback const& onstatus, int onstatusrate, exception_callback const& onexception)
+	signal_status_callback const& onstatus, int onstatusrate, exception_callback const& onexception)
 {
-	return std::unique_ptr<fmmeter>(new fmmeter(std::move(device), tunerprops, fmprops, onstatus, onstatusrate, onexception));
+	return std::unique_ptr<fmmeter>(new fmmeter(std::move(device), tunerprops, onstatus, onstatusrate, onexception));
 }
 
 //---------------------------------------------------------------------------
