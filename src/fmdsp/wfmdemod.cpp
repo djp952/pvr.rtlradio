@@ -50,7 +50,7 @@
 #define PILOTPLL_ZETA .707	//PLL Loop damping factor
 #define PILOTPLL_FREQ 19000.0	//Centerfreq
 #define LOCK_TIMECONST .5		//Lock filter time in seconds
-#define LOCK_MAG_THRESHOLD 0.05	//Lock error magnitude threshold
+#define LOCK_MAG_THRESHOLD 0.1	//Lock error magnitude threshold
 
 #define PHASE_ADJ_M -7.267e-6	//fudge factor slope to compensate for PLL delay
 #define PHASE_ADJ_B 3.677		//fudge factor intercept to compensate for PLL delay
