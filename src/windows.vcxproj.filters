@@ -213,6 +213,18 @@
     <ClInclude Include="fmmeter.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="fmdsp\fmdemod.h">
+      <Filter>Header Files\fmdsp</Filter>
+    </ClInclude>
+    <ClInclude Include="fmdsp\agc.h">
+      <Filter>Header Files\fmdsp</Filter>
+    </ClInclude>
+    <ClInclude Include="fmdsp\fastfir.h">
+      <Filter>Header Files\fmdsp</Filter>
+    </ClInclude>
+    <ClInclude Include="fmdsp\fft.h">
+      <Filter>Header Files\fmdsp</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -325,6 +337,18 @@
     </ClCompile>
     <ClCompile Include="fmmeter.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="fmdsp\fmdemod.cpp">
+      <Filter>Source Files\fmdsp</Filter>
+    </ClCompile>
+    <ClCompile Include="fmdsp\agc.cpp">
+      <Filter>Source Files\fmdsp</Filter>
+    </ClCompile>
+    <ClCompile Include="fmdsp\fastfir.cpp">
+      <Filter>Source Files\fmdsp</Filter>
+    </ClCompile>
+    <ClCompile Include="fmdsp\fft.cpp">
+      <Filter>Source Files\fmdsp</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

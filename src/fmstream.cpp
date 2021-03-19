@@ -77,11 +77,8 @@ fmstream::fmstream(std::unique_ptr<rtldevice> device, struct tunerprops const& t
 	uint32_t frequency = m_device->set_center_frequency(channelprops.frequency + (samplerate / 4));		// DC offset
 
 	// Initialize the demodulator parameters
-	tDemodInfo demodinfo = {};
-
-	// DEMODULATOR SETTINGS
 	//
-	demodinfo.txt.assign("WFM");
+	tDemodInfo demodinfo = {};
 	demodinfo.DownsampleQuality = static_cast<enum DownsampleQuality>(fmprops.downsamplequality);
 
 	// Initialize the wideband FM demodulator

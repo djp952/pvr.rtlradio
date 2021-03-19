@@ -80,9 +80,13 @@ LOCAL_SRC_FILES := \
     depends/rtl-sdr/src/tuner_fc2580.c \
     depends/rtl-sdr/src/tuner_r82xx.c \
     depends/sqlite/sqlite3.c \
+    src/fmdsp/agc.cpp \
     src/fmdsp/demodulator.cpp \
     src/fmdsp/downconvert.cpp \
+    src/fmdsp/fastfir.cpp \
+    src/fmdsp/fft.cpp \
     src/fmdsp/fir.cpp \
+    src/fmdsp/fmdemod.cpp \
     src/fmdsp/fractresampler.cpp \
     src/fmdsp/iir.cpp \
     src/fmdsp/wfmdemod.cpp \

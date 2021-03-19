@@ -24,7 +24,7 @@
 
 Concept based on project pvr.rtl.radiofm (https://github.com/AlwinEsch/pvr.rtl.radiofm) - Copyright (C)2015-2018 Alwin Esch
 
-Wideband FM Digital Signal Processing provided by CuteSDR (https://sourceforge.net/projects/cutesdr) - Copyright (C)2010 Moe Wheatley</description>
+FM Digital Signal Processing provided by CuteSDR (https://sourceforge.net/projects/cutesdr) - Copyright (C)2010 Moe Wheatley</description>
 		<news><#= File.ReadAllText(this.Host.ResolvePath(this.Host.ResolveParameterValue("", "", "changelogtxt"))) #></news>
 		<license>MIT License (https://opensource.org/licenses/MIT)</license>
 		<website>https://github.com/djp952/pvr.rtlradio/wiki</website>

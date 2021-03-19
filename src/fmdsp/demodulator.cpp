@@ -96,6 +96,7 @@ CDemodulator::CDemodulator()
 	m_InBufPos = 0;
 	m_InBufLimit = 1000;
 	m_DemodMode = -1;
+	m_pFmDemod = NULL;
 	m_pWFmDemod = NULL;
 	m_USFm = true;
 	SetDemodFreq(0.0);
@@ -115,8 +116,11 @@ CDemodulator::~CDemodulator()
 //////////////////////////////////////////////////////////////////
 void CDemodulator::DeleteAllDemods()
 {
+	if(m_pFmDemod)
+		delete m_pFmDemod;
 	if(m_pWFmDemod)
 		delete m_pWFmDemod;
+	m_pFmDemod = NULL;
 	m_pWFmDemod = NULL;
 }
 
@@ -131,6 +135,12 @@ void CDemodulator::SetInputSampleRate(TYPEREAL InputRate)
 		//change any demod parameters that may occur with sample rate change
 		switch(m_DemodMode)
 		{
+			case DEMOD_FM:
+				m_DownConverterOutputRate = m_DownConvert.SetDataRate(m_InputRate, m_DesiredMaxOutputBandwidth);
+				m_DemodOutputRate = m_DownConverterOutputRate;
+				if(m_pFmDemod)
+					m_pFmDemod->SetSampleRate(m_DownConverterOutputRate);
+				break;
 			case DEMOD_WFM:
 				m_DownConverterOutputRate = m_DownConvert.SetWfmDataRate(m_InputRate, 100000);
 				if(m_pWFmDemod)
@@ -157,10 +167,16 @@ void CDemodulator::SetDemod(int Mode, tDemodInfo CurrentDemodInfo)
 	{
 		DeleteAllDemods();		//remove current demod object
 		m_DemodMode = Mode;
+		m_DesiredMaxOutputBandwidth = m_DemodInfo.HiCutmax;
 		
 		//now create correct demodulator
 		switch(m_DemodMode)
 		{
+			case DEMOD_FM:
+				m_DownConverterOutputRate = m_DownConvert.SetDataRate(m_InputRate, m_DesiredMaxOutputBandwidth);
+				m_pFmDemod = new CFmDemod(m_DownConverterOutputRate);
+				m_DemodOutputRate = m_DownConverterOutputRate;
+				break;
 			case DEMOD_WFM:
 				m_DownConverterOutputRate = m_DownConvert.SetWfmDataRate(m_InputRate, 100000);
 				m_pWFmDemod = new CWFmDemod(m_DownConverterOutputRate);
@@ -169,6 +185,12 @@ void CDemodulator::SetDemod(int Mode, tDemodInfo CurrentDemodInfo)
 		}
 	}
 
+	if(m_DemodMode != DEMOD_WFM)
+		m_FastFIR.SetupParameters(m_DemodInfo.LowCut, m_DemodInfo.HiCut,0,m_DownConverterOutputRate);
+	m_Agc.SetParameters(m_DemodInfo.AgcOn, m_DemodInfo.AgcHangOn, m_DemodInfo.AgcThresh,
+		m_DemodInfo.AgcManualGain, m_DemodInfo.AgcSlope, m_DemodInfo.AgcDecay, m_DownConverterOutputRate);
+	if(	m_pFmDemod != NULL)
+		m_pFmDemod->SetSquelch(m_DemodInfo.SquelchValue);
 	//set input buffer limit so that decimated output is abt 10mSec or more of data
 	m_InBufLimit = static_cast<int>((m_DemodOutputRate/100.0) * m_InputRate/m_DemodOutputRate);	//process abt .01sec of output samples at a time
 	m_InBufLimit &= 0xFFFFFF00;	//keep modulo 256 since decimation is only in power of 2
@@ -195,6 +217,15 @@ int ret = 0;
 			//perform baseband tuning and decimation
 			int n = m_DownConvert.ProcessData(m_InBufPos, m_pDemodInBuf, m_pDemodInBuf);
 
+			if(m_DemodMode != DEMOD_WFM)
+			{	//if not wideband FM mode do filtering and AGC
+				//perform main bandpass filtering
+				n = m_FastFIR.ProcessData(n, m_pDemodInBuf, m_pDemodTmpBuf);
+
+				//perform AGC
+				m_Agc.ProcessData(n, m_pDemodTmpBuf, m_pDemodTmpBuf );
+			}
+
 			// Get the signal levels
 			TYPEREAL signal = 0, noise = 0;
 			get_signal_levels(n, m_pDemodInBuf, signal, noise);
@@ -210,6 +241,9 @@ int ret = 0;
 			//perform the desired demod action
 			switch(m_DemodMode)
 			{
+				case DEMOD_FM:
+					n = m_pFmDemod->ProcessData(n, m_DemodInfo.HiCut, m_pDemodTmpBuf, pOutData );
+					break;
 				case DEMOD_WFM:
 					n = m_pWFmDemod->ProcessData(n, m_pDemodInBuf, pOutData );
 					break;
@@ -243,6 +277,15 @@ int ret = 0;
 			//perform baseband tuning and decimation
 			int n = m_DownConvert.ProcessData(m_InBufPos, m_pDemodInBuf, m_pDemodInBuf);
 
+			if(m_DemodMode != DEMOD_WFM)
+			{	//if not wideband FM mode do filtering and AGC
+				//perform main bandpass filtering
+				n = m_FastFIR.ProcessData(n, m_pDemodInBuf, m_pDemodTmpBuf);
+
+				//perform AGC
+				m_Agc.ProcessData(n, m_pDemodTmpBuf, m_pDemodTmpBuf );
+			}
+
 			// Get the signal levels
 			TYPEREAL signal = 0, noise = 0;
 			get_signal_levels(n, m_pDemodInBuf, signal, noise);
@@ -258,6 +301,9 @@ int ret = 0;
 			//perform the desired demod action
 			switch(m_DemodMode)
 			{
+				case DEMOD_FM:
+					n = m_pFmDemod->ProcessData(n, m_DemodInfo.HiCut, m_pDemodTmpBuf, pOutData );
+					break;
 				case DEMOD_WFM:
 					n = m_pWFmDemod->ProcessData(n, m_pDemodInBuf, pOutData );
 					break;

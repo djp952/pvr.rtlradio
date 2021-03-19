@@ -37,11 +37,15 @@
 #define DEMODULATOR_H
 
 #include "downconvert.h"
+#include "fastfir.h"
+#include "agc.h"
+#include "fmdemod.h"
 #include "wfmdemod.h"
 
 #include <string>
 #include <mutex>
 
+#define DEMOD_FM 2
 #define DEMOD_WFM 7
 
 #define MAX_INBUFSIZE 250000	//maximum size of demod input buffer
@@ -52,7 +56,18 @@
 typedef struct _sdmd
 {
 	enum DownsampleQuality DownsampleQuality;
-	std::string txt;
+
+	int HiCut;
+	int HiCutmax;	//not saved in settings
+	int LowCut;
+	int SquelchValue;
+	int AgcSlope;
+	int AgcThresh;
+	int AgcManualGain;
+	int AgcDecay;
+	bool AgcOn;
+	bool AgcHangOn;
+	//std::string txt;
 
 }tDemodInfo;
 
@@ -111,6 +126,8 @@ public:
 private:
 	void DeleteAllDemods();
 	CDownConvert m_DownConvert;
+	CFastFIR m_FastFIR;
+	CAgc m_Agc;
 #ifdef FMDSP_THREAD_SAFE
 	mutable std::mutex m_Mutex;		//for keeping threads from stomping on each other
 #endif
@@ -118,6 +135,7 @@ private:
 	TYPEREAL m_InputRate;
 	TYPEREAL m_DownConverterOutputRate;
 	TYPEREAL m_DemodOutputRate;
+	TYPEREAL m_DesiredMaxOutputBandwidth;
 	TYPECPX* m_pDemodInBuf;
 	TYPECPX* m_pDemodTmpBuf;
 	bool m_USFm;
@@ -125,6 +143,7 @@ private:
 	int m_InBufPos;
 	int m_InBufLimit;
 	//pointers to all the various implemented demodulator classes
+	CFmDemod* m_pFmDemod;
 	CWFmDemod* m_pWFmDemod;
 
 	TYPEREAL m_SignalLevel = NAN;
