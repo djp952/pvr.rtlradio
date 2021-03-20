@@ -239,39 +239,8 @@ void delete_channel(sqlite3* instance, unsigned int id)
 
 void enumerate_channels(sqlite3* instance, enumerate_channels_callback const& callback)
 {
-	sqlite3_stmt*				statement;			// SQL statement to execute
-	int							result;				// Result from SQLite function
-
-	if(instance == nullptr) throw std::invalid_argument("instance");
-
-	// id | channel | subchannel | name | hidden
-	auto sql = "select ((frequency / 100000) * 10) + subchannel as id, (frequency / 1000000) as channel, "
-		"(frequency % 1000000) / 100000 as subchannel, name as name, hidden as hidden, logourl as logourl "
-		"from channel order by id asc";
-
-	result = sqlite3_prepare_v2(instance, sql, -1, &statement, nullptr);
-	if(result != SQLITE_OK) throw sqlite_exception(result, sqlite3_errmsg(instance));
-
-	try {
-
-		// Execute the query and iterate over all returned rows
-		while(sqlite3_step(statement) == SQLITE_ROW) {
-
-			struct channel item = {};
-			item.id = static_cast<unsigned int>(sqlite3_column_int(statement, 0));
-			item.channel = static_cast<unsigned int>(sqlite3_column_int(statement, 1));
-			item.subchannel = static_cast<unsigned int>(sqlite3_column_int(statement, 2));
-			item.name = reinterpret_cast<char const*>(sqlite3_column_text(statement, 3));
-			item.hidden = (sqlite3_column_int(statement, 4) != 0);
-			item.logourl = reinterpret_cast<char const*>(sqlite3_column_text(statement, 5));
-
-			callback(item);						// Invoke caller-supplied callback
-		}
-
-		sqlite3_finalize(statement);			// Finalize the SQLite statement
-	}
-
-	catch(...) { sqlite3_finalize(statement); throw; }
+	enumerate_fmradio_channels(instance, callback);		// FM Radio
+	enumerate_wxradio_channels(instance, callback);		// Weather Radio
 }
 
 //---------------------------------------------------------------------------
@@ -294,7 +263,7 @@ void enumerate_fmradio_channels(sqlite3* instance, enumerate_channels_callback c
 	// id | channel | subchannel | name | hidden
 	auto sql = "select ((frequency / 100000) * 10) + subchannel as id, (frequency / 1000000) as channel, "
 		"(frequency % 1000000) / 100000 as sub, name as name, hidden as hidden from channel "
-		"where channel.subchannel = 0 order by id asc";
+		"where (frequency between 87500000 and 107900000) and (channel.subchannel = 0) order by id asc";
 
 	result = sqlite3_prepare_v2(instance, sql, -1, &statement, nullptr);
 	if(result != SQLITE_OK) throw sqlite_exception(result, sqlite3_errmsg(instance));
@@ -310,6 +279,51 @@ void enumerate_fmradio_channels(sqlite3* instance, enumerate_channels_callback c
 			item.subchannel = static_cast<unsigned int>(sqlite3_column_int(statement, 2));
 			item.name = reinterpret_cast<char const*>(sqlite3_column_text(statement, 3));
 			item.hidden = (sqlite3_column_int(statement, 4) != 0);
+
+			callback(item);						// Invoke caller-supplied callback
+		}
+
+		sqlite3_finalize(statement);			// Finalize the SQLite statement
+	}
+
+	catch(...) { sqlite3_finalize(statement); throw; }
+}
+
+//---------------------------------------------------------------------------
+// enumerate_wxradio_channels
+//
+// Enumerates Weather Radio channels
+//
+// Arguments:
+//
+//	instance	- Database instance
+//	callback	- Callback function
+
+void enumerate_wxradio_channels(sqlite3* instance, enumerate_channels_callback const& callback)
+{
+	sqlite3_stmt*				statement;			// SQL statement to execute
+	int							result;				// Result from SQLite function
+
+	if(instance == nullptr) throw std::invalid_argument("instance");
+
+	// id | channel | name | hidden
+	auto sql = "select ((frequency / 100000) * 10) + subchannel as id, ((frequency - 162000000) / 1000) as channel, "
+		"name as name, hidden as hidden from channel "
+		"where (frequency between 162400000 and 162550000) and (channel.subchannel = 0) order by id asc";
+
+	result = sqlite3_prepare_v2(instance, sql, -1, &statement, nullptr);
+	if(result != SQLITE_OK) throw sqlite_exception(result, sqlite3_errmsg(instance));
+
+	try {
+
+		// Execute the query and iterate over all returned rows
+		while(sqlite3_step(statement) == SQLITE_ROW) {
+
+			struct channel item = {};
+			item.id = static_cast<unsigned int>(sqlite3_column_int(statement, 0));
+			item.channel = static_cast<unsigned int>(sqlite3_column_int(statement, 1));
+			item.name = reinterpret_cast<char const*>(sqlite3_column_text(statement, 2));
+			item.hidden = (sqlite3_column_int(statement, 3) != 0);
 
 			callback(item);						// Invoke caller-supplied callback
 		}
@@ -584,18 +598,19 @@ void import_channels(sqlite3* instance, char const* json)
 	if(instance == nullptr) throw std::invalid_argument("instance");
 	if((json == nullptr) || (*json == '\0')) throw std::invalid_argument("instance");
 
-	// Massage the input as much as possible, only the frequency and subchannel fields are actually required,
+	// Massage the input as much as possible, only the frequency is actually required,
 	// the rest can be defaulted if not present. Also watch out for duplicates and the frequency range
 	execute_non_query(instance, "replace into channel "
 		"select cast(json_extract(entry.value, '$.frequency') as integer) as frequency, "
-		"cast(json_extract(entry.value, '$.subchannel') as integer) as subchannel, "
+		"cast(ifnull(json_extract(entry.value, '$.subchannel'), 0) as integer) as subchannel, "
 		"cast(ifnull(json_extract(entry.value, '$.hidden'), 0) as integer) as hidden, "
 		"cast(ifnull(json_extract(entry.value, '$.name'), '') as text) as name, "
-		"cast(ifnull(json_extract(entry.value, '$.autogain'), 1) as integer) as autogain, "
+		"cast(ifnull(json_extract(entry.value, '$.autogain'), 0) as integer) as autogain, "
 		"cast(ifnull(json_extract(entry.value, '$.manualgain'), 0) as integer) as manualgain, "
 		"json_extract(entry.value, '$.logourl') as logourl "	// <-- this one allows nulls
 		"from json_each(?1) as entry "
-		"where frequency is not null and subchannel is not null and frequency between 87500000 and 107900000 "
+		"where frequency is not null and "
+		"((frequency between 87500000 and 107900000) or (frequency between 162400000 and 162550000))"
 		"group by frequency, subchannel", json);
 }
 

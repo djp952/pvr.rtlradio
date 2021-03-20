@@ -153,6 +153,11 @@ void enumerate_channels(sqlite3* instance, enumerate_channels_callback const& ca
 // Enumerates FM Radio channels
 void enumerate_fmradio_channels(sqlite3* instance, enumerate_channels_callback const& callback);
 
+// enumerate_wxradio_channels
+//
+// Enumerates Weather Radio channels
+void enumerate_wxradio_channels(sqlite3* instance, enumerate_channels_callback const& callback);
+
 // export_channels
 //
 // Exports the channels into a JSON string

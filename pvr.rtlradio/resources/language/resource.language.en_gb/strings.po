@@ -32,6 +32,10 @@ msgctxt "#30003"
 msgid "HD Radio"
 msgstr ""
 
+msgctxt "#30004"
+msgid "Weather Radio"
+msgstr ""
+
 msgctxt "#30100"
 msgid "Connection type"
 msgstr ""
@@ -209,7 +213,7 @@ msgid "Specifies the Radio Data System (RDS) region. When set to Automatic the r
 msgstr ""
 
 msgctxt "#30505"
-msgid "Specifies the FM Digital Signal Processor (DSP) PCM output sample rate."
+msgid "Specifies the Digital Signal Processor (DSP) PCM output sample rate."
 msgstr ""
 
 msgctxt "#30506"
@@ -225,7 +229,7 @@ msgid "Specifies the frequency correction calibration offset to apply to the RTL
 msgstr ""
 
 msgctxt "#30509"
-msgid "Specifies the FM Digital Signal Processor (DSP) PCM output audio gain. Lower gain values will reduce the perceived volume of the audio, whereas higher gain values will increase the perceived volume of the audio."
+msgid "Specifies the Digital Signal Processor (DSP) PCM output audio gain. Lower gain values will reduce the perceived volume of the audio, whereas higher gain values will increase the perceived volume of the audio."
 msgstr ""
 
 msgctxt "#30510"
@@ -233,6 +237,6 @@ msgid "Specifies the input sample rate for the RTL-SDR device. Lower sample rate
 msgstr ""
 
 msgctxt "#30511"
-msgid "Specifies the FM Digital Signal Processor (DSP) downsample quality. When set to Fast, downsampling will be optimized for system performance. When set to Maximum, downsampling will be optimized for audio quality."
+msgid "Specifies the Digital Signal Processor (DSP) downsample quality. When set to Fast, downsampling will be optimized for system performance. When set to Maximum, downsampling will be optimized for audio quality."
 msgstr ""
 

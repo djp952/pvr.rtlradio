@@ -177,5 +177,36 @@
       </group>
     </category>
 
+    <category id="wxradio" label="30004">
+      <group id="1" label="-1">
+
+        <setting id="wxradio_output_samplerate" type="integer" label="30105" help="30505">
+          <level>0</level>
+          <default>48000</default>
+          <constraints>
+            <options>
+              <option label="30205">44100</option>
+              <option label="30206">48000</option>
+            </options>
+          </constraints>
+          <control type="spinner" format="integer"/>
+        </setting>
+
+        <setting id="wxradio_output_gain" type="number" label="30109" help="30509">
+          <level>0</level>
+          <default>-3.0</default>
+          <constraints>
+            <minimum>-12.0</minimum>
+            <step>0.5</step>
+            <maximum>0.0</maximum>
+          </constraints>
+          <control type="slider" format="number">
+            <formatlabel>14054</formatlabel>
+          </control>
+        </setting>
+
+      </group>
+    </category>
+
   </section>
 </settings>
