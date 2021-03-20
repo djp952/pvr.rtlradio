@@ -202,7 +202,6 @@
     <ClInclude Include="database.h" />
     <ClInclude Include="dbtypes.h" />
     <ClInclude Include="channelsettings.h" />
-    <ClInclude Include="fmdsp\agc.h" />
     <ClInclude Include="fmdsp\datatypes.h" />
     <ClInclude Include="fmdsp\demodulator.h" />
     <ClInclude Include="fmdsp\downconvert.h" />
@@ -232,6 +231,7 @@
     <ClInclude Include="uecp.h" />
     <ClInclude Include="usbdevice.h" />
     <ClInclude Include="win32_exception.h" />
+    <ClInclude Include="wxstream.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\depends\libusb\src\libusb\core.c">
@@ -625,12 +625,6 @@
     <ClCompile Include="addon.cpp" />
     <ClCompile Include="database.cpp" />
     <ClCompile Include="channelsettings.cpp" />
-    <ClCompile Include="fmdsp\agc.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
-    </ClCompile>
     <ClCompile Include="fmdsp\demodulator.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
@@ -729,6 +723,7 @@
     <ClCompile Include="uecp.cpp" />
     <ClCompile Include="usbdevice.cpp" />
     <ClCompile Include="win32_exception.cpp" />
+    <ClCompile Include="wxstream.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="..\tmp\version\version.rc" />

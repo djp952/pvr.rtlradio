@@ -21,7 +21,7 @@
 //---------------------------------------------------------------------------
 
 #include "stdafx.h"
-#include "fmstream.h"
+#include "wxstream.h"
 
 #include <algorithm>
 #include <chrono>
@@ -32,36 +32,30 @@
 
 #pragma warning(push, 4)
 
-// fmstream::MAX_SAMPLE_QUEUE
+// wxstream::MAX_SAMPLE_QUEUE
 //
 // Maximum number of queued sample sets from the device
-size_t const fmstream::MAX_SAMPLE_QUEUE = 200;		// ~2sec
+size_t const wxstream::MAX_SAMPLE_QUEUE = 200;		// ~2sec
 
-// fmstream::STREAM_ID_AUDIO
+// wxstream::STREAM_ID_AUDIO
 //
 // Stream identifier for the audio output stream
-int const fmstream::STREAM_ID_AUDIO = 1;
-
-// fmstream::STREAM_ID_UECP
-//
-// Stream identifier for the UECP output stream
-int const fmstream::STREAM_ID_UECP = 2;
+int const wxstream::STREAM_ID_AUDIO = 1;
 
 //---------------------------------------------------------------------------
-// fmstream Constructor (private)
+// wxstream Constructor (private)
 //
 // Arguments:
 //
 //	device			- RTL-SDR device instance
 //	tunerprops		- Tuner device properties
 //	channelprops	- Channel properties
-//	fmprops			- FM digital signal processor properties
+//	wxprops			- Weather Radio digital signal processor properties
 
-fmstream::fmstream(std::unique_ptr<rtldevice> device, struct tunerprops const& tunerprops, 
-	struct channelprops const& channelprops, struct fmprops const& fmprops) :
-	m_device(std::move(device)), m_decoderds(fmprops.decoderds), m_rdsdecoder(fmprops.isrbds),
-	m_muxname(generate_mux_name(channelprops)), m_pcmsamplerate(fmprops.outputrate), 
-	m_pcmgain(MPOW(10.0, (fmprops.outputgain / 10.0)))
+wxstream::wxstream(std::unique_ptr<rtldevice> device, struct tunerprops const& tunerprops,
+	struct channelprops const& channelprops, struct wxprops const& wxprops) :
+	m_device(std::move(device)), m_muxname(generate_mux_name(channelprops)), 
+	m_pcmsamplerate(wxprops.outputrate), m_pcmgain(MPOW(10.0, (wxprops.outputgain / 10.0)))
 {
 	// The sample rate must be within 900001Hz - 3200000Hz
 	if((tunerprops.samplerate < 900001) || (tunerprops.samplerate > 3200000))
@@ -80,16 +74,14 @@ fmstream::fmstream(std::unique_ptr<rtldevice> device, struct tunerprops const& t
 	//
 	tDemodInfo demodinfo = {};
 	demodinfo.HiCutmax = 100000;
-	demodinfo.HiCut = 100000;
-	demodinfo.LowCut = -100000;
+	demodinfo.HiCut = 4000;				// TODO: 8Khz or 16Khz? Hard to find out
+	demodinfo.LowCut = -4000;
 	demodinfo.SquelchValue = -160;
-	demodinfo.WfmDownsampleQuality = static_cast<enum DownsampleQuality>(fmprops.downsamplequality);
 
-	// Initialize the wideband FM demodulator
+	// Initialize the narrowband FM demodulator
 	m_demodulator = std::unique_ptr<CDemodulator>(new CDemodulator());
-	m_demodulator->SetUSFmVersion(fmprops.isrbds);
 	m_demodulator->SetInputSampleRate(static_cast<TYPEREAL>(samplerate));
-	m_demodulator->SetDemod(DEMOD_WFM, demodinfo);
+	m_demodulator->SetDemod(DEMOD_FM, demodinfo);
 	m_demodulator->SetDemodFreq(static_cast<TYPEREAL>(frequency - channelprops.frequency));
 
 	// Initialize the output resampler
@@ -102,20 +94,20 @@ fmstream::fmstream(std::unique_ptr<rtldevice> device, struct tunerprops const& t
 
 	// Create a worker thread on which to perform the transfer operations
 	scalar_condition<bool> started{ false };
-	m_worker = std::thread(&fmstream::transfer, this, std::ref(started));
+	m_worker = std::thread(&wxstream::transfer, this, std::ref(started));
 	started.wait_until_equals(true);
 }
 
 //---------------------------------------------------------------------------
-// fmstream Destructor
+// wxstream Destructor
 
-fmstream::~fmstream()
+wxstream::~wxstream()
 {
 	close();
 }
 
 //---------------------------------------------------------------------------
-// fmstream::canseek
+// wxstream::canseek
 //
 // Gets a flag indicating if the stream allows seek operations
 //
@@ -123,13 +115,13 @@ fmstream::~fmstream()
 //
 //	NONE
 
-bool fmstream::canseek(void) const
+bool wxstream::canseek(void) const
 {
 	return false;
 }
 
 //---------------------------------------------------------------------------
-// fmstream::close
+// wxstream::close
 //
 // Closes the stream
 //
@@ -137,7 +129,7 @@ bool fmstream::canseek(void) const
 //
 //	NONE
 
-void fmstream::close(void)
+void wxstream::close(void)
 {
 	m_stop = true;								// Signal worker thread to stop
 	if(m_device) m_device->cancel_async();		// Cancel any async read operations
@@ -146,25 +138,25 @@ void fmstream::close(void)
 }
 
 //---------------------------------------------------------------------------
-// fmstream::create (static)
+// wxstream::create (static)
 //
-// Factory method, creates a new fmstream instance
+// Factory method, creates a new wxstream instance
 //
 // Arguments:
 //
 //	device			- RTL-SDR device instance
 //	tunerprops		- Tunder device properties
 //	channelprops	- Channel properties
-//	fmprops			- FM digital signal processor properties
+//	wxprops			- Weather Radio digital signal processor properties
 
-std::unique_ptr<fmstream> fmstream::create(std::unique_ptr<rtldevice> device, struct tunerprops const& tunerprops,
-	struct channelprops const& channelprops, struct fmprops const& fmprops)
+std::unique_ptr<wxstream> wxstream::create(std::unique_ptr<rtldevice> device, struct tunerprops const& tunerprops,
+	struct channelprops const& channelprops, struct wxprops const& wxprops)
 {
-	return std::unique_ptr<fmstream>(new fmstream(std::move(device), tunerprops, channelprops, fmprops));
+	return std::unique_ptr<wxstream>(new wxstream(std::move(device), tunerprops, channelprops, wxprops));
 }
 
 //---------------------------------------------------------------------------
-// fmstream::demuxabort
+// wxstream::demuxabort
 //
 // Aborts the demultiplexer
 //
@@ -172,12 +164,12 @@ std::unique_ptr<fmstream> fmstream::create(std::unique_ptr<rtldevice> device, st
 //
 //	NONE
 
-void fmstream::demuxabort(void)
+void wxstream::demuxabort(void)
 {
 }
 
 //---------------------------------------------------------------------------
-// fmstream::demuxflush
+// wxstream::demuxflush
 //
 // Flushes the demultiplexer
 //
@@ -185,12 +177,12 @@ void fmstream::demuxabort(void)
 //
 //	NONE
 
-void fmstream::demuxflush(void)
+void wxstream::demuxflush(void)
 {
 }
 
 //---------------------------------------------------------------------------
-// fmstream::demuxread
+// wxstream::demuxread
 //
 // Reads the next packet from the demultiplexer
 //
@@ -198,30 +190,8 @@ void fmstream::demuxflush(void)
 //
 //	allocator		- DemuxPacket allocation function
 
-DEMUX_PACKET* fmstream::demuxread(std::function<DEMUX_PACKET*(int)> const& allocator)
+DEMUX_PACKET* wxstream::demuxread(std::function<DEMUX_PACKET*(int)> const& allocator)
 {
-	// If there is an RDS UECP packet available, handle it before demodulating more audio
-	uecp_data_packet uecp_packet;
-	if(m_rdsdecoder.pop_uecp_data_packet(uecp_packet) && (!uecp_packet.empty())) {
-
-		// The user may have opted to disable RDS.  The packet from the decoder still
-		// needs to be popped from the queue, but don't do anything with it ...
-		if(m_decoderds) {
-
-			// Allocate and initialize the UECP demultiplexer packet
-			int packetsize = static_cast<int>(uecp_packet.size());
-			DEMUX_PACKET* packet = allocator(packetsize);
-			if(packet == nullptr) return nullptr;
-
-			packet->iStreamId = STREAM_ID_UECP;
-			packet->iSize = packetsize;
-
-			// Copy the UECP data into the demultiplexer packet and return it
-			memcpy(packet->pData, uecp_packet.data(), uecp_packet.size());
-			return packet;
-		}
-	}
-
 	// Wait for there to be a packet of samples available for processing
 	std::unique_lock<std::mutex> lock(m_queuelock);
 	m_cv.wait(lock, [&]() -> bool { return ((m_queue.size() > 0) || m_stopped.load() == true); });
@@ -235,12 +205,12 @@ DEMUX_PACKET* fmstream::demuxread(std::function<DEMUX_PACKET*(int)> const& alloc
 	}
 
 	// Pop off the topmost packet of samples from the queue<> and release the lock
-	std::unique_ptr<TYPECPX[]> samples(std::move(m_queue.front()));
+	std::unique_ptr<TYPECPX[]> insamples(std::move(m_queue.front()));
 	m_queue.pop();
 	lock.unlock();
 
 	// If the packet of samples is null, the writer has indicated there was a problem
-	if(!samples) {
+	if(!insamples) {
 
 		m_dts = STREAM_TIME_BASE;			// Reset the current decode time stamp
 
@@ -251,28 +221,25 @@ DEMUX_PACKET* fmstream::demuxread(std::function<DEMUX_PACKET*(int)> const& alloc
 		return packet;				// Return the generated packet
 	}
 
-	// Process the I/Q data, the original samples buffer can be reused/overwritten as it's processed
-	int audiopackets = m_demodulator->ProcessData(m_demodulator->GetInputBufferLimit(), samples.get(), samples.get());
-
-	// Process any RDS group data that was collected during demodulation
-	tRDS_GROUPS rdsgroup = {};
-	while(m_demodulator->GetNextRdsGroupData(&rdsgroup)) m_rdsdecoder.decode_rdsgroup(rdsgroup);
+	// Process the I/Q data
+	std::unique_ptr<TYPEREAL[]> outsamples(new TYPEREAL[m_demodulator->GetInputBufferLimit()]);
+	int audiopackets = m_demodulator->ProcessData(m_demodulator->GetInputBufferLimit(), insamples.get(), outsamples.get());
 
 	// Determine the size of the demultiplexer packet data and allocate it
-	int packetsize = audiopackets * sizeof(TYPESTEREO16);
+	int packetsize = audiopackets * sizeof(TYPEMONO16);
 	DEMUX_PACKET* packet = allocator(packetsize);
 	if(packet == nullptr) return nullptr;
 
 	// Resample the audio data directly into the allocated packet buffer
 	audiopackets = m_resampler->Resample(audiopackets, (m_demodulator->GetOutputRate() / m_pcmsamplerate),
-		samples.get(), reinterpret_cast<TYPESTEREO16*>(packet->pData), m_pcmgain);
+		outsamples.get(), reinterpret_cast<TYPEMONO16*>(packet->pData), m_pcmgain);
 
 	// Calculate the proper duration for the packet
 	double duration = (audiopackets / static_cast<double>(m_pcmsamplerate)) * STREAM_TIME_BASE;
 
 	// Set up the demultiplexer packet with the proper size, duration and dts
 	packet->iStreamId = STREAM_ID_AUDIO;
-	packet->iSize = audiopackets * sizeof(TYPESTEREO16);
+	packet->iSize = audiopackets * sizeof(TYPEMONO16);
 	packet->duration = duration;
 	packet->dts = packet->pts = m_dts;
 
@@ -283,7 +250,7 @@ DEMUX_PACKET* fmstream::demuxread(std::function<DEMUX_PACKET*(int)> const& alloc
 }
 
 //---------------------------------------------------------------------------
-// fmstream::demuxreset
+// wxstream::demuxreset
 //
 // Resets the demultiplexer
 //
@@ -291,12 +258,12 @@ DEMUX_PACKET* fmstream::demuxread(std::function<DEMUX_PACKET*(int)> const& alloc
 //
 //	NONE
 
-void fmstream::demuxreset(void)
+void wxstream::demuxreset(void)
 {
 }
 
 //---------------------------------------------------------------------------
-// fmstream::devicename
+// wxstream::devicename
 //
 // Gets the device name associated with the stream
 //
@@ -304,13 +271,13 @@ void fmstream::demuxreset(void)
 //
 //	NONE
 
-std::string fmstream::devicename(void) const
+std::string wxstream::devicename(void) const
 {
 	return std::string(m_device->get_device_name());
 }
 
 //---------------------------------------------------------------------------
-// fmstream::enumproperties
+// wxstream::enumproperties
 //
 // Enumerates the stream properties
 //
@@ -318,31 +285,21 @@ std::string fmstream::devicename(void) const
 //
 //	callback		- Callback to invoke for each stream
 
-void fmstream::enumproperties(std::function<void(struct streamprops const& props)> const& callback)
+void wxstream::enumproperties(std::function<void(struct streamprops const& props)> const& callback)
 {
 	// AUDIO STREAM
 	//
 	streamprops audio = {};
 	audio.codec = "pcm_s16le";
 	audio.pid = STREAM_ID_AUDIO;
-	audio.channels = 2;
+	audio.channels = 1;
 	audio.samplerate = static_cast<int>(m_pcmsamplerate);
 	audio.bitspersample = 16;
 	callback(audio);
-
-	// UECP STREAM
-	//
-	if(m_decoderds) {
-
-		streamprops uecp = {};
-		uecp.codec = "rds";
-		uecp.pid = STREAM_ID_UECP;
-		callback(uecp);
-	}
 }
 
 //---------------------------------------------------------------------------
-// fmstream::generate_mux_name (private)
+// wxstream::generate_mux_name (private)
 //
 // Generates the mux name to associate with the stream
 //
@@ -350,16 +307,25 @@ void fmstream::enumproperties(std::function<void(struct streamprops const& props
 //
 //	channelprops		- Channel properties structure
 
-std::string fmstream::generate_mux_name(struct channelprops const& channelprops) const
+std::string wxstream::generate_mux_name(struct channelprops const& channelprops) const
 {
-	// Set the default mux name to the frequency in Megahertz
+	// Use "WX1", "WX2", "WX3" if the frequency matches one of those channel designations
+	if(channelprops.frequency == 162550000) return std::string("WX1");
+	else if(channelprops.frequency == 162400000) return std::string("WX2");
+	else if(channelprops.frequency == 162475000) return std::string("WX3");
+	else if(channelprops.frequency == 162425000) return std::string("WX4");
+	else if(channelprops.frequency == 162450000) return std::string("WX5");
+	else if(channelprops.frequency == 162500000) return std::string("WX6");
+	else if(channelprops.frequency == 162525000) return std::string("WX7");
+
+	// Otherwise use the channel frequency in Megahertz
 	char buf[64] = { 0 };
-	snprintf(buf, std::extent<decltype(buf)>::value, "%.1f FM", (channelprops.frequency / 1000000.0f));
+	snprintf(buf, std::extent<decltype(buf)>::value, "%.3f VHF", (channelprops.frequency / 1000000.0f));
 	return std::string(buf);
 }
 
 //---------------------------------------------------------------------------
-// fmstream::length
+// wxstream::length
 //
 // Gets the length of the stream; or -1 if stream is real-time
 //
@@ -367,13 +333,13 @@ std::string fmstream::generate_mux_name(struct channelprops const& channelprops)
 //
 //	NONE
 
-long long fmstream::length(void) const
+long long wxstream::length(void) const
 {
 	return -1;
 }
 
 //---------------------------------------------------------------------------
-// fmstream::muxname
+// wxstream::muxname
 //
 // Gets the mux name associated with the stream
 //
@@ -381,14 +347,13 @@ long long fmstream::length(void) const
 //
 //	NONE
 
-std::string fmstream::muxname(void) const
+std::string wxstream::muxname(void) const
 {
-	// If the callsign for the station is known, use that with an -FM suffix, otherwise use the default
-	return (m_rdsdecoder.has_rbds_callsign()) ? std::string(m_rdsdecoder.get_rbds_callsign()) + "-FM" : m_muxname;
+	return m_muxname;
 }
 
 //---------------------------------------------------------------------------
-// fmstream::position
+// wxstream::position
 //
 // Gets the current position of the stream
 //
@@ -396,13 +361,13 @@ std::string fmstream::muxname(void) const
 //
 //	NONE
 
-long long fmstream::position(void) const
+long long wxstream::position(void) const
 {
 	return -1;
 }
 
 //---------------------------------------------------------------------------
-// fmstream::read
+// wxstream::read
 //
 // Reads data from the live stream
 //
@@ -411,13 +376,13 @@ long long fmstream::position(void) const
 //	buffer		- Buffer to receive the live stream data
 //	count		- Size of the destination buffer in bytes
 
-size_t fmstream::read(uint8_t* /*buffer*/, size_t /*count*/)
+size_t wxstream::read(uint8_t* /*buffer*/, size_t /*count*/)
 {
 	return 0;
 }
 
 //---------------------------------------------------------------------------
-// fmstream::realtime
+// wxstream::realtime
 //
 // Gets a flag indicating if the stream is real-time
 //
@@ -425,13 +390,13 @@ size_t fmstream::read(uint8_t* /*buffer*/, size_t /*count*/)
 //
 //	NONE
 
-bool fmstream::realtime(void) const
+bool wxstream::realtime(void) const
 {
 	return true;
 }
 
 //---------------------------------------------------------------------------
-// fmstream::seek
+// wxstream::seek
 //
 // Sets the stream pointer to a specific position
 //
@@ -440,13 +405,13 @@ bool fmstream::realtime(void) const
 //	position	- Delta within the stream to seek, relative to whence
 //	whence		- Starting position from which to apply the delta
 
-long long fmstream::seek(long long /*position*/, int /*whence*/)
+long long wxstream::seek(long long /*position*/, int /*whence*/)
 {
 	return -1;
 }
 
 //---------------------------------------------------------------------------
-// fmstream::servicename
+// wxstream::servicename
 //
 // Gets the service name associated with the stream
 //
@@ -454,13 +419,13 @@ long long fmstream::seek(long long /*position*/, int /*whence*/)
 //
 //	NONE
 
-std::string fmstream::servicename(void) const
+std::string wxstream::servicename(void) const
 {
 	return std::string("Wideband FM radio");
 }
 
 //---------------------------------------------------------------------------
-// fmstream::signalstrength
+// wxstream::signalstrength
 //
 // Gets the signal strength as a percentage
 //
@@ -468,14 +433,14 @@ std::string fmstream::servicename(void) const
 //
 //	NONE
 
-int fmstream::signalstrength(void) const
+int wxstream::signalstrength(void) const
 {
 	int percent = static_cast<int>(((m_demodulator->GetSignalLevel() + 48.0) / 48.0) * 100.0);
 	return std::max(std::min(percent, 100), 0);
 }
 
 //---------------------------------------------------------------------------
-// fmstream::signaltonoise
+// wxstream::signaltonoise
 //
 // Gets the signal to noise ratio as a percentage
 //
@@ -483,14 +448,14 @@ int fmstream::signalstrength(void) const
 //
 //	NONE
 
-int fmstream::signaltonoise(void) const
+int wxstream::signaltonoise(void) const
 {
 	int percent = static_cast<int>((m_demodulator->GetSignalToNoiseLevel() / 24.0) * 100.0);
 	return std::max(std::min(percent, 100), 0);
 }
 
 //---------------------------------------------------------------------------
-// fmstream::transfer (private)
+// wxstream::transfer (private)
 //
 // Worker thread procedure used to transfer data into the ring buffer
 //
@@ -498,7 +463,7 @@ int fmstream::signaltonoise(void) const
 //
 //	started		- Condition variable to set when thread has started
 
-void fmstream::transfer(scalar_condition<bool>& started)
+void wxstream::transfer(scalar_condition<bool>& started)
 {
 	assert(m_demodulator);
 	assert(m_device);

@@ -44,7 +44,7 @@ struct channelprops {
 
 // fmprops
 //
-// Defines properties for the FM digital signal processor
+// Defines properties for the FM Radio digital signal processor
 struct fmprops {
 
 	bool			decoderds;			// Flag if RDS should be decoded or not
@@ -73,6 +73,15 @@ struct tunerprops {
 
 	uint32_t		samplerate;			// Input sample rate in Hertz
 	int				freqcorrection;		// Frequency correction (PPM)
+};
+
+// wxprops
+//
+// Defines properties for the Weather Radio digital signal processor
+struct wxprops {
+
+	uint32_t		outputrate;			// Output sample rate in Hertz
+	float			outputgain;			// Output gain in Decibels
 };
 
 //-----------------------------------------------------------------------------

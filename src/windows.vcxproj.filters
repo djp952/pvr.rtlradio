@@ -216,14 +216,14 @@
     <ClInclude Include="fmdsp\fmdemod.h">
       <Filter>Header Files\fmdsp</Filter>
     </ClInclude>
-    <ClInclude Include="fmdsp\agc.h">
-      <Filter>Header Files\fmdsp</Filter>
-    </ClInclude>
     <ClInclude Include="fmdsp\fastfir.h">
       <Filter>Header Files\fmdsp</Filter>
     </ClInclude>
     <ClInclude Include="fmdsp\fft.h">
       <Filter>Header Files\fmdsp</Filter>
+    </ClInclude>
+    <ClInclude Include="wxstream.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -341,14 +341,14 @@
     <ClCompile Include="fmdsp\fmdemod.cpp">
       <Filter>Source Files\fmdsp</Filter>
     </ClCompile>
-    <ClCompile Include="fmdsp\agc.cpp">
-      <Filter>Source Files\fmdsp</Filter>
-    </ClCompile>
     <ClCompile Include="fmdsp\fastfir.cpp">
       <Filter>Source Files\fmdsp</Filter>
     </ClCompile>
     <ClCompile Include="fmdsp\fft.cpp">
       <Filter>Source Files\fmdsp</Filter>
+    </ClCompile>
+    <ClCompile Include="wxstream.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

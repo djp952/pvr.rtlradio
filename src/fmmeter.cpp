@@ -248,7 +248,7 @@ void fmmeter::start(void)
 			// Create and initialize the wideband FM demodulator instance
 			std::unique_ptr<CDemodulator> demodulator(new CDemodulator()); 
 			tDemodInfo demodinfo = {};
-			demodinfo.DownsampleQuality = DownsampleQuality::Low;
+			demodinfo.WfmDownsampleQuality = DownsampleQuality::Low;
 			demodulator->SetInputSampleRate(static_cast<TYPEREAL>(samplerate));
 			demodulator->SetDemod(DEMOD_WFM, demodinfo);
 

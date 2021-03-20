@@ -53,7 +53,7 @@ public:
 	void SetSquelch(int Value);		//call with range of -160 to 0 to set squelch threshold
 
 private:
-	void PerformNoiseSquelch(int InLength, TYPECPX* pOutData);
+	
 	void PerformNoiseSquelch(int InLength, TYPEREAL* pOutData);
 	void InitNoiseSquelch();
 	void ProcessDeemphasisFilter(int InLength, TYPEREAL* InBuf, TYPEREAL* OutBuf);
@@ -66,7 +66,6 @@ private:
 	TYPEREAL m_DcAlpha;
 	TYPEREAL m_NcoPhase;
 	TYPEREAL m_NcoFreq;
-	TYPEREAL m_NcoAcc;
 	TYPEREAL m_NcoLLimit;
 	TYPEREAL m_NcoHLimit;
 	TYPEREAL m_PllAlpha;

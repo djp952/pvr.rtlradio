@@ -20,8 +20,8 @@
 // SOFTWARE.
 //-----------------------------------------------------------------------------
 
-#ifndef __FMSTREAM_H_
-#define __FMSTREAM_H_
+#ifndef __WXSTREAM_H_
+#define __WXSTREAM_H_
 #pragma once
 
 #include <atomic>
@@ -36,24 +36,23 @@
 
 #include "props.h"
 #include "pvrstream.h"
-#include "rdsdecoder.h"
 #include "rtldevice.h"
 #include "scalar_condition.h"
 
 #pragma warning(push, 4)
 
 //---------------------------------------------------------------------------
-// Class fmstream
+// Class wxstream
 //
-// Implements a FM radio stream
+// Implements a Weather Radio stream
 
-class fmstream : public pvrstream
+class wxstream : public pvrstream
 {
 public:
 
 	// Destructor
 	//
-	virtual ~fmstream();
+	virtual ~wxstream();
 
 	//-----------------------------------------------------------------------
 	// Member Functions
@@ -70,9 +69,9 @@ public:
 
 	// create (static)
 	//
-	// Factory method, creates a new fmstream instance
-	static std::unique_ptr<fmstream> create(std::unique_ptr<rtldevice> device, struct tunerprops const& tunerprops, 
-		struct channelprops const& channelprops, struct fmprops const& fmprops);
+	// Factory method, creates a new wxstream instance
+	static std::unique_ptr<wxstream> create(std::unique_ptr<rtldevice> device, struct tunerprops const& tunerprops,
+		struct channelprops const& channelprops, struct wxprops const& wxprops);
 
 	// demuxabort
 	//
@@ -151,8 +150,8 @@ public:
 
 private:
 
-	fmstream(fmstream const&) = delete;
-	fmstream& operator=(fmstream const&) = delete;
+	wxstream(wxstream const&) = delete;
+	wxstream& operator=(wxstream const&) = delete;
 
 	// MAX_SAMPLE_QUEUE
 	//
@@ -164,15 +163,10 @@ private:
 	// Stream identifier for the audio output stream
 	static int const STREAM_ID_AUDIO;
 
-	// STREAM_ID_UECP
-	//
-	// Stream identifier for the UECP output stream
-	static int const STREAM_ID_UECP;
-
 	// Instance Constructor
 	//
-	fmstream(std::unique_ptr<rtldevice> device, struct tunerprops const& tunerprops, 
-		struct channelprops const& channelprops, struct fmprops const& fmprops);
+	wxstream(std::unique_ptr<rtldevice> device, struct tunerprops const& tunerprops,
+		struct channelprops const& channelprops, struct wxprops const& wxprops);
 
 	//-----------------------------------------------------------------------
 	// Private Type Declarations
@@ -194,7 +188,7 @@ private:
 	//
 	// Generates the mux name to associate with the stream
 	std::string generate_mux_name(struct channelprops const& channelprops) const;
-
+	
 	// transfer
 	//
 	// Worker thread procedure used to transfer data into the ring buffer
@@ -206,10 +200,8 @@ private:
 	std::unique_ptr<rtldevice>			m_device;					// RTL-SDR device instance
 	std::unique_ptr<CDemodulator>		m_demodulator;				// CuteSDR demodulator instance
 	std::unique_ptr<CFractResampler>	m_resampler;				// CuteSDR resampler instance
-	bool const							m_decoderds;				// Flag to send decoded RDS data
-	rdsdecoder							m_rdsdecoder;				// RDS decoder instance
 
-	std::string	const					m_muxname;					// Default mux name for the stream
+	std::string	const					m_muxname;					// Generated mux name
 	uint32_t const						m_pcmsamplerate;			// Output sample rate
 	TYPEREAL const						m_pcmgain;					// Output gain
 	double								m_dts{ STREAM_TIME_BASE };	// Current decode time stamp
@@ -229,4 +221,4 @@ private:
 
 #pragma warning(pop)
 
-#endif	// __FMSTREAM_H_
+#endif	// __WXSTREAM_H_

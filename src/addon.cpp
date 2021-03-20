@@ -45,6 +45,7 @@
 #include "sqlite_exception.h"
 #include "tcpdevice.h"
 #include "usbdevice.h"
+#include "wxstream.h"
 
 #pragma warning(push, 4)
 

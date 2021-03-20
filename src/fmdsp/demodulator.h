@@ -38,7 +38,6 @@
 
 #include "downconvert.h"
 #include "fastfir.h"
-#include "agc.h"
 #include "fmdemod.h"
 #include "wfmdemod.h"
 
@@ -55,19 +54,13 @@
 
 typedef struct _sdmd
 {
-	enum DownsampleQuality DownsampleQuality;
-
 	int HiCut;
-	int HiCutmax;	//not saved in settings
+	int HiCutmax;
 	int LowCut;
 	int SquelchValue;
-	int AgcSlope;
-	int AgcThresh;
-	int AgcManualGain;
-	int AgcDecay;
-	bool AgcOn;
-	bool AgcHangOn;
-	//std::string txt;
+
+	// Wideband FM only
+	enum DownsampleQuality WfmDownsampleQuality;
 
 }tDemodInfo;
 
@@ -127,7 +120,7 @@ private:
 	void DeleteAllDemods();
 	CDownConvert m_DownConvert;
 	CFastFIR m_FastFIR;
-	CAgc m_Agc;
+
 #ifdef FMDSP_THREAD_SAFE
 	mutable std::mutex m_Mutex;		//for keeping threads from stomping on each other
 #endif
