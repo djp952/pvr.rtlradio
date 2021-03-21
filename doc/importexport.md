@@ -13,51 +13,52 @@ Selecting this client specific setting will open a folder browser dialog allows 
 
 ### Clear channel data
 Selecting this client specific setting will clear all existing channel data from the PVR database.
-***
+
+### Weather Radio channels (North America)
+[NOAA Weather Radio (US)](https://www.weather.gov/nwr&ln_desc=NOAA+Weather+Radio/), [Weatheradio (Canada)](https://www.canada.ca/en/environment-climate-change/services/weatheradio.html), and SARMEX (Mexico) channels are supported by the PVR and may be included as part of the channel import. Weather Radio channels must have a specified frequency between 162400000 (162.400MHz) and 162550000 (162.550MHz), but otherwise the same __JSON Schema__ requirements apply.
+
 #### JSON Schema
 The channel data JSON file must contain a single unnamed array object that in turn contains one or more unnamed objects that describe each channel. Each unnamed channel object may include the following elements:
    
 | Element | Type|Required | Description | Default |
 | :-- | :-- | :-- | :-- | :--: |
 | frequency | Integer  | Yes | Specifies the channel frequency in Hertz. | __`N/A`__ |
-| subchannel | Integer | Yes | Reserved for future use - must be set to __`0`__. | __`N/A`__ |
+| subchannel | Integer | No | Reserved for future use - must be set to __`0`__. | __`0`__ |
 | hidden | Integer | No | Specifies that the channel should be reported as hidden to Kodi.  Set to __`1`__ to report the channel as hidden, __`0`__ to report the channel as visible.| __`0`__ |
 | name | String | No | Specifies the name of the channel to report to Kodi. | __`""`__ |
-| autogain | Integer | No | Specifies that tuner automatic gain control (AGC) should be used for this channel. Set to __`1`__ to enable AGC, __`0`__ to disable AGC. | __`1`__ |
+| autogain | Integer | No | Specifies that tuner automatic gain control (AGC) should be used for this channel. Set to __`1`__ to enable AGC, __`0`__ to disable AGC. | __`0`__ |
 | manualgain | Integer | No | Specifies that a manual antenna gain should used for this channel. Specified in tenths of a decibel. For example, to set manual gain of 32.8dB set to __`328`__. Ignored if autogain is set to __`1`__. <sup>1</sup> | __`0`__ |
 | logourl | String | No | Specifies the URL to a logo image to report to Kodi for display with this channel. | __`null`__ |
 
 > <sup>1</sup> Valid manual gain values differ among RTL-SDR tuner devices. The PVR will automatically adjust what is specified here to the nearest valid value for the detected device. See below for a table that indicates the valid manual gain values for common RTL-SDR tuner devices.   
 ***
-#### Example JSON:
+#### Example JSON
+This example JSON describes four channels from the Baltimore, Maryland (US) region using various options. WDCH-FM 99.1; WLIF-FM 101.9; WQSR-FM 102.7, and KEC83 (NOAA Weather Radio, 162.400MHz, WX2):
 ```
 [
     {
         "frequency": 99100000,
-        "subchannel": 0,
-        "hidden": 0,
         "name": "WDCH-FM",
-        "autogain": 1,
-        "manualgain": 0,
-        "logourl": "https://notreal.org/WDCH_Bloomberg99.1-105.7HD2_logo.png"
+        "logourl": "https://upload.wikimedia.org/wikipedia/en/2/2b/WDCH_Bloomberg99.1-105.7HD2_logo.png"
     },
     {
         "frequency": 101900000,
-        "subchannel": 0,
-        "hidden": 0,
         "name": "WLIF-FM",
-        "autogain": 0,
         "manualgain": 328,
-        "logourl": "https://notreal.org/220px-WLIF_logo_2013-.png"
+        "logourl": "https://upload.wikimedia.org/wikipedia/en/4/4f/WLIF_logo_2013-.png"
     },
     {
         "frequency": 102700000,
-        "subchannel": 0,
-        "hidden": 0,
         "name": "WQSR-FM",
+        "autogain": 1,
+        "logourl": null
+    },
+    {
+        "frequency": 162400000,
+        "name": "KEC83",
         "autogain": 0,
         "manualgain": 480,
-        "logourl": null
+        "logourl": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6a/Noaa_all_hazards.svg/500px-Noaa_all_hazards.svg.png"
     }
 ]
 ```

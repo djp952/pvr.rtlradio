@@ -31,9 +31,17 @@
 | :-- | :-- | :--: |
 | Enable Radio Data System (RDS) | When set to __`ON`__ detected Radio Data System (RDS) data embedded in the FM signal will be decoded and processed. | __`ON`__ |
 | Radio Data System (RDS) region <sup>3</sup> | Specifies the Radio Data System (RDS) region. When set to __`Automatic`__ the region will be automatically detected. When set to __`World`__ the global RDS standard will be used. When set to __`North America`__ the RBDS standard will be used. | __`Automatic`__ |
-| Downsample quality | Specifies the FM Digital Signal Processor (DSP) downsample quality. When set to __`Fast`__, downsampling will be optimized for system performance. When set to __`Maximum`__, downsampling will be optimized for audio quality. | __`Standard`__ |
-| PCM output sample rate | Specifies the FM digital signal processor PCM output sample rate. | __`48.0 KHz`__ |
-| PCM output gain | Specifies the FM Digital Signal Processor (DSP) PCM output audio gain. Lower gain values will reduce the perceived volume of the audio, whereas higher gain values will increase the perceived volume of the audio. | __`-3.0 dB`__ |
+| Downsample quality | Specifies the Digital Signal Processor (DSP) downsample quality. When set to __`Fast`__, downsampling will be optimized for system performance. When set to __`Maximum`__, downsampling will be optimized for audio quality. | __`Standard`__ |
+| PCM output sample rate | Specifies the Digital Signal Processor PCM output sample rate. | __`48.0 KHz`__ |
+| PCM output gain | Specifies the Digital Signal Processor (DSP) PCM output audio gain. Lower gain values will reduce the perceived volume of the audio, whereas higher gain values will increase the perceived volume of the audio. | __`-3.0 dB`__ |
+   
+### Weather Radio
+> Configures Weather Radio settings   
+   
+| Setting | Description | Default |
+| :-- | :-- | :--: |
+| PCM output sample rate | Specifies the Digital Signal Processor PCM output sample rate. | __`48.0 KHz`__ |
+| PCM output gain | Specifies the Digital Signal Processor (DSP) PCM output audio gain. Lower gain values will reduce the perceived volume of the audio, whereas higher gain values will increase the perceived volume of the audio. | __`-3.0 dB`__ |
    
 > <sup>1</sup> Setting is available when __Connection type__ is set to __`Universal Serial Bus (USB)`__   
 > <sup>2</sup> Setting is available when __Connection type__ is set to __`Network (rtl_tcp)`__   
