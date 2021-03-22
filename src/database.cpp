@@ -260,9 +260,9 @@ void enumerate_fmradio_channels(sqlite3* instance, enumerate_channels_callback c
 
 	if(instance == nullptr) throw std::invalid_argument("instance");
 
-	// id | channel | subchannel | name | hidden
+	// id | channel | subchannel | name | hidden | logourl
 	auto sql = "select ((frequency / 100000) * 10) + subchannel as id, (frequency / 1000000) as channel, "
-		"(frequency % 1000000) / 100000 as sub, name as name, hidden as hidden from channel "
+		"(frequency % 1000000) / 100000 as sub, name as name, hidden as hidden, logourl as logourl from channel "
 		"where (frequency between 87500000 and 107900000) and (channel.subchannel = 0) order by id asc";
 
 	result = sqlite3_prepare_v2(instance, sql, -1, &statement, nullptr);
@@ -279,6 +279,7 @@ void enumerate_fmradio_channels(sqlite3* instance, enumerate_channels_callback c
 			item.subchannel = static_cast<unsigned int>(sqlite3_column_int(statement, 2));
 			item.name = reinterpret_cast<char const*>(sqlite3_column_text(statement, 3));
 			item.hidden = (sqlite3_column_int(statement, 4) != 0);
+			item.logourl = reinterpret_cast<char const*>(sqlite3_column_text(statement, 5));
 
 			callback(item);						// Invoke caller-supplied callback
 		}
@@ -306,9 +307,9 @@ void enumerate_wxradio_channels(sqlite3* instance, enumerate_channels_callback c
 
 	if(instance == nullptr) throw std::invalid_argument("instance");
 
-	// id | channel | name | hidden
+	// id | channel | name | hidden | logourl
 	auto sql = "select ((frequency / 100000) * 10) + subchannel as id, ((frequency - 162000000) / 1000) as channel, "
-		"name as name, hidden as hidden from channel "
+		"name as name, hidden as hidden, logourl as logourl from channel "
 		"where (frequency between 162400000 and 162550000) and (channel.subchannel = 0) order by id asc";
 
 	result = sqlite3_prepare_v2(instance, sql, -1, &statement, nullptr);
@@ -324,6 +325,7 @@ void enumerate_wxradio_channels(sqlite3* instance, enumerate_channels_callback c
 			item.channel = static_cast<unsigned int>(sqlite3_column_int(statement, 1));
 			item.name = reinterpret_cast<char const*>(sqlite3_column_text(statement, 2));
 			item.hidden = (sqlite3_column_int(statement, 3) != 0);
+			item.logourl = reinterpret_cast<char const*>(sqlite3_column_text(statement, 4));
 
 			callback(item);						// Invoke caller-supplied callback
 		}
