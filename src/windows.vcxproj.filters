@@ -225,6 +225,9 @@
     <ClInclude Include="wxstream.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="fmdsp\agc.h">
+      <Filter>Header Files\fmdsp</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -349,6 +352,9 @@
     </ClCompile>
     <ClCompile Include="wxstream.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="fmdsp\agc.cpp">
+      <Filter>Source Files\fmdsp</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

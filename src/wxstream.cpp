@@ -73,10 +73,20 @@ wxstream::wxstream(std::unique_ptr<rtldevice> device, struct tunerprops const& t
 	// Initialize the demodulator parameters
 	//
 	tDemodInfo demodinfo = {};
+
 	demodinfo.HiCutmax = 100000;
-	demodinfo.HiCut = 4000;				// TODO: 8Khz or 16Khz? Hard to find out
-	demodinfo.LowCut = -4000;
+	demodinfo.HiCut = 5000;
+	demodinfo.LowCut = -5000;
 	demodinfo.SquelchValue = -160;
+
+	// AGC settings are based what SDR# uses by default, these may need to change
+	// or become configurable by the end user on a channel-by-channel basis
+	demodinfo.AgcOn = true;
+	demodinfo.AgcDecay = 500;
+	demodinfo.AgcHangOn = false;
+	demodinfo.AgcManualGain = 0;
+	demodinfo.AgcSlope = 0;
+	demodinfo.AgcThresh = -50;
 
 	// Initialize the narrowband FM demodulator
 	m_demodulator = std::unique_ptr<CDemodulator>(new CDemodulator());
