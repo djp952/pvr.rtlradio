@@ -43,7 +43,7 @@
 
 
 #define FMPLL_RANGE 15000.0	//maximum deviation limit of PLL
-#define VOICE_BANDWIDTH 3000.0
+#define VOICE_BANDWIDTH 2500.0 //3000.0
 
 #define FMPLL_BW VOICE_BANDWIDTH	//natural frequency ~loop bandwidth
 #define FMPLL_ZETA .707				//PLL Loop damping factor
@@ -56,7 +56,7 @@
 #define SQUELCHAVE_TIMECONST .02
 #define SQUELCH_HYSTERESIS 50.0
 
-#define DEMPHASIS_TIME 80e-6
+#define DEMPHASIS_TIME 75e-6 //80e-6
 
 /////////////////////////////////////////////////////////////////////////////////
 //	Construct FM demod object
@@ -100,7 +100,8 @@ void CFmDemod::SetSampleRate(TYPEREAL samplerate)
 	m_DeemphasisAlpha = (1.0-MEXP(-1.0/(m_SampleRate*DEMPHASIS_TIME)) );
 	m_DeemphasisAve = 0.0;
 
-	m_LpFir.InitLPFilter(0,1.0,50.0,VOICE_BANDWIDTH, 1.6*VOICE_BANDWIDTH, m_SampleRate);
+	//m_LpFir.InitLPFilter(0, 1.0, 50.0, VOICE_BANDWIDTH, 1.6 * VOICE_BANDWIDTH, m_SampleRate);
+	m_LpFir.InitLPFilter(0, 1.0, 50.0, VOICE_BANDWIDTH, 2.0 * VOICE_BANDWIDTH, m_SampleRate);
 
 	InitNoiseSquelch();
 }
@@ -120,8 +121,8 @@ void CFmDemod::SetSquelch(int Value)
 /////////////////////////////////////////////////////////////////////////////////
 void CFmDemod::InitNoiseSquelch()
 {
-	m_HpFir.InitHPFilter(0, 1.0, 50.0, m_SquelchHPFreq*.8, m_SquelchHPFreq*.65, m_SampleRate);
-//	m_HpFir.InitHPFilter(0, 1.0, 50.0, VOICE_BANDWIDTH*2.0, VOICE_BANDWIDTH, m_SampleRate);
+	//m_HpFir.InitHPFilter(0, 1.0, 50.0, m_SquelchHPFreq*.8, m_SquelchHPFreq*.65, m_SampleRate);
+	m_HpFir.InitHPFilter(0, 1.0, 50.0, VOICE_BANDWIDTH*2.0, VOICE_BANDWIDTH, m_SampleRate);
 }
 
 
