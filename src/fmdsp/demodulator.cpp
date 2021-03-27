@@ -190,8 +190,6 @@ void CDemodulator::SetDemod(int Mode, tDemodInfo CurrentDemodInfo)
 	if(m_DemodMode != DEMOD_WFM)
 	{
 		m_FastFIR.SetupParameters(m_DemodInfo.LowCut, m_DemodInfo.HiCut, 0, m_DownConverterOutputRate);
-		m_Agc.SetParameters(m_DemodInfo.AgcOn, m_DemodInfo.AgcHangOn, m_DemodInfo.AgcThresh,
-			m_DemodInfo.AgcManualGain, m_DemodInfo.AgcSlope, m_DemodInfo.AgcDecay, m_DownConverterOutputRate);
 	}
 	if(	m_pFmDemod != NULL)
 		m_pFmDemod->SetSquelch(m_DemodInfo.SquelchValue);
@@ -222,12 +220,9 @@ int ret = 0;
 			int n = m_DownConvert.ProcessData(m_InBufPos, m_pDemodInBuf, m_pDemodInBuf);
 
 			if(m_DemodMode != DEMOD_WFM)
-			{	//if not wideband FM mode do filtering and AGC
+			{
 				//perform main bandpass filtering
 				n = m_FastFIR.ProcessData(n, m_pDemodInBuf, m_pDemodTmpBuf);
-
-				//perform AGC
-				m_Agc.ProcessData(n, m_pDemodTmpBuf, m_pDemodTmpBuf );
 			}
 
 			// Get the signal levels
@@ -282,12 +277,9 @@ int ret = 0;
 			int n = m_DownConvert.ProcessData(m_InBufPos, m_pDemodInBuf, m_pDemodInBuf);
 
 			if(m_DemodMode != DEMOD_WFM)
-			{	//if not wideband FM mode do filtering and AGC
+			{
 				//perform main bandpass filtering
 				n = m_FastFIR.ProcessData(n, m_pDemodInBuf, m_pDemodTmpBuf);
-
-				//perform AGC
-				m_Agc.ProcessData(n, m_pDemodTmpBuf, m_pDemodTmpBuf );
 			}
 
 			// Get the signal levels

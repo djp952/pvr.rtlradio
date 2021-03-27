@@ -607,7 +607,7 @@ void import_channels(sqlite3* instance, char const* json)
 		"cast(ifnull(json_extract(entry.value, '$.subchannel'), 0) as integer) as subchannel, "
 		"cast(ifnull(json_extract(entry.value, '$.hidden'), 0) as integer) as hidden, "
 		"cast(ifnull(json_extract(entry.value, '$.name'), '') as text) as name, "
-		"cast(ifnull(json_extract(entry.value, '$.autogain'), 0) as integer) as autogain, "
+		"cast(ifnull(json_extract(entry.value, '$.autogain'), 1) as integer) as autogain, "
 		"cast(ifnull(json_extract(entry.value, '$.manualgain'), 0) as integer) as manualgain, "
 		"json_extract(entry.value, '$.logourl') as logourl "	// <-- this one allows nulls
 		"from json_each(?1) as entry "

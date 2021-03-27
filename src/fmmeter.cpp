@@ -57,8 +57,8 @@ fmmeter::fmmeter(std::unique_ptr<rtldevice> device, struct tunerprops const& tun
 	m_device(std::move(device)), m_tunerprops(tunerprops), m_onstatus(onstatus), 
 	m_onstatusrate(std::min(statusrate / 10, 10)), m_onexception(onexception)
 {
-	// Disable automatic gain control on the device by default
-	m_device->set_automatic_gain_control(false);
+	// Enable automatic gain control on the device by default
+	m_device->set_automatic_gain_control(true);
 
 	// Set the default frequency, sample rate, and frequency correction offset
 	m_device->set_center_frequency(DEFAULT_DEVICE_FREQUENCY);
@@ -69,7 +69,6 @@ fmmeter::fmmeter(std::unique_ptr<rtldevice> device, struct tunerprops const& tun
 	std::vector<int> gains;
 	m_device->get_valid_gains(gains);
 	m_manualgain = (gains.size()) ? gains[0] : 0;
-	m_manualgain = m_device->set_gain(m_manualgain);
 }
 
 //---------------------------------------------------------------------------

@@ -26,7 +26,7 @@ The channel data JSON file must contain a single unnamed array object that in tu
 | subchannel | Integer | No | Reserved for future use - must be set to __`0`__. | __`0`__ |
 | hidden | Integer | No | Specifies that the channel should be reported as hidden to Kodi.  Set to __`1`__ to report the channel as hidden, __`0`__ to report the channel as visible.| __`0`__ |
 | name | String | No | Specifies the name of the channel to report to Kodi. | __`""`__ |
-| autogain | Integer | No | Specifies that tuner automatic gain control (AGC) should be used for this channel. Set to __`1`__ to enable AGC, __`0`__ to disable AGC. | __`0`__ |
+| autogain | Integer | No | Specifies that tuner automatic gain control (AGC) should be used for this channel. Set to __`1`__ to enable AGC, __`0`__ to disable AGC. | __`1`__ |
 | manualgain | Integer | No | Specifies that a manual antenna gain should used for this channel. Specified in tenths of a decibel. For example, to set manual gain of 32.8dB set to __`328`__. Ignored if autogain is set to __`1`__. <sup>1</sup> | __`0`__ |
 | logourl | String | No | Specifies the URL to a logo image to report to Kodi for display with this channel. | __`null`__ |
 

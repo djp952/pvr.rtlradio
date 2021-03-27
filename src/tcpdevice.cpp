@@ -169,6 +169,11 @@ tcpdevice::tcpdevice(char const* host, uint16_t port)
 			char devicename[256];
 			snprintf(devicename, std::extent<decltype(devicename)>::value, "Realtek RTL2832U on %s:%d", host, port);
 			m_name.assign(devicename);
+
+			// Turn off internal digital automatic gain control
+			struct device_command command = { 0x08, 0 };
+			result = send(m_socket, reinterpret_cast<char const*>(&command), sizeof(struct device_command), 0);
+			if (result != sizeof(struct device_command)) throw socket_exception(__func__, ": send() failed");
 		}
 
 		// Shutdown and close the socket on any exception

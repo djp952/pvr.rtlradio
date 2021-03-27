@@ -75,6 +75,10 @@ usbdevice::usbdevice(uint32_t index)
 			m_product.assign(product);
 			m_serialnumber.assign(serialnumber);
 		}
+
+		// Turn off internal digital automatic gain control
+		result = rtlsdr_set_agc_mode(m_device, 0);
+		if (result < 0) throw string_exception(__func__, ": failed to set digital automatic gain control to off");
 	}
 
 	// Close the RTL-SDR device on any thrown exception
@@ -363,7 +367,7 @@ void usbdevice::set_automatic_gain_control(bool enable) const
 	assert(m_device != nullptr);
 
 	int result = rtlsdr_set_tuner_gain_mode(m_device, (enable) ? 0 : 1);
-	if(result < 0) throw string_exception(__func__, ": failed to set device automatic gain control to ", (enable) ? "on" : "off");
+	if(result < 0) throw string_exception(__func__, ": failed to set tuner automatic gain control to ", (enable) ? "on" : "off");
 }
 
 //---------------------------------------------------------------------------
