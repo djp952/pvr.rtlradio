@@ -20,7 +20,7 @@ As part of the PVR, platform-specific versions of the OSMOCOM RTL-SDR command li
 
 > <sup>2</sup> The __rtl_power__ tool has been modified for proper operation on Windows 64-bit (x64) platforms.   
 
-> <sup>3</sup> The __rtl_tcp__ tool has been modified for proper operation on Windows platforms, and incorporates proposed performance enhancements by __blinick__ (https://github.com/blinick/rtl-sdr/tree/wip_rtltcp_ringbuf).   
+> <sup>3</sup> The __rtl_tcp__ tool has been modified for proper operation on Windows platforms, and includes a custom performance enhancement to allow clients to disconnect and reconnect very quickly without timing out.   
 ***
 ### SQLite Command Line Tool
 
