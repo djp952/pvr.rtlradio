@@ -1,3 +1,6 @@
+[submodule "angle"]
+	path = depends/angle
+	url = https://github.com/google/angle.git
 [submodule "build"]
 	path = depends/build
 	url = https://github.com/djp952/build.git
