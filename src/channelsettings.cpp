@@ -44,6 +44,21 @@ static const int CONTROL_EDIT_METERGAIN			= 207;
 static const int CONTROL_EDIT_METERPOWER		= 208;
 static const int CONTROL_EDIT_METERSNR			= 209;
 
+// channelsettings::FMRADIO_BANDWIDTH
+//
+// Bandwidth of an analog FM radio channel
+uint32_t const channelsettings::FMRADIO_BANDWIDTH = (200 KHz);
+
+// channelsettings::HDRADIO_BANDWIDTH
+//
+// Bandwidth of a Hybrid Digital (HD) FM radio channel
+uint32_t const channelsettings::HDRADIO_BANDWIDTH = (400 KHz);
+
+// channelsettings::WXRADIO_BANDWIDTH
+//
+// Bandwidth of a VHF weather radio channel
+uint32_t const channelsettings::WXRADIO_BANDWIDTH = (10 KHz);
+
 //---------------------------------------------------------------------------
 // channelsettings Constructor (private)
 //
@@ -56,11 +71,22 @@ static const int CONTROL_EDIT_METERSNR			= 209;
 channelsettings::channelsettings(std::unique_ptr<rtldevice> device, struct tunerprops const& tunerprops, struct channelprops const& channelprops) 
 	: kodi::gui::CWindow("channelsettings.xml", "skin.estuary", true), m_channelprops(channelprops)
 {
+	uint32_t				bandwidth = FMRADIO_BANDWIDTH;			// Default to wideband FM radio bandwidth
+
 	assert(device);
 
+	// Adjust the signal meter bandwidth based on the underlying channel type
+	switch(get_channel_type(channelprops)) {
+
+		case channeltype::fmradio: bandwidth = FMRADIO_BANDWIDTH; break;
+		case channeltype::hdradio: bandwidth = HDRADIO_BANDWIDTH; break;
+		case channeltype::wxradio: bandwidth = WXRADIO_BANDWIDTH; break;
+	}
+
 	// Create the signal meter instance with the specified device and tuner properties, set for a 500ms callback rate
-	m_signalmeter = fmmeter::create(std::move(device), tunerprops, std::bind(&channelsettings::fm_meter_status, this, std::placeholders::_1), 
-		500, std::bind(&channelsettings::fm_meter_exception, this, std::placeholders::_1));
+	m_signalmeter = fmmeter::create(std::move(device), tunerprops, channelprops.frequency, bandwidth, 
+		std::bind(&channelsettings::fm_meter_status, this, std::placeholders::_1), 500, 
+		std::bind(&channelsettings::fm_meter_exception, this, std::placeholders::_1));
 
 	// Get the vector<> of valid manual gain values for the attached device
 	m_signalmeter->get_valid_manual_gains(m_manualgains);
@@ -73,22 +99,6 @@ channelsettings::~channelsettings()
 {
 	// Stop the signal meter
 	m_signalmeter->stop();
-}
-
-//---------------------------------------------------------------------------
-// channelsettings::create (static)
-//
-// Factory method, creates a new channelsettings instance
-//
-// Arguments:
-//
-//	device			- Device instance
-//	tunerprops		- Tuner properties
-
-std::unique_ptr<channelsettings> channelsettings::create(std::unique_ptr<rtldevice> device, struct tunerprops const& tunerprops)
-{
-	struct channelprops channelprops = {};
-	return std::unique_ptr<channelsettings>(new channelsettings(std::move(device), tunerprops, channelprops));
 }
 
 //---------------------------------------------------------------------------
@@ -383,7 +393,6 @@ bool channelsettings::OnInit(void)
 		m_edit_signalsnr->SetText("N/A");
 
 		// Start the signal meter instance
-		m_signalmeter->set_frequency(m_channelprops.frequency);
 		m_signalmeter->set_automatic_gain(m_channelprops.autogain);
 		m_signalmeter->set_manual_gain(m_channelprops.manualgain);
 		m_signalmeter->start();

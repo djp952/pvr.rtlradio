@@ -42,6 +42,16 @@ struct channelprops {
 	int				manualgain;			// Manual gain value as 10*dB (i.e. 32.8dB = 328)
 };
 
+// channeltype
+//
+// Defines the type of a channel
+enum channeltype {
+
+	fmradio			= 0,				// Wideband FM radio
+	hdradio			= 1,				// Hybrid Digital (HD) radio
+	wxradio			= 2,				// VHF Weather radio
+};
+
 // fmprops
 //
 // Defines properties for the FM Radio digital signal processor
@@ -83,6 +93,23 @@ struct wxprops {
 	uint32_t		outputrate;			// Output sample rate in Hertz
 	float			outputgain;			// Output gain in Decibels
 };
+
+// get_channel_type (inline)
+//
+// Determines the channeltype value for a channelprops structure
+inline enum channeltype get_channel_type(struct channelprops const& channelprops)
+{
+	// FM Radio / HD Radio
+	if((channelprops.frequency >= 87500000) && (channelprops.frequency <= 108000000))
+		return (channelprops.subchannel == 0) ? channeltype::fmradio : channeltype::hdradio;
+
+	// Weather Radio
+	else if((channelprops.frequency >= 162400000) && (channelprops.frequency <= 162550000) && (channelprops.subchannel == 0))
+		return channeltype::wxradio;
+
+	// Unknown; assume FM Radio
+	return channeltype::fmradio;
+}
 
 //-----------------------------------------------------------------------------
 

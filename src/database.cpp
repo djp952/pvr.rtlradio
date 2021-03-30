@@ -263,7 +263,7 @@ void enumerate_fmradio_channels(sqlite3* instance, enumerate_channels_callback c
 	// id | channel | subchannel | name | hidden | logourl
 	auto sql = "select ((frequency / 100000) * 10) + subchannel as id, (frequency / 1000000) as channel, "
 		"(frequency % 1000000) / 100000 as sub, name as name, hidden as hidden, logourl as logourl from channel "
-		"where (frequency between 87500000 and 107900000) and (channel.subchannel = 0) order by id asc";
+		"where (frequency between 87500000 and 108000000) and (channel.subchannel = 0) order by id asc";
 
 	result = sqlite3_prepare_v2(instance, sql, -1, &statement, nullptr);
 	if(result != SQLITE_OK) throw sqlite_exception(result, sqlite3_errmsg(instance));
@@ -612,7 +612,7 @@ void import_channels(sqlite3* instance, char const* json)
 		"json_extract(entry.value, '$.logourl') as logourl "	// <-- this one allows nulls
 		"from json_each(?1) as entry "
 		"where frequency is not null and "
-		"((frequency between 87500000 and 107900000) or (frequency between 162400000 and 162550000))"
+		"((frequency between 87500000 and 108000000) or (frequency between 162400000 and 162550000))"
 		"group by frequency, subchannel", json);
 }
 

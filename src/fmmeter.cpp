@@ -31,16 +31,6 @@
 
 #pragma warning(push, 4)
 
-// fmmeter::DEFAULT_DEVICE_FREQUENCY
-//
-// Default device frequency
-uint32_t const fmmeter::DEFAULT_DEVICE_FREQUENCY = (87900 KHz);		// 87.9 MHz
-
-// fmmeter::DEFAULT_DEVICE_SAMPLE_RATE
-//
-// Default device sample rate
-uint32_t const fmmeter::DEFAULT_DEVICE_SAMPLE_RATE = (1 MHz);
-
 //---------------------------------------------------------------------------
 // fmmeter Constructor (private)
 //
@@ -48,22 +38,24 @@ uint32_t const fmmeter::DEFAULT_DEVICE_SAMPLE_RATE = (1 MHz);
 //
 //	device			- RTL-SDR device instance
 //	tunerprops		- Tuner device properties
+//  frequency		- Center frequency to be tuned for the channel
+//  bandwidth		- Bandwidth of the channel to be analyzed
 //	onstatus		- Signal status callback function
 //	statusrate		- Rate at which the status callback will be invoked (milliseconds)
 //	onexception		- Exception callback function
 
-fmmeter::fmmeter(std::unique_ptr<rtldevice> device, struct tunerprops const& tunerprops,
-	signal_status_callback const& onstatus, int statusrate, exception_callback const& onexception) : 
-	m_device(std::move(device)), m_tunerprops(tunerprops), m_onstatus(onstatus), 
-	m_onstatusrate(std::min(statusrate / 10, 10)), m_onexception(onexception)
+fmmeter::fmmeter(std::unique_ptr<rtldevice> device, struct tunerprops const& tunerprops, uint32_t frequency,
+	uint32_t bandwidth, signal_status_callback const& onstatus, int statusrate, exception_callback const& onexception) : 
+	m_device(std::move(device)), m_tunerprops(tunerprops), m_frequency(frequency), m_bandwidth(bandwidth), 
+	m_onstatus(onstatus), m_onstatusrate(std::min(statusrate / 10, 10)), m_onexception(onexception)
 {
+	// Set the default frequency, sample rate, and frequency correction offset
+	m_device->set_center_frequency(m_frequency);
+	m_device->set_sample_rate(m_tunerprops.samplerate);
+	m_device->set_frequency_correction(m_tunerprops.freqcorrection);
+
 	// Enable automatic gain control on the device by default
 	m_device->set_automatic_gain_control(true);
-
-	// Set the default frequency, sample rate, and frequency correction offset
-	m_device->set_center_frequency(DEFAULT_DEVICE_FREQUENCY);
-	m_device->set_sample_rate(DEFAULT_DEVICE_SAMPLE_RATE);
-	m_device->set_frequency_correction(m_tunerprops.freqcorrection);
 
 	// Set the manual gain to the lowest value by default
 	std::vector<int> gains;
@@ -89,14 +81,16 @@ fmmeter::~fmmeter()
 //
 //	device			- RTL-SDR device instance
 //	tunerprops		- Tuner device properties
+//  frequency		- Center frequency to be tuned for the channel
+//  bandwidth		- Bandwidth of the channel to be analyzed
 //	onstatus		- Signal status callback function
 //	onstatusrate	- Rate at which the status callback will be invoked (milliseconds)
 
 std::unique_ptr<fmmeter> fmmeter::create(std::unique_ptr<rtldevice> device, struct tunerprops const& tunerprops,
-	signal_status_callback const& onstatus, int onstatusrate)
+	uint32_t frequency, uint32_t bandwidth, signal_status_callback const& onstatus, int onstatusrate)
 {
 	auto onexception = [](std::exception const&) -> void { /* DO NOTHING */ };
-	return std::unique_ptr<fmmeter>(new fmmeter(std::move(device), tunerprops, onstatus, onstatusrate, onexception));
+	return std::unique_ptr<fmmeter>(new fmmeter(std::move(device), tunerprops, frequency, bandwidth, onstatus, onstatusrate, onexception));
 }
 
 //---------------------------------------------------------------------------
@@ -108,14 +102,16 @@ std::unique_ptr<fmmeter> fmmeter::create(std::unique_ptr<rtldevice> device, stru
 //
 //	device			- RTL-SDR device instance
 //	tunerprops		- Tuner device properties
+//  frequency		- Center frequency to be tuned for the channel
+//  bandwidth		- Bandwidth of the channel to be analyzed
 //	onstatus		- Signal status callback function
 //	onstatusrate	- Rate at which the status callback will be invoked (milliseconds)
 //	onexception		- Exception callback function
 
 std::unique_ptr<fmmeter> fmmeter::create(std::unique_ptr<rtldevice> device, struct tunerprops const& tunerprops,
-	signal_status_callback const& onstatus, int onstatusrate, exception_callback const& onexception)
+	uint32_t frequency, uint32_t bandwidth, signal_status_callback const& onstatus, int onstatusrate, exception_callback const& onexception)
 {
-	return std::unique_ptr<fmmeter>(new fmmeter(std::move(device), tunerprops, onstatus, onstatusrate, onexception));
+	return std::unique_ptr<fmmeter>(new fmmeter(std::move(device), tunerprops, frequency, bandwidth, onstatus, onstatusrate, onexception));
 }
 
 //---------------------------------------------------------------------------
@@ -130,20 +126,6 @@ std::unique_ptr<fmmeter> fmmeter::create(std::unique_ptr<rtldevice> device, stru
 bool fmmeter::get_automatic_gain(void) const
 {
 	return m_autogain;
-}
-
-//---------------------------------------------------------------------------
-// fmmeter::get_frequency
-//
-// Gets the current tuned frequency
-//
-// Arguments:
-//
-//	NONE
-
-uint32_t fmmeter::get_frequency(void) const
-{
-	return m_frequency;
 }
 
 //---------------------------------------------------------------------------
@@ -192,20 +174,6 @@ void fmmeter::set_automatic_gain(bool autogain)
 }
 
 //---------------------------------------------------------------------------
-// fmmeter::set_frequency
-//
-// Sets the frequency to be tuned
-//
-// Arguments:
-//
-//	frequency		- Frequency to set, specified in hertz
-
-void fmmeter::set_frequency(uint32_t frequency)
-{
-	m_frequency = m_device->set_center_frequency(frequency);
-}
-
-//---------------------------------------------------------------------------
 // fmmeter::set_manual_gain
 //
 // Sets the manual gain value of the device
@@ -241,23 +209,23 @@ void fmmeter::start(void)
 
 		try {
 
-			// The sampling rate for the signal meter isn't adjustable
-			uint32_t const samplerate = DEFAULT_DEVICE_SAMPLE_RATE;
-
-			// Create and initialize the wideband FM demodulator instance
+			// Create and initialize the FM demodulator instance
 			std::unique_ptr<CDemodulator> demodulator(new CDemodulator()); 
+			
 			tDemodInfo demodinfo = {};
-			demodinfo.WfmDownsampleQuality = DownsampleQuality::Low;
-			demodulator->SetInputSampleRate(static_cast<TYPEREAL>(samplerate));
-			demodulator->SetDemod(DEMOD_WFM, demodinfo);
+			demodinfo.HiCutmax = 100000;
+			demodinfo.HiCut = (m_bandwidth / 2);
+			demodinfo.LowCut = -demodinfo.HiCut;
+			demodinfo.SquelchValue = -160;
 
+			demodulator = std::unique_ptr<CDemodulator>(new CDemodulator());
+			demodulator->SetInputSampleRate(static_cast<TYPEREAL>(m_tunerprops.samplerate));
+			demodulator->SetDemod(DEMOD_FM, demodinfo);
+			
+			// Create the input buffers to hold the raw and converted I/Q samples read from the device
 			size_t const numsamples = demodulator->GetInputBufferLimit();
 			size_t const numbytes = numsamples * 2;
 
-			bool stereo = false;			// Flag if stereo has been detected
-			bool rds = false;				// Flag if RDS has been detected
-
-			// Create the input buffers to hold the raw and converted I/Q samples read from the device
 			std::unique_ptr<uint8_t[]> buffer(new uint8_t[numbytes]);
 			std::unique_ptr<TYPECPX[]> samples(new TYPECPX[numsamples]);
 
@@ -267,14 +235,6 @@ void fmmeter::start(void)
 
 			// Loop until the worker thread has been signaled to stop
 			while(m_stop.test(false) == true) {
-
-				// If the frequency changed everything needs to be reset
-				bool expected = true;
-				if(m_freqchange.compare_exchange_strong(expected, false)) {
-
-					stereo = false;
-					rds = false;
-				}
 
 				// Read the next block of raw 8-bit I/Q samples from the input device
 				size_t read = 0;
@@ -297,15 +257,8 @@ void fmmeter::start(void)
 					};
 				}
 
-				// Run the I/Q samples through the demodulator
+				// Run the I/Q samples through the demodulator to calculate the signal levels
 				demodulator->ProcessData(static_cast<int>(numsamples), samples.get(), samples.get());
-
-				// Determine if there is a stereo lock
-				if(demodulator->GetStereoLock(nullptr)) stereo = true;
-
-				// Pull out any RDS group data that was collected during demodulation
-				tRDS_GROUPS rdsgroup = {};
-				while(demodulator->GetNextRdsGroupData(&rdsgroup)) { rds = true; }
 
 				// Only invoke the callback at roughly the requested rate
 				if((++iterations % m_onstatusrate) == 0) {
@@ -314,8 +267,6 @@ void fmmeter::start(void)
 					status.power = demodulator->GetSignalLevel();;
 					status.noise = demodulator->GetNoiseLevel();
 					status.snr = demodulator->GetSignalToNoiseLevel();;
-					status.stereo = stereo;
-					status.rds = rds;
 
 					if(m_onstatus) m_onstatus(status);
 					iterations = 0;

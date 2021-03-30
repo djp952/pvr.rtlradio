@@ -62,8 +62,6 @@ public:
 		TYPEREAL			power;				// Signal power level in dB
 		TYPEREAL			noise;				// Signal noise level in dB
 		TYPEREAL			snr;				// Signal-to-noise ratio in dB
-		bool				stereo;				// Flag if Stereo signal is present
-		bool				rds;				// Flag if RDS signal is present
 	};
 
 	// exception_callback
@@ -83,19 +81,15 @@ public:
 	//
 	// Factory method, creates a new fmmeter instance
 	static std::unique_ptr<fmmeter> create(std::unique_ptr<rtldevice> device, struct tunerprops const& tunerprops,
-		signal_status_callback const& onstatus, int onstatusrate);
+		uint32_t frequency, uint32_t bandwidth, signal_status_callback const& onstatus, int onstatusrate);
 	static std::unique_ptr<fmmeter> create(std::unique_ptr<rtldevice> device, struct tunerprops const& tunerprops,
-		signal_status_callback const& onstatus, int onstatusrate, exception_callback const& onexception);
+		uint32_t frequency, uint32_t bandwidth, signal_status_callback const& onstatus, int onstatusrate, 
+		exception_callback const& onexception);
 
 	// get_automatic_gain
 	//
 	// Gets the currently set automatic gain value
 	bool get_automatic_gain(void) const;
-
-	// get_frequency
-	//
-	// Gets the currently set frequency
-	uint32_t get_frequency(void) const;
 
 	// get_manual_gain
 	//
@@ -111,11 +105,6 @@ public:
 	//
 	// Sets the automatic gain flag
 	void set_automatic_gain(bool autogain);
-
-	// set_frequency
-	//
-	// Sets the frequency to be tuned
-	void set_frequency(uint32_t frequency);
 
 	// set_manual_gain
 	//
@@ -139,29 +128,19 @@ private:
 
 	// Instance Constructor
 	//
-	fmmeter(std::unique_ptr<rtldevice> device, struct tunerprops const& tunerprops, signal_status_callback const& onstatus, 
-		int onstatusrate, exception_callback const& onexception);
-
-	// DEFAULT_DEVICE_FREQUENCY
-	//
-	// Default device frequency
-	static uint32_t const DEFAULT_DEVICE_FREQUENCY;
-
-	// DEFAULT_DEVICE_SAMPLE_RATE
-	//
-	// Default device sample rate
-	static uint32_t const DEFAULT_DEVICE_SAMPLE_RATE;
+	fmmeter(std::unique_ptr<rtldevice> device, struct tunerprops const& tunerprops, uint32_t frequency, 
+		uint32_t bandwidth, signal_status_callback const& onstatus, int onstatusrate, exception_callback const& onexception);
 
 	//-----------------------------------------------------------------------
 	// Member Variables
 
 	std::unique_ptr<rtldevice>		m_device;				// RTL-SDR device instance
 	struct tunerprops const			m_tunerprops;			// Tuner settings
+	uint32_t const					m_frequency;			// Center frequency
+	uint32_t const					m_bandwidth;			// Channel bandwidth
 
-	bool							m_autogain = false;		// Automatic gain enabled/disabled
+	bool							m_autogain = true;		// Automatic gain enabled/disabled
 	int								m_manualgain = 0;		// Current manual gain value
-	uint32_t						m_frequency = 0;		// Current frequency value
-	std::atomic<bool>				m_freqchange{ false };	// Frequency changed flag
 	std::thread						m_worker;				// Worker thread
 	scalar_condition<bool>			m_stop{ false };		// Condition to stop worker
 	std::atomic<bool>				m_stopped{ false };		// Worker stopped flag

@@ -63,7 +63,6 @@ public:
 	// create (static)
 	//
 	// Factory method, creates a new channelsettings instance
-	static std::unique_ptr<channelsettings> create(std::unique_ptr<rtldevice> device, struct tunerprops const& tunerprops);
 	static std::unique_ptr<channelsettings> create(std::unique_ptr<rtldevice> device, struct tunerprops const& tunerprops, 
 		struct channelprops const& channelprops);
 
@@ -85,6 +84,21 @@ private:
 	// Instance Constructor
 	//
 	channelsettings(std::unique_ptr<rtldevice> device, struct tunerprops const& tunerprops, struct channelprops const& channelprops);
+
+	// FMRADIO_BANDWIDTH
+	//
+	// Bandwidth of an analog FM radio channel
+	static uint32_t const FMRADIO_BANDWIDTH;
+
+	// HDRADIO_BANDWIDTH
+	//
+	// Bandwidth of a Hybrid Digital (HD) FM radio channel
+	static uint32_t const HDRADIO_BANDWIDTH;
+
+	// WXRADIO_BANDWIDTH
+	//
+	// Bandwidth of a VHF weather radio channel
+	static uint32_t const WXRADIO_BANDWIDTH;
 
 	//-------------------------------------------------------------------------
 	// CWindow Implementation

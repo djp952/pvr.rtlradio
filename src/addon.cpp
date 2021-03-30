@@ -1523,7 +1523,7 @@ bool addon::OpenLiveStream(kodi::addon::PVRChannel const& channel)
 
 		// FM Radio
 		//
-		if((channelprops.frequency >= 87500000) && (channelprops.frequency <= 107900000) && (channelprops.subchannel == 0)) {
+		if(get_channel_type(channelprops) == channeltype::fmradio) {
 
 			// Set up the FM digital signal processor properties
 			struct fmprops fmprops = {};
@@ -1552,7 +1552,7 @@ bool addon::OpenLiveStream(kodi::addon::PVRChannel const& channel)
 
 		// Weather Radio
 		//
-		else if((channelprops.frequency >= 162400000) && (channelprops.frequency <= 162550000) && (channelprops.subchannel == 0)) {
+		else if(get_channel_type(channelprops) == channeltype::wxradio) {
 
 			// Set up the FM digital signal processor properties
 			struct wxprops wxprops = {};

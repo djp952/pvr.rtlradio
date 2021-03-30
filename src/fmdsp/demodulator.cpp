@@ -54,7 +54,7 @@
 
 static void get_signal_levels(int numsamples, TYPECPX const* samples, TYPEREAL& rms, TYPEREAL& noise)
 {
-	numsamples = (numsamples + 63) / 64;
+	numsamples = (numsamples + 127) / 128;
 
 	rms = 0;
 	noise = 0;
