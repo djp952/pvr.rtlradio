@@ -5,6 +5,7 @@ VisualStudioVersion = 16.0.28922.388
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "windows", "src\windows.vcxproj", "{5B5A17F1-4312-4A64-A796-2818CE0906B4}"
 	ProjectSection(ProjectDependencies) = postProject
+		{6B1B43B7-CFD6-43A3-ABB7-5557466B55CD} = {6B1B43B7-CFD6-43A3-ABB7-5557466B55CD}
 		{3F7B8BC6-FA0C-4E08-8F7E-D6CD97E7581B} = {3F7B8BC6-FA0C-4E08-8F7E-D6CD97E7581B}
 	EndProjectSection
 EndProject
@@ -104,6 +105,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "xml", "xml", "{880E452A-4A3
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "rtl_biast", "src\rtl_biast.vcxproj", "{F36BC675-E8EC-4A56-8350-3A666B0AA870}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "angle", "src\angle.vcxproj", "{6B1B43B7-CFD6-43A3-ABB7-5557466B55CD}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -200,6 +203,14 @@ Global
 		{F36BC675-E8EC-4A56-8350-3A666B0AA870}.Release|Win32.Build.0 = Release|Win32
 		{F36BC675-E8EC-4A56-8350-3A666B0AA870}.Release|x64.ActiveCfg = Release|x64
 		{F36BC675-E8EC-4A56-8350-3A666B0AA870}.Release|x64.Build.0 = Release|x64
+		{6B1B43B7-CFD6-43A3-ABB7-5557466B55CD}.Debug|Win32.ActiveCfg = Debug|Win32
+		{6B1B43B7-CFD6-43A3-ABB7-5557466B55CD}.Debug|Win32.Build.0 = Debug|Win32
+		{6B1B43B7-CFD6-43A3-ABB7-5557466B55CD}.Debug|x64.ActiveCfg = Debug|x64
+		{6B1B43B7-CFD6-43A3-ABB7-5557466B55CD}.Debug|x64.Build.0 = Debug|x64
+		{6B1B43B7-CFD6-43A3-ABB7-5557466B55CD}.Release|Win32.ActiveCfg = Release|Win32
+		{6B1B43B7-CFD6-43A3-ABB7-5557466B55CD}.Release|Win32.Build.0 = Release|Win32
+		{6B1B43B7-CFD6-43A3-ABB7-5557466B55CD}.Release|x64.ActiveCfg = Release|x64
+		{6B1B43B7-CFD6-43A3-ABB7-5557466B55CD}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

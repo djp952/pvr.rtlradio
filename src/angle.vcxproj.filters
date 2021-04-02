@@ -1,0 +1,965 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="External Libraries">
+      <UniqueIdentifier>{eb0262dd-4497-479f-81a3-67548f7bddf8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\compat">
+      <UniqueIdentifier>{f9548fb9-c133-4c83-850c-1b366fa2a60c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\compat\id">
+      <UniqueIdentifier>{0b36854d-105a-4920-9df1-dd0488ecf719}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\common">
+      <UniqueIdentifier>{a5f6b475-a134-4307-82ce-b1e3d6a10a1c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\compiler">
+      <UniqueIdentifier>{ef7d25b3-fa8a-4d4f-9449-43fd41c17964}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\compiler\preprocessor">
+      <UniqueIdentifier>{c40abca3-7e15-4b7f-af73-53c8126170ab}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\compiler\translator">
+      <UniqueIdentifier>{3def1161-d193-4e29-864a-887ab69e25ef}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\compiler\translator\tree_ops">
+      <UniqueIdentifier>{7be382d5-f235-4dac-90d9-8fd45979539b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\compiler\translator\tree_util">
+      <UniqueIdentifier>{f01796b6-11ae-4d1a-80e8-d72c3318e2a0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\image_util">
+      <UniqueIdentifier>{91f08152-9ad3-47d5-a2d7-699a5ae1dfce}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\libangle">
+      <UniqueIdentifier>{59cebd65-95ef-4c6f-bcb3-2c02321ba002}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\libangle\renderer">
+      <UniqueIdentifier>{c21083c0-5d10-4195-8e57-1f63c8dddbd9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\libangle\renderer\d3d">
+      <UniqueIdentifier>{e715b431-293e-49ec-9d1f-f45bb90dea78}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\libangle\renderer\d3d\d3d11">
+      <UniqueIdentifier>{71033f23-3011-4874-ac8e-afb8c35979dd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\libegl">
+      <UniqueIdentifier>{e0a7dac6-bea4-4e41-8989-1dde7eff8b59}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\libglesv2">
+      <UniqueIdentifier>{9af4385d-540e-473b-a0fe-6ed552e57b55}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="compat\id\commit.h">
+      <Filter>Header Files\compat\id</Filter>
+    </ClInclude>
+    <ClInclude Include="anglepch.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\depends\angle\src\common\aligned_memory.cpp">
+      <Filter>Source Files\common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\common\angleutils.cpp">
+      <Filter>Source Files\common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\common\debug.cpp">
+      <Filter>Source Files\common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\common\Float16ToFloat32.cpp">
+      <Filter>Source Files\common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\common\mathutil.cpp">
+      <Filter>Source Files\common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\common\matrix_utils.cpp">
+      <Filter>Source Files\common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\common\MemoryBuffer.cpp">
+      <Filter>Source Files\common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\common\PackedEGLEnums_autogen.cpp">
+      <Filter>Source Files\common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\common\PackedEnums.cpp">
+      <Filter>Source Files\common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\common\PackedGLEnums_autogen.cpp">
+      <Filter>Source Files\common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\common\string_utils.cpp">
+      <Filter>Source Files\common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\common\system_utils.cpp">
+      <Filter>Source Files\common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\common\system_utils_win.cpp">
+      <Filter>Source Files\common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\common\tls.cpp">
+      <Filter>Source Files\common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\common\uniform_type_info_autogen.cpp">
+      <Filter>Source Files\common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\common\utilities.cpp">
+      <Filter>Source Files\common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\libANGLE\angletypes.cpp">
+      <Filter>Source Files\libangle</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\libANGLE\AttributeMap.cpp">
+      <Filter>Source Files\libangle</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\libANGLE\BlobCache.cpp">
+      <Filter>Source Files\libangle</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\libANGLE\Buffer.cpp">
+      <Filter>Source Files\libangle</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\libANGLE\Caps.cpp">
+      <Filter>Source Files\libangle</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\libANGLE\Compiler.cpp">
+      <Filter>Source Files\libangle</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\libANGLE\Config.cpp">
+      <Filter>Source Files\libangle</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\libANGLE\Context.cpp">
+      <Filter>Source Files\libangle</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\libANGLE\Context_gles_1_0.cpp">
+      <Filter>Source Files\libangle</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\libANGLE\Debug.cpp">
+      <Filter>Source Files\libangle</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\libANGLE\Device.cpp">
+      <Filter>Source Files\libangle</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\libANGLE\Display.cpp">
+      <Filter>Source Files\libangle</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\libANGLE\EGLSync.cpp">
+      <Filter>Source Files\libangle</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\libANGLE\Error.cpp">
+      <Filter>Source Files\libangle</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\libANGLE\es3_copy_conversion_table_autogen.cpp">
+      <Filter>Source Files\libangle</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\libANGLE\Fence.cpp">
+      <Filter>Source Files\libangle</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\libANGLE\format_map_autogen.cpp">
+      <Filter>Source Files\libangle</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\libANGLE\formatutils.cpp">
+      <Filter>Source Files\libangle</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\libANGLE\Framebuffer.cpp">
+      <Filter>Source Files\libangle</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\libANGLE\FramebufferAttachment.cpp">
+      <Filter>Source Files\libangle</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\libANGLE\GLES1Renderer.cpp">
+      <Filter>Source Files\libangle</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\libANGLE\GLES1State.cpp">
+      <Filter>Source Files\libangle</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\libANGLE\HandleAllocator.cpp">
+      <Filter>Source Files\libangle</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\libANGLE\Image.cpp">
+      <Filter>Source Files\libangle</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\libANGLE\ImageIndex.cpp">
+      <Filter>Source Files\libangle</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\libANGLE\IndexRangeCache.cpp">
+      <Filter>Source Files\libangle</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\libANGLE\LoggingAnnotator.cpp">
+      <Filter>Source Files\libangle</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\libANGLE\Observer.cpp">
+      <Filter>Source Files\libangle</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\libANGLE\Platform.cpp">
+      <Filter>Source Files\libangle</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\libANGLE\Program.cpp">
+      <Filter>Source Files\libangle</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\libANGLE\ProgramLinkedResources.cpp">
+      <Filter>Source Files\libangle</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\libANGLE\ProgramPipeline.cpp">
+      <Filter>Source Files\libangle</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\libANGLE\Query.cpp">
+      <Filter>Source Files\libangle</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\libANGLE\queryconversions.cpp">
+      <Filter>Source Files\libangle</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\libANGLE\queryutils.cpp">
+      <Filter>Source Files\libangle</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\libANGLE\Renderbuffer.cpp">
+      <Filter>Source Files\libangle</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\libANGLE\ResourceManager.cpp">
+      <Filter>Source Files\libangle</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\libANGLE\Sampler.cpp">
+      <Filter>Source Files\libangle</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\libANGLE\Shader.cpp">
+      <Filter>Source Files\libangle</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\libANGLE\State.cpp">
+      <Filter>Source Files\libangle</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\libANGLE\Stream.cpp">
+      <Filter>Source Files\libangle</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\libANGLE\Surface.cpp">
+      <Filter>Source Files\libangle</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\libANGLE\Texture.cpp">
+      <Filter>Source Files\libangle</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\libANGLE\Thread.cpp">
+      <Filter>Source Files\libangle</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\libANGLE\TransformFeedback.cpp">
+      <Filter>Source Files\libangle</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\libANGLE\Uniform.cpp">
+      <Filter>Source Files\libangle</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\libANGLE\VaryingPacking.cpp">
+      <Filter>Source Files\libangle</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\libANGLE\VertexArray.cpp">
+      <Filter>Source Files\libangle</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\libANGLE\VertexAttribute.cpp">
+      <Filter>Source Files\libangle</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\libANGLE\WorkerThread.cpp">
+      <Filter>Source Files\libangle</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\libGLESv2\entry_points_gles_1_0_autogen.cpp">
+      <Filter>Source Files\libglesv2</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\libGLESv2\entry_points_gles_2_0_autogen.cpp">
+      <Filter>Source Files\libglesv2</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\libGLESv2\entry_points_gles_3_0_autogen.cpp">
+      <Filter>Source Files\libglesv2</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\libGLESv2\entry_points_gles_3_1_autogen.cpp">
+      <Filter>Source Files\libglesv2</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\libGLESv2\entry_points_gles_ext_autogen.cpp">
+      <Filter>Source Files\libglesv2</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\libGLESv2\global_state.cpp">
+      <Filter>Source Files\libglesv2</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\common\third_party\base\anglebase\sha1.cc">
+      <Filter>Source Files\common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\common\third_party\xxhash\xxhash.c">
+      <Filter>Source Files\common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\common\third_party\smhasher\src\PMurHash.cpp">
+      <Filter>Source Files\common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\libANGLE\renderer\ContextImpl.cpp">
+      <Filter>Source Files\libangle\renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\libANGLE\renderer\DeviceImpl.cpp">
+      <Filter>Source Files\libangle\renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\libANGLE\renderer\DisplayImpl.cpp">
+      <Filter>Source Files\libangle\renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\libANGLE\renderer\driver_utils.cpp">
+      <Filter>Source Files\libangle\renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\libANGLE\renderer\Format_table_autogen.cpp">
+      <Filter>Source Files\libangle\renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\libANGLE\renderer\load_functions_table_autogen.cpp">
+      <Filter>Source Files\libangle\renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\libANGLE\renderer\QueryImpl.cpp">
+      <Filter>Source Files\libangle\renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\libANGLE\renderer\renderer_utils.cpp">
+      <Filter>Source Files\libangle\renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\libANGLE\renderer\SurfaceImpl.cpp">
+      <Filter>Source Files\libangle\renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\libANGLE\renderer\d3d\BufferD3D.cpp">
+      <Filter>Source Files\libangle\renderer\d3d</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\libANGLE\renderer\d3d\CompilerD3D.cpp">
+      <Filter>Source Files\libangle\renderer\d3d</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\libANGLE\renderer\d3d\DeviceD3D.cpp">
+      <Filter>Source Files\libangle\renderer\d3d</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\libANGLE\renderer\d3d\DisplayD3D.cpp">
+      <Filter>Source Files\libangle\renderer\d3d</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\libANGLE\renderer\d3d\DynamicHLSL.cpp">
+      <Filter>Source Files\libangle\renderer\d3d</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\libANGLE\renderer\d3d\DynamicImage2DHLSL.cpp">
+      <Filter>Source Files\libangle\renderer\d3d</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\libANGLE\renderer\d3d\EGLImageD3D.cpp">
+      <Filter>Source Files\libangle\renderer\d3d</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\libANGLE\renderer\d3d\FramebufferD3D.cpp">
+      <Filter>Source Files\libangle\renderer\d3d</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\libANGLE\renderer\d3d\HLSLCompiler.cpp">
+      <Filter>Source Files\libangle\renderer\d3d</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\libANGLE\renderer\d3d\ImageD3D.cpp">
+      <Filter>Source Files\libangle\renderer\d3d</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\libANGLE\renderer\d3d\IndexBuffer.cpp">
+      <Filter>Source Files\libangle\renderer\d3d</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\libANGLE\renderer\d3d\IndexDataManager.cpp">
+      <Filter>Source Files\libangle\renderer\d3d</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\libANGLE\renderer\d3d\NativeWindowD3D.cpp">
+      <Filter>Source Files\libangle\renderer\d3d</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\libANGLE\renderer\d3d\ProgramD3D.cpp">
+      <Filter>Source Files\libangle\renderer\d3d</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\libANGLE\renderer\d3d\RenderbufferD3D.cpp">
+      <Filter>Source Files\libangle\renderer\d3d</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\libANGLE\renderer\d3d\RendererD3D.cpp">
+      <Filter>Source Files\libangle\renderer\d3d</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\libANGLE\renderer\d3d\RenderTargetD3D.cpp">
+      <Filter>Source Files\libangle\renderer\d3d</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\libANGLE\renderer\d3d\ShaderD3D.cpp">
+      <Filter>Source Files\libangle\renderer\d3d</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\libANGLE\renderer\d3d\ShaderExecutableD3D.cpp">
+      <Filter>Source Files\libangle\renderer\d3d</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\libANGLE\renderer\d3d\SurfaceD3D.cpp">
+      <Filter>Source Files\libangle\renderer\d3d</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\libANGLE\renderer\d3d\SwapChainD3D.cpp">
+      <Filter>Source Files\libangle\renderer\d3d</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\libANGLE\renderer\d3d\TextureD3D.cpp">
+      <Filter>Source Files\libangle\renderer\d3d</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\libANGLE\renderer\d3d\VertexBuffer.cpp">
+      <Filter>Source Files\libangle\renderer\d3d</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\libANGLE\renderer\d3d\VertexDataManager.cpp">
+      <Filter>Source Files\libangle\renderer\d3d</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\libANGLE\validationEGL.cpp">
+      <Filter>Source Files\libangle</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\libANGLE\validationES.cpp">
+      <Filter>Source Files\libangle</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\libANGLE\validationES1.cpp">
+      <Filter>Source Files\libangle</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\libANGLE\validationES2.cpp">
+      <Filter>Source Files\libangle</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\libANGLE\validationES3.cpp">
+      <Filter>Source Files\libangle</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\libANGLE\validationES31.cpp">
+      <Filter>Source Files\libangle</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\libANGLE\MemoryProgramCache.cpp">
+      <Filter>Source Files\libangle</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\compiler\translator\tree_util\FindMain.cpp">
+      <Filter>Source Files\compiler\translator\tree_util</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\compiler\translator\tree_util\FindSymbolNode.cpp">
+      <Filter>Source Files\compiler\translator\tree_util</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\compiler\translator\tree_util\IntermNode_util.cpp">
+      <Filter>Source Files\compiler\translator\tree_util</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\compiler\translator\tree_util\IntermNodePatternMatcher.cpp">
+      <Filter>Source Files\compiler\translator\tree_util</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\compiler\translator\tree_util\IntermTraverse.cpp">
+      <Filter>Source Files\compiler\translator\tree_util</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\compiler\translator\tree_util\ReplaceVariable.cpp">
+      <Filter>Source Files\compiler\translator\tree_util</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\compiler\translator\tree_util\RunAtTheEndOfShader.cpp">
+      <Filter>Source Files\compiler\translator\tree_util</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\compiler\translator\tree_ops\ClampPointSize.cpp">
+      <Filter>Source Files\compiler\translator\tree_ops</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\compiler\translator\tree_ops\DeclareAndInitBuiltinsForInstancedMultiview.cpp">
+      <Filter>Source Files\compiler\translator\tree_ops</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\compiler\translator\tree_ops\DeferGlobalInitializers.cpp">
+      <Filter>Source Files\compiler\translator\tree_ops</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\compiler\translator\tree_ops\EmulateGLFragColorBroadcast.cpp">
+      <Filter>Source Files\compiler\translator\tree_ops</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\compiler\translator\tree_ops\EmulatePrecision.cpp">
+      <Filter>Source Files\compiler\translator\tree_ops</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\compiler\translator\tree_ops\FoldExpressions.cpp">
+      <Filter>Source Files\compiler\translator\tree_ops</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\compiler\translator\tree_ops\InitializeVariables.cpp">
+      <Filter>Source Files\compiler\translator\tree_ops</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\compiler\translator\tree_ops\PruneEmptyCases.cpp">
+      <Filter>Source Files\compiler\translator\tree_ops</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\compiler\translator\tree_ops\PruneNoOps.cpp">
+      <Filter>Source Files\compiler\translator\tree_ops</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\compiler\translator\tree_ops\RemoveArrayLengthMethod.cpp">
+      <Filter>Source Files\compiler\translator\tree_ops</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\compiler\translator\tree_ops\RemoveInvariantDeclaration.cpp">
+      <Filter>Source Files\compiler\translator\tree_ops</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\compiler\translator\tree_ops\RemovePow.cpp">
+      <Filter>Source Files\compiler\translator\tree_ops</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\compiler\translator\tree_ops\RemoveUnreferencedVariables.cpp">
+      <Filter>Source Files\compiler\translator\tree_ops</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\compiler\translator\tree_ops\RewriteTexelFetchOffset.cpp">
+      <Filter>Source Files\compiler\translator\tree_ops</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\compiler\translator\tree_ops\ScalarizeVecAndMatConstructorArgs.cpp">
+      <Filter>Source Files\compiler\translator\tree_ops</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\compiler\translator\tree_ops\SeparateDeclarations.cpp">
+      <Filter>Source Files\compiler\translator\tree_ops</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\compiler\translator\tree_ops\SimplifyLoopConditions.cpp">
+      <Filter>Source Files\compiler\translator\tree_ops</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\compiler\translator\tree_ops\SplitSequenceOperator.cpp">
+      <Filter>Source Files\compiler\translator\tree_ops</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\compiler\translator\ASTMetadataHLSL.cpp">
+      <Filter>Source Files\compiler\translator</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\compiler\translator\AtomicCounterFunctionHLSL.cpp">
+      <Filter>Source Files\compiler\translator</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\compiler\translator\blocklayout.cpp">
+      <Filter>Source Files\compiler\translator</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\compiler\translator\blocklayoutHLSL.cpp">
+      <Filter>Source Files\compiler\translator</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\compiler\translator\BuiltInFunctionEmulator.cpp">
+      <Filter>Source Files\compiler\translator</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\compiler\translator\BuiltInFunctionEmulatorGLSL.cpp">
+      <Filter>Source Files\compiler\translator</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\compiler\translator\BuiltInFunctionEmulatorHLSL.cpp">
+      <Filter>Source Files\compiler\translator</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\compiler\translator\CallDAG.cpp">
+      <Filter>Source Files\compiler\translator</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\compiler\translator\CodeGen.cpp">
+      <Filter>Source Files\compiler\translator</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\compiler\translator\CollectVariables.cpp">
+      <Filter>Source Files\compiler\translator</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\compiler\translator\Compiler.cpp">
+      <Filter>Source Files\compiler\translator</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\compiler\translator\ConstantUnion.cpp">
+      <Filter>Source Files\compiler\translator</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\compiler\translator\Declarator.cpp">
+      <Filter>Source Files\compiler\translator</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\compiler\translator\Diagnostics.cpp">
+      <Filter>Source Files\compiler\translator</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\compiler\translator\DirectiveHandler.cpp">
+      <Filter>Source Files\compiler\translator</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\compiler\translator\emulated_builtin_functions_hlsl_autogen.cpp">
+      <Filter>Source Files\compiler\translator</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\compiler\translator\ExtensionBehavior.cpp">
+      <Filter>Source Files\compiler\translator</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\compiler\translator\ExtensionGLSL.cpp">
+      <Filter>Source Files\compiler\translator</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\compiler\translator\FlagStd140Structs.cpp">
+      <Filter>Source Files\compiler\translator</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\compiler\translator\FunctionLookup.cpp">
+      <Filter>Source Files\compiler\translator</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\compiler\translator\HashNames.cpp">
+      <Filter>Source Files\compiler\translator</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\compiler\translator\ImageFunctionHLSL.cpp">
+      <Filter>Source Files\compiler\translator</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\compiler\translator\ImmutableStringBuilder.cpp">
+      <Filter>Source Files\compiler\translator</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\compiler\translator\InfoSink.cpp">
+      <Filter>Source Files\compiler\translator</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\compiler\translator\Initialize.cpp">
+      <Filter>Source Files\compiler\translator</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\compiler\translator\InitializeDll.cpp">
+      <Filter>Source Files\compiler\translator</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\compiler\translator\IntermNode.cpp">
+      <Filter>Source Files\compiler\translator</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\compiler\translator\IsASTDepthBelowLimit.cpp">
+      <Filter>Source Files\compiler\translator</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\compiler\translator\Operator.cpp">
+      <Filter>Source Files\compiler\translator</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\compiler\translator\OutputESSL.cpp">
+      <Filter>Source Files\compiler\translator</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\compiler\translator\OutputGLSL.cpp">
+      <Filter>Source Files\compiler\translator</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\compiler\translator\OutputGLSLBase.cpp">
+      <Filter>Source Files\compiler\translator</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\compiler\translator\OutputHLSL.cpp">
+      <Filter>Source Files\compiler\translator</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\compiler\translator\OutputTree.cpp">
+      <Filter>Source Files\compiler\translator</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\compiler\translator\OutputVulkanGLSL.cpp">
+      <Filter>Source Files\compiler\translator</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\compiler\translator\ParseContext.cpp">
+      <Filter>Source Files\compiler\translator</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\compiler\translator\PoolAlloc.cpp">
+      <Filter>Source Files\compiler\translator</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\compiler\translator\QualifierTypes.cpp">
+      <Filter>Source Files\compiler\translator</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\compiler\translator\ResourcesHLSL.cpp">
+      <Filter>Source Files\compiler\translator</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\compiler\translator\ShaderLang.cpp">
+      <Filter>Source Files\compiler\translator</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\compiler\translator\ShaderStorageBlockFunctionHLSL.cpp">
+      <Filter>Source Files\compiler\translator</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\compiler\translator\ShaderStorageBlockOutputHLSL.cpp">
+      <Filter>Source Files\compiler\translator</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\compiler\translator\ShaderVars.cpp">
+      <Filter>Source Files\compiler\translator</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\compiler\translator\StructureHLSL.cpp">
+      <Filter>Source Files\compiler\translator</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\compiler\translator\Symbol.cpp">
+      <Filter>Source Files\compiler\translator</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\compiler\translator\SymbolTable.cpp">
+      <Filter>Source Files\compiler\translator</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\compiler\translator\SymbolUniqueId.cpp">
+      <Filter>Source Files\compiler\translator</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\compiler\translator\TextureFunctionHLSL.cpp">
+      <Filter>Source Files\compiler\translator</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\compiler\translator\TranslatorESSL.cpp">
+      <Filter>Source Files\compiler\translator</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\compiler\translator\TranslatorGLSL.cpp">
+      <Filter>Source Files\compiler\translator</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\compiler\translator\TranslatorHLSL.cpp">
+      <Filter>Source Files\compiler\translator</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\compiler\translator\TranslatorVulkan.cpp">
+      <Filter>Source Files\compiler\translator</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\compiler\translator\Types.cpp">
+      <Filter>Source Files\compiler\translator</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\compiler\translator\util.cpp">
+      <Filter>Source Files\compiler\translator</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\compiler\translator\UtilsHLSL.cpp">
+      <Filter>Source Files\compiler\translator</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\compiler\translator\ValidateAST.cpp">
+      <Filter>Source Files\compiler\translator</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\compiler\translator\ValidateGlobalInitializer.cpp">
+      <Filter>Source Files\compiler\translator</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\compiler\translator\ValidateLimitations.cpp">
+      <Filter>Source Files\compiler\translator</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\compiler\translator\ValidateMaxParameters.cpp">
+      <Filter>Source Files\compiler\translator</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\compiler\translator\ValidateOutputs.cpp">
+      <Filter>Source Files\compiler\translator</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\compiler\translator\ValidateSwitch.cpp">
+      <Filter>Source Files\compiler\translator</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\compiler\translator\ValidateVaryingLocations.cpp">
+      <Filter>Source Files\compiler\translator</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\compiler\translator\VariablePacker.cpp">
+      <Filter>Source Files\compiler\translator</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\compiler\translator\VersionGLSL.cpp">
+      <Filter>Source Files\compiler\translator</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\libEGL\libEGL.cpp">
+      <Filter>Source Files\libegl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\libGLESv2\entry_points_egl.cpp">
+      <Filter>Source Files\libglesv2</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\libGLESv2\entry_points_egl_ext.cpp">
+      <Filter>Source Files\libglesv2</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\libGLESv2\libGLESv2_autogen.cpp">
+      <Filter>Source Files\libglesv2</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\libGLESv2\proc_table_autogen.cpp">
+      <Filter>Source Files\libglesv2</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\common\event_tracer.cpp">
+      <Filter>Source Files\common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\libANGLE\HandleRangeAllocator.cpp">
+      <Filter>Source Files\libangle</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\libANGLE\Path.cpp">
+      <Filter>Source Files\libangle</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\third_party\systeminfo\SystemInfo.cpp">
+      <Filter>Source Files\libangle</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\libANGLE\renderer\d3d\d3d11\Blit11.cpp">
+      <Filter>Source Files\libangle\renderer\d3d\d3d11</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\libANGLE\renderer\d3d\d3d11\Buffer11.cpp">
+      <Filter>Source Files\libangle\renderer\d3d\d3d11</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\libANGLE\renderer\d3d\d3d11\Clear11.cpp">
+      <Filter>Source Files\libangle\renderer\d3d\d3d11</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\libANGLE\renderer\d3d\d3d11\Context11.cpp">
+      <Filter>Source Files\libangle\renderer\d3d\d3d11</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\libANGLE\renderer\d3d\d3d11\DebugAnnotator11.cpp">
+      <Filter>Source Files\libangle\renderer\d3d\d3d11</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\libANGLE\renderer\d3d\d3d11\dxgi_format_map_autogen.cpp">
+      <Filter>Source Files\libangle\renderer\d3d\d3d11</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\libANGLE\renderer\d3d\d3d11\dxgi_support_table.cpp">
+      <Filter>Source Files\libangle\renderer\d3d\d3d11</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\libANGLE\renderer\d3d\d3d11\Fence11.cpp">
+      <Filter>Source Files\libangle\renderer\d3d\d3d11</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\libANGLE\renderer\d3d\d3d11\formatutils11.cpp">
+      <Filter>Source Files\libangle\renderer\d3d\d3d11</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\libANGLE\renderer\d3d\d3d11\Framebuffer11.cpp">
+      <Filter>Source Files\libangle\renderer\d3d\d3d11</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\libANGLE\renderer\d3d\d3d11\Image11.cpp">
+      <Filter>Source Files\libangle\renderer\d3d\d3d11</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\libANGLE\renderer\d3d\d3d11\IndexBuffer11.cpp">
+      <Filter>Source Files\libangle\renderer\d3d\d3d11</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\libANGLE\renderer\d3d\d3d11\InputLayoutCache.cpp">
+      <Filter>Source Files\libangle\renderer\d3d\d3d11</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\libANGLE\renderer\d3d\d3d11\PixelTransfer11.cpp">
+      <Filter>Source Files\libangle\renderer\d3d\d3d11</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\libANGLE\renderer\d3d\d3d11\Program11.cpp">
+      <Filter>Source Files\libangle\renderer\d3d\d3d11</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\libANGLE\renderer\d3d\d3d11\ProgramPipeline11.cpp">
+      <Filter>Source Files\libangle\renderer\d3d\d3d11</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\libANGLE\renderer\d3d\d3d11\Query11.cpp">
+      <Filter>Source Files\libangle\renderer\d3d\d3d11</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\libANGLE\renderer\d3d\d3d11\Renderer11.cpp">
+      <Filter>Source Files\libangle\renderer\d3d\d3d11</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\libANGLE\renderer\d3d\d3d11\renderer11_utils.cpp">
+      <Filter>Source Files\libangle\renderer\d3d\d3d11</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\libANGLE\renderer\d3d\d3d11\RenderStateCache.cpp">
+      <Filter>Source Files\libangle\renderer\d3d\d3d11</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\libANGLE\renderer\d3d\d3d11\RenderTarget11.cpp">
+      <Filter>Source Files\libangle\renderer\d3d\d3d11</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\libANGLE\renderer\d3d\d3d11\ResourceManager11.cpp">
+      <Filter>Source Files\libangle\renderer\d3d\d3d11</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\libANGLE\renderer\d3d\d3d11\ShaderExecutable11.cpp">
+      <Filter>Source Files\libangle\renderer\d3d\d3d11</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\libANGLE\renderer\d3d\d3d11\StateManager11.cpp">
+      <Filter>Source Files\libangle\renderer\d3d\d3d11</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\libANGLE\renderer\d3d\d3d11\StreamProducerD3DTexture.cpp">
+      <Filter>Source Files\libangle\renderer\d3d\d3d11</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\libANGLE\renderer\d3d\d3d11\SwapChain11.cpp">
+      <Filter>Source Files\libangle\renderer\d3d\d3d11</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\libANGLE\renderer\d3d\d3d11\texture_format_table.cpp">
+      <Filter>Source Files\libangle\renderer\d3d\d3d11</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\libANGLE\renderer\d3d\d3d11\texture_format_table_autogen.cpp">
+      <Filter>Source Files\libangle\renderer\d3d\d3d11</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\libANGLE\renderer\d3d\d3d11\TextureStorage11.cpp">
+      <Filter>Source Files\libangle\renderer\d3d\d3d11</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\libANGLE\renderer\d3d\d3d11\TransformFeedback11.cpp">
+      <Filter>Source Files\libangle\renderer\d3d\d3d11</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\libANGLE\renderer\d3d\d3d11\Trim11.cpp">
+      <Filter>Source Files\libangle\renderer\d3d\d3d11</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\libANGLE\renderer\d3d\d3d11\VertexArray11.cpp">
+      <Filter>Source Files\libangle\renderer\d3d\d3d11</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\libANGLE\renderer\d3d\d3d11\VertexBuffer11.cpp">
+      <Filter>Source Files\libangle\renderer\d3d\d3d11</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\libANGLE\renderer\d3d\d3d11\win32\NativeWindow11Win32.cpp">
+      <Filter>Source Files\libangle\renderer\d3d\d3d11</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\libANGLE\renderer\d3d\d3d11\converged\CompositorNativeWindow11.cpp">
+      <Filter>Source Files\libangle\renderer\d3d\d3d11</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\image_util\copyimage.cpp">
+      <Filter>Source Files\image_util</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\image_util\imageformats.cpp">
+      <Filter>Source Files\image_util</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\image_util\loadimage.cpp">
+      <Filter>Source Files\image_util</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\image_util\loadimage_etc.cpp">
+      <Filter>Source Files\image_util</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\compiler\preprocessor\DiagnosticsBase.cpp">
+      <Filter>Source Files\compiler\preprocessor</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\compiler\preprocessor\DirectiveHandlerBase.cpp">
+      <Filter>Source Files\compiler\preprocessor</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\compiler\preprocessor\DirectiveParser.cpp">
+      <Filter>Source Files\compiler\preprocessor</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\compiler\preprocessor\ExpressionParser.cpp">
+      <Filter>Source Files\compiler\preprocessor</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\compiler\preprocessor\Input.cpp">
+      <Filter>Source Files\compiler\preprocessor</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\compiler\preprocessor\Lexer.cpp">
+      <Filter>Source Files\compiler\preprocessor</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\compiler\preprocessor\Macro.cpp">
+      <Filter>Source Files\compiler\preprocessor</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\compiler\preprocessor\MacroExpander.cpp">
+      <Filter>Source Files\compiler\preprocessor</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\compiler\preprocessor\Preprocessor.cpp">
+      <Filter>Source Files\compiler\preprocessor</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\compiler\preprocessor\Token.cpp">
+      <Filter>Source Files\compiler\preprocessor</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\compiler\preprocessor\Tokenizer.cpp">
+      <Filter>Source Files\compiler\preprocessor</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\compiler\translator\tree_ops\AddAndTrueToLoopCondition.cpp">
+      <Filter>Source Files\compiler\translator\tree_ops</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\compiler\translator\tree_ops\BreakVariableAliasingInInnerLoops.cpp">
+      <Filter>Source Files\compiler\translator\tree_ops</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\compiler\translator\tree_ops\ClampFragDepth.cpp">
+      <Filter>Source Files\compiler\translator\tree_ops</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\compiler\translator\tree_ops\EmulateGLDrawID.cpp">
+      <Filter>Source Files\compiler\translator\tree_ops</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\compiler\translator\tree_ops\ExpandIntegerPowExpressions.cpp">
+      <Filter>Source Files\compiler\translator\tree_ops</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\compiler\translator\tree_ops\NameEmbeddedUniformStructs.cpp">
+      <Filter>Source Files\compiler\translator\tree_ops</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\compiler\translator\tree_ops\RecordConstantPrecision.cpp">
+      <Filter>Source Files\compiler\translator\tree_ops</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\compiler\translator\tree_ops\RegenerateStructNames.cpp">
+      <Filter>Source Files\compiler\translator\tree_ops</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\compiler\translator\tree_ops\RewriteAtomicFunctionExpressions.cpp">
+      <Filter>Source Files\compiler\translator\tree_ops</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\compiler\translator\tree_ops\RewriteDoWhile.cpp">
+      <Filter>Source Files\compiler\translator\tree_ops</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\compiler\translator\tree_ops\RewriteExpressionsWithShaderStorageBlock.cpp">
+      <Filter>Source Files\compiler\translator\tree_ops</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\compiler\translator\tree_ops\RewriteRepeatedAssignToSwizzled.cpp">
+      <Filter>Source Files\compiler\translator\tree_ops</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\compiler\translator\tree_ops\RewriteStructSamplers.cpp">
+      <Filter>Source Files\compiler\translator\tree_ops</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\compiler\translator\tree_ops\RewriteUnaryMinusOperatorFloat.cpp">
+      <Filter>Source Files\compiler\translator\tree_ops</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\compiler\translator\tree_ops\RewriteUnaryMinusOperatorInt.cpp">
+      <Filter>Source Files\compiler\translator\tree_ops</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\compiler\translator\tree_ops\UnfoldShortCircuitAST.cpp">
+      <Filter>Source Files\compiler\translator\tree_ops</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\compiler\translator\tree_ops\UseInterfaceBlockFields.cpp">
+      <Filter>Source Files\compiler\translator\tree_ops</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\compiler\translator\tree_ops\VectorizeVectorScalarArithmetic.cpp">
+      <Filter>Source Files\compiler\translator\tree_ops</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\compiler\translator\glslang_lex.cpp">
+      <Filter>Source Files\compiler\translator</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\compiler\translator\glslang_tab.cpp">
+      <Filter>Source Files\compiler\translator</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\third_party\compiler\ArrayBoundsClamper.cpp">
+      <Filter>Source Files\compiler\translator</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\libANGLE\renderer\TextureImpl.cpp">
+      <Filter>Source Files\libangle\renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\compiler\translator\SymbolTable_autogen.cpp">
+      <Filter>Source Files\compiler\translator</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\compiler\translator\ImmutableString.cpp">
+      <Filter>Source Files\compiler\translator</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\compiler\translator\tree_ops\AddDefaultReturnStatements.cpp">
+      <Filter>Source Files\compiler\translator\tree_ops</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\compiler\translator\tree_ops\ArrayReturnValueToOutParameter.cpp">
+      <Filter>Source Files\compiler\translator\tree_ops</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\compiler\translator\tree_ops\RemoveDynamicIndexing.cpp">
+      <Filter>Source Files\compiler\translator\tree_ops</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\compiler\translator\tree_ops\RemoveSwitchFallThrough.cpp">
+      <Filter>Source Files\compiler\translator\tree_ops</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\compiler\translator\tree_ops\RewriteElseBlocks.cpp">
+      <Filter>Source Files\compiler\translator\tree_ops</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\compiler\translator\tree_ops\SeparateArrayConstructorStatements.cpp">
+      <Filter>Source Files\compiler\translator\tree_ops</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\compiler\translator\tree_ops\SeparateArrayInitialization.cpp">
+      <Filter>Source Files\compiler\translator\tree_ops</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\compiler\translator\tree_ops\SeparateExpressionsReturningArrays.cpp">
+      <Filter>Source Files\compiler\translator\tree_ops</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\compiler\translator\tree_ops\UnfoldShortCircuitToIf.cpp">
+      <Filter>Source Files\compiler\translator\tree_ops</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\angle\src\compiler\translator\tree_ops\WrapSwitchStatementsInBlocks.cpp">
+      <Filter>Source Files\compiler\translator\tree_ops</Filter>
+    </ClCompile>
+    <ClCompile Include="anglepch.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>

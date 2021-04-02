@@ -61,8 +61,16 @@
 
   </Target>
 
+  <!-- Generates the ANGLE static library for windows-win32 -->
+  <Target Name="angle-win32">
+
+    <MakeDir Directories="out\windows-win32" ContinueOnError="false"/>
+    <MSBuild Projects="src\angle.vcxproj" Properties="Configuration=$(Configuration);Platform=Win32" Targets="Build" ContinueOnError="false"/>
+
+  </Target>
+
   <!-- BUILD: WINDOWS-WIN32 -->
-  <Target Name="windows-win32" DependsOnTargets="AddonVersion">
+  <Target Name="windows-win32" DependsOnTargets="AddonVersion;angle-win32">
 
     <MakeDir Directories="out\windows-win32" ContinueOnError="false"/>
     <MakeDir Directories="out\repository" ContinueOnError="false"/>
@@ -75,6 +83,7 @@
     <MSBuild Projects="src\rtl_tcp.vcxproj" Properties="Configuration=$(Configuration);Platform=Win32" Targets="Build" ContinueOnError="false"/>
     <MSBuild Projects="src\rtl_test.vcxproj" Properties="Configuration=$(Configuration);Platform=Win32" Targets="Build" ContinueOnError="false"/>
     <MSBuild Projects="src\sqlite3.vcxproj" Properties="Configuration=$(Configuration);Platform=Win32" Targets="Build" ContinueOnError="false"/>
+    <MSBuild Projects="src\angle.vcxproj" Properties="Configuration=$(Configuration);Platform=Win32" Targets="Build" ContinueOnError="false"/>
     <MSBuild Projects="src\windows.vcxproj" Properties="Configuration=$(Configuration);Platform=Win32" Targets="Build" ContinueOnError="false"/>
     <Exec Command="TextTransform.exe template\addon.xml.tt -out tmp\addon-windows-win32.xml -a !!platform!windows-i686 -a !!libraryplatform!windx -a !!libraryname!zuki.pvr.rtlradio.dll -a !!changelogtxt!pvr.rtlradio\changelog.txt -a &quot;!!displayversion!$(DisplayVersion)&quot; -a &quot;!!repomanifest!windows-win32.xml.gz&quot;" ContinueOnError="false"/>
     <XmlPeek XmlInputPath="tmp\addon-windows-win32.xml" Query="/addon/@version">
@@ -94,8 +103,16 @@
 
   </Target>
 
+  <!-- Generates the ANGLE static library for windows-x64 -->
+  <Target Name="angle-x64">
+
+    <MakeDir Directories="out\windows-x64" ContinueOnError="false"/>
+    <MSBuild Projects="src\angle.vcxproj" Properties="Configuration=$(Configuration);Platform=x64" Targets="Build" ContinueOnError="false"/>
+
+  </Target>
+
   <!-- BUILD: WINDOWS-X64 -->
-  <Target Name="windows-x64" DependsOnTargets="AddonVersion">
+  <Target Name="windows-x64" DependsOnTargets="AddonVersion;angle-x64">
 
     <MakeDir Directories="out\windows-x64" ContinueOnError="false"/>
     <MakeDir Directories="out\repository" ContinueOnError="false"/>
