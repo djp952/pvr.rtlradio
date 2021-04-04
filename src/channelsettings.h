@@ -146,6 +146,30 @@ private:
 	// Converts a percentage into a manual gain value
 	int percent_to_gain(int percent) const;
 
+	// render_signalmeter_create
+	//
+	// Creates the needed rendering control for Kodi
+	static bool render_signalmeter_create(kodi::gui::ClientHandle handle, int x, int y, int w, int h, kodi::HardwareContext device);
+	bool render_signalmeter_create(int x, int y, int w, int h, kodi::HardwareContext device);
+
+	// render_signalmeter_dirty
+	//
+	// Determines if a region is dirty and needs to be rendered
+	static bool render_signalmeter_dirty(kodi::gui::ClientHandle handle);
+	bool render_signalmeter_dirty(void);
+
+	// render_signalmeter_render
+	//
+	// Renders the control
+	static void render_signalmeter_render(kodi::gui::ClientHandle handle);
+	void render_signalmeter_render(void);
+
+	// render_signalmeter_stop
+	//
+	// Stops the rendering process for the control
+	static void render_signalmeter_stop(kodi::gui::ClientHandle handle);
+	void render_signalmeter_stop(void);
+
 	// update_gain
 	//
 	// Updates the state of the gain control

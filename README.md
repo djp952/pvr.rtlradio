@@ -31,6 +31,7 @@ sudo add-apt-repository 'deb http://archive.ubuntu.com/ubuntu/ xenial main unive
 sudo apt-get update
 sudo apt-get install gcc-4.9 g++-4.9 libc6-dev:i386 libstdc++-4.9-dev:i386 lib32gcc-4.9-dev
 sudo apt-get install gcc-4.9-arm-linux-gnueabihf g++-4.9-arm-linux-gnueabihf gcc-4.9-arm-linux-gnueabi g++-4.9-arm-linux-gnueabi gcc-4.9-aarch64-linux-gnu g++-4.9-aarch64-linux-gnu
+sudo apt-get install libgles2-mesa-dev libgles2-mesa-dev:i386
 ```
    
 **OPTIONAL: CONFIGURE ANDROID NDK**   

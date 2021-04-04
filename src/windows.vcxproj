@@ -101,14 +101,14 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;_CRT_SECURE_NO_WARNINGS;rtlsdr_STATIC;FMDSP_USE_DOUBLE_PRECISION;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(ProjectDir)..\depends\xbmc\xbmc;$(ProjectDir)..\depends\xbmc\xbmc\platform\win32;$(ProjectDir)..\depends\xbmc\xbmc\addons\kodi-dev-kit\include;$(ProjectDir)..\depends\xbmc\xbmc\cores\VideoPlayer\Interface\Addon;$(ProjectDir)..\depends\rapidjson\include;$(ProjectDir)..\depends\rtl-sdr\include;$(ProjectDir)..\depends\sqlite;$(ProjectDir)..\tmp\version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\depends\xbmc\xbmc;$(ProjectDir)..\depends\xbmc\xbmc\platform\win32;$(ProjectDir)..\depends\xbmc\xbmc\addons\kodi-dev-kit\include;$(ProjectDir)..\depends\xbmc\xbmc\cores\VideoPlayer\Interface\Addon;$(ProjectDir)..\depends\angle\include;$(ProjectDir)..\depends\rapidjson\include;$(ProjectDir)..\depends\rtl-sdr\include;$(ProjectDir)..\depends\sqlite;$(ProjectDir)..\tmp\version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp14</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ModuleDefinitionFile>$(ProjectDir)..\exportlist\exportlist.windows</ModuleDefinitionFile>
-      <AdditionalDependencies>ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>$(ProjectDir)..\out\windows-$(Platform)\$(Configuration)\angle.lib;dxguid.lib;ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PreBuildEvent />
     <PostBuildEvent />
@@ -120,14 +120,14 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;_CRT_SECURE_NO_WARNINGS;rtlsdr_STATIC;FMDSP_USE_DOUBLE_PRECISION;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(ProjectDir)..\depends\xbmc\xbmc;$(ProjectDir)..\depends\xbmc\xbmc\platform\win32;$(ProjectDir)..\depends\xbmc\xbmc\addons\kodi-dev-kit\include;$(ProjectDir)..\depends\xbmc\xbmc\cores\VideoPlayer\Interface\Addon;$(ProjectDir)..\depends\rapidjson\include;$(ProjectDir)..\depends\rtl-sdr\include;$(ProjectDir)..\depends\sqlite;$(ProjectDir)..\tmp\version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\depends\xbmc\xbmc;$(ProjectDir)..\depends\xbmc\xbmc\platform\win32;$(ProjectDir)..\depends\xbmc\xbmc\addons\kodi-dev-kit\include;$(ProjectDir)..\depends\xbmc\xbmc\cores\VideoPlayer\Interface\Addon;$(ProjectDir)..\depends\angle\include;$(ProjectDir)..\depends\rapidjson\include;$(ProjectDir)..\depends\rtl-sdr\include;$(ProjectDir)..\depends\sqlite;$(ProjectDir)..\tmp\version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp14</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ModuleDefinitionFile>$(ProjectDir)..\exportlist\exportlist.windows</ModuleDefinitionFile>
-      <AdditionalDependencies>ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>$(ProjectDir)..\out\windows-$(Platform)\$(Configuration)\angle.lib;dxguid.lib;ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PreBuildEvent />
     <PostBuildEvent />
@@ -141,7 +141,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;_CRT_SECURE_NO_WARNINGS;rtlsdr_STATIC;FMDSP_USE_DOUBLE_PRECISION;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(ProjectDir)..\depends\xbmc\xbmc;$(ProjectDir)..\depends\xbmc\xbmc\platform\win32;$(ProjectDir)..\depends\xbmc\xbmc\addons\kodi-dev-kit\include;$(ProjectDir)..\depends\xbmc\xbmc\cores\VideoPlayer\Interface\Addon;$(ProjectDir)..\depends\rapidjson\include;$(ProjectDir)..\depends\rtl-sdr\include;$(ProjectDir)..\depends\sqlite;$(ProjectDir)..\tmp\version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\depends\xbmc\xbmc;$(ProjectDir)..\depends\xbmc\xbmc\platform\win32;$(ProjectDir)..\depends\xbmc\xbmc\addons\kodi-dev-kit\include;$(ProjectDir)..\depends\xbmc\xbmc\cores\VideoPlayer\Interface\Addon;$(ProjectDir)..\depends\angle\include;$(ProjectDir)..\depends\rapidjson\include;$(ProjectDir)..\depends\rtl-sdr\include;$(ProjectDir)..\depends\sqlite;$(ProjectDir)..\tmp\version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp14</LanguageStandard>
     </ClCompile>
     <Link>
@@ -150,7 +150,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ModuleDefinitionFile>$(ProjectDir)..\exportlist\exportlist.windows</ModuleDefinitionFile>
-      <AdditionalDependencies>ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>$(ProjectDir)..\out\windows-$(Platform)\$(Configuration)\angle.lib;dxguid.lib;ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PreBuildEvent />
     <PostBuildEvent />
@@ -164,7 +164,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;_CRT_SECURE_NO_WARNINGS;rtlsdr_STATIC;FMDSP_USE_DOUBLE_PRECISION;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(ProjectDir)..\depends\xbmc\xbmc;$(ProjectDir)..\depends\xbmc\xbmc\platform\win32;$(ProjectDir)..\depends\xbmc\xbmc\addons\kodi-dev-kit\include;$(ProjectDir)..\depends\xbmc\xbmc\cores\VideoPlayer\Interface\Addon;$(ProjectDir)..\depends\rapidjson\include;$(ProjectDir)..\depends\rtl-sdr\include;$(ProjectDir)..\depends\sqlite;$(ProjectDir)..\tmp\version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\depends\xbmc\xbmc;$(ProjectDir)..\depends\xbmc\xbmc\platform\win32;$(ProjectDir)..\depends\xbmc\xbmc\addons\kodi-dev-kit\include;$(ProjectDir)..\depends\xbmc\xbmc\cores\VideoPlayer\Interface\Addon;$(ProjectDir)..\depends\angle\include;$(ProjectDir)..\depends\rapidjson\include;$(ProjectDir)..\depends\rtl-sdr\include;$(ProjectDir)..\depends\sqlite;$(ProjectDir)..\tmp\version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp14</LanguageStandard>
     </ClCompile>
     <Link>
@@ -173,7 +173,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ModuleDefinitionFile>$(ProjectDir)..\exportlist\exportlist.windows</ModuleDefinitionFile>
-      <AdditionalDependencies>ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>$(ProjectDir)..\out\windows-$(Platform)\$(Configuration)\angle.lib;dxguid.lib;ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PreBuildEvent />
     <PostBuildEvent />
