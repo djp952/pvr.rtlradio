@@ -48,10 +48,16 @@ Download the Android NDK r20b for Windows 64-bit:
 * Generate the MAC OSX 10.11 SDK Package for OSXCROSS by following the instructions provided at [PACKAGING THE SDK](https://github.com/tpoechtrager/osxcross#packaging-the-sdk).  The suggested version of Xcode to use when generating the SDK package is Xcode 7.3.1 (May 3, 2016).
 * Open "Ubuntu 18.04 LTS"   
 ```
-sudo apt-get install cmake clang llvm-dev libxml2-dev uuid-dev libssl-dev libbz2-dev zlib1g-dev
+sudo apt-get install cmake clang llvm-dev libxml2-dev libssl-dev libbz2-dev zlib1g-dev
 git clone https://github.com/tpoechtrager/osxcross --depth=1
 cp {MacOSX10.11.sdk.tar.bz2} osxcross/tarballs/
 UNATTENDED=1 osxcross/build.sh
+osxcross/build_compiler_rt.sh
+sudo mkdir -p /usr/lib/llvm-6.0/lib/clang/6.0.0/include
+sudo mkdir -p /usr/lib/llvm-6.0/lib/clang/6.0.0/lib/darwin
+sudo cp -rv $(pwd)/osxcross/build/compiler-rt/compiler-rt/include/sanitizer /usr/lib/llvm-6.0/lib/clang/6.0.0/include
+sudo cp -v $(pwd)/osxcross/build/compiler-rt/compiler-rt/build/lib/darwin/*.a /usr/lib/llvm-6.0/lib/clang/6.0.0/lib/darwin
+sudo cp -v $(pwd)/osxcross/build/compiler-rt/compiler-rt/build/lib/darwin/*.dylib /usr/lib/llvm-6.0/lib/clang/6.0.0/lib/darwin
 ```
    
 ## BUILD KODI ADDON PACKAGES
