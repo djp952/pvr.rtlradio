@@ -67,7 +67,8 @@ LOCAL_STATIC_LIBRARIES += \
 	libusb-prebuilt
 
 LOCAL_LDLIBS += \
-	-llog
+	-llog \
+    -lGLESv3
 
 LOCAL_LDFLAGS += \
 	-Wl,--version-script=exportlist/exportlist.android

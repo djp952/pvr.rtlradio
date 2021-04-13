@@ -26,8 +26,6 @@
 #include <cmath>
 #include <kodi/General.h>
 #include <kodi/gui/dialogs/FileBrowser.h>
-#include <kodi/gui/gl/GL.h>
-#include <kodi/gui/gl/Shader.h>
 
 #pragma warning(push, 4)
 
@@ -60,6 +58,136 @@ uint32_t const channelsettings::HDRADIO_BANDWIDTH = (400 KHz);
 //
 // Bandwidth of a VHF weather radio channel
 uint32_t const channelsettings::WXRADIO_BANDWIDTH = (10 KHz);
+
+//---------------------------------------------------------------------------
+// channelsettings::fftcontrol Constructor
+//
+// Arguments:
+//
+//	window		- Parent CWindow instance
+//	controlid	- Identifier of the control within the parent CWindow instance
+
+channelsettings::fftcontrol::fftcontrol(kodi::gui::CWindow* window, int controlid) : renderingcontrol(window, controlid)
+{
+}
+
+//---------------------------------------------------------------------------
+// channelsettings::fftcontrol::Dirty
+//
+// Indicates if there are dirty regions in the control that need to be rendered
+//
+// Arguments:
+//
+//	NONE
+
+bool channelsettings::fftcontrol::Dirty(void)
+{
+	// TODO: only dirty if the data has changed
+	return true;
+}
+
+//---------------------------------------------------------------------------
+// channelsettings::fftcontrol::Render
+//
+// Renders all dirty regions within the control
+//
+// Arguments:
+//
+//	NONE
+
+void channelsettings::fftcontrol::Render(void)
+{
+	assert(m_shader.ShaderOK());
+
+	// TODO: This is just a dummy implementation
+
+	const GLfloat triangleVertices[] = {
+			0.0f, 1.0f,
+			-1.0f, -1.0f,
+			1.0f, -1.0f
+	};
+
+	m_shader.EnableShader();
+
+	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, triangleVertices);
+	glEnableVertexAttribArray(0);
+	glDrawArrays(GL_TRIANGLES, 0, 3);
+
+	m_shader.DisableShader();
+}
+
+//---------------------------------------------------------------------------
+// channelsettings::fftshader Constructor
+//
+// Arguments:
+//
+//	NONE
+
+channelsettings::fftshader::fftshader()
+{
+	// TODO: This is just a dummy implementation
+
+	// VERTEX SHADER
+	std::string const vertexshader(
+		"#version 100\n"
+		"attribute vec4 vPosition;\n"
+		"void main()\n"
+		"{\n"
+		"    gl_Position = vPosition;\n"
+		"}\n");
+
+	// FRAGMENT SHADER
+	std::string const fragmentshader(
+		"#version 100\n"
+		"precision mediump float;\n"
+		"void main()\n"
+		"{\n"
+		"    gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);\n"
+		"}\n");
+
+	// Compile and link the shader programs during construction
+	CompileAndLink(vertexshader, "", fragmentshader, "");
+}
+
+//---------------------------------------------------------------------------
+// channelsettings::fftshader::OnCompiledAndLinked
+//
+// Invoked when the shader has been compiled and linked
+//
+// Arguments:
+//
+//	NONE
+
+void channelsettings::fftshader::OnCompiledAndLinked(void)
+{
+}
+
+//---------------------------------------------------------------------------
+// channelsettings::fftshader::OnDisabled
+//
+// Invoked when the shader has been disabled
+//
+// Arguments:
+//
+//	NONE
+
+void channelsettings::fftshader::OnDisabled(void)
+{
+}
+
+//---------------------------------------------------------------------------
+// channelsettings::fftshader::OnEnabled
+//
+// Invoked when the shader has been enabled
+//
+// Arguments:
+//
+//	NONE
+
+bool channelsettings::fftshader::OnEnabled(void)
+{
+	return true;
+}
 
 //---------------------------------------------------------------------------
 // channelsettings Constructor (private)
@@ -261,129 +389,6 @@ int channelsettings::percent_to_gain(int percent) const
 }
 
 //---------------------------------------------------------------------------
-// channelsettings::render_signalmeter_create (static, private)
-//
-// Creates the needed rendering control for Kodi
-//
-// Arguments:
-//
-//	handle		- Client-provided context handle
-//	x			- Horizontal position
-//	y			- Vertical position
-//	w			- Width of the control
-//	h			- Height of the control
-//	device		- Device to use; for OpenGL this will be empty
-
-bool channelsettings::render_signalmeter_create(kodi::gui::ClientHandle handle, int x, int y, int w, int h, kodi::HardwareContext device)
-{
-	assert(handle);
-	return reinterpret_cast<channelsettings*>(handle)->render_signalmeter_create(x, y, w, h, device);
-}
-
-//---------------------------------------------------------------------------
-// channelsettings::render_signalmeter_create (private)
-//
-// Creates the needed rendering control for Kodi
-//
-// Arguments:
-//
-//	x			- Horizontal position
-//	y			- Vertical position
-//	w			- Width of the control
-//	h			- Height of the control
-//	device		- Device to use; for OpenGL this will be empty
-
-bool channelsettings::render_signalmeter_create(int /*x*/, int /*y*/, int /*w*/, int /*h*/, kodi::HardwareContext /*device*/)
-{
-	return true;
-}
-
-//---------------------------------------------------------------------------
-// channelsettings::render_signalmeter_dirty (static, private)
-//
-// Determines if a region is dirty and needs to be rendered
-//
-// Arguments:
-//
-//	handle		- Client-provided context handle
-
-bool channelsettings::render_signalmeter_dirty(kodi::gui::ClientHandle handle)
-{
-	assert(handle);
-	return reinterpret_cast<channelsettings*>(handle)->render_signalmeter_dirty();
-}
-
-//---------------------------------------------------------------------------
-// channelsettings::render_signalmeter_dirty (private)
-//
-// Determines if a region is dirty and needs to be rendered
-//
-// Arguments:
-//
-//	NONE
-
-bool channelsettings::render_signalmeter_dirty(void)
-{
-	return true;
-}
-
-//---------------------------------------------------------------------------
-// channelsettings::render_signalmeter_render (static, private)
-//
-// Renders the control
-//
-// Arguments:
-//
-//	handle		- Client-provided context handle
-
-void channelsettings::render_signalmeter_render(kodi::gui::ClientHandle handle)
-{
-	assert(handle);
-	return reinterpret_cast<channelsettings*>(handle)->render_signalmeter_render();
-}
-
-//---------------------------------------------------------------------------
-// channelsettings::render_signalmeter_render (private)
-//
-// Renders the control
-//
-// Arguments:
-//
-//	NONE
-
-void channelsettings::render_signalmeter_render(void)
-{
-}
-
-//---------------------------------------------------------------------------
-// channelsettings::render_signalmeter_stop (static, private)
-//
-// Stops the rendering process for the control
-//
-// Arguments:
-//
-//	handle		- Client-provided context handle
-
-void channelsettings::render_signalmeter_stop(kodi::gui::ClientHandle handle)
-{
-	assert(handle);
-	return reinterpret_cast<channelsettings*>(handle)->render_signalmeter_stop();
-}
-
-//---------------------------------------------------------------------------
-// channelsettings::render_signalmeter_stop (private)
-//
-// Stops the rendering process for the control
-//
-// Arguments:
-//
-//	NONE
-
-void channelsettings::render_signalmeter_stop(void)
-{
-}
-
-//---------------------------------------------------------------------------
 // channelsettings::update_gain (private)
 //
 // Updates the state of the gain control
@@ -490,7 +495,7 @@ bool channelsettings::OnInit(void)
 		m_image_channelicon = std::unique_ptr<CImage>(new CImage(this, CONTROL_IMAGE_CHANNELICON));
 		m_radio_autogain = std::unique_ptr<CRadioButton>(new CRadioButton(this, CONTROL_RADIO_AUTOMATICGAIN));
 		m_slider_manualgain = std::unique_ptr<CSettingsSlider>(new CSettingsSlider(this, CONTROL_SLIDER_MANUALGAIN));
-		m_render_signalmeter = std::unique_ptr<CRendering>(new CRendering(this, CONTROL_RENDER_SIGNALMETER));
+		m_render_signalmeter = std::unique_ptr<fftcontrol>(new fftcontrol(this, CONTROL_RENDER_SIGNALMETER));
 		m_edit_signalgain = std::unique_ptr<CEdit>(new CEdit(this, CONTROL_EDIT_METERGAIN));
 		m_edit_signalpower = std::unique_ptr<CEdit>(new CEdit(this, CONTROL_EDIT_METERPOWER));
 		m_edit_signalsnr = std::unique_ptr<CEdit>(new CEdit(this, CONTROL_EDIT_METERSNR));
@@ -512,9 +517,6 @@ bool channelsettings::OnInit(void)
 		m_slider_manualgain->SetEnabled(!m_channelprops.autogain);
 		m_slider_manualgain->SetPercentage(static_cast<float>(gain_to_percent(m_channelprops.manualgain)));
 		update_gain();
-
-		// Set up the rendering control callbacks
-		m_render_signalmeter->SetIndependentCallbacks(this, render_signalmeter_create, render_signalmeter_render, render_signalmeter_stop, render_signalmeter_dirty);
 
 		// Set the default text for the signal indicators
 		m_edit_signalpower->SetText("N/A");

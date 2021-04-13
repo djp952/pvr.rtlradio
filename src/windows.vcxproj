@@ -220,6 +220,7 @@
     <ClInclude Include="pvrstream.h" />
     <ClInclude Include="pvrtypes.h" />
     <ClInclude Include="rdsdecoder.h" />
+    <ClInclude Include="renderingcontrol.h" />
     <ClInclude Include="rtldevice.h" />
     <ClInclude Include="scalar_condition.h" />
     <ClInclude Include="fmmeter.h" />

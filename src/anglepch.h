@@ -20,37 +20,9 @@
 // SOFTWARE.
 //---------------------------------------------------------------------------
 
-#ifndef __STDAFX_H_
-#define __STDAFX_H_
+#ifndef __ANGLEPCH_H_
+#define __ANGLEPCH_H_
 #pragma once
-
-#define NOMINMAX
-
-#if defined(_M_IX86)
-#define ANGLE_IS_32_BIT_CPU
-#elif defined(_M_X64)
-#define ANGLE_IS_64_BIT_CPU
-#else
-#error Unable to define ANGLE_IS_XX_BIT_CPU
-#endif
-
-#define LIBANGLE_IMPLEMENTATION
-
-#define ANGLE_EXPORT
-#define ANGLE_UTIL_EXPORT
-#define EGLAPI
-#define GL_APICALL
-#define GL_API
-
-#define GL_GLES_PROTOTYPES 1
-#define EGL_EGL_PROTOTYPES 1
-#define GL_GLEXT_PROTOTYPES 1
-#define EGL_EGLEXT_PROTOTYPES 1
-
-#define ANGLE_ENABLE_D3D11 1
-#define ANGLE_ENABLE_ESSL 1
-#define ANGLE_ENABLE_GLSL 1
-#define ANGLE_ENABLE_HLSL 1
 
 #ifndef D3DERR_OUTOFVIDEOMEMORY
 #define D3DERR_OUTOFVIDEOMEMORY E_FAIL
@@ -347,4 +319,4 @@
 
 //---------------------------------------------------------------------------
 
-#endif	// __STDAFX_H_
+#endif	// __ANGLEPCH_H_

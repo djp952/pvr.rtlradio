@@ -28,8 +28,9 @@
 #include <kodi/gui/controls/Edit.h>
 #include <kodi/gui/controls/Image.h>
 #include <kodi/gui/controls/RadioButton.h>
-#include <kodi/gui/controls/Rendering.h>
 #include <kodi/gui/controls/SettingsSlider.h>
+#include <kodi/gui/gl/GL.h>
+#include <kodi/gui/gl/Shader.h>
 #include <kodi/gui/Window.h>
 #include <memory>
 #include <vector>
@@ -38,6 +39,7 @@
 
 #include "fmmeter.h"
 #include "props.h"
+#include "renderingcontrol.h"
 #include "rtldevice.h"
 
 #pragma warning(push, 4)
@@ -81,10 +83,6 @@ private:
 	channelsettings(channelsettings const&) = delete;
 	channelsettings& operator=(channelsettings const&) = delete;
 
-	// Instance Constructor
-	//
-	channelsettings(std::unique_ptr<rtldevice> device, struct tunerprops const& tunerprops, struct channelprops const& channelprops);
-
 	// FMRADIO_BANDWIDTH
 	//
 	// Bandwidth of an analog FM radio channel
@@ -99,6 +97,56 @@ private:
 	//
 	// Bandwidth of a VHF weather radio channel
 	static uint32_t const WXRADIO_BANDWIDTH;
+
+	// Instance Constructor
+	//
+	channelsettings(std::unique_ptr<rtldevice> device, struct tunerprops const& tunerprops, struct channelprops const& channelprops);
+
+	//-----------------------------------------------------------------------
+	// Private Type Declarations
+
+	// Class fftshader
+	//
+	// Implements the shader for the FFT rendering control
+	class fftshader : public kodi::gui::gl::CShaderProgram
+	{
+	public:
+
+		// Instance constructor
+		fftshader();
+
+	private:
+
+		fftshader(fftshader const&) = delete;
+		fftshader& operator=(fftshader const&) = delete;
+
+		// Member Functions
+		void OnCompiledAndLinked(void) override;
+		void OnDisabled(void) override;
+		bool OnEnabled(void) override;
+	};
+
+	// Class fftcontrol
+	//
+	// Implements the FFT rendering control
+	class fftcontrol : public renderingcontrol
+	{
+	public:
+
+		// Instance Constructor
+		fftcontrol(kodi::gui::CWindow* window, int controlid);
+
+		// Member Functions
+		bool Dirty(void) override;
+		void Render(void) override;
+
+	private:
+
+		fftcontrol(fftcontrol const&) = delete;
+		fftcontrol& operator=(fftcontrol const&) = delete;
+
+		fftshader		m_shader;			// Shader instance
+	};
 
 	//-------------------------------------------------------------------------
 	// CWindow Implementation
@@ -146,30 +194,6 @@ private:
 	// Converts a percentage into a manual gain value
 	int percent_to_gain(int percent) const;
 
-	// render_signalmeter_create
-	//
-	// Creates the needed rendering control for Kodi
-	static bool render_signalmeter_create(kodi::gui::ClientHandle handle, int x, int y, int w, int h, kodi::HardwareContext device);
-	bool render_signalmeter_create(int x, int y, int w, int h, kodi::HardwareContext device);
-
-	// render_signalmeter_dirty
-	//
-	// Determines if a region is dirty and needs to be rendered
-	static bool render_signalmeter_dirty(kodi::gui::ClientHandle handle);
-	bool render_signalmeter_dirty(void);
-
-	// render_signalmeter_render
-	//
-	// Renders the control
-	static void render_signalmeter_render(kodi::gui::ClientHandle handle);
-	void render_signalmeter_render(void);
-
-	// render_signalmeter_stop
-	//
-	// Stops the rendering process for the control
-	static void render_signalmeter_stop(kodi::gui::ClientHandle handle);
-	void render_signalmeter_stop(void);
-
 	// update_gain
 	//
 	// Updates the state of the gain control
@@ -192,7 +216,7 @@ private:
 	std::unique_ptr<CImage>				m_image_channelicon;	// Channel icon
 	std::unique_ptr<CRadioButton>		m_radio_autogain;		// Automatic gain
 	std::unique_ptr<CSettingsSlider>	m_slider_manualgain;	// Manual gain
-	std::unique_ptr<CRendering>			m_render_signalmeter;	// Signal meter
+	std::unique_ptr<fftcontrol>			m_render_signalmeter;	// Signal meter
 	std::unique_ptr<CEdit>				m_edit_signalgain;		// Active gain
 	std::unique_ptr<CEdit>				m_edit_signalpower;		// Active power
 	std::unique_ptr<CEdit>				m_edit_signalsnr;		// Active SNR

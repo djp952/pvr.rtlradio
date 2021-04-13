@@ -127,10 +127,10 @@
           <shadowcolor>black</shadowcolor>
         </control>
         <control type="renderaddon" id="206">
-          <left>0</left>
-          <top>50</top>
-          <width>720</width>
-          <height>390</height>
+          <left>20</left>
+          <top>70</top>
+          <width>680</width>
+          <height>350</height>
         </control>
         <control type="edit" id="207">
           <left>-14</left>
