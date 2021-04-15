@@ -4,6 +4,9 @@
 [submodule "build"]
 	path = depends/build
 	url = https://github.com/djp952/build.git
+[submodule "glm"]
+	path = depends/glm
+	url = https://github.com/g-truc/glm.git
 [submodule "libusb"]
 	path = depends/libusb
 	url = https://github.com/djp952/prebuilt-libusb.git
