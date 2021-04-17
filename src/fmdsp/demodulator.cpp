@@ -227,7 +227,7 @@ int ret = 0;
 
 			// Get the signal levels
 			TYPEREAL signal = 0, noise = 0;
-			get_signal_levels(n, m_pDemodInBuf, signal, noise);
+			get_signal_levels(n, (m_DemodMode == DEMOD_WFM) ? m_pDemodInBuf : m_pDemodTmpBuf, signal, noise);
 
 			// Smooth the signal level
 			if(isnan(m_SignalLevel)) m_SignalLevel = signal;
@@ -284,7 +284,7 @@ int ret = 0;
 
 			// Get the signal levels
 			TYPEREAL signal = 0, noise = 0;
-			get_signal_levels(n, m_pDemodInBuf, signal, noise);
+			get_signal_levels(n, (m_DemodMode == DEMOD_WFM) ? m_pDemodInBuf : m_pDemodTmpBuf, signal, noise);
 
 			// Smooth the signal level
 			if(isnan(m_SignalLevel)) m_SignalLevel = signal;

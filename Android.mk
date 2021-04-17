@@ -35,6 +35,7 @@ include $(CLEAR_VARS)
 LOCAL_MODULE := rtlradio
 
 LOCAL_C_INCLUDES += \
+	depends/glm \
 	depends/xbmc/xbmc \
 	depends/xbmc/xbmc/linux \
 	depends/xbmc/xbmc/addons/kodi-dev-kit/include \

@@ -74,18 +74,18 @@ public:
 	// Member Functions
 	//----------------------------------------------------------------------------
 
-	// Dirty (virtual)
+	// dirty (virtual)
 	//
 	// Determines if a region is dirty and needs to be rendered
-	virtual bool Dirty(void) 
+	virtual bool dirty(void) 
 	{
 		return false;
 	}
 
-	// Render (virtual)
+	// render (virtual)
 	//
 	// Render all dirty regions
-	virtual void Render(void)
+	virtual void render(void)
 	{
 	}
 
@@ -102,10 +102,10 @@ protected:
 	// Protected Member Variables
 	//-------------------------------------------------------------------------
 
-	int						m_x;		// Horizontal position of the control
-	int						m_y;		// Vertical position of the control
-	int						m_w;		// Width of the control
-	int						m_h;		// Height of the control
+	size_t					m_left;		// Horizontal position of the control
+	size_t					m_top;		// Vertical position of the control
+	size_t					m_width;	// Width of the control
+	size_t					m_height;	// Height of the control
 
 	kodi::HardwareContext	m_device;	// Device to use, only set for DirectX
 
@@ -121,10 +121,10 @@ private:
 
 		// This is called during object construction, virtual member functions are not available.
 		// Store off all of the provided size, position, and device information
-		instance->m_x = x;
-		instance->m_y = y;
-		instance->m_w = w;
-		instance->m_h = h;
+		instance->m_left = static_cast<size_t>(x);
+		instance->m_top = static_cast<size_t>(y);
+		instance->m_width = static_cast<size_t>(w);
+		instance->m_height = static_cast<size_t>(h);
 		instance->m_device = device;
 
 		// Access the rendering helper instance
@@ -139,7 +139,7 @@ private:
 	static bool OnDirty(KODI_GUI_CLIENT_HANDLE handle)
 	{
 		assert(handle);
-		return reinterpret_cast<renderingcontrol*>(handle)->Dirty();
+		return reinterpret_cast<renderingcontrol*>(handle)->dirty();
 	}
 
 	// OnRender
@@ -154,7 +154,7 @@ private:
 
 		// Render the control
 		instance->m_renderHelper->Begin();
-		instance->Render();
+		instance->render();
 		instance->m_renderHelper->End();
 	}
 

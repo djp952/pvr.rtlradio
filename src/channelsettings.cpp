@@ -23,9 +23,15 @@
 #include "stdafx.h"
 #include "channelsettings.h"
 
+#include <assert.h>
 #include <cmath>
+#include <glm/gtc/type_ptr.hpp>
 #include <kodi/General.h>
 #include <kodi/gui/dialogs/FileBrowser.h>
+
+#ifdef HAS_GLES
+#include <EGL/egl.h>
+#endif
 
 #pragma warning(push, 4)
 
@@ -44,6 +50,21 @@ static const int CONTROL_EDIT_METERGAIN			= 207;
 static const int CONTROL_EDIT_METERPOWER		= 208;
 static const int CONTROL_EDIT_METERSNR			= 209;
 
+// channelsettings::FFT_BANDWIDTH
+//
+// Bandwidth of the FFT display
+uint32_t const channelsettings::FFT_BANDWIDTH = (400 KHz);
+
+// channelsettings::FFT_MINDB
+//
+// Maximum decibel level supported by the FFT
+float const channelsettings::FFT_MAXDB = 3.0f;
+
+// channelsettings::FFT_MINDB
+//
+// Minimum decibel level supported by the FFT
+float const channelsettings::FFT_MINDB = -72.0f;
+
 // channelsettings::FMRADIO_BANDWIDTH
 //
 // Bandwidth of an analog FM radio channel
@@ -59,6 +80,22 @@ uint32_t const channelsettings::HDRADIO_BANDWIDTH = (400 KHz);
 // Bandwidth of a VHF weather radio channel
 uint32_t const channelsettings::WXRADIO_BANDWIDTH = (10 KHz);
 
+// is_platform_opengles (local)
+//
+// Helper function to determine if the platform is full OpenGL or OpenGL ES
+static bool is_platform_opengles(void)
+{
+#if defined(TARGET_WINDOWS)
+	return true;
+#elif defined(TARGET_ANDROID)
+	return true;
+#elif defined(TARGET_DARWIN_OSX)
+	return false;
+#else
+	return (eglQueryAPI() == EGL_OPENGL_ES_API);
+#endif
+}
+
 //---------------------------------------------------------------------------
 // channelsettings::fftcontrol Constructor
 //
@@ -69,10 +106,48 @@ uint32_t const channelsettings::WXRADIO_BANDWIDTH = (10 KHz);
 
 channelsettings::fftcontrol::fftcontrol(kodi::gui::CWindow* window, int controlid) : renderingcontrol(window, controlid)
 {
+	// Store some handy floating point copies of the width and height for rendering
+	m_widthf = static_cast<GLfloat>(m_width);
+	m_heightf = static_cast<GLfloat>(m_height);
+
+	// Allocate the buffer to hold the scaled FFT data
+	m_fft = std::unique_ptr<glm::vec2[]>(new glm::vec2[m_width]);
+
+	// Create the model/view/projection matrix based on width and height
+	m_modelProjMat = glm::ortho(0.0f, m_widthf, m_heightf, 0.0f);
+
+	// Create the vertex buffer object (GL)
+	if(m_shader.isgl()) glGenBuffers(1, &m_vertexVBO);
 }
 
 //---------------------------------------------------------------------------
-// channelsettings::fftcontrol::Dirty
+// channelsettings::fftcontrol Destructor
+
+channelsettings::fftcontrol::~fftcontrol()
+{
+	if(m_shader.isgl() && (m_vertexVBO != 0)) {
+
+		glDeleteBuffers(1, &m_vertexVBO);
+		m_vertexVBO = 0;
+	}
+}
+
+//---------------------------------------------------------------------------
+// channelsettings::fftcontrol::db_to_height (private)
+//
+// Converts a power level specified in decibels to a height for the FFT
+//
+// Arguments:
+//
+//	db			- Power level in decibels
+
+inline GLfloat channelsettings::fftcontrol::db_to_height(float db) const
+{
+	return m_heightf * ((db - channelsettings::FFT_MAXDB) / (channelsettings::FFT_MINDB - channelsettings::FFT_MAXDB));
+}
+
+//---------------------------------------------------------------------------
+// channelsettings::fftcontrol::dirty (private)
 //
 // Indicates if there are dirty regions in the control that need to be rendered
 //
@@ -80,14 +155,27 @@ channelsettings::fftcontrol::fftcontrol(kodi::gui::CWindow* window, int controli
 //
 //	NONE
 
-bool channelsettings::fftcontrol::Dirty(void)
+bool channelsettings::fftcontrol::dirty(void)
 {
-	// TODO: only dirty if the data has changed
-	return true;
+	return m_dirty;
 }
 
 //---------------------------------------------------------------------------
-// channelsettings::fftcontrol::Render
+// channelsettings::fftcontrol::height
+//
+// Retrieves the height of the control
+//
+// Arguments:
+//
+//	NONE
+
+size_t channelsettings::fftcontrol::height(void) const
+{
+	return static_cast<size_t>(m_height);
+}
+
+//---------------------------------------------------------------------------
+// channelsettings::fftcontrol::render (private)
 //
 // Renders all dirty regions within the control
 //
@@ -95,25 +183,324 @@ bool channelsettings::fftcontrol::Dirty(void)
 //
 //	NONE
 
-void channelsettings::fftcontrol::Render(void)
+void channelsettings::fftcontrol::render(void)
 {
+	// Ensure that the shader was compiled properly before continuing
 	assert(m_shader.ShaderOK());
+	if(!m_shader.ShaderOK()) return;
 
-	// TODO: This is just a dummy implementation
+	// Enable blending
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-	const GLfloat triangleVertices[] = {
-			0.0f, 1.0f,
-			-1.0f, -1.0f,
-			1.0f, -1.0f
-	};
-
+	// Enable the shader program
 	m_shader.EnableShader();
 
-	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, triangleVertices);
-	glEnableVertexAttribArray(0);
-	glDrawArrays(GL_TRIANGLES, 0, 3);
+	// Set the model/view/projection matrix
+	glUniformMatrix4fv(m_shader.uModelProjMatrix(), 1, GL_FALSE, glm::value_ptr(m_modelProjMat));
 
-	m_shader.DisableShader();
+	// Bind the vertex buffer object (GL)
+	if(m_shader.isgl()) glBindBuffer(GL_ARRAY_BUFFER, m_vertexVBO);
+
+	// Enable the vertex array
+	glEnableVertexAttribArray(m_shader.aPosition());
+
+	// Set the vertex attribute pointer type (GL)
+	if(m_shader.isgl()) glVertexAttribPointer(m_shader.aPosition(), 2, GL_FLOAT, GL_FALSE, sizeof(glm::vec2), BUFFER_OFFSET(offsetof(glm::vec2, x)));
+
+#ifndef HAS_ANGLE
+	// Background
+	glm::vec2 backgroundrect[4] = { { 0.0f, 0.0f }, { 0.0f, m_heightf }, { m_widthf, 0.0f }, { m_widthf, m_heightf } };
+	render_rect(glm::vec3(0.0f, 0.0f, 0.0f), backgroundrect);
+#endif
+
+	// 0dB level
+	GLfloat zerodb = db_to_height(0.0f);
+	glm::vec2 zerodbline[2] = { { 0.0f, zerodb }, { m_widthf, zerodb } };
+	render_line(glm::vec4(1.0f, 1.0f, 0.0f, 0.75f), zerodbline);
+
+	// -6dB increment levels
+	for(int index = -6; index >= static_cast<int>(channelsettings::FFT_MINDB); index -= 6) {
+
+		GLfloat y = db_to_height(static_cast<float>(index));
+		glm::vec2 dbline[2] = { { 0.0f, y }, { m_widthf, y } };
+		render_line(glm::vec4(1.0f, 1.0f, 1.0f, 0.25f), dbline);
+	}
+
+	// Bandwidth
+	glm::vec2 cutrect[4] = { { m_lowcut, 0.0f }, { m_lowcut, m_heightf }, { m_highcut, 0.0f }, { m_highcut, m_heightf } };
+	render_rect(glm::vec4(1.0f, 1.0f, 1.0f, 0.1f), cutrect);
+
+	// Power range
+	glm::vec2 powerrect[4] = { { 0.0f, m_power }, { m_widthf, m_power }, { 0.0f, m_noise }, { m_widthf, m_noise } };
+	render_rect(glm::vec4(0.0f, 1.0f, 0.0f, 0.1f), powerrect);
+	glm::vec2 powerline[2] = { { 0.0f, m_power }, { m_widthf, m_power } };
+	render_line(glm::vec4(0.0f, 1.0f, 0.0f, 0.75f), powerline);
+
+	// Noise range
+	glm::vec2 noiserect[4] = { { 0.0f, m_noise }, { m_widthf, m_noise }, { 0.0f, m_heightf }, { m_widthf, m_heightf } };
+	render_rect(glm::vec4(1.0f, 0.0f, 0.0f, 0.1f), noiserect);
+	glm::vec2 noiseline[2] = { { 0.0f, m_noise }, { m_width, m_noise } };
+	render_line(glm::vec4(1.0f, 0.0f, 0.0f, 0.75f), noiseline);
+
+	// Center frequency
+	glm::vec2 centerline[2] = { { m_widthf / 2.0f, 0.0f }, { m_widthf / 2.0f, m_heightf } };
+	render_line(glm::vec4(1.0f, 1.0f, 0.0f, 0.75f), centerline);
+
+	// FFT
+	render_line_strip(glm::vec3(1.0f, 1.0f, 1.0f), m_fft.get(), m_width);
+
+	glDisableVertexAttribArray(m_shader.aPosition());		// Disable the vertex array
+	if(m_shader.isgl()) glBindBuffer(GL_ARRAY_BUFFER, 0);	// Unbind the VBO (GL)
+
+	m_shader.DisableShader();								// Disable the shader program
+	glDisable(GL_BLEND);									// Disable blending
+
+	// Render state is clean until the next update from the meter instance
+	m_dirty = false;
+}
+
+//---------------------------------------------------------------------------
+// channelsettings::fftcontrol::render_line (private)
+//
+// Renders a line primitive
+//
+// Arguments:
+//
+//	color		- Color value to use when rendering
+//	vertices	- Line vertices
+
+void channelsettings::fftcontrol::render_line(glm::vec3 color, glm::vec2 vertices[2]) const
+{
+	return render_line(glm::vec4(color, 1.0f), vertices);
+}
+
+//---------------------------------------------------------------------------
+// channelsettings::fftcontrol::render_line (private)
+//
+// Renders a line primitive
+//
+// Arguments:
+//
+//	color		- Color value to use when rendering
+//	vertices	- Line vertices
+
+void channelsettings::fftcontrol::render_line(glm::vec4 color, glm::vec2 vertices[2]) const
+{
+	// Set the specific color value before drawing the line
+	glUniform4f(m_shader.uColor(), color.r, color.g, color.b, color.a);
+
+	glm::vec2 p(vertices[1].x - vertices[0].x, vertices[1].y - vertices[0].y);
+	p = glm::normalize(p);
+
+	// Pre-calculate the required deltas for the line thickness
+	GLfloat const dx = (m_linewidthf / 2.0f);
+	GLfloat const dy = (m_lineheightf / 2.0f);
+
+	glm::vec2 const p1(-p.y, p.x);
+	glm::vec2 const p2(p.y, -p.x);
+
+	glm::vec2 strip[] = {
+
+		{ vertices[0].x + p1.x * dx, vertices[0].y + p1.y * dy },
+		{ vertices[0].x + p2.x * dx, vertices[0].y + p2.y * dy },
+		{ vertices[1].x + p1.x * dx, vertices[1].y + p1.y * dy },
+		{ vertices[1].x + p2.x * dx, vertices[1].y + p2.y * dy }
+	};
+
+	if(m_shader.isgl()) glBufferData(GL_ARRAY_BUFFER, (sizeof(glm::vec2) * 4), &strip[0], GL_STATIC_DRAW);
+	else glVertexAttribPointer(m_shader.aPosition(), 2, GL_FLOAT, GL_FALSE, 0, strip);
+
+	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+}
+
+//---------------------------------------------------------------------------
+// channelsettings::fftcontrol::render_line_strip (private)
+//
+// Renders a line strip primitive
+//
+// Arguments:
+//
+//	color		- Color value to use when rendering
+//	vertices	- Line strip vertices
+//	numvertices	- Number of line strip vertices
+
+void channelsettings::fftcontrol::render_line_strip(glm::vec3 color, glm::vec2 vertices[], size_t numvertices) const
+{
+	return render_line_strip(glm::vec4(color, 1.0f), vertices, numvertices);
+}
+
+//---------------------------------------------------------------------------
+// channelsettings::fftcontrol::render_line_strip (private)
+//
+// Renders a line strip primitive
+//
+// Arguments:
+//
+//	color		- Color value to use when rendering
+//	vertices	- Line vertices
+//	numvertices	- Number of line strip vertices
+
+void channelsettings::fftcontrol::render_line_strip(glm::vec4 color, glm::vec2 vertices[], size_t numvertices) const
+{
+	// Set the specific color value before drawing the line
+	glUniform4f(m_shader.uColor(), color.r, color.g, color.b, color.a);
+
+	// Each point in the line strip will be represented by six vertices in the triangle strip
+	std::unique_ptr<glm::vec2[]> strip(new glm::vec2[numvertices * 6]);
+	size_t strippos = 0;
+
+	// Pre-calculate the required deltas for the line thickness
+	GLfloat const dx = (m_linewidthf / 2.0f);
+	GLfloat const dy = (m_lineheightf / 2.0f);
+
+	for(size_t index = 0; index < numvertices - 1; index++)
+	{
+		glm::vec2 const& a = vertices[index];
+		glm::vec2 const& b = vertices[index + 1];
+
+		glm::vec2 p(b.x - a.x, b.y - a.y);
+		p = glm::normalize(p);
+
+		glm::vec2 const p1(-p.y, p.x);
+		glm::vec2 const p2(p.y, -p.x);
+
+		strip[strippos++] = a;
+		strip[strippos++] = b;
+		strip[strippos++] = glm::vec2(a.x + p1.x * dx, a.y + p1.y * dy);
+		strip[strippos++] = glm::vec2(a.x + p2.x * dx, a.y + p2.y * dy);
+		strip[strippos++] = glm::vec2(b.x + p1.x * dx, b.y + p1.y * dy);
+		strip[strippos++] = glm::vec2(b.x + p2.x * dx, b.y + p2.y * dy);
+	}
+
+	if(m_shader.isgl()) glBufferData(GL_ARRAY_BUFFER, (sizeof(glm::vec2) * strippos), strip.get(), GL_STATIC_DRAW);
+	else glVertexAttribPointer(m_shader.aPosition(), 2, GL_FLOAT, GL_FALSE, 0, strip.get());
+
+	glDrawArrays(GL_TRIANGLE_STRIP, 0, static_cast<GLsizei>(strippos));
+}
+
+//---------------------------------------------------------------------------
+// channelsettings::fftcontrol::render_rect (private)
+//
+// Renders a line primitive
+//
+// Arguments:
+//
+//	color		- Color value to use when rendering
+//	vertices	- Rectangle vertices
+
+void channelsettings::fftcontrol::render_rect(glm::vec3 color, glm::vec2 vertices[4]) const
+{
+	return render_rect(glm::vec4(color, 1.0f), vertices);
+}
+
+//---------------------------------------------------------------------------
+// channelsettings::fftcontrol::render_rect (private)
+//
+// Renders a line primitive
+//
+// Arguments:
+//
+//	color		- Color value to use when rendering
+//	vertices	- Rectangle vertices
+
+void channelsettings::fftcontrol::render_rect(glm::vec4 color, glm::vec2 vertices[4]) const
+{
+	// Set the specific color value before drawing the line
+	glUniform4f(m_shader.uColor(), color.r, color.g, color.b, color.a);
+
+	// Render the rectangle as a 4-vertex GL_TRIANGLE_STRIP primitive
+	if(m_shader.isgl()) glBufferData(GL_ARRAY_BUFFER, (sizeof(glm::vec2) * 4), &vertices[0], GL_STATIC_DRAW);
+	else glVertexAttribPointer(m_shader.aPosition(), 2, GL_FLOAT, GL_FALSE, 0, vertices);
+
+	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+}
+
+//---------------------------------------------------------------------------
+// channelsettings::fftcontrol::render_triangle (private)
+//
+// Renders a line primitive
+//
+// Arguments:
+//
+//	color		- Color value to use when rendering
+//	vertices	- Triangle vertices
+
+void channelsettings::fftcontrol::render_triangle(glm::vec3 color, glm::vec2 vertices[3]) const
+{
+	return render_triangle(glm::vec4(color, 1.0f), vertices);
+}
+
+//---------------------------------------------------------------------------
+// channelsettings::fftcontrol::render_triangle (private)
+//
+// Renders a line primitive
+//
+// Arguments:
+//
+//	color		- Color value to use when rendering
+//	vertices	- Triangle vertices
+
+void channelsettings::fftcontrol::render_triangle(glm::vec4 color, glm::vec2 vertices[3]) const
+{
+	// Set the specific color value before drawing the line
+	glUniform4f(m_shader.uColor(), color.r, color.g, color.b, color.a);
+
+	// Render the triangle as a 3-vertex GL_TRIANGLES primitive
+	if(m_shader.isgl()) glBufferData(GL_ARRAY_BUFFER, (sizeof(glm::vec2) * 3), &vertices[0], GL_STATIC_DRAW);
+	else glVertexAttribPointer(m_shader.aPosition(), 2, GL_FLOAT, GL_FALSE, 0, vertices);
+
+	glDrawArrays(GL_TRIANGLES, 0, 3);
+}
+
+//---------------------------------------------------------------------------
+// channelsettings::fftcontrol::update
+//
+// Updates the rendering control state and flags it as dirty
+//
+// Arguments:
+//
+//	NONE
+
+void channelsettings::fftcontrol::update(struct fmmeter::signal_status const& status)
+{
+	// Power and noise values are supplied as dB and need to be scaled to the viewport
+	m_power = db_to_height(status.power);
+	m_noise = db_to_height(status.noise);
+
+	// Calculate the horizontal offsets of the low and high cut points and where to put the power meter
+	m_lowcut = (((status.fftbandwidth / 2.0f) + status.fftlowcut) / status.fftbandwidth) * m_widthf;
+	m_highcut = (((status.fftbandwidth / 2.0f) + status.ffthighcut) / status.fftbandwidth) * m_widthf;
+
+	// The length of the fft data should match the width of the control, but watch for overrruns
+	assert(status.fftsize == m_width);
+	size_t length = std::min(status.fftsize, static_cast<size_t>(m_width));
+
+	// The FFT data merely needs to be converted into an X,Y vertex to be used by the renderer
+	for(size_t index = 0; index < length; index++) m_fft[index] = glm::vec2(static_cast<float>(index), 
+		static_cast<float>(status.fftdata[index]));
+
+	// In the event of an FFT data underrun, flat-line the remainder of the data points
+	if(m_width > status.fftsize) {
+
+		for(size_t index = length; index < m_width; index++) m_fft[index] = glm::vec2(static_cast<float>(index), m_heightf);
+	}
+
+	m_dirty = true;					// Scene needs to be re-rendered
+}
+
+//---------------------------------------------------------------------------
+// channelsettings::fftcontrol::width
+//
+// Retrieves the width of the control
+//
+// Arguments:
+//
+//	NONE
+
+size_t channelsettings::fftcontrol::width(void) const
+{
+	return static_cast<size_t>(m_width);
 }
 
 //---------------------------------------------------------------------------
@@ -123,34 +510,100 @@ void channelsettings::fftcontrol::Render(void)
 //
 //	NONE
 
-channelsettings::fftshader::fftshader()
+channelsettings::fftshader::fftshader() : m_gles(is_platform_opengles())
 {
-	// TODO: This is just a dummy implementation
-
 	// VERTEX SHADER
 	std::string const vertexshader(
-		"#version 100\n"
-		"attribute vec4 vPosition;\n"
-		"void main()\n"
-		"{\n"
-		"    gl_Position = vPosition;\n"
-		"}\n");
+		R"(
+uniform mat4 u_modelViewProjectionMatrix;
+
+#ifdef GL_ES
+attribute vec2 a_position;
+#else
+in vec2 a_position;
+#endif
+
+void main()
+{
+  gl_Position = u_modelViewProjectionMatrix * vec4(a_position, 0.0, 1.0);
+}
+		)");
 
 	// FRAGMENT SHADER
 	std::string const fragmentshader(
-		"#version 100\n"
-		"precision mediump float;\n"
-		"void main()\n"
-		"{\n"
-		"    gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);\n"
-		"}\n");
+		R"(
+#ifdef GL_ES
+precision mediump float;
+#else
+precision highp float;
+#endif
+
+uniform vec4 u_color;
+
+#ifndef GL_ES
+out vec4 FragColor;
+#endif
+
+void main()
+{
+#ifdef GL_ES
+  gl_FragColor = u_color;
+#else
+  FragColor = u_color;
+#endif
+}
+		)");
 
 	// Compile and link the shader programs during construction
-	CompileAndLink(vertexshader, "", fragmentshader, "");
+	if(m_gles) CompileAndLink("#version 100\n", vertexshader, "#version 100\n", fragmentshader);
+	else CompileAndLink("#version 150\n", vertexshader, "#version 150\n", fragmentshader);
 }
 
 //---------------------------------------------------------------------------
-// channelsettings::fftshader::OnCompiledAndLinked
+// channelsettings::fftshader::aPosition (const)
+//
+// Gets the location of the aPosition shader variable
+//
+// Arguments:
+//
+//	NONE
+
+GLint channelsettings::fftshader::aPosition(void) const
+{
+	assert(m_aPosition != -1);
+	return m_aPosition;
+}
+
+//---------------------------------------------------------------------------
+// channelsettings::fftshader::isgl
+//
+// Indicates if the shader was compiled for desktop OpenGL
+//
+// Arguments:
+//
+//	NONE
+
+bool channelsettings::fftshader::isgl(void) const
+{
+	return !m_gles;
+}
+
+//---------------------------------------------------------------------------
+// channelsettings::fftshader::isgles
+//
+// Indicates if the shader was compiled for OpenGL ES
+//
+// Arguments:
+//
+//	NONE
+
+bool channelsettings::fftshader::isgles(void) const 
+{
+	return m_gles;
+}
+
+//---------------------------------------------------------------------------
+// channelsettings::fftshader::OnCompiledAndLinked (CShaderProgram)
 //
 // Invoked when the shader has been compiled and linked
 //
@@ -160,10 +613,13 @@ channelsettings::fftshader::fftshader()
 
 void channelsettings::fftshader::OnCompiledAndLinked(void)
 {
+	m_aPosition = glGetAttribLocation(ProgramHandle(), "a_position");
+	m_uColor = glGetUniformLocation(ProgramHandle(), "u_color");
+	m_uModelProjMatrix = glGetUniformLocation(ProgramHandle(), "u_modelViewProjectionMatrix");
 }
 
 //---------------------------------------------------------------------------
-// channelsettings::fftshader::OnDisabled
+// channelsettings::fftshader::OnDisabled (CShaderProgram)
 //
 // Invoked when the shader has been disabled
 //
@@ -176,7 +632,7 @@ void channelsettings::fftshader::OnDisabled(void)
 }
 
 //---------------------------------------------------------------------------
-// channelsettings::fftshader::OnEnabled
+// channelsettings::fftshader::OnEnabled (CShaderProgram)
 //
 // Invoked when the shader has been enabled
 //
@@ -187,6 +643,36 @@ void channelsettings::fftshader::OnDisabled(void)
 bool channelsettings::fftshader::OnEnabled(void)
 {
 	return true;
+}
+
+//---------------------------------------------------------------------------
+// channelsettings::fftshader::uColor (const)
+//
+// Gets the location of the uColor shader variable
+//
+// Arguments:
+//
+//	NONE
+
+GLint channelsettings::fftshader::uColor(void) const
+{
+	assert(m_uColor != -1);
+	return m_uColor;
+}
+
+//---------------------------------------------------------------------------
+// channelsettings::fftshader::uModelProjMatrix (const)
+//
+// Gets the location of the aPosition shader variable
+//
+// Arguments:
+//
+//	NONE
+
+GLint channelsettings::fftshader::uModelProjMatrix(void) const
+{
+	assert(m_uModelProjMatrix != -1);
+	return m_uModelProjMatrix;
 }
 
 //---------------------------------------------------------------------------
@@ -214,7 +700,7 @@ channelsettings::channelsettings(std::unique_ptr<rtldevice> device, struct tuner
 	}
 
 	// Create the signal meter instance with the specified device and tuner properties, set for a 500ms callback rate
-	m_signalmeter = fmmeter::create(std::move(device), tunerprops, channelprops.frequency, bandwidth, 
+	m_signalmeter = fmmeter::create(std::move(device), tunerprops, channelprops.frequency, bandwidth, FFT_BANDWIDTH,
 		std::bind(&channelsettings::fm_meter_status, this, std::placeholders::_1), 500, 
 		std::bind(&channelsettings::fm_meter_exception, this, std::placeholders::_1));
 
@@ -274,6 +760,10 @@ void channelsettings::fm_meter_exception(std::exception const& ex)
 void channelsettings::fm_meter_status(struct fmmeter::signal_status const& status)
 {
 	char strbuf[64] = {};						// snprintf() text buffer
+
+	// Signal Meter
+	//
+	m_render_signalmeter->update(status);
 
 	// Signal Strength
 	//
@@ -500,9 +990,11 @@ bool channelsettings::OnInit(void)
 		m_edit_signalpower = std::unique_ptr<CEdit>(new CEdit(this, CONTROL_EDIT_METERPOWER));
 		m_edit_signalsnr = std::unique_ptr<CEdit>(new CEdit(this, CONTROL_EDIT_METERSNR));
 
-		// Set the channel frequency in XXX.X MHz format
+		// Set the channel frequency in XXX.X MHz or XXX.XXX format
 		char freqstr[128];
-		snprintf(freqstr, std::extent<decltype(freqstr)>::value, "%.1f", (m_channelprops.frequency / static_cast<double>(100000)) / 10.0);
+		double frequency = (m_channelprops.frequency / static_cast<double>(100000)) / 10.0;
+		if(get_channel_type(m_channelprops) == channeltype::wxradio) snprintf(freqstr, std::extent<decltype(freqstr)>::value, "%.3f", frequency);
+		else snprintf(freqstr, std::extent<decltype(freqstr)>::value, "%.1f", frequency);
 		m_edit_frequency->SetText(freqstr);
 
 		// Set the channel name and logo/icon
@@ -525,7 +1017,7 @@ bool channelsettings::OnInit(void)
 		// Start the signal meter instance
 		m_signalmeter->set_automatic_gain(m_channelprops.autogain);
 		m_signalmeter->set_manual_gain(m_channelprops.manualgain);
-		m_signalmeter->start();
+		m_signalmeter->start(FFT_MAXDB, FFT_MINDB, m_render_signalmeter->height(), m_render_signalmeter->width());
 	}
 
 	catch(...) { return false; }

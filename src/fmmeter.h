@@ -30,7 +30,7 @@
 #include <mutex>
 #include <thread>
 
-#include "fmdsp/demodulator.h"
+#include "fmdsp/datatypes.h"
 
 #include "props.h"
 #include "rtldevice.h"
@@ -59,9 +59,14 @@ public:
 	// Structure used to report the current signal status
 	struct signal_status {
 
-		TYPEREAL			power;				// Signal power level in dB
-		TYPEREAL			noise;				// Signal noise level in dB
-		TYPEREAL			snr;				// Signal-to-noise ratio in dB
+		float				power;				// Signal power level in dB
+		float				noise;				// Signal noise level in dB
+		float				snr;				// Signal-to-noise ratio in dB
+		uint32_t			fftbandwidth;		// Overall bandwidth of the FFT
+		int32_t				ffthighcut;			// High cut frequency from center
+		int32_t				fftlowcut;			// Low cut frequency from center
+		size_t				fftsize;			// Size of the FFT
+		int	const*			fftdata;			// Pointer to the FFT data
 	};
 
 	// exception_callback
@@ -81,9 +86,9 @@ public:
 	//
 	// Factory method, creates a new fmmeter instance
 	static std::unique_ptr<fmmeter> create(std::unique_ptr<rtldevice> device, struct tunerprops const& tunerprops,
-		uint32_t frequency, uint32_t bandwidth, signal_status_callback const& onstatus, int onstatusrate);
+		uint32_t frequency, uint32_t bandwidth, uint32_t fftwidth, signal_status_callback const& onstatus, int onstatusrate);
 	static std::unique_ptr<fmmeter> create(std::unique_ptr<rtldevice> device, struct tunerprops const& tunerprops,
-		uint32_t frequency, uint32_t bandwidth, signal_status_callback const& onstatus, int onstatusrate, 
+		uint32_t frequency, uint32_t bandwidth, uint32_t fftwidth, signal_status_callback const& onstatus, int onstatusrate, 
 		exception_callback const& onexception);
 
 	// get_automatic_gain
@@ -114,7 +119,7 @@ public:
 	// start
 	//
 	// Starts the signal meter
-	void start(void);
+	void start(TYPEREAL maxdb, TYPEREAL mindb, size_t height, size_t width);
 
 	// stop
 	//
@@ -129,7 +134,8 @@ private:
 	// Instance Constructor
 	//
 	fmmeter(std::unique_ptr<rtldevice> device, struct tunerprops const& tunerprops, uint32_t frequency, 
-		uint32_t bandwidth, signal_status_callback const& onstatus, int onstatusrate, exception_callback const& onexception);
+		uint32_t bandwidth, uint32_t fftwidth, signal_status_callback const& onstatus, int onstatusrate, 
+		exception_callback const& onexception);
 
 	//-----------------------------------------------------------------------
 	// Member Variables
@@ -138,6 +144,7 @@ private:
 	struct tunerprops const			m_tunerprops;			// Tuner settings
 	uint32_t const					m_frequency;			// Center frequency
 	uint32_t const					m_bandwidth;			// Channel bandwidth
+	uint32_t const					m_fftwidth;				// FFT bandwidth
 
 	bool							m_autogain = true;		// Automatic gain enabled/disabled
 	int								m_manualgain = 0;		// Current manual gain value

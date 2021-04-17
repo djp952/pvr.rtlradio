@@ -28,6 +28,7 @@
 #include <string.h>
 
 #include "align.h"
+#include "fmdsp/fft.h"
 
 #pragma warning(push, 4)
 
@@ -40,14 +41,16 @@
 //	tunerprops		- Tuner device properties
 //  frequency		- Center frequency to be tuned for the channel
 //  bandwidth		- Bandwidth of the channel to be analyzed
+//	fftwidth		- Bandwidth of the FFT data to be generated
 //	onstatus		- Signal status callback function
 //	statusrate		- Rate at which the status callback will be invoked (milliseconds)
 //	onexception		- Exception callback function
 
 fmmeter::fmmeter(std::unique_ptr<rtldevice> device, struct tunerprops const& tunerprops, uint32_t frequency,
-	uint32_t bandwidth, signal_status_callback const& onstatus, int statusrate, exception_callback const& onexception) : 
-	m_device(std::move(device)), m_tunerprops(tunerprops), m_frequency(frequency), m_bandwidth(bandwidth), 
-	m_onstatus(onstatus), m_onstatusrate(std::min(statusrate / 10, 10)), m_onexception(onexception)
+	uint32_t bandwidth, uint32_t fftwidth, signal_status_callback const& onstatus, int statusrate, 
+	exception_callback const& onexception) : m_device(std::move(device)), m_tunerprops(tunerprops), 
+	m_frequency(frequency), m_bandwidth(bandwidth), m_fftwidth(fftwidth), m_onstatus(onstatus), 
+	m_onstatusrate(std::min(statusrate / 10, 10)), m_onexception(onexception)
 {
 	// Set the default frequency, sample rate, and frequency correction offset
 	m_device->set_center_frequency(m_frequency);
@@ -83,14 +86,15 @@ fmmeter::~fmmeter()
 //	tunerprops		- Tuner device properties
 //  frequency		- Center frequency to be tuned for the channel
 //  bandwidth		- Bandwidth of the channel to be analyzed
+//	fftwidth		- Bandwidth of the FFT data to be generated
 //	onstatus		- Signal status callback function
 //	onstatusrate	- Rate at which the status callback will be invoked (milliseconds)
 
 std::unique_ptr<fmmeter> fmmeter::create(std::unique_ptr<rtldevice> device, struct tunerprops const& tunerprops,
-	uint32_t frequency, uint32_t bandwidth, signal_status_callback const& onstatus, int onstatusrate)
+	uint32_t frequency, uint32_t bandwidth, uint32_t fftwidth, signal_status_callback const& onstatus, int onstatusrate)
 {
 	auto onexception = [](std::exception const&) -> void { /* DO NOTHING */ };
-	return std::unique_ptr<fmmeter>(new fmmeter(std::move(device), tunerprops, frequency, bandwidth, onstatus, onstatusrate, onexception));
+	return std::unique_ptr<fmmeter>(new fmmeter(std::move(device), tunerprops, frequency, bandwidth, fftwidth, onstatus, onstatusrate, onexception));
 }
 
 //---------------------------------------------------------------------------
@@ -104,14 +108,15 @@ std::unique_ptr<fmmeter> fmmeter::create(std::unique_ptr<rtldevice> device, stru
 //	tunerprops		- Tuner device properties
 //  frequency		- Center frequency to be tuned for the channel
 //  bandwidth		- Bandwidth of the channel to be analyzed
+//	fftwidth		- Bandwidth of the FFT data to be generated
 //	onstatus		- Signal status callback function
 //	onstatusrate	- Rate at which the status callback will be invoked (milliseconds)
 //	onexception		- Exception callback function
 
 std::unique_ptr<fmmeter> fmmeter::create(std::unique_ptr<rtldevice> device, struct tunerprops const& tunerprops,
-	uint32_t frequency, uint32_t bandwidth, signal_status_callback const& onstatus, int onstatusrate, exception_callback const& onexception)
+	uint32_t frequency, uint32_t bandwidth, uint32_t fftwidth, signal_status_callback const& onstatus, int onstatusrate, exception_callback const& onexception)
 {
-	return std::unique_ptr<fmmeter>(new fmmeter(std::move(device), tunerprops, frequency, bandwidth, onstatus, onstatusrate, onexception));
+	return std::unique_ptr<fmmeter>(new fmmeter(std::move(device), tunerprops, frequency, bandwidth, fftwidth, onstatus, onstatusrate, onexception));
 }
 
 //---------------------------------------------------------------------------
@@ -196,39 +201,43 @@ void fmmeter::set_manual_gain(int manualgain)
 //
 //	NONE
 
-void fmmeter::start(void)
+void fmmeter::start(TYPEREAL maxdb, TYPEREAL mindb, size_t height, size_t width)
 {
 	scalar_condition<bool>		started{ false };		// Thread start condition variable
 
 	stop();						// Stop the signal meter if it's already running
 
 	// Define and launch the I/Q signal meter thread
-	m_worker = std::thread([&]() -> void {
+	m_worker = std::thread([&](TYPEREAL maxdb, TYPEREAL mindb, size_t height, size_t width) -> void {
+
+		CFft			fft;				// Fast fourier transform instance
+
+		// The FFT size (number of bins) needs to be a power of two equal to or larger
+		// than the output width; start at 512 and increase until we find that
+		size_t fftsize = 512;
+		while(width > fftsize) fftsize <<= 1;
+
+		// Initialize the fast fourier transform instance
+		fft.SetFFTParams(static_cast<int>(fftsize), false, 0.0, m_tunerprops.samplerate);
+		fft.SetFFTAve(10);
 
 		started = true;					// Signal that the thread has started
 
 		try {
 
-			// Create and initialize the FM demodulator instance
-			std::unique_ptr<CDemodulator> demodulator(new CDemodulator()); 
-			
-			tDemodInfo demodinfo = {};
-			demodinfo.HiCutmax = 100000;
-			demodinfo.HiCut = (m_bandwidth / 2);
-			demodinfo.LowCut = -demodinfo.HiCut;
-			demodinfo.SquelchValue = -160;
+			TYPEREAL avgpower = NAN;			// Average power level
+			TYPEREAL avgnoise = NAN;			// Average noise level
 
-			demodulator = std::unique_ptr<CDemodulator>(new CDemodulator());
-			demodulator->SetInputSampleRate(static_cast<TYPEREAL>(m_tunerprops.samplerate));
-			demodulator->SetDemod(DEMOD_FM, demodinfo);
-			
-			// Create the input buffers to hold the raw and converted I/Q samples read from the device
-			size_t const numsamples = demodulator->GetInputBufferLimit();
+			// Grab around 16K samples from the stream at a time, align to fftsize
+			size_t numsamples = align::up(16 KiB, static_cast<unsigned int>(fftsize));
 			size_t const numbytes = numsamples * 2;
 
-			std::unique_ptr<uint8_t[]> buffer(new uint8_t[numbytes]);
-			std::unique_ptr<TYPECPX[]> samples(new TYPECPX[numsamples]);
+			// Create all of the required data buffers
+			std::unique_ptr<uint8_t[]>	buffer(new uint8_t[numbytes]);
+			std::unique_ptr<TYPECPX[]>	samples(new TYPECPX[numsamples]);
+			std::unique_ptr<int[]>		fftbuffer(new int[width + 1]);
 
+			// TODO: see below, this is a lame way to do this
 			int iterations = 0;					// Counter for callback loop iterations
 
 			m_device->begin_stream();			// Begin streaming from the device
@@ -240,33 +249,83 @@ void fmmeter::start(void)
 				size_t read = 0;
 				while(read < numbytes) read += m_device->read(&buffer[read], numbytes - read);
 
-				// Convert the raw 8-bit I/Q samples into scaled complex I/Q samples
-				for(size_t index = 0; index < numsamples; index++) {
-
-					// The demodulator expects the I/Q samples in the range of -32767.0 through +32767.0
-					// (32767.0 / 127.5) = 256.9960784313725
-					samples[index] = {
-
-					#ifdef FMDSP_USE_DOUBLE_PRECISION
-						(static_cast<TYPEREAL>(buffer[(index * 2)]) - 127.5) * 256.9960784313725,		// I
-						(static_cast<TYPEREAL>(buffer[(index * 2) + 1]) - 127.5) * 256.9960784313725,	// Q
-					#else
-						(static_cast<TYPEREAL>(buffer[(index * 2)]) - 127.5f) * 256.9960784313725f,		// I
-						(static_cast<TYPEREAL>(buffer[(index * 2) + 1]) - 127.5f) * 256.9960784313725f,	// Q
-					#endif
-					};
-				}
-
-				// Run the I/Q samples through the demodulator to calculate the signal levels
-				demodulator->ProcessData(static_cast<int>(numsamples), samples.get(), samples.get());
-
 				// Only invoke the callback at roughly the requested rate
+				// TODO: This can be made to be a set amount of time, this way is cheesy
 				if((++iterations % m_onstatusrate) == 0) {
+					
+					// Convert the raw 8-bit I/Q samples into scaled complex I/Q samples
+					for(size_t index = 0; index < numsamples; index++) {
 
+						// The demodulator expects the I/Q samples in the range of -32767.0 through +32767.0
+						// (32767.0 / 127.5) = 256.9960784313725
+						samples[index] = {
+
+						#ifdef FMDSP_USE_DOUBLE_PRECISION
+							(static_cast<TYPEREAL>(buffer[(index * 2)]) - 127.5) * 256.9960784313725,		// I
+							(static_cast<TYPEREAL>(buffer[(index * 2) + 1]) - 127.5) * 256.9960784313725,	// Q
+						#else
+							(static_cast<TYPEREAL>(buffer[(index * 2)]) - 127.5f) * 256.9960784313725f,		// I
+							(static_cast<TYPEREAL>(buffer[(index * 2) + 1]) - 127.5f) * 256.9960784313725f,	// Q
+						#endif
+						};
+					}
+
+					// Put the I/Q samples into the fast fourier transform instance (numsamples is aligned to fftsize)
+					size_t index = 0;
+					while(index < numsamples) {
+
+						fft.PutInDisplayFFT(static_cast<qint32>(fftsize), &samples[index]);
+						index += fftsize;
+					}
+
+					// Convert the captured FFT data into bitmapped points that can be measured/displayed
+					fft.GetScreenIntegerFFTData(static_cast<qint32>(height), static_cast<qint32>(width), maxdb, mindb,
+						-(static_cast<int32_t>(m_fftwidth) / 2), (static_cast<int32_t>(m_fftwidth) / 2), fftbuffer.get());
+
+					// Use the FFT data to calculate the power and noise levels
+					TYPEREAL const hz = static_cast<TYPEREAL>(width) / static_cast<TYPEREAL>(m_fftwidth);
+					TYPEREAL const center = (static_cast<TYPEREAL>(width) / 2.0);
+					
+					// Power = peak amplitude within +/- 5KHz of the center frequency
+					size_t power = height;
+					size_t const powerlowcut = static_cast<size_t>(center - (hz * 5.0 KHz));	// -5 KHz
+					size_t const powerhighcut = static_cast<size_t>(center + (hz * 5.0 KHz));	// +5 KHz
+					
+					for(index = powerlowcut; index < powerhighcut; index++) {
+
+						size_t val = fftbuffer[index];
+						if(val < power) power = val;			// FFT: 0 = MAX, height = MIN
+					}
+
+					// Noise = average amplitude of 5Khz below the low cut and 5KHz above the high cut
+					TYPEREAL noise = 0.0;
+					size_t const lowcut = static_cast<size_t>(center - (static_cast<TYPEREAL>(m_bandwidth / 2) * hz));
+					size_t const highcut = static_cast<size_t>(center + (static_cast<TYPEREAL>(m_bandwidth / 2) * hz));
+					size_t const fivekhz = static_cast<size_t>(hz * 5.0 KHz);
+
+					for(index = (lowcut - fivekhz); index < lowcut; index++) noise += static_cast<TYPEREAL>(fftbuffer[index]);
+					for(index = highcut; index < (highcut + fivekhz); index++) noise += static_cast<TYPEREAL>(fftbuffer[index]);
+					noise /= static_cast<TYPEREAL>(fivekhz * 2);
+
+					// Convert the power and noise into decibels based on the FFT range
+					TYPEREAL const powerdb = ((mindb - maxdb) * (static_cast<TYPEREAL>(power) / static_cast<TYPEREAL>(height))) + maxdb;
+					TYPEREAL const noisedb = ((mindb - maxdb) * (noise / static_cast<TYPEREAL>(height))) + maxdb;
+
+					// Smooth the power and noise levels out a bit
+					avgpower = (std::isnan(avgpower)) ? powerdb : 0.85 * avgpower + 0.15 * powerdb;
+					avgnoise = (std::isnan(avgnoise)) ? noisedb : 0.85 * avgnoise + 0.15 * noisedb;
+
+					// Send all of the calculated information into the status callback
 					struct signal_status status = {};
-					status.power = demodulator->GetSignalLevel();;
-					status.noise = demodulator->GetNoiseLevel();
-					status.snr = demodulator->GetSignalToNoiseLevel();;
+
+					status.power = static_cast<float>(avgpower);				// Power in dB
+					status.noise = static_cast<float>(avgnoise);				// Noise in dB
+					status.snr = static_cast<float>(avgpower + -avgnoise);		// SNR in dB
+					status.fftbandwidth = m_fftwidth;							// Overall FFT bandwidth
+					status.ffthighcut = (m_bandwidth / 2);						// High cut bandwidth
+					status.fftlowcut = -status.ffthighcut;						// Low cut bandwidth
+					status.fftsize = width;										// Length of the FFT graph data
+					status.fftdata = fftbuffer.get();							// FFT graph data
 
 					if(m_onstatus) m_onstatus(status);
 					iterations = 0;
@@ -278,7 +337,8 @@ void fmmeter::start(void)
 		catch(std::exception const& ex) { if(m_onexception) m_onexception(ex); }
 		
 		m_stopped.store(true);			// Thread is stopped
-	});
+	
+	}, maxdb, mindb, height, width);
 
 	// Wait until the worker thread indicates that it has started
 	started.wait_until_equals(true);

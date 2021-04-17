@@ -24,6 +24,7 @@
 #define __CHANNELSETTINGS_H_
 #pragma once
 
+#include <glm/glm.hpp>
 #include <kodi/gui/controls/Button.h>
 #include <kodi/gui/controls/Edit.h>
 #include <kodi/gui/controls/Image.h>
@@ -83,6 +84,21 @@ private:
 	channelsettings(channelsettings const&) = delete;
 	channelsettings& operator=(channelsettings const&) = delete;
 
+	// FFT_BANDWIDTH
+	//
+	// Bandwidth of the FFT display
+	static uint32_t const FFT_BANDWIDTH;
+
+	// FFT_MAXDB
+	//
+	// Maximum decibel value supported by the FFT
+	static float const FFT_MAXDB;
+
+	// FFT_MINDB
+	//
+	// Minimum decibel level supported by the FFT
+	static float const FFT_MINDB;
+
 	// FMRADIO_BANDWIDTH
 	//
 	// Bandwidth of an analog FM radio channel
@@ -112,18 +128,33 @@ private:
 	{
 	public:
 
-		// Instance constructor
+		// Constructor
+		//
 		fftshader();
+
+		// Member Functions
+		//
+		GLint	aPosition(void) const;
+		bool	isgl(void) const;
+		bool	isgles(void) const;
+		GLint	uColor() const;
+		GLint	uModelProjMatrix(void) const;
 
 	private:
 
 		fftshader(fftshader const&) = delete;
 		fftshader& operator=(fftshader const&) = delete;
 
-		// Member Functions
+		// CShaderProgram overrides
+		//
 		void OnCompiledAndLinked(void) override;
 		void OnDisabled(void) override;
 		bool OnEnabled(void) override;
+
+		bool const	m_gles;						// GLES or GL flag
+		GLint		m_aPosition = -1;			// Attribute location
+		GLint		m_uColor = -1;				// Attribute location
+		GLint		m_uModelProjMatrix = -1;	// Uniform location
 	};
 
 	// Class fftcontrol
@@ -133,19 +164,55 @@ private:
 	{
 	public:
 
-		// Instance Constructor
+		// Constructor / Destructor
+		//
 		fftcontrol(kodi::gui::CWindow* window, int controlid);
+		~fftcontrol() override;
 
 		// Member Functions
-		bool Dirty(void) override;
-		void Render(void) override;
+		//
+		size_t	height(void) const;
+		size_t	width(void) const;
+		void	update(struct fmmeter::signal_status const& status);
 
 	private:
 
 		fftcontrol(fftcontrol const&) = delete;
 		fftcontrol& operator=(fftcontrol const&) = delete;
 
-		fftshader		m_shader;			// Shader instance
+		// Private Member Functions
+		//
+		GLfloat db_to_height(float db) const;
+		void render_line(glm::vec3 color, glm::vec2 vertices[2]) const;
+		void render_line(glm::vec4 color, glm::vec2 vertices[2]) const;
+		void render_line_strip(glm::vec3 color, glm::vec2 vertices[], size_t numvertices) const;
+		void render_line_strip(glm::vec4 color, glm::vec2 vertices[], size_t numvertices) const;
+		void render_rect(glm::vec3 color, glm::vec2 vertices[4]) const;
+		void render_rect(glm::vec4 color, glm::vec2 vertices[4]) const;
+		void render_triangle(glm::vec3 color, glm::vec2 vertices[3]) const;
+		void render_triangle(glm::vec4 color, glm::vec2 vertices[3]) const;
+
+		// renderingcontrol overrides
+		//
+		bool dirty(void) override;
+		void render(void) override;
+
+		GLfloat					m_widthf;				// Width as GLfloat
+		GLfloat					m_heightf;				// Height as GLfloat
+		GLfloat					m_linewidthf = 1.25f;	// Line width factor
+		GLfloat					m_lineheightf = 1.25f;	// Line height factor
+
+		fftshader				m_shader;				// Shader instance
+		GLuint					m_vertexVBO;			// Vertex buffer object (GL)
+		glm::mat4				m_modelProjMat;			// Model/Projection matrix
+
+		bool					m_dirty = false;		// Dirty flag
+		GLfloat					m_power = 0.0f;			// Power level
+		GLfloat					m_noise = 0.0f;			// Noise level
+		GLfloat					m_lowcut = 0.0f;		// Low cut
+		GLfloat					m_highcut = 0.0f;		// High cut
+
+		std::unique_ptr<glm::vec2[]>	m_fft;			// FFT vertices
 	};
 
 	//-------------------------------------------------------------------------
