@@ -135,8 +135,6 @@ private:
 		// Member Functions
 		//
 		GLint	aPosition(void) const;
-		bool	isgl(void) const;
-		bool	isgles(void) const;
 		GLint	uColor() const;
 		GLint	uModelProjMatrix(void) const;
 
@@ -151,7 +149,6 @@ private:
 		void OnDisabled(void) override;
 		bool OnEnabled(void) override;
 
-		bool const	m_gles;						// GLES or GL flag
 		GLint		m_aPosition = -1;			// Attribute location
 		GLint		m_uColor = -1;				// Attribute location
 		GLint		m_uModelProjMatrix = -1;	// Uniform location
@@ -203,7 +200,7 @@ private:
 		GLfloat					m_lineheightf = 1.25f;	// Line height factor
 
 		fftshader				m_shader;				// Shader instance
-		GLuint					m_vertexVBO;			// Vertex buffer object (GL)
+		GLuint					m_vertexVBO;			// Vertex buffer object
 		glm::mat4				m_modelProjMat;			// Model/Projection matrix
 
 		bool					m_dirty = false;		// Dirty flag

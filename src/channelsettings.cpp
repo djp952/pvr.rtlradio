@@ -116,8 +116,8 @@ channelsettings::fftcontrol::fftcontrol(kodi::gui::CWindow* window, int controli
 	// Create the model/view/projection matrix based on width and height
 	m_modelProjMat = glm::ortho(0.0f, m_widthf, m_heightf, 0.0f);
 
-	// Create the vertex buffer object (GL)
-	if(m_shader.isgl()) glGenBuffers(1, &m_vertexVBO);
+	// Create the vertex buffer object
+	glGenBuffers(1, &m_vertexVBO);
 }
 
 //---------------------------------------------------------------------------
@@ -125,11 +125,8 @@ channelsettings::fftcontrol::fftcontrol(kodi::gui::CWindow* window, int controli
 
 channelsettings::fftcontrol::~fftcontrol()
 {
-	if(m_shader.isgl() && (m_vertexVBO != 0)) {
-
-		glDeleteBuffers(1, &m_vertexVBO);
-		m_vertexVBO = 0;
-	}
+	// Delete the vertex buffer object
+	glDeleteBuffers(1, &m_vertexVBO);
 }
 
 //---------------------------------------------------------------------------
@@ -199,14 +196,14 @@ void channelsettings::fftcontrol::render(void)
 	// Set the model/view/projection matrix
 	glUniformMatrix4fv(m_shader.uModelProjMatrix(), 1, GL_FALSE, glm::value_ptr(m_modelProjMat));
 
-	// Bind the vertex buffer object (GL)
-	if(m_shader.isgl()) glBindBuffer(GL_ARRAY_BUFFER, m_vertexVBO);
+	// Bind the vertex buffer object
+	glBindBuffer(GL_ARRAY_BUFFER, m_vertexVBO);
 
 	// Enable the vertex array
 	glEnableVertexAttribArray(m_shader.aPosition());
 
-	// Set the vertex attribute pointer type (GL)
-	if(m_shader.isgl()) glVertexAttribPointer(m_shader.aPosition(), 2, GL_FLOAT, GL_FALSE, sizeof(glm::vec2), BUFFER_OFFSET(offsetof(glm::vec2, x)));
+	// Set the vertex attribute pointer type
+	glVertexAttribPointer(m_shader.aPosition(), 2, GL_FLOAT, GL_FALSE, sizeof(glm::vec2), BUFFER_OFFSET(offsetof(glm::vec2, x)));
 
 #ifndef HAS_ANGLE
 	// Background
@@ -250,11 +247,11 @@ void channelsettings::fftcontrol::render(void)
 	// FFT
 	render_line_strip(glm::vec3(1.0f, 1.0f, 1.0f), m_fft.get(), m_width);
 
-	glDisableVertexAttribArray(m_shader.aPosition());		// Disable the vertex array
-	if(m_shader.isgl()) glBindBuffer(GL_ARRAY_BUFFER, 0);	// Unbind the VBO (GL)
+	glDisableVertexAttribArray(m_shader.aPosition());	// Disable the vertex array
+	glBindBuffer(GL_ARRAY_BUFFER, 0);					// Unbind the VBO
 
-	m_shader.DisableShader();								// Disable the shader program
-	glDisable(GL_BLEND);									// Disable blending
+	m_shader.DisableShader();							// Disable the shader program
+	glDisable(GL_BLEND);								// Disable blending
 
 	// Render state is clean until the next update from the meter instance
 	m_dirty = false;
@@ -308,9 +305,7 @@ void channelsettings::fftcontrol::render_line(glm::vec4 color, glm::vec2 vertice
 		{ vertices[1].x + p2.x * dx, vertices[1].y + p2.y * dy }
 	};
 
-	if(m_shader.isgl()) glBufferData(GL_ARRAY_BUFFER, (sizeof(glm::vec2) * 4), &strip[0], GL_STATIC_DRAW);
-	else glVertexAttribPointer(m_shader.aPosition(), 2, GL_FLOAT, GL_FALSE, 0, strip);
-
+	glBufferData(GL_ARRAY_BUFFER, (sizeof(glm::vec2) * 4), &strip[0], GL_STATIC_DRAW);
 	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 }
 
@@ -373,9 +368,7 @@ void channelsettings::fftcontrol::render_line_strip(glm::vec4 color, glm::vec2 v
 		strip[strippos++] = glm::vec2(b.x + p2.x * dx, b.y + p2.y * dy);
 	}
 
-	if(m_shader.isgl()) glBufferData(GL_ARRAY_BUFFER, (sizeof(glm::vec2) * strippos), strip.get(), GL_STATIC_DRAW);
-	else glVertexAttribPointer(m_shader.aPosition(), 2, GL_FLOAT, GL_FALSE, 0, strip.get());
-
+	glBufferData(GL_ARRAY_BUFFER, (sizeof(glm::vec2) * strippos), strip.get(), GL_STATIC_DRAW);
 	glDrawArrays(GL_TRIANGLE_STRIP, 0, static_cast<GLsizei>(strippos));
 }
 
@@ -410,9 +403,7 @@ void channelsettings::fftcontrol::render_rect(glm::vec4 color, glm::vec2 vertice
 	glUniform4f(m_shader.uColor(), color.r, color.g, color.b, color.a);
 
 	// Render the rectangle as a 4-vertex GL_TRIANGLE_STRIP primitive
-	if(m_shader.isgl()) glBufferData(GL_ARRAY_BUFFER, (sizeof(glm::vec2) * 4), &vertices[0], GL_STATIC_DRAW);
-	else glVertexAttribPointer(m_shader.aPosition(), 2, GL_FLOAT, GL_FALSE, 0, vertices);
-
+	glBufferData(GL_ARRAY_BUFFER, (sizeof(glm::vec2) * 4), &vertices[0], GL_STATIC_DRAW);
 	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 }
 
@@ -447,9 +438,7 @@ void channelsettings::fftcontrol::render_triangle(glm::vec4 color, glm::vec2 ver
 	glUniform4f(m_shader.uColor(), color.r, color.g, color.b, color.a);
 
 	// Render the triangle as a 3-vertex GL_TRIANGLES primitive
-	if(m_shader.isgl()) glBufferData(GL_ARRAY_BUFFER, (sizeof(glm::vec2) * 3), &vertices[0], GL_STATIC_DRAW);
-	else glVertexAttribPointer(m_shader.aPosition(), 2, GL_FLOAT, GL_FALSE, 0, vertices);
-
+	glBufferData(GL_ARRAY_BUFFER, (sizeof(glm::vec2) * 3), &vertices[0], GL_STATIC_DRAW);
 	glDrawArrays(GL_TRIANGLES, 0, 3);
 }
 
@@ -510,7 +499,7 @@ size_t channelsettings::fftcontrol::width(void) const
 //
 //	NONE
 
-channelsettings::fftshader::fftshader() : m_gles(is_platform_opengles())
+channelsettings::fftshader::fftshader()
 {
 	// VERTEX SHADER
 	std::string const vertexshader(
@@ -555,7 +544,7 @@ void main()
 		)");
 
 	// Compile and link the shader programs during construction
-	if(m_gles) CompileAndLink("#version 100\n", vertexshader, "#version 100\n", fragmentshader);
+	if(is_platform_opengles()) CompileAndLink("#version 100\n", vertexshader, "#version 100\n", fragmentshader);
 	else CompileAndLink("#version 150\n", vertexshader, "#version 150\n", fragmentshader);
 }
 
@@ -572,34 +561,6 @@ GLint channelsettings::fftshader::aPosition(void) const
 {
 	assert(m_aPosition != -1);
 	return m_aPosition;
-}
-
-//---------------------------------------------------------------------------
-// channelsettings::fftshader::isgl
-//
-// Indicates if the shader was compiled for desktop OpenGL
-//
-// Arguments:
-//
-//	NONE
-
-bool channelsettings::fftshader::isgl(void) const
-{
-	return !m_gles;
-}
-
-//---------------------------------------------------------------------------
-// channelsettings::fftshader::isgles
-//
-// Indicates if the shader was compiled for OpenGL ES
-//
-// Arguments:
-//
-//	NONE
-
-bool channelsettings::fftshader::isgles(void) const 
-{
-	return m_gles;
 }
 
 //---------------------------------------------------------------------------
