@@ -100,6 +100,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "skin.estuary", "skin.estuar
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "xml", "xml", "{880E452A-4A32-4A49-A911-183912652C33}"
 	ProjectSection(SolutionItems) = preProject
+		pvr.rtlradio\resources\skins\skin.estuary\xml\channeladd.xml = pvr.rtlradio\resources\skins\skin.estuary\xml\channeladd.xml
 		pvr.rtlradio\resources\skins\skin.estuary\xml\channelsettings.xml = pvr.rtlradio\resources\skins\skin.estuary\xml\channelsettings.xml
 	EndProjectSection
 EndProject

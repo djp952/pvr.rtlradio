@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<window>
+  <defaultcontrol always="true">20</defaultcontrol>
+  <include>Animation_DialogPopupOpenClose</include>
+  <controls>
+    <control type="group">
+      <centertop>50%</centertop>
+      <height>900</height>
+      <centerleft>50%</centerleft>
+      <width>900</width>
+      <include content="DialogBackgroundCommons">
+        <param name="width" value="900" />
+        <param name="height" value="900" />
+        <param name="header_label" value="Add channel" />
+        <param name="header_id" value="2" />
+      </include>
+      <!-- Dialog Buttons -->
+      <control type="grouplist" id="9000">
+        <right>10</right>
+        <top>118</top>
+        <onleft>9002</onleft>
+        <onright>10</onright>
+        <itemgap>dialogbuttons_itemgap</itemgap>
+        <width>400</width>
+        <!-- OK -->
+        <include content="DefaultDialogButton">
+          <param name="width" value="400" />
+          <param name="id" value="100" />
+          <param name="label" value="$LOCALIZE[186]" />
+        </include>
+        <!-- Cancel -->
+        <include content="DefaultDialogButton">
+          <param name="width" value="400" />
+          <param name="id" value="101" />
+          <param name="label" value="$LOCALIZE[222]" />
+        </include>
+      </control>
+    </control>
+  </controls>
+</window>

@@ -198,6 +198,7 @@
     <ClInclude Include="..\tmp\version\version.h" />
     <ClInclude Include="addon.h" />
     <ClInclude Include="align.h" />
+    <ClInclude Include="channeladd.h" />
     <ClInclude Include="compat\pthread.h" />
     <ClInclude Include="database.h" />
     <ClInclude Include="dbtypes.h" />
@@ -624,6 +625,7 @@
       <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(IntDir)sqlite\</ObjectFileName>
     </ClCompile>
     <ClCompile Include="addon.cpp" />
+    <ClCompile Include="channeladd.cpp" />
     <ClCompile Include="database.cpp" />
     <ClCompile Include="channelsettings.cpp" />
     <ClCompile Include="fmdsp\demodulator.cpp">

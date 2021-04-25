@@ -38,6 +38,7 @@
 #include <android/log.h>
 #endif
 
+#include "channeladd.h"
 #include "channelsettings.h"
 #include "dbtypes.h"
 #include "fmstream.h"
@@ -1403,11 +1404,39 @@ int64_t addon::LengthLiveStream(void)
 
 PVR_ERROR addon::OpenDialogChannelAdd(kodi::addon::PVRChannel const& /*channel*/)
 {
-	//
-	// TODO: Stub implementation
-	//
+	try {
 
-	return PVR_ERROR::PVR_ERROR_NOT_IMPLEMENTED;
+		// Create and initialize the dialog box
+		std::unique_ptr<channeladd> dialog = channeladd::create();
+		dialog->DoModal();
+
+		if(dialog->get_dialog_result()) {
+
+			struct channelprops channelprops = {};
+
+			// Retrieve the updated channel properties from the dialog box and persist them
+			dialog->get_channel_properties(channelprops);
+
+			//
+			// check for a duplicate channel
+			// add to the database
+			// if device not in use, show channelsettings dialog
+			// trigger pvr updates
+			//
+		}
+	}
+
+	catch(std::exception& ex) {
+
+		// Log the error and inform the user that the operation failed, do not return an error code
+		handle_stdexception(__func__, ex);
+		kodi::gui::dialogs::OK::ShowAndGetInput(kodi::GetLocalizedString(30407), "An error occurred displaying the "
+			"add channel dialog:", "", ex.what());
+	}
+
+	catch(...) { return handle_generalexception(__func__, PVR_ERROR::PVR_ERROR_FAILED); }
+
+	return PVR_ERROR::PVR_ERROR_NO_ERROR;
 }
 
 //-----------------------------------------------------------------------------

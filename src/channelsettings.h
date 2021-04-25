@@ -58,7 +58,7 @@ public:
 
 	// Destructor
 	//
-	virtual ~channelsettings();
+	~channelsettings() override;
 	
 	//-----------------------------------------------------------------------
 	// Member Functions
