@@ -354,9 +354,7 @@ void addon::menuhook_clearchannels(void)
 		clear_channels(connectionpool::handle(m_connpool));
 		kodi::gui::dialogs::OK::ShowAndGetInput(kodi::GetLocalizedString(30402), "Channel data successfully cleared");
 
-		// Trigger both a channel and a channel group update in Kodi
-		TriggerChannelUpdate();
-		TriggerChannelGroupsUpdate();
+		TriggerChannelGroupsUpdate();					// Trigger a channel group update in Kodi
 	}
 
 	catch(std::exception& ex) {
@@ -482,9 +480,7 @@ void addon::menuhook_importchannels(void)
 			// Inform the user that the operation was successful
 			kodi::gui::dialogs::OK::ShowAndGetInput(kodi::GetLocalizedString(30400), "Channels successfully imported from:", "", filepath.c_str());
 
-			// Trigger both a channel and a channel group update in Kodi
-			TriggerChannelUpdate();
-			TriggerChannelGroupsUpdate();
+			TriggerChannelGroupsUpdate();					// Trigger a channel group update in Kodi
 		}
 
 		catch(std::exception& ex) {
@@ -765,9 +761,8 @@ ADDON_STATUS addon::SetSetting(std::string const& settingName, kodi::CSettingVal
 			m_settings.interface_prepend_channel_numbers = bvalue;
 			log_info(__func__, ": setting interface_prepend_channel_numbers changed to ", bvalue);
 
-			// Trigger channel and channel group updates to refresh the channel names
+			// Trigger an update to refresh the channel names
 			TriggerChannelUpdate();
-			TriggerChannelGroupsUpdate();
 		}
 	}
 
@@ -1504,7 +1499,6 @@ PVR_ERROR addon::OpenDialogChannelSettings(kodi::addon::PVRChannel const& channe
 
 			// Trigger a PVR channel update in the event the channel name or logo changed
 			TriggerChannelUpdate();
-			TriggerChannelGroupsUpdate();
 		}
 	}
 
