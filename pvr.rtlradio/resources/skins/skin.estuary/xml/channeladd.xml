@@ -1,38 +1,175 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <window>
-  <defaultcontrol always="true">20</defaultcontrol>
+  <defaultcontrol always="true">2000</defaultcontrol>
   <include>Animation_DialogPopupOpenClose</include>
+  <depth>DepthDialog+</depth>
   <controls>
     <control type="group">
       <centertop>50%</centertop>
-      <height>900</height>
+      <height>660</height>
       <centerleft>50%</centerleft>
-      <width>900</width>
+      <width>545</width>
       <include content="DialogBackgroundCommons">
-        <param name="width" value="900" />
-        <param name="height" value="900" />
-        <param name="header_label" value="Add channel" />
-        <param name="header_id" value="2" />
+        <param name="width" value="696" />
+        <param name="height" value="600" />
+        <param name="header_label" value="$LOCALIZE[19204]" />
+        <param name="header_id" value="" />
       </include>
+      <!-- Input label -->
+      <control type="group" id="3000">
+        <left>10</left>
+        <top>70</top>
+        <control type="image" id="9000">
+          <left>29</left>
+          <top>31</top>
+          <width>302</width>
+          <height>60</height>
+          <texture colordiffuse="32FFFFFF" border="2">colors/white.png</texture>
+        </control>
+        <control type="label" id="300">
+          <description>Input</description>
+          <left>19</left>
+          <top>20</top>
+          <width>322</width>
+          <height>80</height>
+          <font>font37</font>
+          <align>center</align>
+          <aligny>center</aligny>
+        </control>
+      </control>
+      <!-- Numeric keypad -->
+      <control type="grouplist" id="2000">
+        <left>30</left>
+        <top>180</top>
+        <height>1000</height>
+        <onleft>1000</onleft>
+        <onright>1000</onright>
+        <orientation>vertical</orientation>
+        <itemgap>-10</itemgap>
+        <control type="grouplist">
+          <description>1 - 3 buttons</description>
+          <height>110</height>
+          <itemgap>-20</itemgap>
+          <orientation>horizontal</orientation>
+          <control type="button" id="201">
+            <include>KeyboardButton</include>
+            <label>$NUMBER[1]</label>
+            <onup>210</onup>
+            <ondown>204</ondown>
+          </control>
+          <control type="button" id="202">
+            <include>KeyboardButton</include>
+            <label>$NUMBER[2]</label>
+            <onup>200</onup>
+            <ondown>205</ondown>
+          </control>
+          <control type="button" id="203">
+            <include>KeyboardButton</include>
+            <label>$NUMBER[3]</label>
+            <onup>210</onup>
+            <ondown>206</ondown>
+          </control>
+        </control>
+        <control type="grouplist">
+          <description>4 - 6 buttons</description>
+          <height>110</height>
+          <itemgap>-20</itemgap>
+          <orientation>horizontal</orientation>
+          <control type="button" id="204">
+            <include>KeyboardButton</include>
+            <label>$NUMBER[4]</label>
+            <onup>201</onup>
+            <ondown>207</ondown>
+          </control>
+          <control type="button" id="205">
+            <include>KeyboardButton</include>
+            <label>$NUMBER[5]</label>
+            <onup>202</onup>
+            <ondown>208</ondown>
+          </control>
+          <control type="button" id="206">
+            <include>KeyboardButton</include>
+            <label>$NUMBER[6]</label>
+            <onup>203</onup>
+            <ondown>209</ondown>
+          </control>
+        </control>
+        <control type="grouplist">
+          <description>7 - 9 buttons</description>
+          <height>110</height>
+          <onleft>21</onleft>
+          <onright>21</onright>
+          <itemgap>-20</itemgap>
+          <orientation>horizontal</orientation>
+          <control type="button" id="207">
+            <include>KeyboardButton</include>
+            <label>$NUMBER[7]</label>
+            <onup>204</onup>
+            <ondown>210</ondown>
+          </control>
+          <control type="button" id="208">
+            <include>KeyboardButton</include>
+            <label>$NUMBER[8]</label>
+            <onup>205</onup>
+            <ondown>200</ondown>
+          </control>
+          <control type="button" id="209">
+            <include>KeyboardButton</include>
+            <label>$NUMBER[9]</label>
+            <onup>206</onup>
+            <ondown>203</ondown>
+          </control>
+        </control>
+        <control type="grouplist">
+          <height>110</height>
+          <onleft>21</onleft>
+          <onright>21</onright>
+          <itemgap>-20</itemgap>
+          <orientation>horizontal</orientation>
+          <control type="radiobutton" id="210">
+            <description>backspace</description>
+            <width>120</width>
+            <height>120</height>
+            <texturefocus colordiffuse="button_focus">buttons/roundbutton-fo.png</texturefocus>
+            <texturenofocus />
+            <textureradioonfocus colordiffuse="FFFFFFFF">icons/keyboard/arrowleft.png</textureradioonfocus>
+            <textureradioonnofocus colordiffuse="FFFFFFFF">icons/keyboard/arrowleft.png</textureradioonnofocus>
+            <textureradioofffocus colordiffuse="FFFFFFFF">icons/keyboard/arrowleft.png</textureradioofffocus>
+            <textureradiooffnofocus colordiffuse="FFFFFFFF">icons/keyboard/arrowleft.png</textureradiooffnofocus>
+            <radioposx>40</radioposx>
+            <radiowidth>36</radiowidth>
+            <radioheight>36</radioheight>
+            <onup>207</onup>
+            <ondown>201</ondown>
+          </control>
+          <control type="button" id="200">
+            <description>0 button</description>
+            <include>KeyboardButton</include>
+            <label>$NUMBER[0]</label>
+            <onup>208</onup>
+            <ondown>202</ondown>
+          </control>
+        </control>
+      </control>
       <!-- Dialog Buttons -->
-      <control type="grouplist" id="9000">
-        <right>10</right>
-        <top>118</top>
-        <onleft>9002</onleft>
-        <onright>10</onright>
+      <control type="grouplist" id="1000">
+        <left>375</left>
+        <top>80</top>
+        <onleft>2000</onleft>
+        <onright>2000</onright>
         <itemgap>dialogbuttons_itemgap</itemgap>
-        <width>400</width>
-        <!-- OK -->
+        <width>300</width>
+        <!-- Add -->
         <include content="DefaultDialogButton">
-          <param name="width" value="400" />
+          <param name="width" value="300" />
           <param name="id" value="100" />
-          <param name="label" value="$LOCALIZE[186]" />
+          <param name="label" value="$LOCALIZE[15019]" />
         </include>
-        <!-- Cancel -->
+        <!-- Close -->
         <include content="DefaultDialogButton">
-          <param name="width" value="400" />
+          <param name="width" value="300" />
           <param name="id" value="101" />
-          <param name="label" value="$LOCALIZE[222]" />
+          <param name="label" value="$LOCALIZE[15067]" />
         </include>
       </control>
     </control>

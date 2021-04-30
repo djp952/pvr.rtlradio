@@ -128,6 +128,16 @@ private:
 // FUNCTION PROTOTYPES
 //---------------------------------------------------------------------------
 
+// add_channel
+//
+// Adds a new channel to the database
+bool add_channel(sqlite3* instance, struct channelprops const& channelprops);
+
+// channel_exists
+//
+// Determines if a channel exists in the database
+bool channel_exists(sqlite3* instance, struct channelprops const& channelprops);
+
 // clear_channels
 //
 // Clears all channels from the database

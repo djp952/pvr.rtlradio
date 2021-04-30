@@ -24,11 +24,15 @@
 #define __CHANNELADD_H_
 #pragma once
 
+#include <kodi/gui/controls/Button.h>
+#include <kodi/gui/controls/Label.h>
 #include <kodi/gui/Window.h>
 
 #include "props.h"
 
 #pragma warning(push, 4)
+
+using namespace kodi::gui::controls;
 
 //---------------------------------------------------------------------------
 // Class channeladd
@@ -87,11 +91,37 @@ private:
 	//-------------------------------------------------------------------------
 	// Private Member Functions
 
+	// format_input
+	//
+	// Formats the current input string for display
+	std::string format_input(std::string const& input) const;
+
+	// get_frequency
+	//
+	// Attempts to parse a formatted input string to get the frequency
+	bool get_frequency(std::string const& input, uint32_t& frequency) const;
+
+	// on_backspace
+	//
+	// Handles input of a backspace character
+	void on_backspace(void);
+
+	// on_digit
+	//
+	// Handles input of a digit character
+	void on_digit(int number);
+
 	//-------------------------------------------------------------------------
 	// Member Variables
 
 	struct channelprops			m_channelprops = {};		// Channel properties
 	bool						m_result = false;			// Dialog result
+	std::string					m_input;					// Input string
+
+	// CONTROLS
+	//
+	std::unique_ptr<CLabel>		m_label_input;				// Input
+	std::unique_ptr<CButton>	m_button_add;				// Add button
 };
 
 //-----------------------------------------------------------------------------

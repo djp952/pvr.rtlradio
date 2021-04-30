@@ -1405,19 +1405,20 @@ PVR_ERROR addon::OpenDialogChannelAdd(kodi::addon::PVRChannel const& /*channel*/
 		std::unique_ptr<channeladd> dialog = channeladd::create();
 		dialog->DoModal();
 
+		// If the dialog was successful add the channel to the database
 		if(dialog->get_dialog_result()) {
 
-			struct channelprops channelprops = {};
+			connectionpool::handle dbhandle(m_connpool);	// Grab a database handle
 
-			// Retrieve the updated channel properties from the dialog box and persist them
+			// Retrieve the new channel properties from the dialog box
+			struct channelprops channelprops = {};
 			dialog->get_channel_properties(channelprops);
 
-			//
-			// check for a duplicate channel
-			// add to the database
-			// if device not in use, show channelsettings dialog
-			// trigger pvr updates
-			//
+			// Only add the channel if it doesn't already exist in the database so that
+			// existing channel settings will be preserved
+			if(!channel_exists(dbhandle, channelprops)) add_channel(dbhandle, channelprops);
+
+			TriggerChannelGroupsUpdate();					// Update the channel groups
 		}
 	}
 

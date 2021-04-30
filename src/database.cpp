@@ -142,6 +142,24 @@ void connectionpool::release(sqlite3* handle)
 }
 
 //---------------------------------------------------------------------------
+// add_channel
+//
+// Adds a new channel to the database
+//
+// Arguments:
+//
+//	instance		- Database instance
+//	channelprops	- Channel properties
+
+bool add_channel(sqlite3* instance, struct channelprops const& channelprops)
+{
+	// frequency | subchannel | hidden | name | autogain | manualgain | logourl
+	return execute_non_query(instance, "replace into channel values(?1, ?2, 0, ?3, ?4, ?5, ?6)",
+		channelprops.frequency, channelprops.subchannel, channelprops.name.c_str(), (channelprops.autogain) ? 1 : 0,
+		channelprops.manualgain, channelprops.logourl.c_str()) > 0;
+}
+
+//---------------------------------------------------------------------------
 // bind_parameter (local)
 //
 // Used by execute_non_query to bind a string parameter
@@ -178,6 +196,24 @@ static void bind_parameter(sqlite3_stmt* statement, int& paramindex, uint32_t va
 {
 	int result = sqlite3_bind_int(statement, paramindex++, static_cast<int32_t>(value));
 	if(result != SQLITE_OK) throw sqlite_exception(result);
+}
+
+//---------------------------------------------------------------------------
+// channel_exists
+//
+// Determines if a channel exists in the database
+//
+// Arguments:
+//
+//	instance		- Database instance
+//	channelprops	- Channel properties
+
+bool channel_exists(sqlite3* instance, struct channelprops const& channelprops)
+{
+	if(instance == nullptr) throw std::invalid_argument("instance");
+
+	return execute_scalar_int(instance, "select exists(select * from channel where frequency = ?1 and subchannel = ?2)",
+		channelprops.frequency, channelprops.subchannel) == 1;
 }
 
 //---------------------------------------------------------------------------
