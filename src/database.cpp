@@ -260,7 +260,7 @@ void delete_channel(sqlite3* instance, unsigned int id)
 {
 	if(instance == nullptr) throw std::invalid_argument("instance");
 
-	execute_non_query(instance, "delete from channel where frequency = ?1 and subchannel = ?2", (id / 10) * 100000, id % 10);
+	execute_non_query(instance, "delete from channel where frequency = ?1 and subchannel = ?2", (id / 10) * 1000, id % 10);
 }
 
 //---------------------------------------------------------------------------
@@ -297,7 +297,7 @@ void enumerate_fmradio_channels(sqlite3* instance, enumerate_channels_callback c
 	if(instance == nullptr) throw std::invalid_argument("instance");
 
 	// id | channel | subchannel | name | hidden | logourl
-	auto sql = "select ((frequency / 100000) * 10) + subchannel as id, (frequency / 1000000) as channel, "
+	auto sql = "select ((frequency / 1000) * 10) + subchannel as id, (frequency / 1000000) as channel, "
 		"(frequency % 1000000) / 100000 as sub, name as name, hidden as hidden, logourl as logourl from channel "
 		"where (frequency between 87500000 and 108000000) and (channel.subchannel = 0) order by id asc";
 
@@ -344,7 +344,7 @@ void enumerate_wxradio_channels(sqlite3* instance, enumerate_channels_callback c
 	if(instance == nullptr) throw std::invalid_argument("instance");
 
 	// id | channel | name | hidden | logourl
-	auto sql = "select ((frequency / 100000) * 10) + subchannel as id, ((frequency - 162000000) / 1000) as channel, "
+	auto sql = "select ((frequency / 1000) * 10) + subchannel as id, ((frequency - 162000000) / 1000) as channel, "
 		"name as name, hidden as hidden, logourl as logourl from channel "
 		"where (frequency between 162400000 and 162550000) and (channel.subchannel = 0) order by id asc";
 
@@ -591,7 +591,7 @@ bool get_channel_properties(sqlite3* instance, unsigned int id, struct channelpr
 	try {
 
 		// Bind the query parameters
-		result = sqlite3_bind_int(statement, 1, (id / 10) * 100000);
+		result = sqlite3_bind_int(statement, 1, (id / 10) * 1000);
 		if(result == SQLITE_OK) sqlite3_bind_int(statement, 2, id % 10);
 		if(result != SQLITE_OK) throw sqlite_exception(result);
 
@@ -747,7 +747,7 @@ void rename_channel(sqlite3* instance, unsigned int id, char const* newname)
 	if(instance == nullptr) throw std::invalid_argument("instance");
 
 	execute_non_query(instance, "update channel set name = ?1 where frequency = ?2 and subchannel = ?3",
-		(newname == nullptr) ? "" : newname, (id / 10) * 100000, id % 10);
+		(newname == nullptr) ? "" : newname, (id / 10) * 1000, id % 10);
 }
 
 //---------------------------------------------------------------------------
@@ -767,7 +767,7 @@ bool update_channel_properties(sqlite3* instance, unsigned int id, struct channe
 
 	return execute_non_query(instance, "update channel set name = ?1, autogain = ?2, manualgain = ?3, logourl = ?4"
 		"where frequency = ?5 and subchannel = ?6", channelprops.name.c_str(), (channelprops.autogain) ? 1 : 0,
-		channelprops.manualgain, channelprops.logourl.c_str(), (id / 10) * 100000, id % 10) > 0;
+		channelprops.manualgain, channelprops.logourl.c_str(), (id / 10) * 1000, id % 10) > 0;
 }
 
 //---------------------------------------------------------------------------
