@@ -928,7 +928,14 @@ void addon::CloseLiveStream(void)
 
 PVR_ERROR addon::DeleteChannel(kodi::addon::PVRChannel const& channel)
 {
-	try { delete_channel(connectionpool::handle(m_connpool), channel.GetUniqueId()); }
+	try {
+
+		// Remove the channel from the database
+		delete_channel(connectionpool::handle(m_connpool), channel.GetUniqueId()); 
+
+		TriggerChannelGroupsUpdate();				// Update the channel groups
+	}
+
 	catch(std::exception& ex) { return handle_stdexception(__func__, ex, PVR_ERROR::PVR_ERROR_FAILED); }
 	catch(...) { return handle_generalexception(__func__, PVR_ERROR::PVR_ERROR_FAILED); }
 
@@ -1397,7 +1404,7 @@ int64_t addon::LengthLiveStream(void)
 //
 //	channel		- The channel to add
 
-PVR_ERROR addon::OpenDialogChannelAdd(kodi::addon::PVRChannel const& /*channel*/)
+PVR_ERROR addon::OpenDialogChannelAdd(kodi::addon::PVRChannel const& channel)
 {
 	try {
 
@@ -1413,6 +1420,9 @@ PVR_ERROR addon::OpenDialogChannelAdd(kodi::addon::PVRChannel const& /*channel*/
 			// Retrieve the new channel properties from the dialog box
 			struct channelprops channelprops = {};
 			dialog->get_channel_properties(channelprops);
+
+			// Apply any properties specified by the PVRChannel instance
+			channelprops.name = channel.GetChannelName();
 
 			// Only add the channel if it doesn't already exist in the database so that
 			// existing channel settings will be preserved
@@ -1498,8 +1508,7 @@ PVR_ERROR addon::OpenDialogChannelSettings(kodi::addon::PVRChannel const& channe
 			dialog->get_channel_properties(channelprops);
 			update_channel_properties(connectionpool::handle(m_connpool), channel.GetUniqueId(), channelprops);
 
-			// Trigger a PVR channel update in the event the channel name or logo changed
-			TriggerChannelUpdate();
+			TriggerChannelUpdate();						// Trigger channel metadata update
 		}
 	}
 
