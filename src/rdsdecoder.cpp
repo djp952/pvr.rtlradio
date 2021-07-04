@@ -289,7 +289,7 @@ void rdsdecoder::decode_radiotext(tRDS_GROUPS const& rdsgroup)
 
 void rdsdecoder::decode_rbds_programidentification(tRDS_GROUPS const& rdsgroup)
 {
-	uint16_t const pi = rdsgroup.BlockA;
+	uint16_t pi = rdsgroup.BlockA;
 
 	// TODO: This is a rudimentary implementation that does not take into account
 	// Canada, Mexico, and a whole host of special cases .. US only for now
@@ -298,6 +298,14 @@ void rdsdecoder::decode_rbds_programidentification(tRDS_GROUPS const& rdsgroup)
 	if(pi != m_rbds_pi) {
 
 		m_rbds_callsign.fill(0x00);
+
+		// SPECIAL CASE: AFxx -> xx00
+		//
+		if((pi & 0xAF00) == 0xAF00) pi <<= 8;
+
+		// SPECIAL CASE: Axxx -> x0xx
+		//
+		else if((pi & 0xA000) == 0xA000) pi = (((pi & 0xF00) << 4) | (pi & 0xFF));
 
 		// USA 3-LETTER-ONLY (ref: NRSC-4-B 04.2011 Table D.7)
 		//
