@@ -291,13 +291,11 @@ void rdsdecoder::decode_rbds_programidentification(tRDS_GROUPS const& rdsgroup)
 {
 	uint16_t pi = rdsgroup.BlockA;
 
-	// TODO: This is a rudimentary implementation that does not take into account
-	// Canada, Mexico, and a whole host of special cases .. US only for now
-
 	// Indicate a change to the Program Identification flags
 	if(pi != m_rbds_pi) {
 
 		m_rbds_callsign.fill(0x00);
+		m_rbds_nationalcode.clear();
 
 		// SPECIAL CASE: AFxx -> xx00
 		//
@@ -305,11 +303,82 @@ void rdsdecoder::decode_rbds_programidentification(tRDS_GROUPS const& rdsgroup)
 
 		// SPECIAL CASE: Axxx -> x0xx
 		//
-		else if((pi & 0xA000) == 0xA000) pi = (((pi & 0xF00) << 4) | (pi & 0xFF));
+		if((pi & 0xA000) == 0xA000) pi = (((pi & 0xF00) << 4) | (pi & 0xFF));
+
+		// NATIONALLY/REGIONALLY-LINKED RADIO STATION CODES
+		//
+		if((pi & 0xB000) == 0xB000) {
+
+			// The low byte of these PI codes defines what nationally/regionally linked
+			// station code should be returned instead of a station call sign
+			switch(pi & 0xFF) {
+
+				case 0x0001: m_rbds_nationalcode = "NPR-1"; return;
+				case 0x0002: m_rbds_nationalcode = "CBC Radio One"; return;
+				case 0x0003: m_rbds_nationalcode = "CBC Radio Two"; return;
+				case 0x0004: m_rbds_nationalcode = "CBC Première Chaîne"; return;
+				case 0x0005: m_rbds_nationalcode = "CBC Espace Musique"; return;
+				case 0x0006: m_rbds_nationalcode = "CBC"; return;
+				case 0x0007: m_rbds_nationalcode = "CBC"; return;
+				case 0x0008: m_rbds_nationalcode = "CBC"; return;
+				case 0x0009: m_rbds_nationalcode = "CBC"; return;
+				case 0x000A: m_rbds_nationalcode = "NPR-2"; return;
+				case 0x000B: m_rbds_nationalcode = "NPR-3"; return;
+				case 0x000C: m_rbds_nationalcode = "NPR-4"; return;
+				case 0x000D: m_rbds_nationalcode = "NPR-5"; return;
+				case 0x000E: m_rbds_nationalcode = "NPR-6"; return;
+
+				// Undefined
+				default: return;
+			}
+		}
+
+		// CANADA
+		//
+		// Reverse engineered from "Program information codes for radio broadcasting stations"
+		// (https://www.ic.gc.ca/eic/site/smt-gst.nsf/eng/h_sf08741.html)
+		//
+		else if((pi & 0xC000) == 0xC000) {
+
+			// Determine the offset and increment values from the PI code
+			uint16_t offset = ((pi - 0xC000) - 257) / 255;
+			uint16_t increment = (pi - 0xC000) - offset;
+
+			// Calculate the individual character code values (interpretation differs for each)
+			uint16_t char1 = (increment - 257) / (26 * 27);
+			uint16_t char2 = ((increment - 257) - (char1 * (26 * 27))) / 27;
+			uint16_t char3 = ((increment - 257) - (char1 * (26 * 27))) - (char2 * 27);
+
+			// Convert the second character of the call sign first as there is a small range of
+			// documented valid characters available; anything out of range should be ignored
+			if(char1 == 0) m_rbds_callsign[1] = 'F';
+			else if(char1 == 1) m_rbds_callsign[1] = 'H';
+			else if(char1 == 2) m_rbds_callsign[1] = 'I';
+			else if(char1 == 3) m_rbds_callsign[1] = 'J';
+			else if(char1 == 4) m_rbds_callsign[1] = 'K';
+			else return;
+
+			// The first character is always 'C'
+			m_rbds_callsign[0] = 'C';
+
+			// The third character is always present and is zero-based from 'A'
+			m_rbds_callsign[2] = static_cast<char>(static_cast<uint16_t>('A') + char2);
+
+			// The fourth character is optional and one-based from 'A'
+			if(char3 != 0) m_rbds_callsign[3] = static_cast<char>(static_cast<uint16_t>('A') + (char3 - 1));
+		}
+
+		// MEXICO
+		//
+		else if((pi & 0xF000) == 0xF000) {
+
+			// TODO - I need some manner of reference material here
+			return;
+		}
 
 		// USA 3-LETTER-ONLY (ref: NRSC-4-B 04.2011 Table D.7)
 		//
-		if((pi >= 0x9950) && (pi <= 0x9EFF)) {
+		else if((pi >= 0x9950) && (pi <= 0x9EFF)) {
 
 			// The 3-letter only callsigns are static and represented in a lookup table
 			for(auto const iterator : CALL3TABLE) {
@@ -532,7 +601,16 @@ void rdsdecoder::decode_trafficprogram(tRDS_GROUPS const& rdsgroup)
 
 std::string rdsdecoder::get_rbds_callsign(void) const
 {
-	return std::string(m_rbds_callsign.begin(), m_rbds_callsign.end());
+	// If this is a nationally/regionally linked station return that string
+	if(!m_rbds_nationalcode.empty()) return m_rbds_nationalcode;
+
+	// The callsign may not have every letter assigned, trim any NULLs at the end
+	std::string callsign = std::string(m_rbds_callsign.begin(), m_rbds_callsign.end());
+	auto trimpos = callsign.find('\0');
+	if(trimpos != std::string::npos) callsign.erase(trimpos);
+
+	// If this wasn't a nationally/regionally-linked station, append the "-FM" suffix
+	return callsign + "-FM";
 }
 
 //---------------------------------------------------------------------------
@@ -546,7 +624,7 @@ std::string rdsdecoder::get_rbds_callsign(void) const
 
 bool rdsdecoder::has_rbds_callsign(void) const
 {
-	return m_rbds_callsign[0] != '\0';
+	return (!m_rbds_nationalcode.empty()) || (m_rbds_callsign[0] != '\0');
 }
 
 //---------------------------------------------------------------------------

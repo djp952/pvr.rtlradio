@@ -384,7 +384,7 @@ long long fmstream::length(void) const
 std::string fmstream::muxname(void) const
 {
 	// If the callsign for the station is known, use that with an -FM suffix, otherwise use the default
-	return (m_rdsdecoder.has_rbds_callsign()) ? std::string(m_rdsdecoder.get_rbds_callsign()) + "-FM" : m_muxname;
+	return (m_rdsdecoder.has_rbds_callsign()) ? m_rdsdecoder.get_rbds_callsign() : m_muxname;
 }
 
 //---------------------------------------------------------------------------
