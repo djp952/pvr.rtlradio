@@ -155,6 +155,7 @@ private:
 	// RBDS
 	//
 	uint16_t					m_rbds_pi = 0x0000;		// RDBS PI indicator
+	std::string					m_rbds_nationalcode;	// RBDS Nationally Linked code
 	std::array<char, 4>			m_rbds_callsign;		// RDBS station call sign
 };
 
