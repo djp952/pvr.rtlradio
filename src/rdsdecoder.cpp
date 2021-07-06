@@ -50,6 +50,19 @@ rdsdecoder::~rdsdecoder()
 }
 
 //---------------------------------------------------------------------------
+// rdsdecoder::decode_applicationidentification
+//
+// Decodes Group Type 3A - Application Idenfication
+//
+// Arguments:
+//
+//	rdsgroiup	- RDS group to be processed
+
+void rdsdecoder::decode_applicationidentification(tRDS_GROUPS const& /*rdsgroup*/)
+{
+}
+
+//---------------------------------------------------------------------------
 // rdsdecoder::decode_basictuning
 //
 // Decodes Group Type 0A and 0B - Basic Tuning and swithing information
@@ -313,67 +326,21 @@ void rdsdecoder::decode_rbds_programidentification(tRDS_GROUPS const& rdsgroup)
 			// station code should be returned instead of a station call sign
 			switch(pi & 0xFF) {
 
-				case 0x0001: m_rbds_nationalcode = "NPR-1"; return;
-				case 0x0002: m_rbds_nationalcode = "CBC Radio One"; return;
-				case 0x0003: m_rbds_nationalcode = "CBC Radio Two"; return;
-				case 0x0004: m_rbds_nationalcode = "CBC Première Chaîne"; return;
-				case 0x0005: m_rbds_nationalcode = "CBC Espace Musique"; return;
-				case 0x0006: m_rbds_nationalcode = "CBC"; return;
-				case 0x0007: m_rbds_nationalcode = "CBC"; return;
-				case 0x0008: m_rbds_nationalcode = "CBC"; return;
-				case 0x0009: m_rbds_nationalcode = "CBC"; return;
-				case 0x000A: m_rbds_nationalcode = "NPR-2"; return;
-				case 0x000B: m_rbds_nationalcode = "NPR-3"; return;
-				case 0x000C: m_rbds_nationalcode = "NPR-4"; return;
-				case 0x000D: m_rbds_nationalcode = "NPR-5"; return;
-				case 0x000E: m_rbds_nationalcode = "NPR-6"; return;
-
-				// Undefined
-				default: return;
+				case 0x0001: m_rbds_nationalcode = "NPR-1"; break;
+				case 0x0002: m_rbds_nationalcode = "CBC Radio One"; break;
+				case 0x0003: m_rbds_nationalcode = "CBC Radio Two"; break;
+				case 0x0004: m_rbds_nationalcode = "CBC Première Chaîne"; break;
+				case 0x0005: m_rbds_nationalcode = "CBC Espace Musique"; break;
+				case 0x0006: m_rbds_nationalcode = "CBC"; break;
+				case 0x0007: m_rbds_nationalcode = "CBC"; break;
+				case 0x0008: m_rbds_nationalcode = "CBC"; break;
+				case 0x0009: m_rbds_nationalcode = "CBC"; break;
+				case 0x000A: m_rbds_nationalcode = "NPR-2"; break;
+				case 0x000B: m_rbds_nationalcode = "NPR-3"; break;
+				case 0x000C: m_rbds_nationalcode = "NPR-4"; break;
+				case 0x000D: m_rbds_nationalcode = "NPR-5"; break;
+				case 0x000E: m_rbds_nationalcode = "NPR-6"; break;
 			}
-		}
-
-		// CANADA
-		//
-		// Reverse engineered from "Program information codes for radio broadcasting stations"
-		// (https://www.ic.gc.ca/eic/site/smt-gst.nsf/eng/h_sf08741.html)
-		//
-		else if((pi & 0xC000) == 0xC000) {
-
-			// Determine the offset and increment values from the PI code
-			uint16_t offset = ((pi - 0xC000) - 257) / 255;
-			uint16_t increment = (pi - 0xC000) - offset;
-
-			// Calculate the individual character code values (interpretation differs for each)
-			uint16_t char1 = (increment - 257) / (26 * 27);
-			uint16_t char2 = ((increment - 257) - (char1 * (26 * 27))) / 27;
-			uint16_t char3 = ((increment - 257) - (char1 * (26 * 27))) - (char2 * 27);
-
-			// Convert the second character of the call sign first as there is a small range of
-			// documented valid characters available; anything out of range should be ignored
-			if(char1 == 0) m_rbds_callsign[1] = 'F';
-			else if(char1 == 1) m_rbds_callsign[1] = 'H';
-			else if(char1 == 2) m_rbds_callsign[1] = 'I';
-			else if(char1 == 3) m_rbds_callsign[1] = 'J';
-			else if(char1 == 4) m_rbds_callsign[1] = 'K';
-			else return;
-
-			// The first character is always 'C'
-			m_rbds_callsign[0] = 'C';
-
-			// The third character is always present and is zero-based from 'A'
-			m_rbds_callsign[2] = static_cast<char>(static_cast<uint16_t>('A') + char2);
-
-			// The fourth character is optional and one-based from 'A'
-			if(char3 != 0) m_rbds_callsign[3] = static_cast<char>(static_cast<uint16_t>('A') + (char3 - 1));
-		}
-
-		// MEXICO
-		//
-		else if((pi & 0xF000) == 0xF000) {
-
-			// TODO - I need some manner of reference material here
-			return;
 		}
 
 		// USA 3-LETTER-ONLY (ref: NRSC-4-B 04.2011 Table D.7)
@@ -421,6 +388,48 @@ void rdsdecoder::decode_rbds_programidentification(tRDS_GROUPS const& rdsgroup)
 			m_rbds_callsign[3] = static_cast<char>(static_cast<uint16_t>('A') + char3);
 		}
 
+		// CANADA
+		//
+		// Reverse engineered from "Program information codes for radio broadcasting stations"
+		// (https://www.ic.gc.ca/eic/site/smt-gst.nsf/eng/h_sf08741.html)
+		//
+		else if((pi & 0xC000) == 0xC000) {
+
+			// Determine the offset and increment values from the PI code
+			uint16_t offset = ((pi - 0xC000) - 257) / 255;
+			uint16_t increment = (pi - 0xC000) - offset;
+
+			// Calculate the individual character code values (interpretation differs for each)
+			uint16_t char1 = (increment - 257) / (26 * 27);
+			uint16_t char2 = ((increment - 257) - (char1 * (26 * 27))) / 27;
+			uint16_t char3 = ((increment - 257) - (char1 * (26 * 27))) - (char2 * 27);
+
+			// Convert the second character of the call sign first as there is a small range of
+			// documented valid characters available; anything out of range should be ignored
+			if(char1 == 0) m_rbds_callsign[1] = 'F';
+			else if(char1 == 1) m_rbds_callsign[1] = 'H';
+			else if(char1 == 2) m_rbds_callsign[1] = 'I';
+			else if(char1 == 3) m_rbds_callsign[1] = 'J';
+			else if(char1 == 4) m_rbds_callsign[1] = 'K';
+			else return;
+
+			// The first character is always 'C'
+			m_rbds_callsign[0] = 'C';
+
+			// The third character is always present and is zero-based from 'A'
+			m_rbds_callsign[2] = static_cast<char>(static_cast<uint16_t>('A') + char2);
+
+			// The fourth character is optional and one-based from 'A'
+			if(char3 != 0) m_rbds_callsign[3] = static_cast<char>(static_cast<uint16_t>('A') + (char3 - 1));
+		}
+
+		// MEXICO
+		//
+		else if((pi & 0xF000) == 0xF000) {
+
+			// TODO - I need some manner of reference material here
+		}
+
 		// Generate a couple fake UECP packets anytime the PI changes to allow Kodi
 		// to get the internals right for North American broadcasts with RBDS
 		struct uecp_data_frame frame = {};
@@ -432,8 +441,15 @@ void rdsdecoder::decode_rbds_programidentification(tRDS_GROUPS const& rdsgroup)
 		message->dsn = UECP_MSG_DSN_CURRENT_SET;
 		message->psn = UECP_MSG_PSN_MAIN;
 
-		// Kodi expects a single word for PI at the address of mel_len
-		*reinterpret_cast<uint8_t*>(&message->mel_len) = 0x10;
+		// Kodi expects a single word for PI at the address of mel_len; for RBDS
+		// hard-code it to 0xB000 which points to this row in the lookup data which
+		// has all three required country codes "US", "CA" and "MX" and can be properly 
+		// set via the UECP_EPP_TM_INFO packet by specifying a PSN of 0xA0 for "US",
+		// 0xA1 for "CA", and 0xA5 for "MX":
+		// 
+		//   {"US","CA","BR","DO","LC","MX","__"}, // B
+		//
+		*reinterpret_cast<uint8_t*>(&message->mel_len) = 0xB0;
 		*reinterpret_cast<uint8_t*>(&message->mel_data[0]) = 0x00;
 
 		frame.seq = UECP_DF_SEQ_DISABLED;
@@ -444,6 +460,9 @@ void rdsdecoder::decode_rbds_programidentification(tRDS_GROUPS const& rdsgroup)
 
 		// UECP_EPP_TM_INFO
 		//
+		// TODO: This must be hard-coded to report "US" for now to ensure
+		// Kodi detects RBDS, in the future set this properly to report values
+		// that will select "US" (0xA0), "CA" (0xA1), or "MX" (0xA5)
 		message->mec = UECP_EPP_TM_INFO;
 		message->dsn = UECP_MSG_DSN_CURRENT_SET;
 		message->psn = 0xA0;				// "US"
@@ -510,6 +529,16 @@ void rdsdecoder::decode_rdsgroup(tRDS_GROUPS const& rdsgroup)
 		case 2:
 			decode_radiotext(rdsgroup);
 			break;
+
+		// Group Type 3: Application Identification
+		case 3:
+			decode_applicationidentification(rdsgroup);
+			break;
+
+		// Group Type 8: Traffic Message Channel (TMC)
+		case 8:
+			decode_trafficmessagechannel(rdsgroup);
+			break;
 	}
 }
 
@@ -549,6 +578,26 @@ void rdsdecoder::decode_slowlabellingcodes(tRDS_GROUPS const& rdsgroup)
 		// Convert the UECP data frame into a packet and queue it up
 		m_uecp_packets.emplace(uecp_create_data_packet(frame));
 	}
+}
+
+//---------------------------------------------------------------------------
+// rdsdecoder::decode_trafficmessagechannel
+//
+// Decodes Group Type 8A - Traffic Message Channel (TMC)
+//
+// Arguments:
+//
+//	rdsgroup	- RDS group to be processed
+
+void rdsdecoder::decode_trafficmessagechannel(tRDS_GROUPS const& rdsgroup)
+{
+	// Determine if this is Group A or Group B data
+	bool const groupa = ((rdsgroup.BlockB & 0x0800) == 0x0000);
+
+	// Use the presence of any Group 8A data as an indicator that the
+	// Traffic Message Channel (TMC) ODA is present.  This should probably
+	// come from examining Group 3A data but this should work well enough
+	if(groupa) m_tmc = true;
 }
 
 //---------------------------------------------------------------------------
@@ -624,7 +673,25 @@ std::string rdsdecoder::get_rbds_callsign(void) const
 
 bool rdsdecoder::has_rbds_callsign(void) const
 {
+	// SPECIAL CASE: If the first nibble of the RBDS PI code is 1 the callsign data
+	// cannot be decoded if the TMC ODA is also present (NRSC-4-B, section D.4.7)
+	if(((m_rbds_pi & 0x1000) == 0x1000) && (m_tmc)) return false;
+
 	return (!m_rbds_nationalcode.empty()) || (m_rbds_callsign[0] != '\0');
+}
+
+//---------------------------------------------------------------------------
+// rdsdecoder::has_tmc
+//
+// Flag indicating that the Traffic Message Channel (TMC) ODA is present
+//
+// Arguments:
+//
+//	NONE
+
+bool rdsdecoder::has_tmc(void) const
+{
+	return m_tmc;
 }
 
 //---------------------------------------------------------------------------
