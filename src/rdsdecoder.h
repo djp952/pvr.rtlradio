@@ -69,6 +69,11 @@ public:
 	// Flag indicating that the RDBS call sign has been decoded
 	bool has_rbds_callsign(void) const;
 
+	// has_tmc
+	//
+	// Flag indicating that the Traffic Message Channel (TMC) ODA is present
+	bool has_tmc(void) const;
+
 	// pop_uecp_data_packet
 	//
 	// Pops the topmost UECP data packet from the queue
@@ -89,6 +94,11 @@ private:
 
 	//-----------------------------------------------------------------------
 	// Private Member Functions
+
+	// decode_applicationidentification
+	//
+	// Decodes Group Type 3A - Application Idenfication
+	void decode_applicationidentification(tRDS_GROUPS const& rdsgroup);
 
 	// decode_basictuning
 	//
@@ -115,6 +125,11 @@ private:
 	// Decodes RBDS Program Identification (PI)
 	void decode_rbds_programidentification(tRDS_GROUPS const& rdsgroup);
 
+	// decode_trafficmessagechannel
+	//
+	// Decodes Group Type 8A - Traffic Message Channel (TMC)
+	void decode_trafficmessagechannel(tRDS_GROUPS const& rdsgroup);
+	
 	// decode_trafficprogram
 	//
 	// Decodes Traffic Program / Traffic Announcement (TP/TA)
@@ -151,6 +166,10 @@ private:
 	uint16_t					m_rt_ready = 0x0000;	// RadioText ready indicator
 	uint8_t						m_rt_ab = 0x00;			// RadioText A/B flag
 	std::array<uint8_t, 64>		m_rt_data;				// RadioText data
+
+	// GROUP 8A - TRAFFIC MESSAGE CHANNEL (TMC)
+	//
+	bool						m_tmc = false;			// TMC present flag
 
 	// RBDS
 	//
