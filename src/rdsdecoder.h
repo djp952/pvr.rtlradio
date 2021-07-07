@@ -127,13 +127,18 @@ private:
 
 	// decode_radiotextplus
 	//
-	// Decodes RadioText+
+	// Decodes the RadioText+ (RT+) ODA
 	void decode_radiotextplus(tRDS_GROUPS const& rdsgroup);
 
 	// decode_rbds_programidentification
 	//
 	// Decodes RBDS Program Identification (PI)
 	void decode_rbds_programidentification(tRDS_GROUPS const& rdsgroup);
+
+	// decode_trafficmessagechannel
+	//
+	// Decodes the Traffic Message Channel (RDS-TMC) ODA
+	void decode_trafficmessagechannel(tRDS_GROUPS const& rdsgroup);
 
 	// decode_trafficprogram
 	//
@@ -181,6 +186,11 @@ private:
 	//
 	uint8_t						m_rtplus_group = 0x00;		// Group code for RadioText+ data
 	uint8_t						m_rtplus_group_ab = 0x00;	// A/B flag for RadioText+ group
+
+	// RDS-TMC
+	//
+	uint8_t						m_rdstmc_group = 0x00;		// Group code for RDS-TMC data
+	uint8_t						m_rdstmc_group_ab = 0x00;	// A/B flag for RDS-TMC group
 
 	// RBDS
 	//

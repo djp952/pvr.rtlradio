@@ -78,10 +78,11 @@ void rdsdecoder::decode_applicationidentification(tRDS_GROUPS const& rdsgroup)
 				m_rtplus_group_ab = rdsgroup.BlockB & 0x01;
 				break;
 
-			// 0xCD46 / 0xCD47: Traffic Message Channel (RDS-TMC)
+			// 0xCD46: Traffic Message Channel (RDS-TMC)
 			case 0xCD46:
-			case 0xCD47:
 				m_oda_rdstmc = true;
+				m_rdstmc_group = (rdsgroup.BlockB >> 1) & 0x0F;
+				m_rdstmc_group_ab = rdsgroup.BlockB & 0x01;
 				break;
 		}
 	}
@@ -214,7 +215,7 @@ void rdsdecoder::decode_programtype(tRDS_GROUPS const& rdsgroup)
 //---------------------------------------------------------------------------
 // rdsdecoder::decode_radiotextplus
 //
-// Decodes RadioText+
+// Decodes the RadioText+ (RT+) ODA
 //
 // Arguments:
 //
@@ -590,8 +591,11 @@ void rdsdecoder::decode_rdsgroup(tRDS_GROUPS const& rdsgroup)
 	// Group Type 3: Application Identification
 	else if(grouptypecode == 3) decode_applicationidentification(rdsgroup);
 
-	// RadioText+
+	// RadioText+ (RT+) Open Data Application
 	if(m_oda_rtplus && grouptypecode == m_rtplus_group) decode_radiotextplus(rdsgroup);
+
+	// Traffic Message Channel (RDS-TMC) Open Data Application
+	if(m_oda_rdstmc && grouptypecode == m_rdstmc_group) decode_trafficmessagechannel(rdsgroup);
 }
 
 //---------------------------------------------------------------------------
@@ -626,6 +630,46 @@ void rdsdecoder::decode_slowlabellingcodes(tRDS_GROUPS const& rdsgroup)
 
 		frame.seq = UECP_DF_SEQ_DISABLED;
 		frame.msg_len = 3 + 1;				// mec, dsn, psn + mel_data[1]
+
+		// Convert the UECP data frame into a packet and queue it up
+		m_uecp_packets.emplace(uecp_create_data_packet(frame));
+	}
+}
+
+//---------------------------------------------------------------------------
+// rdsdecoder::decode_trafficmessagechannel
+//
+// Decodes the Traffic Message Channel (RDS-TMC) ODA
+//
+// Arguments:
+//
+//	rdsgroup	- RDS group to be processed
+
+void rdsdecoder::decode_trafficmessagechannel(tRDS_GROUPS const& rdsgroup)
+{
+	// Determine if the group A/B flag matches that set for the RT+ application
+	if(m_rdstmc_group_ab == ((rdsgroup.BlockB >> 11) & 0x01)) {
+
+		// UECP_ODA_DATA
+		//
+		struct uecp_data_frame frame = {};
+		struct uecp_message* message = &frame.msg;
+
+		// Kodi treats UECP_ODA_DATA as a custom data packet	
+		message->mec = UECP_ODA_DATA;
+		message->dsn = 7;						// ODA data length
+		message->psn = 0xCD;					// High byte of ODA AID (0xCD46)
+		message->mel_len = 0x46;				// Low byte of ODA AID (0xCD46)
+
+		// Pack the BlockB, BlockC, and BlockD data from the RDS group into the packet
+		message->mel_data[0] = rdsgroup.BlockB & 0xFF;
+		message->mel_data[1] = (rdsgroup.BlockC >> 8) & 0xFF;
+		message->mel_data[2] = rdsgroup.BlockC & 0xFF;
+		message->mel_data[3] = (rdsgroup.BlockD >> 8) & 0xFF;
+		message->mel_data[4] = rdsgroup.BlockD & 0xFF;
+
+		frame.seq = UECP_DF_SEQ_DISABLED;
+		frame.msg_len = 4 + 5;					// mec, dsn, psn, mel_data + 5 bytes
 
 		// Convert the UECP data frame into a packet and queue it up
 		m_uecp_packets.emplace(uecp_create_data_packet(frame));
