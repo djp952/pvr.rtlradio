@@ -61,18 +61,28 @@ public:
 
 	// get_rdbs_callsign
 	//
-	// Retrieves the RBDS call sign (if present)
+	// Retrieves the RBDS call sign if present
 	std::string get_rbds_callsign(void) const;
 	
+	// has_enhancedradiotext
+	//
+	// Flag indicating that the Enhanced RadioText (eRT) ODA is present
+	bool has_enhancedradiotext(void) const;
+
+	// has_radiotextplus
+	//
+	// Flag indicating that the RadioText+ (RT+) ODA is present
+	bool has_radiotextplus(void) const;
+
 	// has_rbds_callsign
 	//
 	// Flag indicating that the RDBS call sign has been decoded
 	bool has_rbds_callsign(void) const;
 
-	// has_tmc
+	// has_rdstmc
 	//
-	// Flag indicating that the Traffic Message Channel (TMC) ODA is present
-	bool has_tmc(void) const;
+	// Flag indicating that the Traffic Message Channel (RDS-TMC) ODA is present
+	bool has_rdstmc(void) const;
 
 	// pop_uecp_data_packet
 	//
@@ -97,7 +107,7 @@ private:
 
 	// decode_applicationidentification
 	//
-	// Decodes Group Type 3A - Application Idenfication
+	// Decodes Group Type 3A - Application Identification
 	void decode_applicationidentification(tRDS_GROUPS const& rdsgroup);
 
 	// decode_basictuning
@@ -125,11 +135,6 @@ private:
 	// Decodes RBDS Program Identification (PI)
 	void decode_rbds_programidentification(tRDS_GROUPS const& rdsgroup);
 
-	// decode_trafficmessagechannel
-	//
-	// Decodes Group Type 8A - Traffic Message Channel (TMC)
-	void decode_trafficmessagechannel(tRDS_GROUPS const& rdsgroup);
-	
 	// decode_trafficprogram
 	//
 	// Decodes Traffic Program / Traffic Announcement (TP/TA)
@@ -167,9 +172,11 @@ private:
 	uint8_t						m_rt_ab = 0x00;			// RadioText A/B flag
 	std::array<uint8_t, 64>		m_rt_data;				// RadioText data
 
-	// GROUP 8A - TRAFFIC MESSAGE CHANNEL (TMC)
+	// OPEN DATA APPLICATION (ODA) FLAGS
 	//
-	bool						m_tmc = false;			// TMC present flag
+	bool						m_oda_ert = false;		// Enhanced Radio Text (eRT)
+	bool						m_oda_rtplus = false;	// RadioText+ (RT+)
+	bool						m_oda_rdstmc = false;	// Traffic Message Channel (RDS-TMC) 
 
 	// RBDS
 	//
