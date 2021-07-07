@@ -335,7 +335,7 @@ void rdsdecoder::decode_rbds_programidentification(tRDS_GROUPS const& rdsgroup)
 	// Indicate a change to the Program Identification flags
 	if(pi != m_rbds_pi) {
 
-		m_rbds_callsign.fill(0x00);
+		m_rbds_callsign.fill('\0');
 		m_rbds_nationalcode.clear();
 
 		// SPECIAL CASE: AFxx -> xx00
@@ -439,16 +439,19 @@ void rdsdecoder::decode_rbds_programidentification(tRDS_GROUPS const& rdsgroup)
 			else if(char1 == 2) m_rbds_callsign[1] = 'I';
 			else if(char1 == 3) m_rbds_callsign[1] = 'J';
 			else if(char1 == 4) m_rbds_callsign[1] = 'K';
-			else return;
 
-			// The first character is always 'C'
-			m_rbds_callsign[0] = 'C';
+			// Only fill in the rest of the callsign if char1 was in the valid range
+			if(m_rbds_callsign[1] != '\0') {
 
-			// The third character is always present and is zero-based from 'A'
-			m_rbds_callsign[2] = static_cast<char>(static_cast<uint16_t>('A') + char2);
+				// The first character is always 'C'
+				m_rbds_callsign[0] = 'C';
 
-			// The fourth character is optional and one-based from 'A'
-			if(char3 != 0) m_rbds_callsign[3] = static_cast<char>(static_cast<uint16_t>('A') + (char3 - 1));
+				// The third character is always present and is zero-based from 'A'
+				m_rbds_callsign[2] = static_cast<char>(static_cast<uint16_t>('A') + char2);
+
+				// The fourth character is optional and one-based from 'A'
+				if(char3 != 0) m_rbds_callsign[3] = static_cast<char>(static_cast<uint16_t>('A') + (char3 - 1));
+			}
 		}
 
 		// MEXICO
