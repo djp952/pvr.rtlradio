@@ -1404,7 +1404,7 @@ int64_t addon::LengthLiveStream(void)
 //
 //	channel		- The channel to add
 
-PVR_ERROR addon::OpenDialogChannelAdd(kodi::addon::PVRChannel const& channel)
+PVR_ERROR addon::OpenDialogChannelAdd(kodi::addon::PVRChannel const& /*channel*/)
 {
 	try {
 
@@ -1420,9 +1420,6 @@ PVR_ERROR addon::OpenDialogChannelAdd(kodi::addon::PVRChannel const& channel)
 			// Retrieve the new channel properties from the dialog box
 			struct channelprops channelprops = {};
 			dialog->get_channel_properties(channelprops);
-
-			// Apply any properties specified by the PVRChannel instance
-			channelprops.name = channel.GetChannelName();
 
 			// Only add the channel if it doesn't already exist in the database so that
 			// existing channel settings will be preserved
