@@ -357,7 +357,7 @@ void rdsdecoder::decode_rbds_programidentification(tRDS_GROUPS const& rdsgroup)
 				case 0x0001: m_rbds_nationalcode = "NPR-1"; break;
 				case 0x0002: m_rbds_nationalcode = "CBC Radio One"; break;
 				case 0x0003: m_rbds_nationalcode = "CBC Radio Two"; break;
-				case 0x0004: m_rbds_nationalcode = "CBC Première Chaîne"; break;
+				case 0x0004: m_rbds_nationalcode = "CBC Premiere Chaine"; break;
 				case 0x0005: m_rbds_nationalcode = "CBC Espace Musique"; break;
 				case 0x0006: m_rbds_nationalcode = "CBC"; break;
 				case 0x0007: m_rbds_nationalcode = "CBC"; break;
