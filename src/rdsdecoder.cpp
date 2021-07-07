@@ -74,11 +74,8 @@ void rdsdecoder::decode_applicationidentification(tRDS_GROUPS const& rdsgroup)
 			// 0x4BD7: RadioText+ (RT+)
 			case 0x4BD7:
 				m_oda_rtplus = true;
-				break;
-
-			// 0x6552: Enhanced Radio Text (eRT)
-			case 0x6552:
-				m_oda_ert = true;
+				m_rtplus_group = (rdsgroup.BlockB >> 1) & 0x0F;
+				m_rtplus_group_ab = rdsgroup.BlockB & 0x01;
 				break;
 
 			// 0xCD46 / 0xCD47: Traffic Message Channel (RDS-TMC)
@@ -211,6 +208,47 @@ void rdsdecoder::decode_programtype(tRDS_GROUPS const& rdsgroup)
 
 		// Save the current PTY flags
 		m_pty = pty;
+	}
+}
+
+//---------------------------------------------------------------------------
+// rdsdecoder::decode_radiotextplus
+//
+// Decodes RadioText+
+//
+// Arguments:
+//
+//	rdsgroup	- RDS group to be processed
+
+void rdsdecoder::decode_radiotextplus(tRDS_GROUPS const& rdsgroup)
+{
+	// Determine if the group A/B flag matches that set for the RT+ application
+	if(m_rtplus_group_ab == ((rdsgroup.BlockB >> 11) & 0x01)) {
+
+		// UECP_ODA_DATA
+		//
+		struct uecp_data_frame frame = {};
+		struct uecp_message* message = &frame.msg;
+
+		// Kodi treats UECP_ODA_DATA as a custom data packet	
+		message->mec = UECP_ODA_DATA;
+		message->dsn = 8;						// ODA data length
+		message->psn = 0x4B;					// High byte of ODA AID (0x4BD7)
+		message->mel_len = 0xD7;				// Low byte of ODA AID (0x4BD7)
+
+		// Pack the BlockB, BlockC, and BlockD data from the RDS group into the packet
+		message->mel_data[0] = (rdsgroup.BlockB >> 8) & 0xFF;
+		message->mel_data[1] = rdsgroup.BlockB & 0xFF;
+		message->mel_data[2] = (rdsgroup.BlockC >> 8) & 0xFF;
+		message->mel_data[3] = rdsgroup.BlockC & 0xFF;
+		message->mel_data[4] = (rdsgroup.BlockD >> 8) & 0xFF;
+		message->mel_data[5] = rdsgroup.BlockD & 0xFF;
+
+		frame.seq = UECP_DF_SEQ_DISABLED;
+		frame.msg_len = 4 + 6;					// mec, dsn, psn, mel_data + 6 bytes
+
+		// Convert the UECP data frame into a packet and queue it up
+		m_uecp_packets.emplace(uecp_create_data_packet(frame));
 	}
 }
 
@@ -540,32 +578,20 @@ void rdsdecoder::decode_rdsgroup(tRDS_GROUPS const& rdsgroup)
 	//
 	decode_trafficprogram(rdsgroup);
 
-	// Invoke the proper handler for the specified group type code
-	switch(grouptypecode) {
+	// Group Type 0: Basic Tuning and switching information
+	if(grouptypecode == 0) decode_basictuning(rdsgroup);
 
-		// Group Type 0: Basic Tuning and switching information
-		//
-		case 0:
-			decode_basictuning(rdsgroup);
-			break;
+	// Group Type 1: Slow Labelling Codes
+	else if(grouptypecode == 1) decode_slowlabellingcodes(rdsgroup);
 
-		// Group Type 1: Slow Labelling Codes
-		//
-		case 1:
-			decode_slowlabellingcodes(rdsgroup);
-			break;
+	// Group Type 2: RadioText
+	else if(grouptypecode == 2) decode_radiotext(rdsgroup);
 
-		// Group Type 2: RadioText
-		//
-		case 2:
-			decode_radiotext(rdsgroup);
-			break;
+	// Group Type 3: Application Identification
+	else if(grouptypecode == 3) decode_applicationidentification(rdsgroup);
 
-		// Group Type 3: Application Identification
-		case 3:
-			decode_applicationidentification(rdsgroup);
-			break;
-	}
+	// RadioText+
+	if(m_oda_rtplus && grouptypecode == m_rtplus_group) decode_radiotextplus(rdsgroup);
 }
 
 //---------------------------------------------------------------------------
@@ -666,20 +692,6 @@ std::string rdsdecoder::get_rbds_callsign(void) const
 
 	// If this wasn't a nationally/regionally-linked station, append the "-FM" suffix
 	return callsign + "-FM";
-}
-
-//---------------------------------------------------------------------------
-// rdsdecoder::has_enhancedradiotext
-//
-// Flag indicating that the Enhanced RadioText (eRT) ODA is present
-//
-// Arguments:
-//
-//	NONE
-
-bool rdsdecoder::has_enhancedradiotext(void) const
-{
-	return m_oda_ert;
 }
 
 //---------------------------------------------------------------------------
