@@ -52,14 +52,42 @@ rdsdecoder::~rdsdecoder()
 //---------------------------------------------------------------------------
 // rdsdecoder::decode_applicationidentification
 //
-// Decodes Group Type 3A - Application Idenfication
+// Decodes Group Type 3A - Application Identification
 //
 // Arguments:
 //
 //	rdsgroiup	- RDS group to be processed
 
-void rdsdecoder::decode_applicationidentification(tRDS_GROUPS const& /*rdsgroup*/)
+void rdsdecoder::decode_applicationidentification(tRDS_GROUPS const& rdsgroup)
 {
+	// Determine if this is Group A or Group B data
+	bool const groupa = ((rdsgroup.BlockB & 0x0800) == 0x0000);
+	
+	if(groupa) {
+
+		// Determine what Open Data Application(s) are present by checking
+		// the Application ID (AID) against known values
+		//
+		// (https://www.nrscstandards.org/committees/dsm/archive/rds-oda-aids.pdf)
+		switch(rdsgroup.BlockD) {
+
+			// 0x4BD7: RadioText+ (RT+)
+			case 0x4BD7:
+				m_oda_rtplus = true;
+				break;
+
+			// 0x6552: Enhanced Radio Text (eRT)
+			case 0x6552:
+				m_oda_ert = true;
+				break;
+
+			// 0xCD46 / 0xCD47: Traffic Message Channel (RDS-TMC)
+			case 0xCD46:
+			case 0xCD47:
+				m_oda_rdstmc = true;
+				break;
+		}
+	}
 }
 
 //---------------------------------------------------------------------------
@@ -534,11 +562,6 @@ void rdsdecoder::decode_rdsgroup(tRDS_GROUPS const& rdsgroup)
 		case 3:
 			decode_applicationidentification(rdsgroup);
 			break;
-
-		// Group Type 8: Traffic Message Channel (TMC)
-		case 8:
-			decode_trafficmessagechannel(rdsgroup);
-			break;
 	}
 }
 
@@ -578,26 +601,6 @@ void rdsdecoder::decode_slowlabellingcodes(tRDS_GROUPS const& rdsgroup)
 		// Convert the UECP data frame into a packet and queue it up
 		m_uecp_packets.emplace(uecp_create_data_packet(frame));
 	}
-}
-
-//---------------------------------------------------------------------------
-// rdsdecoder::decode_trafficmessagechannel
-//
-// Decodes Group Type 8A - Traffic Message Channel (TMC)
-//
-// Arguments:
-//
-//	rdsgroup	- RDS group to be processed
-
-void rdsdecoder::decode_trafficmessagechannel(tRDS_GROUPS const& rdsgroup)
-{
-	// Determine if this is Group A or Group B data
-	bool const groupa = ((rdsgroup.BlockB & 0x0800) == 0x0000);
-
-	// Use the presence of any Group 8A data as an indicator that the
-	// Traffic Message Channel (TMC) ODA is present.  This should probably
-	// come from examining Group 3A data but this should work well enough
-	if(groupa) m_tmc = true;
 }
 
 //---------------------------------------------------------------------------
@@ -663,6 +666,34 @@ std::string rdsdecoder::get_rbds_callsign(void) const
 }
 
 //---------------------------------------------------------------------------
+// rdsdecoder::has_enhancedradiotext
+//
+// Flag indicating that the Enhanced RadioText (eRT) ODA is present
+//
+// Arguments:
+//
+//	NONE
+
+bool rdsdecoder::has_enhancedradiotext(void) const
+{
+	return m_oda_ert;
+}
+
+//---------------------------------------------------------------------------
+// rdsdecoder::has_radiotextplus
+//
+// Flag indicating that the RadioText+ (RT+) ODA is present
+//
+// Arguments:
+//
+//	NONE
+
+bool rdsdecoder::has_radiotextplus(void) const
+{
+	return m_oda_rtplus;
+}
+
+//---------------------------------------------------------------------------
 // rdsdecoder::has_rbds_callsign
 //
 // Flag indicating that the RDBS call sign has been decoded
@@ -674,24 +705,24 @@ std::string rdsdecoder::get_rbds_callsign(void) const
 bool rdsdecoder::has_rbds_callsign(void) const
 {
 	// SPECIAL CASE: If the first nibble of the RBDS PI code is 1 the callsign data
-	// cannot be decoded if the TMC ODA is also present (NRSC-4-B, section D.4.7)
-	if(((m_rbds_pi & 0x1000) == 0x1000) && (m_tmc)) return false;
+	// cannot be decoded if the RDS-TMC ODA is also present (NRSC-4-B, section D.4.7)
+	if(((m_rbds_pi & 0x1000) == 0x1000) && (m_oda_rdstmc)) return false;
 
 	return (!m_rbds_nationalcode.empty()) || (m_rbds_callsign[0] != '\0');
 }
 
 //---------------------------------------------------------------------------
-// rdsdecoder::has_tmc
+// rdsdecoder::has_rdstmc
 //
-// Flag indicating that the Traffic Message Channel (TMC) ODA is present
+// Flag indicating that the Traffic Message Channel (RDS-TMC) ODA is present
 //
 // Arguments:
 //
 //	NONE
 
-bool rdsdecoder::has_tmc(void) const
+bool rdsdecoder::has_rdstmc(void) const
 {
-	return m_tmc;
+	return m_oda_rdstmc;
 }
 
 //---------------------------------------------------------------------------
