@@ -83,6 +83,7 @@ struct uecp_message {
 #define UECP_MEC_SLOW_LABEL_CODES	0x1A	// Slow labeling codes
 #define UECP_MEC_LINKAGE_INFO		0x2E	// Linkage information
 #define UECP_EPP_TM_INFO			0x31	// EPP transmitter information
+#define UECP_ODA_DATA				0x46	// Open Data Application (ODA) data
 
 // Data Set Number
 //

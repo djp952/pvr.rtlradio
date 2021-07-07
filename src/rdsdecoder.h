@@ -64,11 +64,6 @@ public:
 	// Retrieves the RBDS call sign if present
 	std::string get_rbds_callsign(void) const;
 	
-	// has_enhancedradiotext
-	//
-	// Flag indicating that the Enhanced RadioText (eRT) ODA is present
-	bool has_enhancedradiotext(void) const;
-
 	// has_radiotextplus
 	//
 	// Flag indicating that the RadioText+ (RT+) ODA is present
@@ -130,6 +125,11 @@ private:
 	// Decodes Group Type 2A and 2B - RadioText
 	void decode_radiotext(tRDS_GROUPS const& rdsgroup);
 
+	// decode_radiotextplus
+	//
+	// Decodes RadioText+
+	void decode_radiotextplus(tRDS_GROUPS const& rdsgroup);
+
 	// decode_rbds_programidentification
 	//
 	// Decodes RBDS Program Identification (PI)
@@ -152,37 +152,41 @@ private:
 
 	// UECP
 	//
-	uecp_packet_queue			m_uecp_packets;			// Queued UECP packets
+	uecp_packet_queue			m_uecp_packets;				// Queued UECP packets
 
 	// GENERAL
 	//
-	uint16_t					m_pi = 0x0000;			// PI indicator
-	uint8_t						m_pty = 0x00;			// PTY indicator
+	uint16_t					m_pi = 0x0000;				// PI indicator
+	uint8_t						m_pty = 0x00;				// PTY indicator
 
 	// GROUP 0 - BASIC TUNING AND SWITCHING INFORMATION
 	//
-	uint8_t						m_ta_tp = 0x00;			// TA/TP indicators
-	uint8_t						m_ps_ready = 0x00;		// PS name ready indicator
-	std::array<char, 8>			m_ps_data;				// Program Service name
+	uint8_t						m_ta_tp = 0x00;				// TA/TP indicators
+	uint8_t						m_ps_ready = 0x00;			// PS name ready indicator
+	std::array<char, 8>			m_ps_data;					// Program Service name
 
 	// GROUP 2 - RADIOTEXT
 	//
-	bool						m_rt_init = false;		// RadioText init flag
-	uint16_t					m_rt_ready = 0x0000;	// RadioText ready indicator
-	uint8_t						m_rt_ab = 0x00;			// RadioText A/B flag
-	std::array<uint8_t, 64>		m_rt_data;				// RadioText data
+	bool						m_rt_init = false;			// RadioText init flag
+	uint16_t					m_rt_ready = 0x0000;		// RadioText ready indicator
+	uint8_t						m_rt_ab = 0x00;				// RadioText A/B flag
+	std::array<uint8_t, 64>		m_rt_data;					// RadioText data
 
-	// OPEN DATA APPLICATION (ODA) FLAGS
+	// GROUP 3 - OPEN DATA APPLICATION (ODA) FLAGS
 	//
-	bool						m_oda_ert = false;		// Enhanced Radio Text (eRT)
-	bool						m_oda_rtplus = false;	// RadioText+ (RT+)
-	bool						m_oda_rdstmc = false;	// Traffic Message Channel (RDS-TMC) 
+	bool						m_oda_rtplus = false;		// RadioText+ (RT+)
+	bool						m_oda_rdstmc = false;		// Traffic Message Channel (RDS-TMC)
+
+	// RADIOTEXT+
+	//
+	uint8_t						m_rtplus_group = 0x00;		// Group code for RadioText+ data
+	uint8_t						m_rtplus_group_ab = 0x00;	// A/B flag for RadioText+ group
 
 	// RBDS
 	//
-	uint16_t					m_rbds_pi = 0x0000;		// RDBS PI indicator
-	std::string					m_rbds_nationalcode;	// RBDS Nationally Linked code
-	std::array<char, 4>			m_rbds_callsign;		// RDBS station call sign
+	uint16_t					m_rbds_pi = 0x0000;			// RDBS PI indicator
+	std::string					m_rbds_nationalcode;		// RBDS Nationally Linked code
+	std::array<char, 4>			m_rbds_callsign;			// RDBS station call sign
 };
 
 //-----------------------------------------------------------------------------
