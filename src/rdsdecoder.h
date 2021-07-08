@@ -135,16 +135,6 @@ private:
 	// Decodes RBDS Program Identification (PI)
 	void decode_rbds_programidentification(tRDS_GROUPS const& rdsgroup);
 
-	// decode_trafficmessagechannel
-	//
-	// Decodes the Traffic Message Channel (RDS-TMC) ODA
-	void decode_trafficmessagechannel(tRDS_GROUPS const& rdsgroup);
-
-	// decode_trafficprogram
-	//
-	// Decodes Traffic Program / Traffic Announcement (TP/TA)
-	void decode_trafficprogram(tRDS_GROUPS const& rdsgroup);
-
 	// decode_slowlabellingcodes
 	//
 	// Decodes Group Type 1A - Slow Labelling Codes
@@ -166,7 +156,6 @@ private:
 
 	// GROUP 0 - BASIC TUNING AND SWITCHING INFORMATION
 	//
-	uint8_t						m_ta_tp = 0x00;				// TA/TP indicators
 	uint8_t						m_ps_ready = 0x00;			// PS name ready indicator
 	std::array<char, 8>			m_ps_data;					// Program Service name
 
@@ -186,11 +175,6 @@ private:
 	//
 	uint8_t						m_rtplus_group = 0x00;		// Group code for RadioText+ data
 	uint8_t						m_rtplus_group_ab = 0x00;	// A/B flag for RadioText+ group
-
-	// RDS-TMC
-	//
-	uint8_t						m_rdstmc_group = 0x00;		// Group code for RDS-TMC data
-	uint8_t						m_rdstmc_group_ab = 0x00;	// A/B flag for RDS-TMC group
 
 	// RBDS
 	//
