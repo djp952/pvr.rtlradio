@@ -372,6 +372,8 @@ void rdsdecoder::decode_rbds_programidentification(tRDS_GROUPS const& rdsgroup)
 	// Indicate a change to the Program Identification flags
 	if(pi != m_rbds_pi) {
 
+		uint8_t countrycode = 0xA0;			// US
+
 		m_rbds_callsign.fill('\0');
 		m_rbds_nationalcode.clear();
 
@@ -406,6 +408,9 @@ void rdsdecoder::decode_rbds_programidentification(tRDS_GROUPS const& rdsgroup)
 				case 0x000D: m_rbds_nationalcode = "NPR-5"; break;
 				case 0x000E: m_rbds_nationalcode = "NPR-6"; break;
 			}
+
+			// If a Canadian Nationally/Regionally linked code was set switch to Canada
+			if(!m_rbds_nationalcode.empty() && (m_rbds_nationalcode[0] == 'C')) countrycode = 0xA1;
 		}
 
 		// USA 3-LETTER-ONLY (ref: NRSC-4-B 04.2011 Table D.7)
@@ -460,6 +465,8 @@ void rdsdecoder::decode_rbds_programidentification(tRDS_GROUPS const& rdsgroup)
 		//
 		else if((pi & 0xC000) == 0xC000) {
 
+			countrycode = 0xA1;					// CA
+
 			// Determine the offset and increment values from the PI code
 			uint16_t offset = ((pi - 0xC000) - 257) / 255;
 			uint16_t increment = (pi - 0xC000) - offset;
@@ -495,6 +502,8 @@ void rdsdecoder::decode_rbds_programidentification(tRDS_GROUPS const& rdsgroup)
 		//
 		else if((pi & 0xF000) == 0xF000) {
 
+			countrycode = 0xA5;					// MX
+			
 			// TODO - I need some manner of reference material here
 		}
 
@@ -528,12 +537,9 @@ void rdsdecoder::decode_rbds_programidentification(tRDS_GROUPS const& rdsgroup)
 
 		// UECP_EPP_TM_INFO
 		//
-		// TODO: This must be hard-coded to report "US" for now to ensure
-		// Kodi detects RBDS, in the future set this properly to report values
-		// that will select "US" (0xA0), "CA" (0xA1), or "MX" (0xA5)
 		message->mec = UECP_EPP_TM_INFO;
 		message->dsn = UECP_MSG_DSN_CURRENT_SET;
-		message->psn = 0xA0;				// "US"
+		message->psn = countrycode;
 
 		frame.seq = UECP_DF_SEQ_DISABLED;
 		frame.msg_len = 3;					// mec, dsn, psn
