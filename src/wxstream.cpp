@@ -422,7 +422,7 @@ long long wxstream::seek(long long /*position*/, int /*whence*/)
 
 std::string wxstream::servicename(void) const
 {
-	return std::string("Wideband FM radio");
+	return std::string("Narrowband FM VHF radio");
 }
 
 //---------------------------------------------------------------------------
