@@ -1289,14 +1289,20 @@ PVR_ERROR addon::GetSignalStatus(int /*channelUid*/, kodi::addon::PVRSignalStatu
 
 	try {
 
+		int quality = 0;			// Quality as a percentage
+		int snr = 0;				// SNR as a percentage
+
+		// Retrieve the quality metrics from the stream instance
+		m_pvrstream->signalquality(quality, snr);
+
 		signalStatus.SetAdapterName(m_pvrstream->devicename());
 		signalStatus.SetAdapterStatus("Active");
 		signalStatus.SetServiceName(m_pvrstream->servicename());
 		signalStatus.SetProviderName("RTL-SDR");
 		signalStatus.SetMuxName(m_pvrstream->muxname());
 
-		signalStatus.SetSNR(m_pvrstream->signaltonoise() * 655);		// Range: 0-65535
-		signalStatus.SetSignal(m_pvrstream->signalstrength() * 655);	// Range: 0-65535
+		signalStatus.SetSignal(quality * 655);		// Range: 0-65535
+		signalStatus.SetSNR(snr * 655);				// Range: 0-65535
 	}
 
 	catch(std::exception& ex) { return handle_stdexception(__func__, ex, PVR_ERROR::PVR_ERROR_FAILED); }

@@ -460,33 +460,24 @@ std::string fmstream::servicename(void) const
 }
 
 //---------------------------------------------------------------------------
-// fmstream::signalstrength
+// fmstream::signalquality
 //
-// Gets the signal strength as a percentage
-//
-// Arguments:
-//
-//	NONE
-
-int fmstream::signalstrength(void) const
-{
-	int percent = static_cast<int>(((m_demodulator->GetSignalLevel() + 48.0) / 48.0) * 100.0);
-	return std::max(std::min(percent, 100), 0);
-}
-
-//---------------------------------------------------------------------------
-// fmstream::signaltonoise
-//
-// Gets the signal to noise ratio as a percentage
+// Gets the signal quality as a percentage
 //
 // Arguments:
 //
 //	NONE
 
-int fmstream::signaltonoise(void) const
+void fmstream::signalquality(int& quality, int& snr) const
 {
-	int percent = static_cast<int>((m_demodulator->GetSignalToNoiseLevel() / 24.0) * 100.0);
-	return std::max(std::min(percent, 100), 0);
+	TYPEREAL demodquality = 0;
+	TYPEREAL demodsnr = 0;
+
+	m_demodulator->GetSignalLevels(demodquality, demodsnr);
+
+	// The levels are expressed in the range [0,1]
+	quality = static_cast<int>(100.0 * demodquality);
+	snr = static_cast<int>(100.0 * demodsnr);
 }
 
 //---------------------------------------------------------------------------
