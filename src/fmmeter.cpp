@@ -286,10 +286,10 @@ void fmmeter::start(TYPEREAL maxdb, TYPEREAL mindb, size_t height, size_t width)
 					TYPEREAL const hz = static_cast<TYPEREAL>(width) / static_cast<TYPEREAL>(m_fftwidth);
 					TYPEREAL const center = (static_cast<TYPEREAL>(width) / 2.0);
 					
-					// Power = peak amplitude within +/- 5KHz of the center frequency
+					// Power = peak amplitude within 1KHz of the center frequency
 					size_t power = height;
-					size_t const powerlowcut = static_cast<size_t>(center - (hz * 5.0 KHz));	// -5 KHz
-					size_t const powerhighcut = static_cast<size_t>(center + (hz * 5.0 KHz));	// +5 KHz
+					size_t const powerlowcut = static_cast<size_t>(center - (hz * 500));	// -500 Hz
+					size_t const powerhighcut = static_cast<size_t>(center + (hz * 500));	// +500 Hz
 					
 					for(index = powerlowcut; index < powerhighcut; index++) {
 
