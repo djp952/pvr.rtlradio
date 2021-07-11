@@ -125,15 +125,10 @@ public:
 	// Gets the service name associated with the stream
 	virtual std::string servicename(void) const = 0;
 
-	// signalstrength
+	// signalquality
 	//
-	// Gets the signal strength as a percentage
-	virtual int signalstrength(void) const = 0;
-
-	// signaltonoise
-	//
-	// Gets the signal to noise ratio as a percentage
-	virtual int signaltonoise(void) const = 0;
+	// Gets the signal quality as percentages
+	virtual void signalquality(int& quality, int& snr) const = 0;
 
 private:
 

@@ -38,6 +38,7 @@
 
 #include "downconvert.h"
 #include "fastfir.h"
+#include "fft.h"
 #include "fmdemod.h"
 #include "wfmdemod.h"
 
@@ -51,6 +52,8 @@
 								//pick so that worst case decimation leaves
 								//reasonable number of samples to process
 #define MAX_MAGBUFSIZE 32000
+
+#define SMETER_FFT_SIZE 512		// Width of signal meter FFT
 
 typedef struct _sdmd
 {
@@ -96,25 +99,8 @@ public:
 		if(m_pWFmDemod) return m_pWFmDemod->GetNextRdsGroupData(pGroupData); else return false;
 	}
 
-	// Gets the signal level in dB
-	TYPEREAL GetSignalLevel(void) const
-	{
-		// The stored signal level is scaled to 32767.0
-		return 20 * MLOG10(m_SignalLevel / 32767.0);
-	}
-
-	// Get the noise level in dB
-	TYPEREAL GetNoiseLevel(void) const
-	{
-		// The stored noise level is scaled to 32767.0
-		return 20 * MLOG10(m_NoiseLevel / 32767.0);
-	}
-
-	// Get the signal to noise level in dB
-	TYPEREAL GetSignalToNoiseLevel(void) const
-	{
-		return 20 * MLOG10(m_SignalLevel / m_NoiseLevel);
-	}
+	// Gets the signal quality values
+	void GetSignalLevels(TYPEREAL& quality, TYPEREAL& snr);
 
 private:
 	void DeleteAllDemods();
@@ -124,7 +110,7 @@ private:
 	mutable std::mutex m_Mutex;		//for keeping threads from stomping on each other
 #endif
 	tDemodInfo m_DemodInfo;
-	TYPEREAL m_InputRate;
+	TYPEREAL m_InputRate = 0;
 	TYPEREAL m_DownConverterOutputRate;
 	TYPEREAL m_DemodOutputRate;
 	TYPEREAL m_DesiredMaxOutputBandwidth;
@@ -138,8 +124,16 @@ private:
 	CFmDemod* m_pFmDemod;
 	CWFmDemod* m_pWFmDemod;
 
-	TYPEREAL m_SignalLevel = NAN;
-	TYPEREAL m_NoiseLevel = NAN;
+	// Signal quality calculations
+	void MeasureSignalQuality(int n, TYPECPX* pInData);
+
+	int m_smeter_samples = 0;
+	TYPEREAL m_smeter_max = 0;
+	TYPEREAL m_smeter_sum = 0;
+	TYPEREAL m_smeter_variance_old_m = 0;
+	TYPEREAL m_smeter_variance_new_m = 0;
+	TYPEREAL m_smeter_variance_old_s = 0;
+	TYPEREAL m_smeter_variance_new_s = 0;
 };
 
 #endif // DEMODULATOR_H

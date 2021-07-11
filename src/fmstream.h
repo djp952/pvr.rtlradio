@@ -139,15 +139,10 @@ public:
 	// Gets the service name associated with the stream
 	std::string servicename(void) const override;
 
-	// signalstrength
+	// signalquality
 	//
-	// Gets the signal strength as a percentage
-	int signalstrength(void) const override;
-
-	// signaltonoise
-	//
-	// Gets the signal to noise ratio as a percentage
-	int signaltonoise(void) const override;
+	// Gets the signal quality as percentages
+	void signalquality(int& quality, int& snr) const override;
 
 private:
 

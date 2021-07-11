@@ -40,52 +40,6 @@
 //==========================================================================================
 #include "demodulator.h"
 
-//---------------------------------------------------------------------------
-// get_signal_levels
-//
-// Gets the approximate signal levels of the input samples
-//
-// Arguments:
-//
-//	numsamples		- Number of samples in the buffer
-//	samples			- Pointer to the samples buffer
-//	rms				- Receives the RMS calculation
-//	noise			- Receives the Standard Deviation calculation
-
-static void get_signal_levels(int numsamples, TYPECPX const* samples, TYPEREAL& rms, TYPEREAL& noise)
-{
-	numsamples = (numsamples + 127) / 128;
-
-	rms = 0;
-	noise = 0;
-
-	if(numsamples == 0) return;
-
-	// MEAN POWER
-	//
-	TYPEREAL mean = 0;
-	for(int index = 0; index < numsamples; index++) {
-
-		TYPECPX const& sample = samples[index];
-		mean += sqrt((sample.re * sample.re) + (sample.im * sample.im));
-	}
-	mean /= numsamples;
-
-	// RMS POWER
-	//
-	rms = sqrt(mean * mean);
-
-	// STANDARD DEVIATION
-	//
-	for(int index = 0; index < numsamples; index++) {
-
-		TYPECPX const& sample = samples[index];
-		TYPEREAL power = sqrt((sample.re * sample.re) + (sample.im * sample.im)) - mean;
-		noise += (power * power);
-	}
-	noise = sqrt(noise / numsamples);
-}
-
 //////////////////////////////////////////////////////////////////
 //	Constructor/Destructor
 //////////////////////////////////////////////////////////////////
@@ -223,19 +177,10 @@ int ret = 0;
 			{
 				//perform main bandpass filtering
 				n = m_FastFIR.ProcessData(n, m_pDemodInBuf, m_pDemodTmpBuf);
+				MeasureSignalQuality(n, m_pDemodTmpBuf);
 			}
-
-			// Get the signal levels
-			TYPEREAL signal = 0, noise = 0;
-			get_signal_levels(n, (m_DemodMode == DEMOD_WFM) ? m_pDemodInBuf : m_pDemodTmpBuf, signal, noise);
-
-			// Smooth the signal level
-			if(isnan(m_SignalLevel)) m_SignalLevel = signal;
-			else m_SignalLevel = 0.95 * m_SignalLevel + 0.05 * signal;
-
-			// Smooth the noise level
-			if(isnan(m_NoiseLevel)) m_NoiseLevel = (noise);
-			else m_NoiseLevel = 0.95 * m_NoiseLevel + 0.05 * (noise);
+			else
+				MeasureSignalQuality(n, m_pDemodInBuf);
 
 			//perform the desired demod action
 			switch(m_DemodMode)
@@ -280,19 +225,10 @@ int ret = 0;
 			{
 				//perform main bandpass filtering
 				n = m_FastFIR.ProcessData(n, m_pDemodInBuf, m_pDemodTmpBuf);
+				MeasureSignalQuality(n, m_pDemodTmpBuf);
 			}
-
-			// Get the signal levels
-			TYPEREAL signal = 0, noise = 0;
-			get_signal_levels(n, (m_DemodMode == DEMOD_WFM) ? m_pDemodInBuf : m_pDemodTmpBuf, signal, noise);
-
-			// Smooth the signal level
-			if(isnan(m_SignalLevel)) m_SignalLevel = signal;
-			else m_SignalLevel = 0.95 * m_SignalLevel + 0.05 * signal;
-
-			// Smooth the noise level
-			if(isnan(m_NoiseLevel)) m_NoiseLevel = (noise);
-			else m_NoiseLevel = 0.95 * m_NoiseLevel + 0.05 * (noise);
+			else 
+				MeasureSignalQuality(n, m_pDemodInBuf);
 
 			//perform the desired demod action
 			switch(m_DemodMode)
@@ -311,4 +247,69 @@ int ret = 0;
 	}
 
 	return ret;
+}
+
+// Added to provide a running signal quality calculations
+void CDemodulator::MeasureSignalQuality(int length, TYPECPX* pInData)
+{
+	int sample_index = 0;			// Index into current sample set
+
+	if(length <= 0) return;
+
+	// Get the level of the first sample
+	TYPEREAL& re = pInData[sample_index].re;
+	TYPEREAL& im = pInData[sample_index].im;
+	TYPEREAL level = (re * re) + (im * im);
+
+	// First sample, reset sum and sum squared to new values
+	if(m_smeter_samples == 0) {
+
+		m_smeter_sum = m_smeter_max = level;
+		m_smeter_variance_old_m = m_smeter_variance_new_m = level;
+		m_smeter_variance_old_s = m_smeter_variance_new_s = 0;
+
+		sample_index = 1;
+	}
+
+	// Process remaining samples
+	while(sample_index < length) {
+
+		// Get the level of the next sample
+		re = pInData[sample_index].re;
+		im = pInData[sample_index].im;
+		level = (re * re) + (im * im);
+
+		m_smeter_sum += level;
+		if(level > m_smeter_max) m_smeter_max = level;
+		m_smeter_samples++;
+
+		m_smeter_variance_new_m = m_smeter_variance_old_m + (level - m_smeter_variance_old_m) / static_cast<TYPEREAL>(m_smeter_samples);
+		m_smeter_variance_new_s = m_smeter_variance_old_s + (level - m_smeter_variance_old_m) * (level - m_smeter_variance_new_m);
+		m_smeter_variance_old_m = m_smeter_variance_new_m;
+		m_smeter_variance_old_s = m_smeter_variance_new_s;
+
+		sample_index++;
+	}
+}
+
+// Retrieves the signal levels from the demodulator and resets the statistics
+void CDemodulator::GetSignalLevels(TYPEREAL& quality, TYPEREAL& snr)
+{
+	quality = snr = 0;
+
+	// Signal quality is based on the coefficient of variation
+	if(m_smeter_samples > 1) {
+
+		// Calcluate the variance, standard deviation, and coeficient of variation
+		TYPEREAL variance = m_smeter_variance_new_s / static_cast<TYPEREAL>(m_smeter_samples - 1);
+		TYPEREAL sd = sqrt(variance);
+		TYPEREAL cv = sd / fabs(m_smeter_sum / static_cast<TYPEREAL>(m_smeter_samples));
+		quality = 1.0 - cv;
+	}
+
+	// SNR is based on ratio of the mean and the maximum power levels
+	TYPEREAL mean = m_smeter_sum / static_cast<TYPEREAL>(m_smeter_samples);
+	snr = mean / m_smeter_max;
+
+	m_smeter_samples = 0;				// Reset statistics on next pass
 }
