@@ -321,7 +321,8 @@ std::string wxstream::generate_mux_name(struct channelprops const& channelprops)
 
 	// Otherwise use the channel frequency in Megahertz
 	char buf[64] = { 0 };
-	snprintf(buf, std::extent<decltype(buf)>::value, "%.3f VHF", (channelprops.frequency / 1000000.0f));
+	snprintf(buf, std::extent<decltype(buf)>::value, "%.3f VHF", 
+		(static_cast<float>(channelprops.frequency) / 1000000.0f));
 	return std::string(buf);
 }
 
