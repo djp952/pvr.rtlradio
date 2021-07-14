@@ -208,6 +208,7 @@ private:
 		GLfloat					m_noise = 0.0f;			// Noise level
 		GLfloat					m_lowcut = 0.0f;		// Low cut
 		GLfloat					m_highcut = 0.0f;		// High cut
+		bool					m_overload = false;		// Overload flag
 
 		std::unique_ptr<glm::vec2[]>	m_fft;			// FFT vertices
 	};

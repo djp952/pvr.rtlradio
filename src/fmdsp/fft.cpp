@@ -19,8 +19,6 @@
 #define K_MAXDB 0.0			//specifies total range of FFT
 #define K_MINDB -220.0
 
-#define OVER_LIMIT 32000.0	//limit for detecting over ranging inputs
-
 
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
@@ -285,12 +283,14 @@ qint32 i;
 	TYPEREAL dtmp1;
 	for(i=0; i<n; i++)
 	{
-		if( InBuf[i].re > OVER_LIMIT )	//flag overload if within OVLimit of max
-			m_Overload = true;
+		// Determine overload from the instantaneous power reading
+		TYPEREAL level = sqrt((InBuf[i].im * InBuf[i].im) + (InBuf[i].re * InBuf[i].re));
+		if(level > K_AMPMAX) m_Overload = true;
+
 		dtmp1 = m_pWindowTbl[i];
 		//NOTE: For some reason I and Q are swapped(demod I/Q does not apear to be swapped)
 		//possibly an issue with the FFT ?
-		((TYPECPX*)m_pFFTInBuf)[i].im =  dtmp1 * (InBuf[i].re);//window the I data
+		((TYPECPX*)m_pFFTInBuf)[i].im = dtmp1 * (InBuf[i].re);//window the I data
 		((TYPECPX*)m_pFFTInBuf)[i].re = dtmp1 * (InBuf[i].im);	//window the Q data
 	}
 	//Calculate the complex FFT
