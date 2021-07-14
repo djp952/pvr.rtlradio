@@ -475,9 +475,11 @@ void fmstream::signalquality(int& quality, int& snr) const
 
 	m_demodulator->GetSignalLevels(demodquality, demodsnr);
 
-	// The levels are expressed in the range [0,1]
-	quality = static_cast<int>(100.0 * demodquality);
-	snr = static_cast<int>(100.0 * demodsnr);
+	// For wideband FM, adjust the range such that 80% is nominal for
+	// signal quality and 60% is nominal for signal-to-noise; this 
+	// adjustment is based on observation and (perceived) output quality
+	quality = std::min(100, static_cast<int>(100.0 * (demodquality / 0.80)));
+	snr = std::min(100, static_cast<int>(100.0 * (demodsnr / 0.60)));
 }
 
 //---------------------------------------------------------------------------
