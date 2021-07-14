@@ -479,8 +479,8 @@ void fmstream::signalquality(int& quality, int& snr) const
 	// For wideband FM, adjust the range such that 80% is nominal for
 	// signal quality and 60% is nominal for signal-to-noise; this 
 	// adjustment is based on observation and (perceived) output quality
-	quality = std::min(100, static_cast<int>(100.0 * (demodquality / 0.80)));
-	snr = std::min(100, static_cast<int>(100.0 * (demodsnr / 0.60)));
+	quality = std::max(0, std::min(100, static_cast<int>(100.0 * (demodquality / 0.80))));
+	snr = std::max(0, std::min(100, static_cast<int>(100.0 * (demodsnr / 0.60))));
 }
 
 //---------------------------------------------------------------------------

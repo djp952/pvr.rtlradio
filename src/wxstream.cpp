@@ -443,8 +443,8 @@ void wxstream::signalquality(int& quality, int& snr) const
 	m_demodulator->GetSignalLevels(demodquality, demodsnr);
 
 	// The levels are expressed in the range [0,1]
-	quality = static_cast<int>(100.0 * demodquality);
-	snr = static_cast<int>(100.0 * demodsnr);
+	quality = std::max(0, std::min(100, static_cast<int>(100.0 * demodquality)));
+	snr = std::max(0, std::min(100, static_cast<int>(100.0 * demodsnr)));
 }
 
 //---------------------------------------------------------------------------
