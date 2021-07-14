@@ -354,7 +354,8 @@ std::string fmstream::generate_mux_name(struct channelprops const& channelprops)
 {
 	// Set the default mux name to the frequency in Megahertz
 	char buf[64] = { 0 };
-	snprintf(buf, std::extent<decltype(buf)>::value, "%.1f FM", (channelprops.frequency / 1000000.0f));
+	snprintf(buf, std::extent<decltype(buf)>::value, "%.1f FM", 
+		(static_cast<float>(channelprops.frequency) / 1000000.0f));
 	return std::string(buf);
 }
 
