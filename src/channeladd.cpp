@@ -403,7 +403,7 @@ bool channeladd::OnInit(void)
 
 		// Initialize the non-default channelprops structure members
 		m_channelprops.name = kodi::GetLocalizedString(19204, "New channel");
-		m_channelprops.autogain = true;
+		m_channelprops.autogain = false;
 	}
 
 	catch(...) { return false; }
