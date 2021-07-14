@@ -279,7 +279,7 @@ void fmmeter::start(TYPEREAL maxdb, TYPEREAL mindb, size_t height, size_t width)
 					}
 
 					// Convert the captured FFT data into bitmapped points that can be measured/displayed
-					fft.GetScreenIntegerFFTData(static_cast<qint32>(height), static_cast<qint32>(width), maxdb, mindb,
+					bool overload = fft.GetScreenIntegerFFTData(static_cast<qint32>(height), static_cast<qint32>(width), maxdb, mindb,
 						-(static_cast<int32_t>(m_fftwidth) / 2), (static_cast<int32_t>(m_fftwidth) / 2), fftbuffer.get());
 
 					// Use the FFT data to calculate the power and noise levels
@@ -321,6 +321,7 @@ void fmmeter::start(TYPEREAL maxdb, TYPEREAL mindb, size_t height, size_t width)
 					status.power = static_cast<float>(avgpower);				// Power in dB
 					status.noise = static_cast<float>(avgnoise);				// Noise in dB
 					status.snr = static_cast<float>(avgpower + -avgnoise);		// SNR in dB
+					status.overload = overload;									// FFT is clipped
 					status.fftbandwidth = m_fftwidth;							// Overall FFT bandwidth
 					status.ffthighcut = (m_bandwidth / 2);						// High cut bandwidth
 					status.fftlowcut = -status.ffthighcut;						// Low cut bandwidth

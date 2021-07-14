@@ -58,7 +58,7 @@ uint32_t const channelsettings::FFT_BANDWIDTH = (400 KHz);
 // channelsettings::FFT_MINDB
 //
 // Maximum decibel level supported by the FFT
-float const channelsettings::FFT_MAXDB = 3.0f;
+float const channelsettings::FFT_MAXDB = 4.0f;
 
 // channelsettings::FFT_MINDB
 //
@@ -245,7 +245,8 @@ void channelsettings::fftcontrol::render(void)
 	render_line(glm::vec4(1.0f, 1.0f, 0.0f, 0.75f), centerline);
 
 	// FFT
-	render_line_strip(glm::vec3(1.0f, 1.0f, 1.0f), m_fft.get(), m_width);
+	if(!m_overload) render_line_strip(glm::vec3(1.0f, 1.0f, 1.0f), m_fft.get(), m_width);
+	else render_line_strip(glm::vec3(1.0f, 0.0f, 0.0f), m_fft.get(), m_width);
 
 	glDisableVertexAttribArray(m_shader.aPosition());	// Disable the vertex array
 	glBindBuffer(GL_ARRAY_BUFFER, 0);					// Unbind the VBO
@@ -291,8 +292,13 @@ void channelsettings::fftcontrol::render_line(glm::vec4 color, glm::vec2 vertice
 	p = glm::normalize(p);
 
 	// Pre-calculate the required deltas for the line thickness
+#if defined(WIN32) && defined(HAS_ANGLE)
+	GLfloat const dx = (m_linewidthf);
+	GLfloat const dy = (m_lineheightf);
+#else
 	GLfloat const dx = (m_linewidthf / 2.0f);
 	GLfloat const dy = (m_lineheightf / 2.0f);
+#endif
 
 	glm::vec2 const p1(-p.y, p.x);
 	glm::vec2 const p2(p.y, -p.x);
@@ -346,8 +352,13 @@ void channelsettings::fftcontrol::render_line_strip(glm::vec4 color, glm::vec2 v
 	size_t strippos = 0;
 
 	// Pre-calculate the required deltas for the line thickness
+#if defined(WIN32) && defined(HAS_ANGLE)
+	GLfloat const dx = (m_linewidthf);
+	GLfloat const dy = (m_lineheightf);
+#else
 	GLfloat const dx = (m_linewidthf / 2.0f);
 	GLfloat const dy = (m_lineheightf / 2.0f);
+#endif
 
 	for(size_t index = 0; index < numvertices - 1; index++)
 	{
@@ -468,6 +479,9 @@ void channelsettings::fftcontrol::update(struct fmmeter::signal_status const& st
 	// The FFT data merely needs to be converted into an X,Y vertex to be used by the renderer
 	for(size_t index = 0; index < length; index++) m_fft[index] = glm::vec2(static_cast<float>(index), 
 		static_cast<float>(status.fftdata[index]));
+
+	// The FFT line strip will be shown in a different color upon overload
+	m_overload = status.overload;
 
 	// In the event of an FFT data underrun, flat-line the remainder of the data points
 	if(m_width > status.fftsize) {

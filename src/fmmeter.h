@@ -62,6 +62,7 @@ public:
 		float				power;				// Signal power level in dB
 		float				noise;				// Signal noise level in dB
 		float				snr;				// Signal-to-noise ratio in dB
+		bool				overload;			// FFT input data is overloaded
 		uint32_t			fftbandwidth;		// Overall bandwidth of the FFT
 		int32_t				ffthighcut;			// High cut frequency from center
 		int32_t				fftlowcut;			// Low cut frequency from center
