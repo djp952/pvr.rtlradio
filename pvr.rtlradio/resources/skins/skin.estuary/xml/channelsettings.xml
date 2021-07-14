@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <window>
-  <defaultcontrol always="true">20</defaultcontrol>
+  <defaultcontrol always="true">1000</defaultcontrol>
   <include>Animation_DialogPopupOpenClose</include>
   <controls>
     <control type="group">
@@ -15,9 +15,11 @@
         <param name="header_id" value="2" />
       </include>
       <!-- Channel Properties -->
-      <control type="group">
+      <control type="group" id="1000">
         <left>10</left>
         <top>70</top>
+        <onleft>4000</onleft>
+        <onright>4000</onright>
         <control type="label" id="9000">
           <left>0</left>
           <top>10</top>
@@ -38,12 +40,12 @@
           <align>right</align>
           <label>MHz</label>
         </control>
-        <control type="grouplist" id="9000">
+        <control type="grouplist" id="1100">
           <top>50</top>
-          <onleft>60</onleft>
-          <onright>9000</onright>
-          <onup>34</onup>
-          <ondown>30</ondown>
+          <onup>205</onup>
+          <ondown>204</ondown>
+          <onleft>4000</onleft>
+          <onright>4000</onright>
           <itemgap>-25</itemgap>
           <control type="edit" id="200">
             <description>Frequency</description>
@@ -87,12 +89,12 @@
           <textcolor>button_focus</textcolor>
           <shadowcolor>black</shadowcolor>
         </control>
-        <control type="grouplist" id="9000">
+        <control type="grouplist" id="1200">
           <top>340</top>
-          <onleft>60</onleft>
-          <onright>9000</onright>
-          <onup>34</onup>
-          <ondown>30</ondown>
+          <onup>202</onup>
+          <ondown>201</ondown>
+          <onleft>4000</onleft>
+          <onright>4000</onright>
           <itemgap>-25</itemgap>
           <control type="radiobutton" id="204">
             <description>Automatic gain</description>
@@ -110,9 +112,11 @@
         </control>
       </control>
       <!-- Signal Meter -->
-      <control type="group">
+      <control type="group" id="3000">
         <left>700</left>
         <top>70</top>
+        <onleft>1000</onleft>
+        <onright>4000</onright>
         <control type="label" id="9000">
           <left>0</left>
           <top>10</top>
@@ -176,11 +180,11 @@
         </control>
       </control>
       <!-- Dialog Buttons -->
-      <control type="grouplist" id="9000">
+      <control type="grouplist" id="4000">
         <right>10</right>
         <top>118</top>
-        <onleft>9002</onleft>
-        <onright>10</onright>
+        <onleft>1000</onleft>
+        <onright>1000</onright>
         <itemgap>dialogbuttons_itemgap</itemgap>
         <width>400</width>
         <!-- OK -->
