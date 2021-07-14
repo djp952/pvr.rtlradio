@@ -40,6 +40,7 @@ rdsdecoder::rdsdecoder(bool isrbds) : m_isrbds(isrbds)
 {
 	m_ps_data.fill(0x00);				// Initialize PS buffer
 	m_rt_data.fill(0x00);				// Initialize RT buffer
+	m_rbds_callsign.fill(0x00);			// Initialize callsign buffer
 }
 
 //---------------------------------------------------------------------------
