@@ -375,6 +375,7 @@ void rdsdecoder::decode_rbds_programidentification(tRDS_GROUPS const& rdsgroup)
 
 		uint8_t countrycode = 0xA0;			// US
 
+		m_rbds_pi = pi;
 		m_rbds_callsign.fill('\0');
 		m_rbds_nationalcode.clear();
 
@@ -547,9 +548,6 @@ void rdsdecoder::decode_rbds_programidentification(tRDS_GROUPS const& rdsgroup)
 
 		// Convert the UECP data frame into a packet and queue it up
 		m_uecp_packets.emplace(uecp_create_data_packet(frame));
-
-		// Save the current PI flags
-		m_rbds_pi = pi;
 	}
 }
 
