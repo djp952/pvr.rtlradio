@@ -27,7 +27,7 @@
     <BashExe>$(WINDIR)\Sysnative\bash.exe</BashExe>
     <Configuration>Release</Configuration>
     <DisplayVersion></DisplayVersion>         <!-- Set by AddonVersion Target; may override on the command line -->
-    <KodiBaseline>matrix</KodiBaseline>
+    <KodiBaseline>nexus</KodiBaseline>
     <ZipperExe>depends\build\zuki.build.tools.zipper.exe</ZipperExe>
   </PropertyGroup>
 
