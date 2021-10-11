@@ -691,13 +691,67 @@
 
   </Target>
 
+  <!-- BUILD: BUILD-NAS-WD -->
+  <Target Name="build-nas-wd" DependsOnTargets="AddonVersion;linux-armhf">
+
+    <ItemGroup>
+      <Binaries Include="out\linux-armhf\rtl_tcp"/>
+      <Scripts Include="src\nas\wd\*.sh"/>
+      <Images Include="pvr.rtlradio\resources\icon.png" />
+    </ItemGroup>
+
+    <MakeDir Directories="out\nas-wd\rtl_tcp" ContinueOnError="false"/>
+    <MakeDir Directories="out\nas-wd\rtl_tcp\bin" ContinueOnError="false"/>
+
+    <Copy SourceFiles="@(Scripts)" DestinationFiles="@(Scripts->'out\nas-wd\rtl_tcp\%(RecursiveDir)%(Filename)%(Extension)')" />
+    <Copy SourceFiles="@(Binaries)" DestinationFiles="@(Binaries->'out\nas-wd\rtl_tcp\bin\%(RecursiveDir)%(Filename)%(Extension)')" />
+    <Copy SourceFiles="@(Images)" DestinationFiles="@(Images->'out\nas-wd\rtl_tcp\%(RecursiveDir)%(Filename)%(Extension)')" />
+
+    <Exec Command="TextTransform.exe template\wdapkg.rc.tt -out out\nas-wd\rtl_tcp\apkg.rc -a &quot;!!addonversion!$(AddonVersion)&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;cd out/nas-wd/rtl_tcp;../../../reference/mksapkg/mksapkg-OS5 -E -s -m MyCloudEX2Ultra 2>/dev/null&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;cd out/nas-wd/rtl_tcp;../../../reference/mksapkg/mksapkg-OS5 -E -s -m MyCloudPR2100 2>/dev/null&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;cd out/nas-wd/rtl_tcp;../../../reference/mksapkg/mksapkg-OS5 -E -s -m MyCloudPR4100 2>/dev/null&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;cd out/nas-wd/rtl_tcp;../../../reference/mksapkg/mksapkg-OS5 -E -s -m WDMyCloud 2>/dev/null&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;cd out/nas-wd/rtl_tcp;../../../reference/mksapkg/mksapkg-OS5 -E -s -m WDMyCloudDL2100 2>/dev/null&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;cd out/nas-wd/rtl_tcp;../../../reference/mksapkg/mksapkg-OS5 -E -s -m WDMyCloudDL4100 2>/dev/null&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;cd out/nas-wd/rtl_tcp;../../../reference/mksapkg/mksapkg-OS5 -E -s -m WDMyCloudEX2100 2>/dev/null&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;cd out/nas-wd/rtl_tcp;../../../reference/mksapkg/mksapkg-OS5 -E -s -m WDMyCloudEX4100 2>/dev/null&quot;" ContinueOnError="false"/>
+    <Exec Command="$(BashExe) -c &quot;cd out/nas-wd/rtl_tcp;../../../reference/mksapkg/mksapkg-OS5 -E -s -m WDMyCloudMirror 2>/dev/null&quot;" ContinueOnError="false"/>
+
+  </Target>
+
+  <!-- BUILD: NAS-WD -->
+  <Target Name="nas-wd" DependsOnTargets="build-nas-wd">
+
+    <PropertyGroup>
+      <CurrentDate>$([System.DateTime]::Now.ToString(MMddyyyy))</CurrentDate>  
+    </PropertyGroup>
+
+    <ItemGroup>
+      <Packages Include="out\nas-wd\*.bin($(CurrentDate))"/>
+    </ItemGroup>
+
+    <Move SourceFiles="@(Packages)" DestinationFiles="@(Packages->Replace('.bin($(CurrentDate))', '.apkg'))">
+      <Output TaskParameter="MovedFiles" ItemName="Packages1"/>
+    </Move>
+    <Move SourceFiles="@(Packages1)" DestinationFiles="@(Packages1->Replace('_rtl_tcp_', '-'))">
+      <Output TaskParameter="MovedFiles" ItemName="Packages2"/>
+    </Move>
+    <Move SourceFiles="@(Packages2)" DestinationFiles="@(Packages2->Replace('out\nas-wd\', 'out\nas-wd\rtl_tcp-nas-wd-'))">
+      <Output TaskParameter="MovedFiles" ItemName="Packages3"/>
+    </Move>
+    <Move SourceFiles="@(Packages3)" DestinationFolder="out"/>
+
+  </Target>
+
   <!-- BUILD: PLATFORMS -->
   <Target Name="windows" DependsOnTargets="windows-win32;windows-x64"/>
   <Target Name="linux" DependsOnTargets="linux-i686;linux-x86_64;linux-armel;linux-armhf;linux-aarch64"/>
   <Target Name="osx" DependsOnTargets="osx-x86_64"/>
   <Target Name="android" DependsOnTargets="android-arm;android-aarch64;android-x86"/>
+  <Target Name="nas" DependsOnTargets="nas-wd"/>
 
   <!-- BUILD: ALL -->
-  <Target Name="all" DependsOnTargets="windows;linux;osx;android"/>
+  <Target Name="all" DependsOnTargets="windows;linux;osx;android;nas"/>
 
 </Project>
