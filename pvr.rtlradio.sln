@@ -76,6 +76,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "template", "template", "{44
 	ProjectSection(SolutionItems) = preProject
 		template\addon.xml.tt = template\addon.xml.tt
 		template\addons.xml.tt = template\addons.xml.tt
+		template\wdapkg.rc.tt = template\wdapkg.rc.tt
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "rtl_test", "src\rtl_test.vcxproj", "{19BD98F9-DD76-49FB-910F-79F97C6BB646}"
@@ -107,6 +108,19 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "rtl_biast", "src\rtl_biast.vcxproj", "{F36BC675-E8EC-4A56-8350-3A666B0AA870}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "angle", "src\angle.vcxproj", "{6B1B43B7-CFD6-43A3-ABB7-5557466B55CD}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "nas", "nas", "{232E6054-3CD8-4AA2-924E-E870B8C1C35B}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "wd", "wd", "{BB28661F-0C05-43A6-AB9F-2F76EC7E2691}"
+	ProjectSection(SolutionItems) = preProject
+		src\nas\wd\clean.sh = src\nas\wd\clean.sh
+		src\nas\wd\init.sh = src\nas\wd\init.sh
+		src\nas\wd\install.sh = src\nas\wd\install.sh
+		src\nas\wd\preinst.sh = src\nas\wd\preinst.sh
+		src\nas\wd\remove.sh = src\nas\wd\remove.sh
+		src\nas\wd\start.sh = src\nas\wd\start.sh
+		src\nas\wd\stop.sh = src\nas\wd\stop.sh
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -227,6 +241,8 @@ Global
 		{14685018-1D53-45C5-BCF5-D9D2074AB355} = {AE3C3D3D-5525-4E65-9944-3CFF8718778F}
 		{6B20BC22-7114-4DC6-BC1A-203C9078F5E5} = {14685018-1D53-45C5-BCF5-D9D2074AB355}
 		{880E452A-4A32-4A49-A911-183912652C33} = {6B20BC22-7114-4DC6-BC1A-203C9078F5E5}
+		{232E6054-3CD8-4AA2-924E-E870B8C1C35B} = {BC723F63-F0D7-4CC4-8789-D6A7DD8AA6E1}
+		{BB28661F-0C05-43A6-AB9F-2F76EC7E2691} = {232E6054-3CD8-4AA2-924E-E870B8C1C35B}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {CDFD4BDC-0976-4BCA-B61E-33B151C24682}

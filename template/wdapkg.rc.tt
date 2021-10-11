@@ -1,0 +1,20 @@
+<#@ template debug="false" hostspecific="true" language="C#" #><#@ assembly name="System.Core" #><#@ import namespace="System.IO" #>Package: rtl_tcp
+Section: Apps
+Version: <#= this.Host.ResolveParameterValue("", "", "addonversion") #>
+Packager: Michael Brehm
+Email: djp952@gmail.com
+Homepage: https://github.com/djp952/pvr.rtlradio
+Description: I/Q spectrum server for RTL2832 based DVB-T receivers
+AddonShowName: rtl_tcp
+Icon: icon.png
+AddonIndexPage:
+AddonUsedPort: 1234
+InstDepend:
+InstConflict:
+StartDepend:
+StartConflict:
+CenterType: 0
+UserControl: 0
+MinFWVer:
+MaxFWVer:
+IndividualFlag: 1
