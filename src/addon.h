@@ -150,6 +150,11 @@ public:
 	// Gets the total amount of channels on the backend
 	PVR_ERROR GetChannelsAmount(int& amount) override;
 
+	// GetChannelStreamProperties
+	//
+	// Get the stream properties for a channel from the backend
+	PVR_ERROR GetChannelStreamProperties(kodi::addon::PVRChannel const& channel, std::vector<kodi::addon::PVRStreamProperty>& properties) override;
+
 	// GetEPGForChannel
 	//
 	// Request the EPG for a channel from the backend
