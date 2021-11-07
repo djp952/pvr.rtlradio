@@ -1251,6 +1251,23 @@ PVR_ERROR addon::GetChannelsAmount(int& amount)
 }
 
 //-----------------------------------------------------------------------------
+// addon::GetChannelStreamProperties (CInstancePVRClient)
+//
+// Get the stream properties for a channel from the backend
+//
+// Arguments:
+//
+//	channel		- channel to get the stream properties for
+//	properties	- properties required to play the stream
+
+PVR_ERROR addon::GetChannelStreamProperties(kodi::addon::PVRChannel const& /*channel*/, std::vector<kodi::addon::PVRStreamProperty>& properties)
+{
+	properties.emplace_back(PVR_STREAM_PROPERTY_ISREALTIMESTREAM, "true");
+
+	return PVR_ERROR::PVR_ERROR_NO_ERROR;
+}
+
+//-----------------------------------------------------------------------------
 // addon::GetEPGForChannel (CInstancePVRClient)
 //
 // Request the EPG for a channel from the backend
