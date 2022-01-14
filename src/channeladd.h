@@ -39,7 +39,7 @@ using namespace kodi::gui::controls;
 //
 // Implements the "Add Channel" dialog
 
-class ATTRIBUTE_HIDDEN channeladd : public kodi::gui::CWindow
+class ATTR_DLL_LOCAL channeladd : public kodi::gui::CWindow
 {
 public:
 

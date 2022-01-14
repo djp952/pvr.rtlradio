@@ -2,7 +2,7 @@
 
 Realtek RTL2832U RTL-SDR FM Radio PVR Client   
    
-Copyright (C)2020-2021 Michael G. Brehm    
+Copyright (C)2020-2022 Michael G. Brehm    
 [MIT LICENSE](https://opensource.org/licenses/MIT)   
    
 Concept based on [__pvr.rtl.radiofm__](https://github.com/AlwinEsch/pvr.rtl.radiofm) - Copyright (C) 2015-2018 Alwin Esch   
@@ -14,8 +14,11 @@ Wideband FM Digital Signal Processing provided by [__CuteSDR__](https://sourcefo
    
 ## BUILD ENVIRONMENT
 **REQUIRED COMPONENTS**   
-* Windows 10 x64 20H2 (19042)   
-* Visual Studio 2017 (Windows 10 SDK (10.0.17763.0), and C++ Universal Windows Platform Tools)   
+* Windows 10 x64 20H2 (19042) or later   
+* Visual Studio 2022 Community Edition or higher with:    
+     * Desktop Development with C++   
+     * Windows 10 SDK (10.0.18362.0)   
+
 * [Windows Subsystem for Linux](https://docs.microsoft.com/en-us/windows/wsl/install-win10) (WSL v1 recommended)   
 * [WSL Ubuntu 18.04 LTS Distro](https://www.microsoft.com/store/productId/9N9TNGVNDL3Q)   
 
@@ -63,15 +66,15 @@ sudo cp -v $(pwd)/osxcross/build/compiler-rt/compiler-rt/build/lib/darwin/*.dyli
    
 ## BUILD KODI ADDON PACKAGES
 **INITIALIZE SOURCE TREE AND DEPENDENCIES**
-* Open "Developer Command Prompt for VS2017"   
+* Open "Developer Command Prompt for VS2022"   
 ```
-git clone https://github.com/djp952/pvr.rtlradio -b Matrix
+git clone https://github.com/djp952/pvr.rtlradio -b Nexus
 cd pvr.rtlradio
 git submodule update --init
 ```
    
 **BUILD ADDON TARGET PACKAGE(S)**   
-* Open "Developer Command Prompt for VS2017"   
+* Open "Developer Command Prompt for VS2022"   
 ```
 cd pvr.rtlradio
 msbuild msbuild.proj [/t:target[;target...]] [/p:parameter=value[;parameter=value...]

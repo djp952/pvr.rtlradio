@@ -402,7 +402,7 @@ bool channeladd::OnInit(void)
 		m_button_add->SetEnabled(false);
 
 		// Initialize the non-default channelprops structure members
-		m_channelprops.name = kodi::GetLocalizedString(19204, "New channel");
+		m_channelprops.name = kodi::addon::GetLocalizedString(19204, "New channel");
 		m_channelprops.autogain = false;
 	}
 

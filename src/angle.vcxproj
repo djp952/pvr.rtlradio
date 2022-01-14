@@ -29,26 +29,26 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
@@ -102,9 +102,8 @@
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_CRT_SECURE_NO_DEPRECATE;NOMINMAX;ANGLE_IS_32_BIT_CPU;LIBANGLE_IMPLEMENTATION;ANGLE_EXPORT=;ANGLE_UTIL_EXPORT=;EGLAPI=;GL_APICALL=;GL_API=;GL_GLES_PROTOTYPES=1;EGL_EGL_PROTOTYPES=1;GL_GLEXT_PROTOTYPES=1;EGL_EGLEXT_PROTOTYPES=1;ANGLE_ENABLE_D3D11=1;ANGLE_ENABLE_ESSL=1;ANGLE_ENABLE_GLSL=1;ANGLE_ENABLE_HLSL=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>$(ProjectDir)compat;$(ProjectDir)..\depends\angle\include;$(ProjectDir)..\depends\angle\src;$(ProjectDir)..\depends\angle\src\common\third_party\base;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <LanguageStandard>stdcpp14</LanguageStandard>
       <PrecompiledHeaderFile>anglepch.h</PrecompiledHeaderFile>
-      <DisableSpecificWarnings>4200;4267;4305</DisableSpecificWarnings>
+      <DisableSpecificWarnings>4200;4244;4267;4305</DisableSpecificWarnings>
       <ForcedIncludeFiles>anglepch.h</ForcedIncludeFiles>
     </ClCompile>
     <Link>
@@ -124,9 +123,8 @@
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_CRT_SECURE_NO_DEPRECATE;NOMINMAX;ANGLE_IS_64_BIT_CPU;LIBANGLE_IMPLEMENTATION;ANGLE_EXPORT=;ANGLE_UTIL_EXPORT=;EGLAPI=;GL_APICALL=;GL_API=;GL_GLES_PROTOTYPES=1;EGL_EGL_PROTOTYPES=1;GL_GLEXT_PROTOTYPES=1;EGL_EGLEXT_PROTOTYPES=1;ANGLE_ENABLE_D3D11=1;ANGLE_ENABLE_ESSL=1;ANGLE_ENABLE_GLSL=1;ANGLE_ENABLE_HLSL=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>$(ProjectDir)compat;$(ProjectDir)..\depends\angle\include;$(ProjectDir)..\depends\angle\src;$(ProjectDir)..\depends\angle\src\common\third_party\base;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <LanguageStandard>stdcpp14</LanguageStandard>
       <PrecompiledHeaderFile>anglepch.h</PrecompiledHeaderFile>
-      <DisableSpecificWarnings>4200;4267;4305</DisableSpecificWarnings>
+      <DisableSpecificWarnings>4200;4244;4267;4305</DisableSpecificWarnings>
       <ForcedIncludeFiles>anglepch.h</ForcedIncludeFiles>
     </ClCompile>
     <Link>
@@ -148,9 +146,8 @@
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_CRT_SECURE_NO_DEPRECATE;NOMINMAX;ANGLE_IS_32_BIT_CPU;LIBANGLE_IMPLEMENTATION;ANGLE_EXPORT=;ANGLE_UTIL_EXPORT=;EGLAPI=;GL_APICALL=;GL_API=;GL_GLES_PROTOTYPES=1;EGL_EGL_PROTOTYPES=1;GL_GLEXT_PROTOTYPES=1;EGL_EGLEXT_PROTOTYPES=1;ANGLE_ENABLE_D3D11=1;ANGLE_ENABLE_ESSL=1;ANGLE_ENABLE_GLSL=1;ANGLE_ENABLE_HLSL=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>$(ProjectDir)compat;$(ProjectDir)..\depends\angle\include;$(ProjectDir)..\depends\angle\src;$(ProjectDir)..\depends\angle\src\common\third_party\base;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <LanguageStandard>stdcpp14</LanguageStandard>
       <PrecompiledHeaderFile>anglepch.h</PrecompiledHeaderFile>
-      <DisableSpecificWarnings>4200;4267;4305</DisableSpecificWarnings>
+      <DisableSpecificWarnings>4200;4244;4267;4305</DisableSpecificWarnings>
       <ForcedIncludeFiles>anglepch.h</ForcedIncludeFiles>
     </ClCompile>
     <Link>
@@ -174,9 +171,8 @@
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_CRT_SECURE_NO_DEPRECATE;NOMINMAX;ANGLE_IS_64_BIT_CPU;LIBANGLE_IMPLEMENTATION;ANGLE_EXPORT=;ANGLE_UTIL_EXPORT=;EGLAPI=;GL_APICALL=;GL_API=;GL_GLES_PROTOTYPES=1;EGL_EGL_PROTOTYPES=1;GL_GLEXT_PROTOTYPES=1;EGL_EGLEXT_PROTOTYPES=1;ANGLE_ENABLE_D3D11=1;ANGLE_ENABLE_ESSL=1;ANGLE_ENABLE_GLSL=1;ANGLE_ENABLE_HLSL=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>$(ProjectDir)compat;$(ProjectDir)..\depends\angle\include;$(ProjectDir)..\depends\angle\src;$(ProjectDir)..\depends\angle\src\common\third_party\base;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <LanguageStandard>stdcpp14</LanguageStandard>
       <PrecompiledHeaderFile>anglepch.h</PrecompiledHeaderFile>
-      <DisableSpecificWarnings>4200;4267;4305</DisableSpecificWarnings>
+      <DisableSpecificWarnings>4200;4244;4267;4305</DisableSpecificWarnings>
       <ForcedIncludeFiles>anglepch.h</ForcedIncludeFiles>
     </ClCompile>
     <Link>

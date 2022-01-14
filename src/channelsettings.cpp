@@ -910,7 +910,7 @@ bool channelsettings::OnClick(int controlId)
 			break;
 
 		case CONTROL_BUTTON_CHANNELICON:
-			kodi::gui::dialogs::FileBrowser::ShowAndGetImage("local|network|pictures", kodi::GetLocalizedString(30406), m_channelprops.logourl);
+			kodi::gui::dialogs::FileBrowser::ShowAndGetImage("local|network|pictures", kodi::addon::GetLocalizedString(30406), m_channelprops.logourl);
 			m_image_channelicon->SetFileName(m_channelprops.logourl, false);
 			return true;
 

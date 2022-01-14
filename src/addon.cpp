@@ -255,7 +255,7 @@ _result addon::handle_stdexception(char const* function, std::exception const& e
 template<typename... _args>
 void addon::log_debug(_args&&... args)
 {
-	log_message(AddonLog::ADDON_LOG_DEBUG, std::forward<_args>(args)...);
+	log_message(ADDON_LOG::ADDON_LOG_DEBUG, std::forward<_args>(args)...);
 }
 
 //---------------------------------------------------------------------------
@@ -270,7 +270,7 @@ void addon::log_debug(_args&&... args)
 template<typename... _args>
 void addon::log_error(_args&&... args)
 {
-	log_message(AddonLog::ADDON_LOG_ERROR, std::forward<_args>(args)...);
+	log_message(ADDON_LOG::ADDON_LOG_ERROR, std::forward<_args>(args)...);
 }
 
 //---------------------------------------------------------------------------
@@ -285,7 +285,7 @@ void addon::log_error(_args&&... args)
 template<typename... _args>
 void addon::log_info(_args&&... args)
 {
-	log_message(AddonLog::ADDON_LOG_INFO, std::forward<_args>(args)...);
+	log_message(ADDON_LOG::ADDON_LOG_INFO, std::forward<_args>(args)...);
 }
 
 //---------------------------------------------------------------------------
@@ -298,7 +298,7 @@ void addon::log_info(_args&&... args)
 //	args	- Variadic argument list
 
 template<typename... _args>
-void addon::log_message(AddonLog level, _args&&... args)
+void addon::log_message(ADDON_LOG level, _args&&... args)
 {
 	std::ostringstream stream;
 	int unpack[] = { 0, (static_cast<void>(stream << args), 0) ... };
@@ -307,7 +307,7 @@ void addon::log_message(AddonLog level, _args&&... args)
 	kodi::Log(level, stream.str().c_str());
 
 	// Write ADDON_LOG_ERROR level messages to an appropriate secondary log mechanism
-	if(level == AddonLog::ADDON_LOG_ERROR) {
+	if(level == ADDON_LOG::ADDON_LOG_ERROR) {
 
 #if defined(_WINDOWS) || defined(WINAPI_FAMILY)
 		std::string message = "ERROR: " + stream.str() + "\r\n";
@@ -332,7 +332,7 @@ void addon::log_message(AddonLog level, _args&&... args)
 template<typename... _args>
 void addon::log_warning(_args&&... args)
 {
-	log_message(AddonLog::ADDON_LOG_WARNING, std::forward<_args>(args)...);
+	log_message(ADDON_LOG::ADDON_LOG_WARNING, std::forward<_args>(args)...);
 }
 
 //---------------------------------------------------------------------------
@@ -352,7 +352,7 @@ void addon::menuhook_clearchannels(void)
 
 		// Clear the channel data from the database and inform the user if successful
 		clear_channels(connectionpool::handle(m_connpool));
-		kodi::gui::dialogs::OK::ShowAndGetInput(kodi::GetLocalizedString(30402), "Channel data successfully cleared");
+		kodi::gui::dialogs::OK::ShowAndGetInput(kodi::addon::GetLocalizedString(30402), "Channel data successfully cleared");
 
 		TriggerChannelGroupsUpdate();					// Trigger a channel group update in Kodi
 	}
@@ -361,7 +361,7 @@ void addon::menuhook_clearchannels(void)
 
 		// Log the error, inform the user that the operation failed, and re-throw the exception with this function name
 		handle_stdexception(__func__, ex);
-		kodi::gui::dialogs::OK::ShowAndGetInput(kodi::GetLocalizedString(30402), "An error occurred clearing the channel data:", "", ex.what());
+		kodi::gui::dialogs::OK::ShowAndGetInput(kodi::addon::GetLocalizedString(30402), "An error occurred clearing the channel data:", "", ex.what());
 		throw string_exception(__func__, ": ", ex.what());
 	}
 
@@ -382,7 +382,7 @@ void addon::menuhook_exportchannels(void)
 	std::string						folderpath;				// Export folder path
 
 	// Prompt the user to locate the folder where the .json file will be exported ...
-	if(kodi::gui::dialogs::FileBrowser::ShowAndGetDirectory("local|network|removable", kodi::GetLocalizedString(30403), folderpath, true)) {
+	if(kodi::gui::dialogs::FileBrowser::ShowAndGetDirectory("local|network|removable", kodi::addon::GetLocalizedString(30403), folderpath, true)) {
 
 		try {
 
@@ -419,14 +419,14 @@ void addon::menuhook_exportchannels(void)
 				throw string_exception("short write occurred generating file ", filepath.c_str());
 
 			// Inform the user that the operation was successful
-			kodi::gui::dialogs::OK::ShowAndGetInput(kodi::GetLocalizedString(30401), "Channels successfully exported to:", "", filepath.c_str());
+			kodi::gui::dialogs::OK::ShowAndGetInput(kodi::addon::GetLocalizedString(30401), "Channels successfully exported to:", "", filepath.c_str());
 		}
 
 		catch(std::exception& ex) {
 
 			// Log the error, inform the user that the operation failed, and re-throw the exception with this function name
 			handle_stdexception(__func__, ex);
-			kodi::gui::dialogs::OK::ShowAndGetInput(kodi::GetLocalizedString(30401), "An error occurred exporting the channel data:", "", ex.what());
+			kodi::gui::dialogs::OK::ShowAndGetInput(kodi::addon::GetLocalizedString(30401), "An error occurred exporting the channel data:", "", ex.what());
 			throw string_exception(__func__, ": ", ex.what());
 		}
 		
@@ -449,7 +449,7 @@ void addon::menuhook_importchannels(void)
 	std::string						json;					// Imported JSON data
 
 	// Prompt the user to locate the .json file to be imported ...
-	if(kodi::gui::dialogs::FileBrowser::ShowAndGetFile("local|network|removable", "*.json", kodi::GetLocalizedString(30404), filepath)) {
+	if(kodi::gui::dialogs::FileBrowser::ShowAndGetFile("local|network|removable", "*.json", kodi::addon::GetLocalizedString(30404), filepath)) {
 
 		try {
 
@@ -478,7 +478,7 @@ void addon::menuhook_importchannels(void)
 			if(json.length()) import_channels(connectionpool::handle(m_connpool), json.c_str());
 
 			// Inform the user that the operation was successful
-			kodi::gui::dialogs::OK::ShowAndGetInput(kodi::GetLocalizedString(30400), "Channels successfully imported from:", "", filepath.c_str());
+			kodi::gui::dialogs::OK::ShowAndGetInput(kodi::addon::GetLocalizedString(30400), "Channels successfully imported from:", "", filepath.c_str());
 
 			TriggerChannelGroupsUpdate();					// Trigger a channel group update in Kodi
 		}
@@ -487,7 +487,7 @@ void addon::menuhook_importchannels(void)
 
 			// Log the error, inform the user that the operation failed, and re-throw the exception with this function name
 			handle_stdexception(__func__, ex);
-			kodi::gui::dialogs::OK::ShowAndGetInput(kodi::GetLocalizedString(30400), "An error occurred importing the channel data:", "", ex.what());
+			kodi::gui::dialogs::OK::ShowAndGetInput(kodi::addon::GetLocalizedString(30400), "An error occurred importing the channel data:", "", ex.what());
 			throw string_exception(__func__, ": ", ex.what());
 		}
 
@@ -559,26 +559,26 @@ ADDON_STATUS addon::Create(void)
 			}
 
 			// Load the device settings
-			m_settings.device_connection = kodi::GetSettingEnum("device_connection", device_connection::usb);
-			m_settings.device_connection_usb_index = kodi::GetSettingInt("device_connection_usb_index", 0);
-			m_settings.device_connection_tcp_host = kodi::GetSettingString("device_connection_tcp_host");
-			m_settings.device_connection_tcp_port = kodi::GetSettingInt("device_connection_tcp_port", 1234);
-			m_settings.device_sample_rate = kodi::GetSettingInt("device_sample_rate", (1600 KHz));
-			m_settings.device_frequency_correction = kodi::GetSettingInt("device_frequency_correction", 0);
+			m_settings.device_connection = kodi::addon::GetSettingEnum("device_connection", device_connection::usb);
+			m_settings.device_connection_usb_index = kodi::addon::GetSettingInt("device_connection_usb_index", 0);
+			m_settings.device_connection_tcp_host = kodi::addon::GetSettingString("device_connection_tcp_host");
+			m_settings.device_connection_tcp_port = kodi::addon::GetSettingInt("device_connection_tcp_port", 1234);
+			m_settings.device_sample_rate = kodi::addon::GetSettingInt("device_sample_rate", (1600 KHz));
+			m_settings.device_frequency_correction = kodi::addon::GetSettingInt("device_frequency_correction", 0);
 
 			// Load the Interface settings
-			m_settings.interface_prepend_channel_numbers = kodi::GetSettingBoolean("interface_prepend_channel_numbers", false);
+			m_settings.interface_prepend_channel_numbers = kodi::addon::GetSettingBoolean("interface_prepend_channel_numbers", false);
 
 			// Load the FM Radio settings
-			m_settings.fmradio_enable_rds = kodi::GetSettingBoolean("fmradio_enable_rds", true);
-			m_settings.fmradio_rds_standard = kodi::GetSettingEnum("fmradio_rds_standard", rds_standard::automatic);
-			m_settings.fmradio_downsample_quality = kodi::GetSettingEnum("fmradio_downsample_quality", downsample_quality::standard);
-			m_settings.fmradio_output_samplerate = kodi::GetSettingInt("fmradio_output_samplerate", 48000);
-			m_settings.fmradio_output_gain = kodi::GetSettingFloat("fmradio_output_gain", -3.0f);
+			m_settings.fmradio_enable_rds = kodi::addon::GetSettingBoolean("fmradio_enable_rds", true);
+			m_settings.fmradio_rds_standard = kodi::addon::GetSettingEnum("fmradio_rds_standard", rds_standard::automatic);
+			m_settings.fmradio_downsample_quality = kodi::addon::GetSettingEnum("fmradio_downsample_quality", downsample_quality::standard);
+			m_settings.fmradio_output_samplerate = kodi::addon::GetSettingInt("fmradio_output_samplerate", 48000);
+			m_settings.fmradio_output_gain = kodi::addon::GetSettingFloat("fmradio_output_gain", -3.0f);
 
 			// Load the Weather Radio settings
-			m_settings.wxradio_output_samplerate = kodi::GetSettingInt("wxradio_output_samplerate", 48000);
-			m_settings.wxradio_output_gain = kodi::GetSettingFloat("wxradio_output_gain", -3.0f);
+			m_settings.wxradio_output_samplerate = kodi::addon::GetSettingInt("wxradio_output_samplerate", 48000);
+			m_settings.wxradio_output_gain = kodi::addon::GetSettingFloat("wxradio_output_gain", -3.0f);
 
 			// Log the setting values; these are for diagnostic purposes just use the raw values
 			log_info(__func__, ": m_settings.device_connection                 = ", static_cast<int>(m_settings.device_connection));
@@ -672,7 +672,7 @@ void addon::Destroy(void) noexcept
 // Arguments:
 //
 
-ADDON_STATUS addon::SetSetting(std::string const& settingName, kodi::CSettingValue const& settingValue)
+ADDON_STATUS addon::SetSetting(std::string const& settingName, kodi::addon::CSettingValue const& settingValue)
 {
 	std::unique_lock<std::mutex> settings_lock(m_settings_lock);
 
@@ -1448,7 +1448,7 @@ PVR_ERROR addon::OpenDialogChannelAdd(kodi::addon::PVRChannel const& /*channel*/
 
 		// Log the error and inform the user that the operation failed, do not return an error code
 		handle_stdexception(__func__, ex);
-		kodi::gui::dialogs::OK::ShowAndGetInput(kodi::GetLocalizedString(30407), "An error occurred displaying the "
+		kodi::gui::dialogs::OK::ShowAndGetInput(kodi::addon::GetLocalizedString(30407), "An error occurred displaying the "
 			"add channel dialog:", "", ex.what());
 	}
 
@@ -1489,7 +1489,7 @@ PVR_ERROR addon::OpenDialogChannelSettings(kodi::addon::PVRChannel const& channe
 	if(m_pvrstream) {
 
 		// TODO: This message is terrible
-		kodi::gui::dialogs::OK::ShowAndGetInput(kodi::GetLocalizedString(30405), "Modifying PVR Radio channel settings requires "
+		kodi::gui::dialogs::OK::ShowAndGetInput(kodi::addon::GetLocalizedString(30405), "Modifying PVR Radio channel settings requires "
 			"exclusive access to the connected RTL-SDR tuner device.", "", "Active playback of PVR Radio streams must be stopped before continuing.");
 
 		return PVR_ERROR::PVR_ERROR_NO_ERROR;
@@ -1526,7 +1526,7 @@ PVR_ERROR addon::OpenDialogChannelSettings(kodi::addon::PVRChannel const& channe
 
 		// Log the error and inform the user that the operation failed, do not return an error code
 		handle_stdexception(__func__, ex);
-		kodi::gui::dialogs::OK::ShowAndGetInput(kodi::GetLocalizedString(30407), "An error occurred displaying the "
+		kodi::gui::dialogs::OK::ShowAndGetInput(kodi::addon::GetLocalizedString(30407), "An error occurred displaying the "
 			"channel settings dialog:", "", ex.what());
 	}
 

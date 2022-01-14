@@ -45,7 +45,7 @@
 // shut down while a render control is active; it's calling Stop() after the
 // object has been destroyed; just take Stop() out for now, I don't need it
 
-class ATTRIBUTE_HIDDEN renderingcontrol : public kodi::gui::CAddonGUIControlBase
+class ATTR_DLL_LOCAL renderingcontrol : public kodi::gui::CAddonGUIControlBase
 {
 public:
 

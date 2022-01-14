@@ -52,7 +52,7 @@ using namespace kodi::gui::controls;
 //
 // Implements the "Channel Settings" dialog
 
-class ATTRIBUTE_HIDDEN channelsettings : public kodi::gui::CWindow
+class ATTR_DLL_LOCAL channelsettings : public kodi::gui::CWindow
 {
 public:
 
