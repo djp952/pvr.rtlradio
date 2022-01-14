@@ -22,7 +22,7 @@
     <ProjectGuid>{D7D45A72-202E-470A-8020-1826DFF174E9}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>rtl_tcp</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0.17763.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.18362.0</WindowsTargetPlatformVersion>
     <ProjectName>rtl_tcp</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
