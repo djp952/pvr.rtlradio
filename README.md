@@ -17,8 +17,8 @@ Wideband FM Digital Signal Processing provided by [__CuteSDR__](https://sourcefo
 * Windows 10 x64 20H2 (19042) or later   
 * Visual Studio 2022 Community Edition or higher with:    
      * Desktop Development with C++   
-     * Windows 10 SDK (10.0.18362.0)   
-
+     * Windows 10 SDK (10.0.18362.0)
+     * MVSC v142 VS2019 C++ x64/x86 build tools (v14.29)
 * [Windows Subsystem for Linux](https://docs.microsoft.com/en-us/windows/wsl/install-win10) (WSL v1 recommended)   
 * [WSL Ubuntu 18.04 LTS Distro](https://www.microsoft.com/store/productId/9N9TNGVNDL3Q)   
 
