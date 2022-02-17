@@ -1,4 +1,5 @@
-v1.0.1 (2021.09.xx)
+v1.1.0 (2022.03.xx)
+  - Update libusb dependency to v1.0.25
   - Fix bug causing constant RBDS call sign recalculations if Program Identification (PI) code falls into a special case category
   - (rtl_tcp) Reset the RTL-SDR device buffers prior to reading each time a stream is created rather than just once at startup
   - (rtl_tcp) Fix garbled/corrupt output of attached RTL-SDR device information on Windows if driver has not been reconfigured with Zadig
