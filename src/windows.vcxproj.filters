@@ -78,9 +78,6 @@
     <ClInclude Include="..\depends\libusb\src\msvc\config.h">
       <Filter>External Libraries\libusb\Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\depends\libusb\src\libusb\hotplug.h">
-      <Filter>External Libraries\libusb\Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\depends\libusb\src\libusb\libusb.h">
       <Filter>External Libraries\libusb\Header Files</Filter>
     </ClInclude>
@@ -93,19 +90,10 @@
     <ClInclude Include="..\depends\libusb\src\libusb\version_nano.h">
       <Filter>External Libraries\libusb\Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\depends\libusb\src\libusb\os\poll_windows.h">
-      <Filter>External Libraries\libusb\Header Files\os</Filter>
-    </ClInclude>
     <ClInclude Include="..\depends\libusb\src\libusb\os\threads_windows.h">
       <Filter>External Libraries\libusb\Header Files\os</Filter>
     </ClInclude>
     <ClInclude Include="..\depends\libusb\src\libusb\os\windows_common.h">
-      <Filter>External Libraries\libusb\Header Files\os</Filter>
-    </ClInclude>
-    <ClInclude Include="..\depends\libusb\src\libusb\os\windows_nt_common.h">
-      <Filter>External Libraries\libusb\Header Files\os</Filter>
-    </ClInclude>
-    <ClInclude Include="..\depends\libusb\src\libusb\os\windows_nt_shared_types.h">
       <Filter>External Libraries\libusb\Header Files\os</Filter>
     </ClInclude>
     <ClInclude Include="..\depends\libusb\src\libusb\os\windows_usbdk.h">
@@ -231,6 +219,9 @@
     <ClInclude Include="channeladd.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\depends\libusb\src\libusb\os\events_windows.h">
+      <Filter>External Libraries\libusb\Header Files\os</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -254,13 +245,7 @@
     <ClCompile Include="..\depends\libusb\src\libusb\sync.c">
       <Filter>External Libraries\libusb\Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\depends\libusb\src\libusb\os\poll_windows.c">
-      <Filter>External Libraries\libusb\Source Files\os</Filter>
-    </ClCompile>
     <ClCompile Include="..\depends\libusb\src\libusb\os\threads_windows.c">
-      <Filter>External Libraries\libusb\Source Files\os</Filter>
-    </ClCompile>
-    <ClCompile Include="..\depends\libusb\src\libusb\os\windows_nt_common.c">
       <Filter>External Libraries\libusb\Source Files\os</Filter>
     </ClCompile>
     <ClCompile Include="..\depends\libusb\src\libusb\os\windows_usbdk.c">
@@ -358,6 +343,12 @@
     </ClCompile>
     <ClCompile Include="channeladd.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\libusb\src\libusb\os\events_windows.c">
+      <Filter>External Libraries\libusb\Source Files\os</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\libusb\src\libusb\os\windows_common.c">
+      <Filter>External Libraries\libusb\Source Files\os</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
