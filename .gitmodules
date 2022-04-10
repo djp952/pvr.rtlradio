@@ -10,6 +10,9 @@
 [submodule "libusb"]
 	path = depends/libusb
 	url = https://github.com/djp952/prebuilt-libusb.git
+[submodule "libusb-jni"]
+	path = depends/libusb-jni
+	url = https://github.com/djp952/prebuilt-libusb-jni
 [submodule "rapidjson"]
 	path = depends/rapidjson
 	url = https://github.com/Tencent/rapidjson.git
