@@ -29,6 +29,11 @@
 #include "libusb_exception.h"
 #include "string_exception.h"
 
+#ifdef __ANDROID__
+#include <libusb.h>
+#include "kodi/platform/android/System.h"
+#endif
+
 #pragma warning(push, 4)
 
 // usbdevice::DEFAULT_DEVICE_INDEX (static)
@@ -49,6 +54,11 @@ usbdevice::usbdevice(uint32_t index)
 	char		product[256] = { '\0' };			// Product string
 	char		serialnumber[256] = { '\0' };		// Serial number string
 
+#ifdef __ANDROID__
+	kodi::platform::CInterfaceAndroidSystem system;
+	libusb_set_option(nullptr, LIBUSB_OPTION_ANDROID_JNIENV, system.GetJNIEnv());
+#endif
+	
 	// Make sure that the specified index is going to correspond with an actual device
 	uint32_t devicecount = rtlsdr_get_device_count();
 	if(index >= devicecount) throw string_exception(__func__, ": invalid RTL-SDR device index");

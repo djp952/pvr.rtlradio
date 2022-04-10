@@ -29,6 +29,13 @@ LOCAL_MODULE := libusb-prebuilt
 LOCAL_SRC_FILES := depends/libusb/$(TARGET_ABI)/lib/libusb-1.0.a
 include $(PREBUILT_STATIC_LIBRARY)
 
+# libusb-jni
+#
+include $(CLEAR_VARS)
+LOCAL_MODULE := libusb-jni-prebuilt
+LOCAL_SRC_FILES := depends/libusb-jni/$(TARGET_ABI)/lib/libusb-1.0.a
+include $(PREBUILT_STATIC_LIBRARY)
+
 # librtlradio
 #
 include $(CLEAR_VARS)
@@ -40,7 +47,7 @@ LOCAL_C_INCLUDES += \
 	depends/xbmc/xbmc/linux \
 	depends/xbmc/xbmc/addons/kodi-dev-kit/include \
 	depends/xbmc/xbmc/cores/VideoPlayer/Interface/Addon \
-	depends/libusb/$(TARGET_ABI)/include \
+	depends/libusb-jni/$(TARGET_ABI)/include \
 	depends/rapidjson/include \
 	depends/rtl-sdr/include \
 	depends/sqlite \
@@ -65,7 +72,7 @@ LOCAL_CPPFLAGS += \
 	-Wno-unknown-pragmas
 	
 LOCAL_STATIC_LIBRARIES += \
-	libusb-prebuilt
+	libusb-jni-prebuilt
 
 LOCAL_LDLIBS += \
 	-llog \
