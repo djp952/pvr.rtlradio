@@ -1,4 +1,4 @@
-v19.1.0 (2022.04.xx)
+v1.1.0 (2022.04.xx)
   - Update libusb dependency to v1.0.25
   - Update rtl-sdr dependency to 20220119
   - Update SQLite database engine to v3.38.2
