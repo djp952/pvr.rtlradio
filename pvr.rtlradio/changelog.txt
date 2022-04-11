@@ -2,6 +2,7 @@ v20.1.0 (2022.04.xx)
   - Update libusb dependency to v1.0.25
   - Update rtl-sdr dependency to 20220119
   - Update SQLite database engine to v3.38.2
+  - Capture the BACKSPACE keypress in the Add Channel dialog to behave as a BACKSPACE rather than 'Previous Dialog'
   - (Android) Add support for locally attached USB RTL-SDR devices
   - Fix bug causing constant RBDS call sign recalculations if Program Identification (PI) code falls into a special case category
   - (rtl_tcp) Reset the RTL-SDR device buffers prior to reading each time a stream is created rather than just once at startup
