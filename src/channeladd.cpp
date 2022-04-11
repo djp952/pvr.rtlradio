@@ -309,6 +309,14 @@ bool channeladd::OnAction(ADDON_ACTION actionId)
 		handled = true;
 	}
 
+	// ADDON_ACTION_NAV_BACK --> Backspace
+	//
+	else if(actionId == ADDON_ACTION_NAV_BACK) {
+
+		on_backspace();
+		handled = true;
+	}
+
 	// Skip actions that we didn't specifically handle (like mouse events)
 	if(handled) {
 
@@ -321,7 +329,7 @@ bool channeladd::OnAction(ADDON_ACTION actionId)
 		m_button_add->SetEnabled(hasfrequency);
 	}
 
-	return (handled) ? true : kodi::gui::CWindow::OnAction(actionId);;
+	return (handled) ? true : kodi::gui::CWindow::OnAction(actionId);
 }
 
 //---------------------------------------------------------------------------
