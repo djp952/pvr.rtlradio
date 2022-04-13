@@ -22,6 +22,20 @@
 
 LOCAL_PATH := $(call my-dir)
 
+# libfaad-hdc
+#
+include $(CLEAR_VARS)
+LOCAL_MODULE := libfaad-hdc-prebuilt
+LOCAL_SRC_FILES := depends/faad2-hdc/$(TARGET_ABI)/lib/libfaad_hdc.a
+include $(PREBUILT_STATIC_LIBRARY)
+
+# libfftw
+#
+include $(CLEAR_VARS)
+LOCAL_MODULE := libfftw-prebuilt
+LOCAL_SRC_FILES := depends/fftw/$(TARGET_ABI)/lib/libfftw3f.a
+include $(PREBUILT_STATIC_LIBRARY)
+
 # libusb
 #
 include $(CLEAR_VARS)
@@ -47,6 +61,8 @@ LOCAL_C_INCLUDES += \
 	depends/xbmc/xbmc/linux \
 	depends/xbmc/xbmc/addons/kodi-dev-kit/include \
 	depends/xbmc/xbmc/cores/VideoPlayer/Interface/Addon \
+	depends/faad-hdc/$(TARGET_ABI)/include \
+	depends/fftw/$(TARGET_ABI)/include \
 	depends/libusb-jni/$(TARGET_ABI)/include \
 	depends/rapidjson/include \
 	depends/rtl-sdr/include \
@@ -71,45 +87,64 @@ LOCAL_CPPFLAGS += \
 	-Wno-unknown-pragmas
 	
 LOCAL_STATIC_LIBRARIES += \
+	libfaad-hdc-prebuilt \
+	libfftw-prebuilt \
 	libusb-jni-prebuilt
 
 LOCAL_LDLIBS += \
 	-llog \
-    -lGLESv3
+	-lm \
+    	-lGLESv3
 
 LOCAL_LDFLAGS += \
 	-Wl,--version-script=exportlist/exportlist.android
 
 LOCAL_SRC_FILES := \
-    depends/rtl-sdr/src/librtlsdr.c \
-    depends/rtl-sdr/src/tuner_e4k.c \
-    depends/rtl-sdr/src/tuner_fc0012.c \
-    depends/rtl-sdr/src/tuner_fc0013.c \
-    depends/rtl-sdr/src/tuner_fc2580.c \
-    depends/rtl-sdr/src/tuner_r82xx.c \
-    depends/sqlite/sqlite3.c \
-    src/fmdsp/demodulator.cpp \
-    src/fmdsp/downconvert.cpp \
-    src/fmdsp/fastfir.cpp \
-    src/fmdsp/fft.cpp \
-    src/fmdsp/fir.cpp \
-    src/fmdsp/fmdemod.cpp \
-    src/fmdsp/fractresampler.cpp \
-    src/fmdsp/iir.cpp \
-    src/fmdsp/wfmdemod.cpp \
-    src/addon.cpp \
-    src/channeladd.cpp \
-    src/channelsettings.cpp \
-    src/database.cpp \
-    src/fmstream.cpp \
-    src/fmmeter.cpp \
-    src/libusb_exception.cpp \
-    src/rdsdecoder.cpp \
-    src/sqlite_exception.cpp \
-    src/uecp.cpp \
-    src/usbdevice.cpp \
-    src/tcpdevice.cpp \
-    src/wxstream.cpp
+	depends/rtl-sdr/src/librtlsdr.c \
+    	depends/rtl-sdr/src/tuner_e4k.c \
+    	depends/rtl-sdr/src/tuner_fc0012.c \
+    	depends/rtl-sdr/src/tuner_fc0013.c \
+	depends/rtl-sdr/src/tuner_fc2580.c \
+	depends/rtl-sdr/src/tuner_r82xx.c \
+	depends/sqlite/sqlite3.c \
+	src/compat/bionic/complex.cpp \
+	src/fmdsp/demodulator.cpp \
+	src/fmdsp/downconvert.cpp \
+	src/fmdsp/fastfir.cpp \
+	src/fmdsp/fft.cpp \
+	src/fmdsp/fir.cpp \
+	src/fmdsp/fmdemod.cpp \
+	src/fmdsp/fractresampler.cpp \
+	src/fmdsp/iir.cpp \
+	src/fmdsp/wfmdemod.cpp \
+	src/hddsp/acquire.c \
+	src/hddsp/conv_dec.c \
+	src/hddsp/decode.c \
+	src/hddsp/firdecim_q15.c \
+	src/hddsp/frame.c \
+	src/hddsp/input.c \
+	src/hddsp/nrsc5.c \
+	src/hddsp/output.c \
+	src/hddsp/pids.c \
+	src/hddsp/rs_decode.c \
+	src/hddsp/rs_init.c \
+	src/hddsp/strndup.c \
+	src/hddsp/sync.c \
+	src/hddsp/unicode.c \
+	src/addon.cpp \
+	src/channeladd.cpp \
+	src/channelsettings.cpp \
+	src/database.cpp \
+	src/fmstream.cpp \
+	src/hdstream.cpp \
+	src/fmmeter.cpp \
+	src/libusb_exception.cpp \
+	src/rdsdecoder.cpp \
+	src/sqlite_exception.cpp \
+	src/uecp.cpp \
+	src/usbdevice.cpp \
+	src/tcpdevice.cpp \
+	src/wxstream.cpp
 
 include $(BUILD_SHARED_LIBRARY)
 

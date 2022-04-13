@@ -42,6 +42,7 @@
 #include "channelsettings.h"
 #include "dbtypes.h"
 #include "fmstream.h"
+#include "hdstream.h"
 #include "string_exception.h"
 #include "sqlite_exception.h"
 #include "tcpdevice.h"
@@ -1601,6 +1602,26 @@ bool addon::OpenLiveStream(kodi::addon::PVRChannel const& channel)
 
 			// Create the FM Radio stream
 			m_pvrstream = fmstream::create(create_device(settings), tunerprops, channelprops, fmprops);
+		}
+
+		// HD Radio
+		//
+		else if(get_channel_type(channelprops) == channeltype::hdradio) {
+
+			// Set up the HD Radio digital signal processor properties
+			struct hdprops hdprops = {};
+
+			// Log information about the stream for diagnostic purposes
+			log_info(__func__, ": Creating hdstream for channel \"", channelprops.name, "\"");
+			log_info(__func__, ": tunerprops.samplerate = ", tunerprops.samplerate, " Hz");
+			log_info(__func__, ": tunerprops.freqcorrection = ", tunerprops.freqcorrection, " PPM");
+			log_info(__func__, ": channelprops.frequency = ", channelprops.frequency, " Hz");
+			log_info(__func__, ": channelprops.subchannel = ", channelprops.subchannel);
+			log_info(__func__, ": channelprops.autogain = ", (channelprops.autogain) ? "true" : "false");
+			log_info(__func__, ": channelprops.manualgain = ", channelprops.manualgain / 10, " dB");
+
+			// Create the HD Radio stream
+			m_pvrstream = hdstream::create(create_device(settings), tunerprops, channelprops, hdprops);
 		}
 
 		// Weather Radio
