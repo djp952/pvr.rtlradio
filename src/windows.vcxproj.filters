@@ -64,6 +64,50 @@
       <UniqueIdentifier>{aaeb06b2-3a1d-49f0-aeaf-4e5f4dd55457}</UniqueIdentifier>
       <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
     </Filter>
+    <Filter Include="External Libraries\fftw">
+      <UniqueIdentifier>{062e2505-825e-4ec1-9550-8004edfa946c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="External Libraries\fftw\Binary Files">
+      <UniqueIdentifier>{13108b92-803c-4707-8433-621c86f914d6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="External Libraries\fftw\Binary Files\Win32">
+      <UniqueIdentifier>{2ca10679-fa95-4c43-9283-c4924690c48a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="External Libraries\fftw\Binary Files\x64">
+      <UniqueIdentifier>{9e159de7-d903-40dc-90e7-811b2f4448d1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\hddsp">
+      <UniqueIdentifier>{6603f615-8c12-4066-8283-064368642231}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\hddsp">
+      <UniqueIdentifier>{c531a1b7-c9d9-4544-88f7-d7c4fb951ae7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="External Libraries\faad2-hdc">
+      <UniqueIdentifier>{c20817e9-0d9a-4a94-b36d-778d77d8f7c9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="External Libraries\faad2-hdc\Header Files">
+      <UniqueIdentifier>{f39c196a-c490-4f67-a39c-e0dadc0fa3d1}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="External Libraries\faad2-hdc\Source Files">
+      <UniqueIdentifier>{d7b18983-a9f4-440f-ab5e-4424d332f530}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="External Libraries\faad2-hdc\Header Files\codebook">
+      <UniqueIdentifier>{44a1e4fc-06f6-4581-89ed-09714ceaf548}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="External Libraries\faad2-hdc\Header Files\compat">
+      <UniqueIdentifier>{358b29bb-ec27-470c-b9f5-b36c067d4dd7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="External Libraries\faad2-hdc\Header Files\compat\faad2-hdc">
+      <UniqueIdentifier>{0a0b9431-e302-461d-910b-590fa69c8c5b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\compat">
+      <UniqueIdentifier>{c72051bd-77e6-4fbe-a07a-b23b94628d39}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\compat\bionic">
+      <UniqueIdentifier>{583fe5f9-9b7e-414b-8d29-daa8f6222f62}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">
@@ -222,6 +266,252 @@
     <ClInclude Include="..\depends\libusb\src\libusb\os\events_windows.h">
       <Filter>External Libraries\libusb\Header Files\os</Filter>
     </ClInclude>
+    <ClInclude Include="hddsp\acquire.h">
+      <Filter>Header Files\hddsp</Filter>
+    </ClInclude>
+    <ClInclude Include="hddsp\bitwriter.h">
+      <Filter>Header Files\hddsp</Filter>
+    </ClInclude>
+    <ClInclude Include="hddsp\conv.h">
+      <Filter>Header Files\hddsp</Filter>
+    </ClInclude>
+    <ClInclude Include="hddsp\conv_gen.h">
+      <Filter>Header Files\hddsp</Filter>
+    </ClInclude>
+    <ClInclude Include="hddsp\conv_neon.h">
+      <Filter>Header Files\hddsp</Filter>
+    </ClInclude>
+    <ClInclude Include="hddsp\conv_sse.h">
+      <Filter>Header Files\hddsp</Filter>
+    </ClInclude>
+    <ClInclude Include="hddsp\decode.h">
+      <Filter>Header Files\hddsp</Filter>
+    </ClInclude>
+    <ClInclude Include="hddsp\defines.h">
+      <Filter>Header Files\hddsp</Filter>
+    </ClInclude>
+    <ClInclude Include="hddsp\firdecim_q15.h">
+      <Filter>Header Files\hddsp</Filter>
+    </ClInclude>
+    <ClInclude Include="hddsp\frame.h">
+      <Filter>Header Files\hddsp</Filter>
+    </ClInclude>
+    <ClInclude Include="hddsp\input.h">
+      <Filter>Header Files\hddsp</Filter>
+    </ClInclude>
+    <ClInclude Include="hddsp\output.h">
+      <Filter>Header Files\hddsp</Filter>
+    </ClInclude>
+    <ClInclude Include="hddsp\pids.h">
+      <Filter>Header Files\hddsp</Filter>
+    </ClInclude>
+    <ClInclude Include="hddsp\private.h">
+      <Filter>Header Files\hddsp</Filter>
+    </ClInclude>
+    <ClInclude Include="hddsp\rs_char.h">
+      <Filter>Header Files\hddsp</Filter>
+    </ClInclude>
+    <ClInclude Include="hddsp\sync.h">
+      <Filter>Header Files\hddsp</Filter>
+    </ClInclude>
+    <ClInclude Include="hddsp\unicode.h">
+      <Filter>Header Files\hddsp</Filter>
+    </ClInclude>
+    <ClInclude Include="hddsp\config.h">
+      <Filter>Header Files\hddsp</Filter>
+    </ClInclude>
+    <ClInclude Include="hddsp\nrsc5.h">
+      <Filter>Header Files\hddsp</Filter>
+    </ClInclude>
+    <ClInclude Include="hdstream.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\depends\faad2-hdc\src\libfaad\codebook\hcb.h">
+      <Filter>External Libraries\faad2-hdc\Header Files\codebook</Filter>
+    </ClInclude>
+    <ClInclude Include="..\depends\faad2-hdc\src\libfaad\codebook\hcb_1.h">
+      <Filter>External Libraries\faad2-hdc\Header Files\codebook</Filter>
+    </ClInclude>
+    <ClInclude Include="..\depends\faad2-hdc\src\libfaad\codebook\hcb_2.h">
+      <Filter>External Libraries\faad2-hdc\Header Files\codebook</Filter>
+    </ClInclude>
+    <ClInclude Include="..\depends\faad2-hdc\src\libfaad\codebook\hcb_3.h">
+      <Filter>External Libraries\faad2-hdc\Header Files\codebook</Filter>
+    </ClInclude>
+    <ClInclude Include="..\depends\faad2-hdc\src\libfaad\codebook\hcb_4.h">
+      <Filter>External Libraries\faad2-hdc\Header Files\codebook</Filter>
+    </ClInclude>
+    <ClInclude Include="..\depends\faad2-hdc\src\libfaad\codebook\hcb_5.h">
+      <Filter>External Libraries\faad2-hdc\Header Files\codebook</Filter>
+    </ClInclude>
+    <ClInclude Include="..\depends\faad2-hdc\src\libfaad\codebook\hcb_6.h">
+      <Filter>External Libraries\faad2-hdc\Header Files\codebook</Filter>
+    </ClInclude>
+    <ClInclude Include="..\depends\faad2-hdc\src\libfaad\codebook\hcb_7.h">
+      <Filter>External Libraries\faad2-hdc\Header Files\codebook</Filter>
+    </ClInclude>
+    <ClInclude Include="..\depends\faad2-hdc\src\libfaad\codebook\hcb_8.h">
+      <Filter>External Libraries\faad2-hdc\Header Files\codebook</Filter>
+    </ClInclude>
+    <ClInclude Include="..\depends\faad2-hdc\src\libfaad\codebook\hcb_9.h">
+      <Filter>External Libraries\faad2-hdc\Header Files\codebook</Filter>
+    </ClInclude>
+    <ClInclude Include="..\depends\faad2-hdc\src\libfaad\codebook\hcb_10.h">
+      <Filter>External Libraries\faad2-hdc\Header Files\codebook</Filter>
+    </ClInclude>
+    <ClInclude Include="..\depends\faad2-hdc\src\libfaad\codebook\hcb_11.h">
+      <Filter>External Libraries\faad2-hdc\Header Files\codebook</Filter>
+    </ClInclude>
+    <ClInclude Include="..\depends\faad2-hdc\src\libfaad\codebook\hcb_sf.h">
+      <Filter>External Libraries\faad2-hdc\Header Files\codebook</Filter>
+    </ClInclude>
+    <ClInclude Include="..\depends\faad2-hdc\src\libfaad\analysis.h">
+      <Filter>External Libraries\faad2-hdc\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\depends\faad2-hdc\src\libfaad\bits.h">
+      <Filter>External Libraries\faad2-hdc\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\depends\faad2-hdc\src\libfaad\cfft.h">
+      <Filter>External Libraries\faad2-hdc\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\depends\faad2-hdc\src\libfaad\cfft_tab.h">
+      <Filter>External Libraries\faad2-hdc\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\depends\faad2-hdc\src\libfaad\common.h">
+      <Filter>External Libraries\faad2-hdc\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\depends\faad2-hdc\src\libfaad\drc.h">
+      <Filter>External Libraries\faad2-hdc\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\depends\faad2-hdc\src\libfaad\drm_dec.h">
+      <Filter>External Libraries\faad2-hdc\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\depends\faad2-hdc\src\libfaad\error.h">
+      <Filter>External Libraries\faad2-hdc\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\depends\faad2-hdc\src\libfaad\filtbank.h">
+      <Filter>External Libraries\faad2-hdc\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\depends\faad2-hdc\src\libfaad\fixed.h">
+      <Filter>External Libraries\faad2-hdc\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\depends\faad2-hdc\src\libfaad\huffman.h">
+      <Filter>External Libraries\faad2-hdc\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\depends\faad2-hdc\src\libfaad\ic_predict.h">
+      <Filter>External Libraries\faad2-hdc\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\depends\faad2-hdc\src\libfaad\iq_table.h">
+      <Filter>External Libraries\faad2-hdc\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\depends\faad2-hdc\src\libfaad\is.h">
+      <Filter>External Libraries\faad2-hdc\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\depends\faad2-hdc\src\libfaad\kbd_win.h">
+      <Filter>External Libraries\faad2-hdc\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\depends\faad2-hdc\src\libfaad\lt_predict.h">
+      <Filter>External Libraries\faad2-hdc\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\depends\faad2-hdc\src\libfaad\mdct.h">
+      <Filter>External Libraries\faad2-hdc\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\depends\faad2-hdc\src\libfaad\mdct_tab.h">
+      <Filter>External Libraries\faad2-hdc\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\depends\faad2-hdc\src\libfaad\mp4.h">
+      <Filter>External Libraries\faad2-hdc\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\depends\faad2-hdc\src\libfaad\ms.h">
+      <Filter>External Libraries\faad2-hdc\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\depends\faad2-hdc\src\libfaad\output.h">
+      <Filter>External Libraries\faad2-hdc\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\depends\faad2-hdc\src\libfaad\pns.h">
+      <Filter>External Libraries\faad2-hdc\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\depends\faad2-hdc\src\libfaad\ps_dec.h">
+      <Filter>External Libraries\faad2-hdc\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\depends\faad2-hdc\src\libfaad\ps_tables.h">
+      <Filter>External Libraries\faad2-hdc\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\depends\faad2-hdc\src\libfaad\pulse.h">
+      <Filter>External Libraries\faad2-hdc\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\depends\faad2-hdc\src\libfaad\rvlc.h">
+      <Filter>External Libraries\faad2-hdc\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\depends\faad2-hdc\src\libfaad\sbr_dct.h">
+      <Filter>External Libraries\faad2-hdc\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\depends\faad2-hdc\src\libfaad\sbr_dec.h">
+      <Filter>External Libraries\faad2-hdc\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\depends\faad2-hdc\src\libfaad\sbr_e_nf.h">
+      <Filter>External Libraries\faad2-hdc\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\depends\faad2-hdc\src\libfaad\sbr_fbt.h">
+      <Filter>External Libraries\faad2-hdc\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\depends\faad2-hdc\src\libfaad\sbr_hfadj.h">
+      <Filter>External Libraries\faad2-hdc\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\depends\faad2-hdc\src\libfaad\sbr_hfgen.h">
+      <Filter>External Libraries\faad2-hdc\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\depends\faad2-hdc\src\libfaad\sbr_huff.h">
+      <Filter>External Libraries\faad2-hdc\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\depends\faad2-hdc\src\libfaad\sbr_noise.h">
+      <Filter>External Libraries\faad2-hdc\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\depends\faad2-hdc\src\libfaad\sbr_qmf.h">
+      <Filter>External Libraries\faad2-hdc\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\depends\faad2-hdc\src\libfaad\sbr_qmf_c.h">
+      <Filter>External Libraries\faad2-hdc\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\depends\faad2-hdc\src\libfaad\sbr_syntax.h">
+      <Filter>External Libraries\faad2-hdc\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\depends\faad2-hdc\src\libfaad\sbr_tf_grid.h">
+      <Filter>External Libraries\faad2-hdc\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\depends\faad2-hdc\src\libfaad\sine_win.h">
+      <Filter>External Libraries\faad2-hdc\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\depends\faad2-hdc\src\libfaad\specrec.h">
+      <Filter>External Libraries\faad2-hdc\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\depends\faad2-hdc\src\libfaad\ssr.h">
+      <Filter>External Libraries\faad2-hdc\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\depends\faad2-hdc\src\libfaad\ssr_fb.h">
+      <Filter>External Libraries\faad2-hdc\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\depends\faad2-hdc\src\libfaad\ssr_ipqf.h">
+      <Filter>External Libraries\faad2-hdc\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\depends\faad2-hdc\src\libfaad\ssr_win.h">
+      <Filter>External Libraries\faad2-hdc\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\depends\faad2-hdc\src\libfaad\structs.h">
+      <Filter>External Libraries\faad2-hdc\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\depends\faad2-hdc\src\libfaad\syntax.h">
+      <Filter>External Libraries\faad2-hdc\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\depends\faad2-hdc\src\libfaad\tns.h">
+      <Filter>External Libraries\faad2-hdc\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="compat\faad2-hdc\win32_ver.h">
+      <Filter>External Libraries\faad2-hdc\Header Files\compat\faad2-hdc</Filter>
+    </ClInclude>
+    <ClInclude Include="endianness.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -350,10 +640,180 @@
     <ClCompile Include="..\depends\libusb\src\libusb\os\windows_common.c">
       <Filter>External Libraries\libusb\Source Files\os</Filter>
     </ClCompile>
+    <ClCompile Include="hddsp\acquire.c">
+      <Filter>Source Files\hddsp</Filter>
+    </ClCompile>
+    <ClCompile Include="hddsp\conv_dec.c">
+      <Filter>Source Files\hddsp</Filter>
+    </ClCompile>
+    <ClCompile Include="hddsp\decode.c">
+      <Filter>Source Files\hddsp</Filter>
+    </ClCompile>
+    <ClCompile Include="hddsp\firdecim_q15.c">
+      <Filter>Source Files\hddsp</Filter>
+    </ClCompile>
+    <ClCompile Include="hddsp\frame.c">
+      <Filter>Source Files\hddsp</Filter>
+    </ClCompile>
+    <ClCompile Include="hddsp\input.c">
+      <Filter>Source Files\hddsp</Filter>
+    </ClCompile>
+    <ClCompile Include="hddsp\nrsc5.c">
+      <Filter>Source Files\hddsp</Filter>
+    </ClCompile>
+    <ClCompile Include="hddsp\output.c">
+      <Filter>Source Files\hddsp</Filter>
+    </ClCompile>
+    <ClCompile Include="hddsp\pids.c">
+      <Filter>Source Files\hddsp</Filter>
+    </ClCompile>
+    <ClCompile Include="hddsp\rs_decode.c">
+      <Filter>Source Files\hddsp</Filter>
+    </ClCompile>
+    <ClCompile Include="hddsp\rs_init.c">
+      <Filter>Source Files\hddsp</Filter>
+    </ClCompile>
+    <ClCompile Include="hddsp\strndup.c">
+      <Filter>Source Files\hddsp</Filter>
+    </ClCompile>
+    <ClCompile Include="hddsp\sync.c">
+      <Filter>Source Files\hddsp</Filter>
+    </ClCompile>
+    <ClCompile Include="hddsp\unicode.c">
+      <Filter>Source Files\hddsp</Filter>
+    </ClCompile>
+    <ClCompile Include="hdstream.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\faad2-hdc\src\libfaad\bits.c">
+      <Filter>External Libraries\faad2-hdc\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\faad2-hdc\src\libfaad\cfft.c">
+      <Filter>External Libraries\faad2-hdc\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\faad2-hdc\src\libfaad\common.c">
+      <Filter>External Libraries\faad2-hdc\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\faad2-hdc\src\libfaad\decoder.c">
+      <Filter>External Libraries\faad2-hdc\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\faad2-hdc\src\libfaad\drc.c">
+      <Filter>External Libraries\faad2-hdc\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\faad2-hdc\src\libfaad\drm_dec.c">
+      <Filter>External Libraries\faad2-hdc\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\faad2-hdc\src\libfaad\error.c">
+      <Filter>External Libraries\faad2-hdc\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\faad2-hdc\src\libfaad\filtbank.c">
+      <Filter>External Libraries\faad2-hdc\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\faad2-hdc\src\libfaad\hcr.c">
+      <Filter>External Libraries\faad2-hdc\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\faad2-hdc\src\libfaad\huffman.c">
+      <Filter>External Libraries\faad2-hdc\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\faad2-hdc\src\libfaad\ic_predict.c">
+      <Filter>External Libraries\faad2-hdc\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\faad2-hdc\src\libfaad\is.c">
+      <Filter>External Libraries\faad2-hdc\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\faad2-hdc\src\libfaad\lt_predict.c">
+      <Filter>External Libraries\faad2-hdc\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\faad2-hdc\src\libfaad\mdct.c">
+      <Filter>External Libraries\faad2-hdc\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\faad2-hdc\src\libfaad\mp4.c">
+      <Filter>External Libraries\faad2-hdc\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\faad2-hdc\src\libfaad\ms.c">
+      <Filter>External Libraries\faad2-hdc\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\faad2-hdc\src\libfaad\output.c">
+      <Filter>External Libraries\faad2-hdc\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\faad2-hdc\src\libfaad\pns.c">
+      <Filter>External Libraries\faad2-hdc\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\faad2-hdc\src\libfaad\ps_dec.c">
+      <Filter>External Libraries\faad2-hdc\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\faad2-hdc\src\libfaad\ps_syntax.c">
+      <Filter>External Libraries\faad2-hdc\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\faad2-hdc\src\libfaad\pulse.c">
+      <Filter>External Libraries\faad2-hdc\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\faad2-hdc\src\libfaad\rvlc.c">
+      <Filter>External Libraries\faad2-hdc\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\faad2-hdc\src\libfaad\sbr_dct.c">
+      <Filter>External Libraries\faad2-hdc\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\faad2-hdc\src\libfaad\sbr_dec.c">
+      <Filter>External Libraries\faad2-hdc\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\faad2-hdc\src\libfaad\sbr_e_nf.c">
+      <Filter>External Libraries\faad2-hdc\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\faad2-hdc\src\libfaad\sbr_fbt.c">
+      <Filter>External Libraries\faad2-hdc\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\faad2-hdc\src\libfaad\sbr_hfadj.c">
+      <Filter>External Libraries\faad2-hdc\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\faad2-hdc\src\libfaad\sbr_hfgen.c">
+      <Filter>External Libraries\faad2-hdc\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\faad2-hdc\src\libfaad\sbr_huff.c">
+      <Filter>External Libraries\faad2-hdc\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\faad2-hdc\src\libfaad\sbr_qmf.c">
+      <Filter>External Libraries\faad2-hdc\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\faad2-hdc\src\libfaad\sbr_syntax.c">
+      <Filter>External Libraries\faad2-hdc\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\faad2-hdc\src\libfaad\sbr_tf_grid.c">
+      <Filter>External Libraries\faad2-hdc\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\faad2-hdc\src\libfaad\specrec.c">
+      <Filter>External Libraries\faad2-hdc\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\faad2-hdc\src\libfaad\ssr.c">
+      <Filter>External Libraries\faad2-hdc\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\faad2-hdc\src\libfaad\ssr_fb.c">
+      <Filter>External Libraries\faad2-hdc\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\faad2-hdc\src\libfaad\ssr_ipqf.c">
+      <Filter>External Libraries\faad2-hdc\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\faad2-hdc\src\libfaad\syntax.c">
+      <Filter>External Libraries\faad2-hdc\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\depends\faad2-hdc\src\libfaad\tns.c">
+      <Filter>External Libraries\faad2-hdc\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="compat\bionic\complex.cpp">
+      <Filter>Source Files\compat\bionic</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="..\tmp\version\version.rc">
       <Filter>Resource Files</Filter>
     </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <CopyFileToFolders Include="..\depends\fftw\windows-x64\bin\libfftw3f-3.dll">
+      <Filter>External Libraries\fftw\Binary Files\x64</Filter>
+    </CopyFileToFolders>
+    <CopyFileToFolders Include="..\depends\fftw\windows-win32\bin\libfftw3f-3.dll">
+      <Filter>External Libraries\fftw\Binary Files\Win32</Filter>
+    </CopyFileToFolders>
   </ItemGroup>
 </Project>

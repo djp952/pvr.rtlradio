@@ -64,6 +64,12 @@ struct fmprops {
 	float			outputgain;			// Output gain in Decibels
 };
 
+// hdprops
+//
+// Defines properties for the HD Radio digital signal processor
+struct hdprops {
+};
+
 // streamprops
 //
 // Defines stream-specific properties

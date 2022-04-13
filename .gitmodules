@@ -4,6 +4,12 @@
 [submodule "build"]
 	path = depends/build
 	url = https://github.com/djp952/build.git
+[submodule "faad2-hdc"]
+	path = depends/faad2-hdc
+	url = https://github.com/djp952/prebuilt-faad2-hdc.git
+[submodule "fftw"]
+	path = depends/fftw
+	url = https://github.com/djp952/prebuilt-fftw.git
 [submodule "glm"]
 	path = depends/glm
 	url = https://github.com/g-truc/glm.git
