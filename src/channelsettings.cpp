@@ -73,7 +73,8 @@ uint32_t const channelsettings::FMRADIO_BANDWIDTH = (200 KHz);
 // channelsettings::HDRADIO_BANDWIDTH
 //
 // Bandwidth of a Hybrid Digital (HD) FM radio channel
-uint32_t const channelsettings::HDRADIO_BANDWIDTH = (400 KHz);
+// (Actually 400KHz, but for signal analysis use the analog portion)
+uint32_t const channelsettings::HDRADIO_BANDWIDTH = (200 KHz);
 
 // channelsettings::WXRADIO_BANDWIDTH
 //
@@ -667,11 +668,11 @@ channelsettings::channelsettings(std::unique_ptr<rtldevice> device, struct tuner
 	assert(device);
 
 	// Adjust the signal meter bandwidth based on the underlying channel type
-	switch(get_channel_type(channelprops)) {
+	switch(channelprops.modulation) {
 
-		case channeltype::fmradio: bandwidth = FMRADIO_BANDWIDTH; break;
-		case channeltype::hdradio: bandwidth = HDRADIO_BANDWIDTH; break;
-		case channeltype::wxradio: bandwidth = WXRADIO_BANDWIDTH; break;
+		case modulation::fm: bandwidth = FMRADIO_BANDWIDTH; break;
+		case modulation::hd: bandwidth = HDRADIO_BANDWIDTH; break;
+		case modulation::wx: bandwidth = WXRADIO_BANDWIDTH; break;
 	}
 
 	// Create the signal meter instance with the specified device and tuner properties, set for a 500ms callback rate
@@ -968,7 +969,7 @@ bool channelsettings::OnInit(void)
 		// Set the channel frequency in XXX.X MHz or XXX.XXX format
 		char freqstr[128];
 		double frequency = (m_channelprops.frequency / static_cast<double>(100000)) / 10.0;
-		if(get_channel_type(m_channelprops) == channeltype::wxradio) snprintf(freqstr, std::extent<decltype(freqstr)>::value, "%.3f", frequency);
+		if(m_channelprops.modulation == modulation::wx) snprintf(freqstr, std::extent<decltype(freqstr)>::value, "%.3f", frequency);
 		else snprintf(freqstr, std::extent<decltype(freqstr)>::value, "%.1f", frequency);
 		m_edit_frequency->SetText(freqstr);
 

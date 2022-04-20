@@ -164,6 +164,11 @@ void enumerate_channels(sqlite3* instance, enumerate_channels_callback const& ca
 // Enumerates FM Radio channels
 void enumerate_fmradio_channels(sqlite3* instance, enumerate_channels_callback const& callback);
 
+// enumerate_hdradio_channels
+//
+// Enumerates HD Radio channels
+void enumerate_hdradio_channels(sqlite3* instance, enumerate_channels_callback const& callback);
+
 // enumerate_wxradio_channels
 //
 // Enumerates Weather Radio channels
