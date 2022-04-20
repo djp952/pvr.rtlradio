@@ -29,27 +29,28 @@
 
 #pragma warning(push, 4)
 
+// modulation
+//
+// Defines the modulation of a channel
+enum class modulation {
+
+	fm = 0,				// Wideband FM radio
+	hd = 1,				// Hybrid Digital (HD) radio
+	wx = 2,				// VHF Weather radio
+};
+
 // channelprops
 //
 // Defines properties for a radio channel
 struct channelprops {
 
-	uint32_t		frequency;			// Station center frequency
-	uint32_t		subchannel;			// Subchannel (HD Radio only)
-	std::string		name;				// Station name / call sign
-	std::string		logourl;			// Station logo URL
-	bool			autogain;			// Flag indicating if automatic gain should be used
-	int				manualgain;			// Manual gain value as 10*dB (i.e. 32.8dB = 328)
-};
-
-// channeltype
-//
-// Defines the type of a channel
-enum channeltype {
-
-	fmradio			= 0,				// Wideband FM radio
-	hdradio			= 1,				// Hybrid Digital (HD) radio
-	wxradio			= 2,				// VHF Weather radio
+	uint32_t			frequency;		// Center frequency
+	uint32_t			subchannel;		// Subchannel (digital modulations only)
+	enum modulation		modulation;		// Modulation
+	std::string			name;			// Station name / call sign
+	std::string			logourl;		// Station logo URL
+	bool				autogain;		// Flag indicating if automatic gain should be used
+	int					manualgain;		// Manual gain value as 10*dB (i.e. 32.8dB = 328)
 };
 
 // fmprops
@@ -99,23 +100,6 @@ struct wxprops {
 	uint32_t		outputrate;			// Output sample rate in Hertz
 	float			outputgain;			// Output gain in Decibels
 };
-
-// get_channel_type (inline)
-//
-// Determines the channeltype value for a channelprops structure
-inline enum channeltype get_channel_type(struct channelprops const& channelprops)
-{
-	// FM Radio / HD Radio
-	if((channelprops.frequency >= 87500000) && (channelprops.frequency <= 108000000))
-		return (channelprops.subchannel == 0) ? channeltype::fmradio : channeltype::hdradio;
-
-	// Weather Radio
-	else if((channelprops.frequency >= 162400000) && (channelprops.frequency <= 162550000) && (channelprops.subchannel == 0))
-		return channeltype::wxradio;
-
-	// Unknown; assume FM Radio
-	return channeltype::fmradio;
-}
 
 //-----------------------------------------------------------------------------
 

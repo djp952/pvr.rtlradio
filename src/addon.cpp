@@ -1096,7 +1096,7 @@ PVR_ERROR addon::GetCapabilities(kodi::addon::PVRCapabilities& capabilities)
 
 PVR_ERROR addon::GetChannelGroupsAmount(int& amount)
 {
-	amount = 2;				// "FM Radio", "Weather Radio"
+	amount = 3;				// "FM Radio", "HD Radio", "Weather Radio"
 
 	return PVR_ERROR::PVR_ERROR_NO_ERROR;
 }
@@ -1119,6 +1119,7 @@ PVR_ERROR addon::GetChannelGroupMembers(kodi::addon::PVRChannelGroup const& grou
 	// Select the proper enumerator for the channel group
 	std::function<void(sqlite3*, enumerate_channels_callback)> enumerator = nullptr;
 	if(strcmp(group.GetGroupName().c_str(), "FM Radio") == 0) enumerator = enumerate_fmradio_channels;
+	else if(strcmp(group.GetGroupName().c_str(), "HD Radio") == 0) enumerator = enumerate_hdradio_channels;
 	else if(strcmp(group.GetGroupName().c_str(), "Weather Radio") == 0) enumerator = enumerate_wxradio_channels;
 
 	// If no enumerator was selected, there isn't any work to do here
@@ -1162,6 +1163,7 @@ PVR_ERROR addon::GetChannelGroupMembers(kodi::addon::PVRChannelGroup const& grou
 PVR_ERROR addon::GetChannelGroups(bool radio, kodi::addon::PVRChannelGroupsResultSet& results)
 {
 	kodi::addon::PVRChannelGroup	fmradio;			// FM Radio
+	kodi::addon::PVRChannelGroup	hdradio;			// HD Radio
 	kodi::addon::PVRChannelGroup	wxradio;			// Weather Radio
 
 	// The PVR only supports radio channel groups
@@ -1170,6 +1172,10 @@ PVR_ERROR addon::GetChannelGroups(bool radio, kodi::addon::PVRChannelGroupsResul
 	fmradio.SetGroupName("FM Radio");
 	fmradio.SetIsRadio(true);
 	results.Add(fmradio);
+
+	hdradio.SetGroupName("HD Radio");
+	hdradio.SetIsRadio(true);
+	results.Add(hdradio);
 
 	wxradio.SetGroupName("Weather Radio");
 	wxradio.SetIsRadio(true);
@@ -1577,7 +1583,7 @@ bool addon::OpenLiveStream(kodi::addon::PVRChannel const& channel)
 
 		// FM Radio
 		//
-		if(get_channel_type(channelprops) == channeltype::fmradio) {
+		if(channelprops.modulation == modulation::fm) {
 
 			// Set up the FM digital signal processor properties
 			struct fmprops fmprops = {};
@@ -1606,7 +1612,7 @@ bool addon::OpenLiveStream(kodi::addon::PVRChannel const& channel)
 
 		// HD Radio
 		//
-		else if(get_channel_type(channelprops) == channeltype::hdradio) {
+		else if(channelprops.modulation == modulation::hd) {
 
 			// Set up the HD Radio digital signal processor properties
 			struct hdprops hdprops = {};
@@ -1626,7 +1632,7 @@ bool addon::OpenLiveStream(kodi::addon::PVRChannel const& channel)
 
 		// Weather Radio
 		//
-		else if(get_channel_type(channelprops) == channeltype::wxradio) {
+		else if(channelprops.modulation == modulation::wx) {
 
 			// Set up the FM digital signal processor properties
 			struct wxprops wxprops = {};
