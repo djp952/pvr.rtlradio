@@ -59,6 +59,7 @@ public:
 	// Structure used to report the current signal status
 	struct signal_status {
 
+		enum modulation		modulation;			// Channel modulation being analyzed
 		float				power;				// Signal power level in dB
 		float				noise;				// Signal noise level in dB
 		float				snr;				// Signal-to-noise ratio in dB
@@ -87,10 +88,11 @@ public:
 	//
 	// Factory method, creates a new fmmeter instance
 	static std::unique_ptr<fmmeter> create(std::unique_ptr<rtldevice> device, struct tunerprops const& tunerprops,
-		uint32_t frequency, uint32_t bandwidth, uint32_t fftwidth, signal_status_callback const& onstatus, int onstatusrate);
+		uint32_t frequency, enum modulation modulation, uint32_t fftwidth, signal_status_callback const& onstatus,
+		int onstatusrate);
 	static std::unique_ptr<fmmeter> create(std::unique_ptr<rtldevice> device, struct tunerprops const& tunerprops,
-		uint32_t frequency, uint32_t bandwidth, uint32_t fftwidth, signal_status_callback const& onstatus, int onstatusrate, 
-		exception_callback const& onexception);
+		uint32_t frequency, enum modulation modulation, uint32_t fftwidth, signal_status_callback const& onstatus,
+		int onstatusrate, exception_callback const& onexception);
 
 	// get_automatic_gain
 	//
@@ -101,6 +103,11 @@ public:
 	//
 	// Gets the currently set manual gain value
 	int get_manual_gain(void) const;
+
+	// get_modulation
+	//
+	// Gets the currently set modulation type
+	enum modulation get_modulation(void) const;
 
 	// get_valid_manual_gains
 	//
@@ -116,6 +123,11 @@ public:
 	//
 	// Sets the manual gain value
 	void set_manual_gain(int manualgain);
+
+	// set_modulation
+	//
+	// Sets the modulation type
+	void set_modulation(enum modulation modulation);
 
 	// start
 	//
@@ -135,8 +147,8 @@ private:
 	// Instance Constructor
 	//
 	fmmeter(std::unique_ptr<rtldevice> device, struct tunerprops const& tunerprops, uint32_t frequency, 
-		uint32_t bandwidth, uint32_t fftwidth, signal_status_callback const& onstatus, int onstatusrate, 
-		exception_callback const& onexception);
+		enum modulation modulation, uint32_t fftwidth, signal_status_callback const& onstatus,
+		int onstatusrate, exception_callback const& onexception);
 
 	//-----------------------------------------------------------------------
 	// Member Variables
@@ -144,11 +156,11 @@ private:
 	std::unique_ptr<rtldevice>		m_device;				// RTL-SDR device instance
 	struct tunerprops const			m_tunerprops;			// Tuner settings
 	uint32_t const					m_frequency;			// Center frequency
-	uint32_t const					m_bandwidth;			// Channel bandwidth
 	uint32_t const					m_fftwidth;				// FFT bandwidth
 
 	bool							m_autogain = true;		// Automatic gain enabled/disabled
 	int								m_manualgain = 0;		// Current manual gain value
+	std::atomic<enum modulation>	m_modulation;			// Current modulation value
 	std::thread						m_worker;				// Worker thread
 	scalar_condition<bool>			m_stop{ false };		// Condition to stop worker
 	std::atomic<bool>				m_stopped{ false };		// Worker stopped flag

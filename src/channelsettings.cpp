@@ -65,22 +65,6 @@ float const channelsettings::FFT_MAXDB = 4.0f;
 // Minimum decibel level supported by the FFT
 float const channelsettings::FFT_MINDB = -72.0f;
 
-// channelsettings::FMRADIO_BANDWIDTH
-//
-// Bandwidth of an analog FM radio channel
-uint32_t const channelsettings::FMRADIO_BANDWIDTH = (200 KHz);
-
-// channelsettings::HDRADIO_BANDWIDTH
-//
-// Bandwidth of a Hybrid Digital (HD) FM radio channel
-// (Actually 400KHz, but for signal analysis use the analog portion)
-uint32_t const channelsettings::HDRADIO_BANDWIDTH = (200 KHz);
-
-// channelsettings::WXRADIO_BANDWIDTH
-//
-// Bandwidth of a VHF weather radio channel
-uint32_t const channelsettings::WXRADIO_BANDWIDTH = (10 KHz);
-
 // is_platform_opengles (local)
 //
 // Helper function to determine if the platform is full OpenGL or OpenGL ES
@@ -105,7 +89,8 @@ static bool is_platform_opengles(void)
 //	window		- Parent CWindow instance
 //	controlid	- Identifier of the control within the parent CWindow instance
 
-channelsettings::fftcontrol::fftcontrol(kodi::gui::CWindow* window, int controlid) : renderingcontrol(window, controlid)
+channelsettings::fftcontrol::fftcontrol(kodi::gui::CWindow* window, int controlid) : 
+	renderingcontrol(window, controlid), m_modulation(modulation::fm)
 {
 	// Store some handy floating point copies of the width and height for rendering
 	m_widthf = static_cast<GLfloat>(m_width);
@@ -225,9 +210,23 @@ void channelsettings::fftcontrol::render(void)
 		render_line(glm::vec4(1.0f, 1.0f, 1.0f, 0.25f), dbline);
 	}
 
-	// Bandwidth
-	glm::vec2 cutrect[4] = { { m_lowcut, 0.0f }, { m_lowcut, m_heightf }, { m_highcut, 0.0f }, { m_highcut, m_heightf } };
-	render_rect(glm::vec4(1.0f, 1.0f, 1.0f, 0.1f), cutrect);
+	if(m_modulation == modulation::hd) {
+
+		// Lower digital sideband
+		glm::vec2 ldsrect[4] = { { 0.0f, 0.0f }, { 0.0f, m_heightf }, { m_lowcut, 0.0f }, { m_lowcut, m_heightf } };
+		render_rect(glm::vec4(1.0f, 1.0f, 1.0f, 0.1f), ldsrect);
+
+		// Upper digital sideband
+		glm::vec2 udsrect[4] = { { m_highcut, 0.0f }, { m_highcut, m_heightf }, { m_widthf, 0.0f }, { m_widthf, m_heightf } };
+		render_rect(glm::vec4(1.0f, 1.0f, 1.0f, 0.1f), udsrect);
+	}
+
+	else {
+
+		// Bandwidth
+		glm::vec2 cutrect[4] = { { m_lowcut, 0.0f }, { m_lowcut, m_heightf }, { m_highcut, 0.0f }, { m_highcut, m_heightf } };
+		render_rect(glm::vec4(1.0f, 1.0f, 1.0f, 0.1f), cutrect);
+	}
 
 	// Power range
 	glm::vec2 powerrect[4] = { { 0.0f, m_power }, { m_widthf, m_power }, { 0.0f, m_noise }, { m_widthf, m_noise } };
@@ -465,6 +464,9 @@ void channelsettings::fftcontrol::render_triangle(glm::vec4 color, glm::vec2 ver
 
 void channelsettings::fftcontrol::update(struct fmmeter::signal_status const& status)
 {
+	// The current modulation impacts the rendering
+	m_modulation = status.modulation;
+
 	// Power and noise values are supplied as dB and need to be scaled to the viewport
 	m_power = db_to_height(status.power);
 	m_noise = db_to_height(status.noise);
@@ -663,20 +665,10 @@ GLint channelsettings::fftshader::uModelProjMatrix(void) const
 channelsettings::channelsettings(std::unique_ptr<rtldevice> device, struct tunerprops const& tunerprops, struct channelprops const& channelprops) 
 	: kodi::gui::CWindow("channelsettings.xml", "skin.estuary", true), m_channelprops(channelprops)
 {
-	uint32_t				bandwidth = FMRADIO_BANDWIDTH;			// Default to wideband FM radio bandwidth
-
 	assert(device);
 
-	// Adjust the signal meter bandwidth based on the underlying channel type
-	switch(channelprops.modulation) {
-
-		case modulation::fm: bandwidth = FMRADIO_BANDWIDTH; break;
-		case modulation::hd: bandwidth = HDRADIO_BANDWIDTH; break;
-		case modulation::wx: bandwidth = WXRADIO_BANDWIDTH; break;
-	}
-
 	// Create the signal meter instance with the specified device and tuner properties, set for a 500ms callback rate
-	m_signalmeter = fmmeter::create(std::move(device), tunerprops, channelprops.frequency, bandwidth, FFT_BANDWIDTH,
+	m_signalmeter = fmmeter::create(std::move(device), tunerprops, channelprops.frequency, channelprops.modulation, FFT_BANDWIDTH,
 		std::bind(&channelsettings::fm_meter_status, this, std::placeholders::_1), 500, 
 		std::bind(&channelsettings::fm_meter_exception, this, std::placeholders::_1));
 
@@ -992,6 +984,7 @@ bool channelsettings::OnInit(void)
 
 		// Start the signal meter instance
 		m_signalmeter->set_automatic_gain(m_channelprops.autogain);
+		m_signalmeter->set_modulation(m_channelprops.modulation);
 		m_signalmeter->set_manual_gain(m_channelprops.manualgain);
 		m_signalmeter->start(FFT_MAXDB, FFT_MINDB, m_render_signalmeter->height(), m_render_signalmeter->width());
 	}

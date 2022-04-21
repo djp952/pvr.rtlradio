@@ -40,16 +40,16 @@
 //	device			- RTL-SDR device instance
 //	tunerprops		- Tuner device properties
 //  frequency		- Center frequency to be tuned for the channel
-//  bandwidth		- Bandwidth of the channel to be analyzed
+//  modulation		- Modulation of the channel to be analyzed
 //	fftwidth		- Bandwidth of the FFT data to be generated
 //	onstatus		- Signal status callback function
 //	statusrate		- Rate at which the status callback will be invoked (milliseconds)
 //	onexception		- Exception callback function
 
 fmmeter::fmmeter(std::unique_ptr<rtldevice> device, struct tunerprops const& tunerprops, uint32_t frequency,
-	uint32_t bandwidth, uint32_t fftwidth, signal_status_callback const& onstatus, int statusrate, 
+	enum modulation modulation, uint32_t fftwidth, signal_status_callback const& onstatus, int statusrate, 
 	exception_callback const& onexception) : m_device(std::move(device)), m_tunerprops(tunerprops), 
-	m_frequency(frequency), m_bandwidth(bandwidth), m_fftwidth(fftwidth), m_onstatus(onstatus), 
+	m_frequency(frequency), m_modulation(modulation), m_fftwidth(fftwidth), m_onstatus(onstatus), 
 	m_onstatusrate(std::min(statusrate / 10, 10)), m_onexception(onexception)
 {
 	// Set the default frequency, sample rate, and frequency correction offset
@@ -85,16 +85,16 @@ fmmeter::~fmmeter()
 //	device			- RTL-SDR device instance
 //	tunerprops		- Tuner device properties
 //  frequency		- Center frequency to be tuned for the channel
-//  bandwidth		- Bandwidth of the channel to be analyzed
+//  modulation		- Modulation of the channel to be anayzed
 //	fftwidth		- Bandwidth of the FFT data to be generated
 //	onstatus		- Signal status callback function
 //	onstatusrate	- Rate at which the status callback will be invoked (milliseconds)
 
 std::unique_ptr<fmmeter> fmmeter::create(std::unique_ptr<rtldevice> device, struct tunerprops const& tunerprops,
-	uint32_t frequency, uint32_t bandwidth, uint32_t fftwidth, signal_status_callback const& onstatus, int onstatusrate)
+	uint32_t frequency, enum modulation modulation, uint32_t fftwidth, signal_status_callback const& onstatus, int onstatusrate)
 {
 	auto onexception = [](std::exception const&) -> void { /* DO NOTHING */ };
-	return std::unique_ptr<fmmeter>(new fmmeter(std::move(device), tunerprops, frequency, bandwidth, fftwidth, onstatus, onstatusrate, onexception));
+	return std::unique_ptr<fmmeter>(new fmmeter(std::move(device), tunerprops, frequency, modulation, fftwidth, onstatus, onstatusrate, onexception));
 }
 
 //---------------------------------------------------------------------------
@@ -107,16 +107,16 @@ std::unique_ptr<fmmeter> fmmeter::create(std::unique_ptr<rtldevice> device, stru
 //	device			- RTL-SDR device instance
 //	tunerprops		- Tuner device properties
 //  frequency		- Center frequency to be tuned for the channel
-//  bandwidth		- Bandwidth of the channel to be analyzed
+//  modulation		- Modulation of the channel to be anayzed
 //	fftwidth		- Bandwidth of the FFT data to be generated
 //	onstatus		- Signal status callback function
 //	onstatusrate	- Rate at which the status callback will be invoked (milliseconds)
 //	onexception		- Exception callback function
 
 std::unique_ptr<fmmeter> fmmeter::create(std::unique_ptr<rtldevice> device, struct tunerprops const& tunerprops,
-	uint32_t frequency, uint32_t bandwidth, uint32_t fftwidth, signal_status_callback const& onstatus, int onstatusrate, exception_callback const& onexception)
+	uint32_t frequency, enum modulation modulation, uint32_t fftwidth, signal_status_callback const& onstatus, int onstatusrate, exception_callback const& onexception)
 {
-	return std::unique_ptr<fmmeter>(new fmmeter(std::move(device), tunerprops, frequency, bandwidth, fftwidth, onstatus, onstatusrate, onexception));
+	return std::unique_ptr<fmmeter>(new fmmeter(std::move(device), tunerprops, frequency, modulation, fftwidth, onstatus, onstatusrate, onexception));
 }
 
 //---------------------------------------------------------------------------
@@ -145,6 +145,20 @@ bool fmmeter::get_automatic_gain(void) const
 int fmmeter::get_manual_gain(void) const
 {
 	return m_manualgain;
+}
+
+//---------------------------------------------------------------------------
+// fmmeter::get_modulation
+//
+// Gets the currently set modulation type
+//
+// Arguments:
+//
+//	NONE
+
+enum modulation fmmeter::get_modulation(void) const
+{
+	return m_modulation.load();
 }
 
 //---------------------------------------------------------------------------
@@ -190,6 +204,20 @@ void fmmeter::set_automatic_gain(bool autogain)
 void fmmeter::set_manual_gain(int manualgain)
 {
 	m_manualgain = (m_autogain) ? manualgain : m_device->set_gain(manualgain);
+}
+
+//---------------------------------------------------------------------------
+// fmmeter::set_modulation
+//
+// Sets the modulation type of the channel being analyzed
+//
+// Arguments:
+//
+//	modulation		- Modulation type of the channel
+
+void fmmeter::set_modulation(enum modulation modulation)
+{
+	m_modulation.store(modulation);
 }
 
 //---------------------------------------------------------------------------
@@ -245,6 +273,10 @@ void fmmeter::start(TYPEREAL maxdb, TYPEREAL mindb, size_t height, size_t width)
 			// Loop until the worker thread has been signaled to stop
 			while(m_stop.test(false) == true) {
 
+				// The currently set modulation affects how the signal is analyzed
+				enum modulation modulation = m_modulation.load();
+				uint32_t bandwidth = (modulation == modulation::wx) ? 10 KHz : 200 KHz;
+
 				// Read the next block of raw 8-bit I/Q samples from the input device
 				size_t read = 0;
 				while(read < numbytes) read += m_device->read(&buffer[read], numbytes - read);
@@ -299,8 +331,8 @@ void fmmeter::start(TYPEREAL maxdb, TYPEREAL mindb, size_t height, size_t width)
 
 					// Noise = average amplitude of 5Khz below the low cut and 5KHz above the high cut
 					TYPEREAL noise = 0.0;
-					size_t const lowcut = static_cast<size_t>(center - (static_cast<TYPEREAL>(m_bandwidth / 2) * hz));
-					size_t const highcut = static_cast<size_t>(center + (static_cast<TYPEREAL>(m_bandwidth / 2) * hz));
+					size_t const lowcut = static_cast<size_t>(center - (static_cast<TYPEREAL>(bandwidth / 2) * hz));
+					size_t const highcut = static_cast<size_t>(center + (static_cast<TYPEREAL>(bandwidth / 2) * hz));
 					size_t const fivekhz = static_cast<size_t>(hz * 5.0 KHz);
 
 					for(index = (lowcut - fivekhz); index < lowcut; index++) noise += static_cast<TYPEREAL>(fftbuffer[index]);
@@ -318,12 +350,13 @@ void fmmeter::start(TYPEREAL maxdb, TYPEREAL mindb, size_t height, size_t width)
 					// Send all of the calculated information into the status callback
 					struct signal_status status = {};
 
+					status.modulation = modulation;								// Channel modulation
 					status.power = static_cast<float>(avgpower);				// Power in dB
 					status.noise = static_cast<float>(avgnoise);				// Noise in dB
 					status.snr = static_cast<float>(avgpower + -avgnoise);		// SNR in dB
 					status.overload = overload;									// FFT is clipped
 					status.fftbandwidth = m_fftwidth;							// Overall FFT bandwidth
-					status.ffthighcut = (m_bandwidth / 2);						// High cut bandwidth
+					status.ffthighcut = (bandwidth / 2);						// High cut bandwidth
 					status.fftlowcut = -status.ffthighcut;						// Low cut bandwidth
 					status.fftsize = width;										// Length of the FFT graph data
 					status.fftdata = fftbuffer.get();							// FFT graph data

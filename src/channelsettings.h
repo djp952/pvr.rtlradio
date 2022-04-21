@@ -99,21 +99,6 @@ private:
 	// Minimum decibel level supported by the FFT
 	static float const FFT_MINDB;
 
-	// FMRADIO_BANDWIDTH
-	//
-	// Bandwidth of an analog FM radio channel
-	static uint32_t const FMRADIO_BANDWIDTH;
-
-	// HDRADIO_BANDWIDTH
-	//
-	// Bandwidth of a Hybrid Digital (HD) FM radio channel
-	static uint32_t const HDRADIO_BANDWIDTH;
-
-	// WXRADIO_BANDWIDTH
-	//
-	// Bandwidth of a VHF weather radio channel
-	static uint32_t const WXRADIO_BANDWIDTH;
-
 	// Instance Constructor
 	//
 	channelsettings(std::unique_ptr<rtldevice> device, struct tunerprops const& tunerprops, struct channelprops const& channelprops);
@@ -204,6 +189,7 @@ private:
 		glm::mat4				m_modelProjMat;			// Model/Projection matrix
 
 		bool					m_dirty = false;		// Dirty flag
+		enum modulation			m_modulation;			// Current modulation type
 		GLfloat					m_power = 0.0f;			// Power level
 		GLfloat					m_noise = 0.0f;			// Noise level
 		GLfloat					m_lowcut = 0.0f;		// Low cut
