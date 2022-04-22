@@ -49,8 +49,8 @@ int const hdstream::STREAM_ID_AUDIO = 1;
 //	hdprops			- HD Radio digital signal processor properties
 
 hdstream::hdstream(std::unique_ptr<rtldevice> device, struct tunerprops const& tunerprops,
-	struct channelprops const& channelprops, struct hdprops const& /*hdprops*/) :
-	m_device(std::move(device)), m_muxname("")
+	struct channelprops const& channelprops, struct hdprops const& hdprops) :
+	m_device(std::move(device)), m_muxname(""), m_pcmgain(powf(10.0f, hdprops.outputgain / 10.0f))
 {
 	// Initialize the RTL-SDR device instance
 	m_device->set_frequency_correction(tunerprops.freqcorrection);
@@ -199,7 +199,9 @@ DEMUX_PACKET* hdstream::demuxread(std::function<DEMUX_PACKET*(int)> const& alloc
 		packet->iSize = static_cast<int>(audiopacket->count * sizeof(int16_t));
 		packet->duration = duration;
 		packet->dts = packet->pts = m_dts;
-		memcpy(packet->pData, &audiopacket->data[0], audiopacket->count * sizeof(int16_t));
+
+		int16_t* data = reinterpret_cast<int16_t*>(&packet->pData[0]);
+		for(int index = 0; index < audiopacket->count; index++) data[index] = static_cast<int16_t>(audiopacket->data[index] * m_pcmgain);
 	}
 
 	m_dts += duration;

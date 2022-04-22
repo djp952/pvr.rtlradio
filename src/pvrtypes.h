@@ -138,8 +138,13 @@ struct settings {
 
 	// fmradio_output_gain
 	//
-	// Specified the output gain for the FM DSP
+	// Specifies the output gain for the FM DSP
 	float fmradio_output_gain;
+
+	// hdradio_output_gain
+	//
+	// Specifies the output gain for the HD DSP
+	float hdradio_output_gain;
 
 	// wxradio_output_samplerate
 	//

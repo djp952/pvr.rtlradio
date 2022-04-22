@@ -205,6 +205,7 @@ private:
 	nrsc5_t*							m_nrsc5;					// Demoudulator handle
 
 	std::string							m_muxname;					// Generated mux name
+	float								m_pcmgain;					// Output gain
 	double								m_dts{ STREAM_TIME_BASE };	// Current decode time stamp
 
 	// STREAM CONTROL
