@@ -53,7 +53,7 @@ hdstream::hdstream(std::unique_ptr<rtldevice> device, struct tunerprops const& t
 	m_device(std::move(device)), m_muxname(""), m_pcmgain(powf(10.0f, hdprops.outputgain / 10.0f))
 {
 	// Initialize the RTL-SDR device instance
-	m_device->set_frequency_correction(tunerprops.freqcorrection);
+	m_device->set_frequency_correction(tunerprops.freqcorrection + channelprops.freqcorrection);
 	m_device->set_sample_rate(1488375);
 	m_device->set_center_frequency(channelprops.frequency);
 

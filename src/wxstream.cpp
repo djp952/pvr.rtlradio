@@ -66,7 +66,7 @@ wxstream::wxstream(std::unique_ptr<rtldevice> device, struct tunerprops const& t
 		throw string_exception(__func__, ": DSP output sample rate must be set to either 44.1KHz or 48.0KHz");
 
 	// Initialize the RTL-SDR device instance
-	m_device->set_frequency_correction(tunerprops.freqcorrection);
+	m_device->set_frequency_correction(tunerprops.freqcorrection + channelprops.freqcorrection);
 	uint32_t samplerate = m_device->set_sample_rate(tunerprops.samplerate);
 	uint32_t frequency = m_device->set_center_frequency(channelprops.frequency + (samplerate / 4));		// DC offset
 

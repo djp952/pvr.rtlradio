@@ -49,6 +49,8 @@ static const int CONTROL_RENDER_SIGNALMETER		= 206;
 static const int CONTROL_EDIT_METERGAIN			= 207;
 static const int CONTROL_EDIT_METERPOWER		= 208;
 static const int CONTROL_EDIT_METERSNR			= 209;
+static const int CONTROL_SPIN_MODULATION		= 210;
+static const int CONTROL_SLIDER_CORRECTION		= 211;
 
 // channelsettings::FFT_BANDWIDTH
 //
@@ -207,25 +209,25 @@ void channelsettings::fftcontrol::render(void)
 
 		GLfloat y = db_to_height(static_cast<float>(index));
 		glm::vec2 dbline[2] = { { 0.0f, y }, { m_widthf, y } };
-		render_line(glm::vec4(1.0f, 1.0f, 1.0f, 0.25f), dbline);
+		render_line(glm::vec4(1.0f, 1.0f, 1.0f, 0.2f), dbline);
 	}
 
 	if(m_modulation == modulation::hd) {
 
 		// Lower digital sideband
 		glm::vec2 ldsrect[4] = { { 0.0f, 0.0f }, { 0.0f, m_heightf }, { m_lowcut, 0.0f }, { m_lowcut, m_heightf } };
-		render_rect(glm::vec4(1.0f, 1.0f, 1.0f, 0.1f), ldsrect);
+		render_rect(glm::vec4(1.0f, 1.0f, 1.0f, 0.2f), ldsrect);
 
 		// Upper digital sideband
 		glm::vec2 udsrect[4] = { { m_highcut, 0.0f }, { m_highcut, m_heightf }, { m_widthf, 0.0f }, { m_widthf, m_heightf } };
-		render_rect(glm::vec4(1.0f, 1.0f, 1.0f, 0.1f), udsrect);
+		render_rect(glm::vec4(1.0f, 1.0f, 1.0f, 0.2f), udsrect);
 	}
 
 	else {
 
 		// Bandwidth
 		glm::vec2 cutrect[4] = { { m_lowcut, 0.0f }, { m_lowcut, m_heightf }, { m_highcut, 0.0f }, { m_highcut, m_heightf } };
-		render_rect(glm::vec4(1.0f, 1.0f, 1.0f, 0.1f), cutrect);
+		render_rect(glm::vec4(1.0f, 1.0f, 1.0f, 0.2f), cutrect);
 	}
 
 	// Power range
@@ -663,7 +665,7 @@ GLint channelsettings::fftshader::uModelProjMatrix(void) const
 //	channelprops	- Channel properties
 
 channelsettings::channelsettings(std::unique_ptr<rtldevice> device, struct tunerprops const& tunerprops, struct channelprops const& channelprops) 
-	: kodi::gui::CWindow("channelsettings.xml", "skin.estuary", true), m_channelprops(channelprops)
+	: kodi::gui::CWindow("channelsettings.xml", "skin.estuary", true), m_tunerprops(tunerprops), m_channelprops(channelprops)
 {
 	assert(device);
 
@@ -902,6 +904,10 @@ bool channelsettings::OnClick(int controlId)
 			m_channelprops.name = m_edit_channelname->GetText();
 			break;
 
+		case CONTROL_SPIN_MODULATION:
+			m_signalmeter->set_modulation(static_cast<enum modulation>(m_spin_modulation->GetIntValue()));
+			return true;
+
 		case CONTROL_BUTTON_CHANNELICON:
 			kodi::gui::dialogs::FileBrowser::ShowAndGetImage("local|network|pictures", kodi::addon::GetLocalizedString(30406), m_channelprops.logourl);
 			m_image_channelicon->SetFileName(m_channelprops.logourl, false);
@@ -918,6 +924,11 @@ bool channelsettings::OnClick(int controlId)
 			m_channelprops.manualgain = percent_to_gain(static_cast<int>(m_slider_manualgain->GetPercentage()));
 			m_signalmeter->set_manual_gain(m_channelprops.manualgain);
 			update_gain();
+			return true;
+
+		case CONTROL_SLIDER_CORRECTION:
+			m_channelprops.freqcorrection = m_slider_correction->GetIntValue();
+			m_signalmeter->set_frequency_correction(m_tunerprops.freqcorrection + m_channelprops.freqcorrection);
 			return true;
 
 		case CONTROL_BUTTON_OK:
@@ -949,10 +960,12 @@ bool channelsettings::OnInit(void)
 		// Get references to all of the manipulable dialog controls
 		m_edit_frequency = std::unique_ptr<CEdit>(new CEdit(this, CONTROL_EDIT_FREQUENCY));
 		m_edit_channelname = std::unique_ptr<CEdit>(new CEdit(this, CONTROL_EDIT_CHANNELNAME));
+		m_spin_modulation = std::unique_ptr<CSpin>(new CSpin(this, CONTROL_SPIN_MODULATION));
 		m_button_channelicon = std::unique_ptr<CButton>(new CButton(this, CONTROL_BUTTON_CHANNELICON));
 		m_image_channelicon = std::unique_ptr<CImage>(new CImage(this, CONTROL_IMAGE_CHANNELICON));
 		m_radio_autogain = std::unique_ptr<CRadioButton>(new CRadioButton(this, CONTROL_RADIO_AUTOMATICGAIN));
 		m_slider_manualgain = std::unique_ptr<CSettingsSlider>(new CSettingsSlider(this, CONTROL_SLIDER_MANUALGAIN));
+		m_slider_correction = std::unique_ptr<CSettingsSlider>(new CSettingsSlider(this, CONTROL_SLIDER_CORRECTION));
 		m_render_signalmeter = std::unique_ptr<fftcontrol>(new fftcontrol(this, CONTROL_RENDER_SIGNALMETER));
 		m_edit_signalgain = std::unique_ptr<CEdit>(new CEdit(this, CONTROL_EDIT_METERGAIN));
 		m_edit_signalpower = std::unique_ptr<CEdit>(new CEdit(this, CONTROL_EDIT_METERPOWER));
@@ -969,6 +982,13 @@ bool channelsettings::OnInit(void)
 		m_edit_channelname->SetText(m_channelprops.name);
 		m_image_channelicon->SetFileName(m_channelprops.logourl, false);
 
+		// Set the modulation type
+		m_spin_modulation->SetType(kodi::gui::controls::AddonGUISpinControlType::ADDON_SPIN_CONTROL_TYPE_TEXT);
+		m_spin_modulation->AddLabel(kodi::addon::GetLocalizedString(30002), static_cast<int>(modulation::fm));
+		m_spin_modulation->AddLabel(kodi::addon::GetLocalizedString(30003), static_cast<int>(modulation::hd));
+		m_spin_modulation->AddLabel(kodi::addon::GetLocalizedString(30004), static_cast<int>(modulation::wx));
+		m_spin_modulation->SetIntValue(static_cast<int>(m_channelprops.modulation));
+
 		// Adjust the manual gain value to match something that the tuner supports
 		m_channelprops.manualgain = nearest_valid_gain(m_channelprops.manualgain);
 
@@ -978,6 +998,11 @@ bool channelsettings::OnInit(void)
 		m_slider_manualgain->SetPercentage(static_cast<float>(gain_to_percent(m_channelprops.manualgain)));
 		update_gain();
 
+		// Set the frequency correction parameters
+		m_slider_correction->SetIntInterval(1);
+		m_slider_correction->SetIntRange(-41, 40);
+		m_slider_correction->SetIntValue(m_channelprops.freqcorrection);
+
 		// Set the default text for the signal indicators
 		m_edit_signalpower->SetText("N/A");
 		m_edit_signalsnr->SetText("N/A");
@@ -985,6 +1010,7 @@ bool channelsettings::OnInit(void)
 		// Start the signal meter instance
 		m_signalmeter->set_automatic_gain(m_channelprops.autogain);
 		m_signalmeter->set_modulation(m_channelprops.modulation);
+		m_signalmeter->set_frequency_correction(m_tunerprops.freqcorrection + m_channelprops.freqcorrection);
 		m_signalmeter->set_manual_gain(m_channelprops.manualgain);
 		m_signalmeter->start(FFT_MAXDB, FFT_MINDB, m_render_signalmeter->height(), m_render_signalmeter->width());
 	}
