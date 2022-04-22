@@ -153,10 +153,10 @@ void connectionpool::release(sqlite3* handle)
 
 bool add_channel(sqlite3* instance, struct channelprops const& channelprops)
 {
-	// frequency | subchannel | modulation | hidden | name | autogain | manualgain | logourl
-	return execute_non_query(instance, "replace into channel values(?1, ?2, ?3, 0, ?4, ?5, ?6, ?7)",
+	// frequency | subchannel | modulation | hidden | name | autogain | manualgain | freqcorrection | logourl
+	return execute_non_query(instance, "replace into channel values(?1, ?2, ?3, 0, ?4, ?5, ?6, ?7, ?8)",
 		channelprops.frequency, channelprops.subchannel, static_cast<int>(channelprops.modulation), channelprops.name.c_str(),
-		(channelprops.autogain) ? 1 : 0, channelprops.manualgain, channelprops.logourl.c_str()) > 0;
+		(channelprops.autogain) ? 1 : 0, channelprops.manualgain, channelprops.freqcorrection, channelprops.logourl.c_str()) > 0;
 }
 
 //---------------------------------------------------------------------------
@@ -178,6 +178,23 @@ static void bind_parameter(sqlite3_stmt* statement, int& paramindex, char const*
 	if(value == nullptr) result = sqlite3_bind_null(statement, paramindex++);
 	else result = sqlite3_bind_text(statement, paramindex++, value, -1, SQLITE_STATIC);
 
+	if(result != SQLITE_OK) throw sqlite_exception(result);
+}
+
+//---------------------------------------------------------------------------
+// bind_parameter (local)
+//
+// Used by execute_non_query to bind an integer parameter
+//
+// Arguments:
+//
+//	statement		- SQL statement instance
+//	paramindex		- Index of the parameter to bind; will be incremented
+//	value			- Value to bind as the parameter
+
+static void bind_parameter(sqlite3_stmt* statement, int& paramindex, int value)
+{
+	int result = sqlite3_bind_int(statement, paramindex++, value);
 	if(result != SQLITE_OK) throw sqlite_exception(result);
 }
 
@@ -596,8 +613,8 @@ std::string export_channels(sqlite3* instance)
 
 	return execute_scalar_string(instance, "select json_group_array(json_object("
 		"'frequency', frequency, 'subchannel', subchannel, "
-		"'modulation', case modulation when 0 then 'FM' when 1 then 'HD' when 2 then 'WX' else 'FM' end, "
-		"'hidden', hidden, 'name', name, 'autogain', autogain, 'manualgain', manualgain, 'logourl', logourl)) "
+		"'modulation', case modulation when 0 then 'FM' when 1 then 'HD' when 2 then 'WX' else 'FM' end, 'hidden', hidden, "
+		"'name', name, 'autogain', autogain, 'manualgain', manualgain, 'freqcorrection', freqcorrection, 'logourl', logourl)) "
 		"from channel");
 }
 
@@ -636,8 +653,8 @@ bool get_channel_properties(sqlite3* instance, unsigned int id, struct channelpr
 
 	if(instance == nullptr) throw std::invalid_argument("instance");
 
-	// name | autogain | manualgain | logourl
-	auto sql = "select name, autogain, manualgain, logourl from channel where frequency = ?1 and subchannel = ?2 and modulation = ?3";
+	// name | autogain | manualgain | freqcorrection | logourl
+	auto sql = "select name, autogain, manualgain, freqcorrection, logourl from channel where frequency = ?1 and subchannel = ?2 and modulation = ?3";
 
 	result = sqlite3_prepare_v2(instance, sql, -1, &statement, nullptr);
 	if(result != SQLITE_OK) throw sqlite_exception(result, sqlite3_errmsg(instance));
@@ -664,8 +681,9 @@ bool get_channel_properties(sqlite3* instance, unsigned int id, struct channelpr
 
 			channelprops.autogain = (sqlite3_column_int(statement, 1) != 0);
 			channelprops.manualgain = sqlite3_column_int(statement, 2);
+			channelprops.freqcorrection = sqlite3_column_int(statement, 3);
 
-			unsigned char const* logourl = sqlite3_column_text(statement, 3);
+			unsigned char const* logourl = sqlite3_column_text(statement, 4);
 			channelprops.logourl.assign((logourl == nullptr) ? "" : reinterpret_cast<char const*>(logourl));
 
 			found = true;						// Channel was found in the database
@@ -711,6 +729,7 @@ void import_channels(sqlite3* instance, char const* json)
 		"cast(ifnull(json_extract(entry.value, '$.name'), '') as text) as name, "
 		"cast(ifnull(json_extract(entry.value, '$.autogain'), 0) as integer) as autogain, "
 		"cast(ifnull(json_extract(entry.value, '$.manualgain'), 0) as integer) as manualgain, "
+		"cast(ifnull(json_extract(entry.value, '$.freqcorrection'), 0) as integer) as freqcorrection, "
 		"json_extract(entry.value, '$.logourl') as logourl "	// <-- this one allows nulls
 		"from json_each(?1) as entry "
 		"where frequency is not null and "
@@ -779,11 +798,11 @@ sqlite3* open_database(char const* connstring, int flags, bool initialize)
 
 				// table: channel
 				//
-				// frequency(pk) | subchannel(pk) | modulation (pk) | hidden | name | autogain | manualgain | logourl
+				// frequency(pk) | subchannel(pk) | modulation (pk) | hidden | name | autogain | manualgain | freqcorrection | logourl
 				execute_non_query(instance, "drop table if exists channel");
 				execute_non_query(instance, "create table channel(frequency integer not null, subchannel integer not null, modulation integer not null, "
-					"hidden integer not null, name text not null, autogain integer not null, manualgain integer not null, logourl text null, "
-					"primary key(frequency, subchannel, modulation))");
+					"hidden integer not null, name text not null, autogain integer not null, manualgain integer not null, freqcorrection integer not null, "
+					"logourl text null, primary key(frequency, subchannel, modulation))");
 
 
 				execute_non_query(instance, "pragma user_version = 2");
@@ -800,14 +819,14 @@ sqlite3* open_database(char const* connstring, int flags, bool initialize)
 
 				// table: channel
 				//
-				// frequency(pk) | subchannel(pk) | modulation (pk) | hidden | name | autogain | manualgain | logourl
+				// frequency(pk) | subchannel(pk) | modulation (pk) | hidden | name | autogain | manualgain | freqcorrection | logourl
 				execute_non_query(instance, "create table channel(frequency integer not null, subchannel integer not null, modulation integer not null, "
-					"hidden integer not null, name text not null, autogain integer not null, manualgain integer not null, logourl text null, "
-					"primary key(frequency, subchannel, modulation))");
+					"hidden integer not null, name text not null, autogain integer not null, manualgain integer not null, freqcorrection integer not null, "
+					"logourl text null, primary key(frequency, subchannel, modulation))");
 
 				// Version 1 modulation can be gleaned from the frequency, anything between 162.400MHz and 162.550MHz is WX (2), anything else is FM (0)
 				execute_non_query(instance, "insert into channel select v1.frequency, v1.subchannel, case when (v1.frequency >= 162400000 and v1.frequency <= 162550000) then 2 else 0 end, "
-					"v1.hidden, v1.name, v1.autogain, v1.manualgain, v1.logourl from channel_v1 as v1");
+					"v1.hidden, v1.name, v1.autogain, v1.manualgain, 0, v1.logourl from channel_v1 as v1");
 
 				execute_non_query(instance, "drop table channel_v1");
 				execute_non_query(instance, "pragma user_version = 2");
@@ -857,9 +876,10 @@ bool update_channel_properties(sqlite3* instance, unsigned int id, struct channe
 	if(instance == nullptr) throw std::invalid_argument("instance");
 
 	channelid channelid(id);
-	return execute_non_query(instance, "update channel set name = ?1, autogain = ?2, manualgain = ?3, logourl = ?4 "
-		"where frequency = ?5 and subchannel = ?6 and modulation = ?7", channelprops.name.c_str(), (channelprops.autogain) ? 1 : 0,
-		channelprops.manualgain, channelprops.logourl.c_str(), channelid.frequency(), channelid.subchannel(), static_cast<int>(channelid.modulation())) > 0;
+	return execute_non_query(instance, "update channel set name = ?1, autogain = ?2, manualgain = ?3, freqcorrection = ?4, logourl = ?5 "
+		"where frequency = ?6 and subchannel = ?7 and modulation = ?8", channelprops.name.c_str(), (channelprops.autogain) ? 1 : 0,
+		channelprops.manualgain, channelprops.freqcorrection, channelprops.logourl.c_str(), channelid.frequency(), channelid.subchannel(), 
+		static_cast<int>(channelid.modulation())) > 0;
 }
 
 //---------------------------------------------------------------------------

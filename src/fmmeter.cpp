@@ -55,7 +55,7 @@ fmmeter::fmmeter(std::unique_ptr<rtldevice> device, struct tunerprops const& tun
 	// Set the default frequency, sample rate, and frequency correction offset
 	m_device->set_center_frequency(m_frequency);
 	m_device->set_sample_rate(m_tunerprops.samplerate);
-	m_device->set_frequency_correction(m_tunerprops.freqcorrection);
+	m_correction = m_device->set_frequency_correction(tunerprops.freqcorrection);
 
 	// Enable automatic gain control on the device by default
 	m_device->set_automatic_gain_control(true);
@@ -134,6 +134,20 @@ bool fmmeter::get_automatic_gain(void) const
 }
 
 //---------------------------------------------------------------------------
+// fmmeter::get_frequency_correction
+//
+// Gets the frequency correction value
+//
+// Arguments:
+//
+//	NONE
+
+int fmmeter::get_frequency_correction(void) const
+{
+	return m_correction;
+}
+
+//---------------------------------------------------------------------------
 // fmmeter::get_manual_gain
 //
 // Gets the manual gain value, specified in tenths of a decibel
@@ -190,6 +204,20 @@ void fmmeter::set_automatic_gain(bool autogain)
 	if(!autogain) m_device->set_gain(m_manualgain);
 
 	m_autogain = autogain;
+}
+
+//---------------------------------------------------------------------------
+// fmmeter::set_frequency_correction
+//
+// Sets the manual gain value of the device
+//
+// Arguments:
+//
+//	ppm		- New frequency correction, in parts per million
+
+void fmmeter::set_frequency_correction(int ppm)
+{
+	m_correction = m_device->set_frequency_correction(ppm);
 }
 
 //---------------------------------------------------------------------------

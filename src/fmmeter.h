@@ -99,6 +99,11 @@ public:
 	// Gets the currently set automatic gain value
 	bool get_automatic_gain(void) const;
 
+	// get_frequency_correction
+	//
+	// Gets the currently set frequency correction value
+	int get_frequency_correction(void) const;
+
 	// get_manual_gain
 	//
 	// Gets the currently set manual gain value
@@ -118,6 +123,11 @@ public:
 	//
 	// Sets the automatic gain flag
 	void set_automatic_gain(bool autogain);
+
+	// set_frequency_correction
+	//
+	// Sets the tuner frequency corrections
+	void set_frequency_correction(int ppm);
 
 	// set_manual_gain
 	//
@@ -160,6 +170,7 @@ private:
 
 	bool							m_autogain = true;		// Automatic gain enabled/disabled
 	int								m_manualgain = 0;		// Current manual gain value
+	int								m_correction = 0;		// Current tuner frequency correction
 	std::atomic<enum modulation>	m_modulation;			// Current modulation value
 	std::thread						m_worker;				// Worker thread
 	scalar_condition<bool>			m_stop{ false };		// Condition to stop worker

@@ -29,6 +29,7 @@
 #include <kodi/gui/controls/Edit.h>
 #include <kodi/gui/controls/Image.h>
 #include <kodi/gui/controls/RadioButton.h>
+#include <kodi/gui/controls/Spin.h>
 #include <kodi/gui/controls/SettingsSlider.h>
 #include <kodi/gui/gl/GL.h>
 #include <kodi/gui/gl/Shader.h>
@@ -254,6 +255,7 @@ private:
 	// Member Variables
 
 	std::unique_ptr<rtldevice> const	m_device;				// Device instance
+	struct tunerprops					m_tunerprops;			// Tuner properties
 	struct channelprops					m_channelprops;			// Channel properties
 	std::unique_ptr<fmmeter>			m_signalmeter;			// Signal meter instance
 	std::vector<int>					m_manualgains;			// Manual gain values
@@ -263,10 +265,12 @@ private:
 	//
 	std::unique_ptr<CEdit>				m_edit_frequency;		// Frequency
 	std::unique_ptr<CEdit>				m_edit_channelname;		// Channel name
+	std::unique_ptr<CSpin>				m_spin_modulation;		// Channel modulation
 	std::unique_ptr<CButton>			m_button_channelicon;	// Channel icon
 	std::unique_ptr<CImage>				m_image_channelicon;	// Channel icon
 	std::unique_ptr<CRadioButton>		m_radio_autogain;		// Automatic gain
 	std::unique_ptr<CSettingsSlider>	m_slider_manualgain;	// Manual gain
+	std::unique_ptr<CSettingsSlider>	m_slider_correction;	// Frequency correction
 	std::unique_ptr<fftcontrol>			m_render_signalmeter;	// Signal meter
 	std::unique_ptr<CEdit>				m_edit_signalgain;		// Active gain
 	std::unique_ptr<CEdit>				m_edit_signalpower;		// Active power

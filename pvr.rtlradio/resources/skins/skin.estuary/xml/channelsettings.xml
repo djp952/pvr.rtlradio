@@ -5,12 +5,12 @@
   <controls>
     <control type="group">
       <centertop>50%</centertop>
-      <height>600</height>
+      <height>720</height>
       <centerleft>50%</centerleft>
       <width>1820</width>
       <include content="DialogBackgroundCommons">
         <param name="width" value="1820" />
-        <param name="height" value="600" />
+        <param name="height" value="720" />
         <param name="header_label" value="Channel settings" />
         <param name="header_id" value="2" />
       </include>
@@ -55,6 +55,14 @@
             <enable>false</enable>
             <disabledcolor>white</disabledcolor>
           </control>
+          <control type="spincontrolex" id="210">
+            <description>Channel modulation</description>
+            <width>700</width>
+            <include>SettingsItemCommon</include>
+            <label>Modulation</label>
+            <enable>false</enable>
+            <disabledcolor>white</disabledcolor>
+          </control>
           <control type="edit" id="201">
             <description>Channel name</description>
             <width>700</width>
@@ -70,7 +78,7 @@
         </control>
         <control type="image" id="203">
           <left>600</left>
-          <top>226</top>
+          <top>301</top>
           <description>Channel logo image</description>
           <width>70</width>
           <height>48</height>
@@ -78,7 +86,7 @@
         </control>
         <control type="label" id="9000">
           <left>0</left>
-          <top>300</top>
+          <top>360</top>
           <description>Tuner properties header</description>
           <width>700</width>
           <height>60</height>
@@ -90,7 +98,7 @@
           <shadowcolor>black</shadowcolor>
         </control>
         <control type="grouplist" id="1200">
-          <top>340</top>
+          <top>400</top>
           <onup>202</onup>
           <ondown>201</ondown>
           <onleft>4000</onleft>
@@ -105,9 +113,16 @@
           <control type="sliderex" id="205">
             <description>Manual gain</description>
             <width>700</width>
-            <sliderwidth>150</sliderwidth>
+            <sliderwidth>200</sliderwidth>
             <include>SettingsItemCommon</include>
             <label>Manual gain</label>
+          </control>
+          <control type="sliderex" id="211">
+            <description>Frequency correction</description>
+            <width>700</width>
+            <sliderwidth>200</sliderwidth>
+            <include>SettingsItemCommon</include>
+            <label>Frequency correction</label>
           </control>
         </control>
       </control>
@@ -133,12 +148,12 @@
         <control type="renderaddon" id="206">
           <left>20</left>
           <top>70</top>
-          <width>680</width>
-          <height>350</height>
+          <width>692</width>
+          <height>485</height>
         </control>
         <control type="edit" id="207">
           <left>-14</left>
-          <top>415</top>
+          <top>550</top>
           <texturefocus></texturefocus>
           <texturenofocus></texturenofocus>
           <alttexturefocus></alttexturefocus>
@@ -152,7 +167,7 @@
         </control>
         <control type="edit" id="208">
           <left>225</left>
-          <top>415</top>
+          <top>550</top>
           <texturefocus></texturefocus>
           <texturenofocus></texturenofocus>
           <alttexturefocus></alttexturefocus>
@@ -166,7 +181,7 @@
         </control>
         <control type="edit" id="209">
           <left>485</left>
-          <top>415</top>
+          <top>550</top>
           <texturefocus></texturefocus>
           <texturenofocus></texturenofocus>
           <alttexturefocus></alttexturefocus>

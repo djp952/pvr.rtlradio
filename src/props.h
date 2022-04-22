@@ -51,6 +51,7 @@ struct channelprops {
 	std::string			logourl;		// Station logo URL
 	bool				autogain;		// Flag indicating if automatic gain should be used
 	int					manualgain;		// Manual gain value as 10*dB (i.e. 32.8dB = 328)
+	int					freqcorrection;	// Frequency correction for this channel
 };
 
 // fmprops
