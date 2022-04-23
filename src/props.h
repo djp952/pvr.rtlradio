@@ -61,6 +61,7 @@ struct fmprops {
 
 	bool			decoderds;			// Flag if RDS should be decoded or not
 	bool			isrbds;				// Flag if region is RBDS (North America)
+	uint32_t		samplerate;			// Input sample rate in Hertz
 	int				downsamplequality;	// Downsample quality setting
 	uint32_t		outputrate;			// Output sample rate in Hertz
 	float			outputgain;			// Output gain in Decibels
@@ -91,7 +92,6 @@ struct streamprops {
 // Defines tuner-specific properties
 struct tunerprops {
 
-	uint32_t		samplerate;			// Input sample rate in Hertz
 	int				freqcorrection;		// Frequency correction (PPM)
 };
 
@@ -100,6 +100,7 @@ struct tunerprops {
 // Defines properties for the Weather Radio digital signal processor
 struct wxprops {
 
+	uint32_t		samplerate;			// Input sample rate in Hertz
 	uint32_t		outputrate;			// Output sample rate in Hertz
 	float			outputgain;			// Output gain in Decibels
 };

@@ -564,7 +564,6 @@ ADDON_STATUS addon::Create(void)
 			m_settings.device_connection_usb_index = kodi::GetSettingInt("device_connection_usb_index", 0);
 			m_settings.device_connection_tcp_host = kodi::GetSettingString("device_connection_tcp_host");
 			m_settings.device_connection_tcp_port = kodi::GetSettingInt("device_connection_tcp_port", 1234);
-			m_settings.device_sample_rate = kodi::GetSettingInt("device_sample_rate", (1600 KHz));
 			m_settings.device_frequency_correction = kodi::GetSettingInt("device_frequency_correction", 0);
 
 			// Load the Interface settings
@@ -573,6 +572,7 @@ ADDON_STATUS addon::Create(void)
 			// Load the FM Radio settings
 			m_settings.fmradio_enable_rds = kodi::GetSettingBoolean("fmradio_enable_rds", true);
 			m_settings.fmradio_rds_standard = kodi::GetSettingEnum("fmradio_rds_standard", rds_standard::automatic);
+			m_settings.fmradio_sample_rate = kodi::GetSettingInt("fmradio_sample_rate", (1600 KHz));
 			m_settings.fmradio_downsample_quality = kodi::GetSettingEnum("fmradio_downsample_quality", downsample_quality::standard);
 			m_settings.fmradio_output_samplerate = kodi::GetSettingInt("fmradio_output_samplerate", 48000);
 			m_settings.fmradio_output_gain = kodi::GetSettingFloat("fmradio_output_gain", -3.0f);
@@ -581,6 +581,7 @@ ADDON_STATUS addon::Create(void)
 			m_settings.hdradio_output_gain = kodi::GetSettingFloat("hdradio_output_gain", -3.0f);
 
 			// Load the Weather Radio settings
+			m_settings.wxradio_sample_rate = kodi::GetSettingInt("wxradio_sample_rate", (1600 KHz));
 			m_settings.wxradio_output_samplerate = kodi::GetSettingInt("wxradio_output_samplerate", 48000);
 			m_settings.wxradio_output_gain = kodi::GetSettingFloat("wxradio_output_gain", -3.0f);
 
@@ -590,16 +591,17 @@ ADDON_STATUS addon::Create(void)
 			log_info(__func__, ": m_settings.device_connection_tcp_port        = ", m_settings.device_connection_tcp_port);
 			log_info(__func__, ": m_settings.device_connection_usb_index       = ", m_settings.device_connection_usb_index);
 			log_info(__func__, ": m_settings.device_frequency_correction       = ", m_settings.device_frequency_correction);
-			log_info(__func__, ": m_settings.device_sample_rate                = ", m_settings.device_sample_rate);
 			log_info(__func__, ": m_settings.fmradio_downsample_quality        = ", static_cast<int>(m_settings.fmradio_downsample_quality));
 			log_info(__func__, ": m_settings.fmradio_enable_rds                = ", m_settings.fmradio_enable_rds);
 			log_info(__func__, ": m_settings.fmradio_output_gain               = ", m_settings.fmradio_output_gain);
 			log_info(__func__, ": m_settings.fmradio_output_samplerate         = ", m_settings.fmradio_output_samplerate);
 			log_info(__func__, ": m_settings.fmradio_rds_standard              = ", static_cast<int>(m_settings.fmradio_rds_standard));
+			log_info(__func__, ": m_settings.fmradio_sample_rate               = ", m_settings.fmradio_sample_rate);
 			log_info(__func__, ": m_settings.hdradio_output_gain               = ", m_settings.hdradio_output_gain);
 			log_info(__func__, ": m_settings.interface_prepend_channel_numbers = ", m_settings.interface_prepend_channel_numbers);
 			log_info(__func__, ": m_settings.wxradio_output_gain               = ", m_settings.wxradio_output_gain);
 			log_info(__func__, ": m_settings.wxradio_output_samplerate         = ", m_settings.wxradio_output_samplerate);
+			log_info(__func__, ": m_settings.wxradio_sample_rate               = ", m_settings.wxradio_sample_rate);
 
 			// Register the PVR_MENUHOOK_SETTING category menu hooks
 			AddMenuHook(kodi::addon::PVRMenuhook(MENUHOOK_SETTING_IMPORTCHANNELS, 30400, PVR_MENUHOOK_SETTING));
@@ -732,18 +734,6 @@ ADDON_STATUS addon::SetSetting(std::string const& settingName, kodi::CSettingVal
 		}
 	}
 
-	// device_sample_rate
-	//
-	else if(settingName == "device_sample_rate") {
-
-		int nvalue = settingValue.GetInt();
-		if(nvalue != m_settings.device_sample_rate) {
-
-			m_settings.device_sample_rate = nvalue;
-			log_info(__func__, ": setting device_sample_rate changed to ", m_settings.device_sample_rate, "Hz");
-		}
-	}
-
 	// device_frequency_correction
 	//
 	else if(settingName == "device_frequency_correction") {
@@ -795,6 +785,18 @@ ADDON_STATUS addon::SetSetting(std::string const& settingName, kodi::CSettingVal
 		}
 	}
 
+	// fmradio_sample_rate
+	//
+	else if(settingName == "fmradio_sample_rate") {
+
+		int nvalue = settingValue.GetInt();
+		if(nvalue != m_settings.fmradio_sample_rate) {
+
+			m_settings.fmradio_sample_rate = nvalue;
+			log_info(__func__, ": setting fmradio_sample_rate changed to ", m_settings.fmradio_sample_rate, "Hz");
+		}
+	}
+
 	// fmradio_downsample_quality
 	//
 	else if(settingName == "fmradio_downsample_quality") {
@@ -841,6 +843,18 @@ ADDON_STATUS addon::SetSetting(std::string const& settingName, kodi::CSettingVal
 		m_settings.hdradio_output_gain = fvalue;
 		log_info(__func__, ": setting hdradio_output_gain changed to ", fvalue, "dB");
 	}
+	}
+
+	// wxradio_sample_rate
+	//
+	else if(settingName == "wxradio_sample_rate") {
+
+		int nvalue = settingValue.GetInt();
+		if(nvalue != m_settings.wxradio_sample_rate) {
+
+			m_settings.wxradio_sample_rate = nvalue;
+			log_info(__func__, ": setting wxradio_sample_rate changed to ", m_settings.wxradio_sample_rate, "Hz");
+		}
 	}
 
 	// wxradio_output_samplerate
@@ -1533,7 +1547,6 @@ PVR_ERROR addon::OpenDialogChannelSettings(kodi::addon::PVRChannel const& channe
 
 		// Set up the tuner device properties
 		struct tunerprops tunerprops = {};
-		tunerprops.samplerate = settings.device_sample_rate;
 		tunerprops.freqcorrection = settings.device_frequency_correction;
 
 		// Get the properties of the channel to be manipulated
@@ -1589,7 +1602,6 @@ bool addon::OpenLiveStream(kodi::addon::PVRChannel const& channel)
 
 		// Set up the tuner device properties
 		struct tunerprops tunerprops = {};
-		tunerprops.samplerate = settings.device_sample_rate;
 		tunerprops.freqcorrection = settings.device_frequency_correction;
 
 		// Retrieve the tuning properties for the channel from the database
@@ -1605,16 +1617,17 @@ bool addon::OpenLiveStream(kodi::addon::PVRChannel const& channel)
 			struct fmprops fmprops = {};
 			fmprops.decoderds = settings.fmradio_enable_rds;
 			fmprops.isrbds = (get_regional_rds_standard(settings.fmradio_rds_standard) == rds_standard::rbds);
+			fmprops.samplerate = settings.fmradio_sample_rate;
 			fmprops.downsamplequality = static_cast<int>(settings.fmradio_downsample_quality);
 			fmprops.outputrate = settings.fmradio_output_samplerate;
 			fmprops.outputgain = settings.fmradio_output_gain;
 
 			// Log information about the stream for diagnostic purposes
 			log_info(__func__, ": Creating fmstream for channel \"", channelprops.name, "\"");
-			log_info(__func__, ": tunerprops.samplerate = ", tunerprops.samplerate, " Hz");
 			log_info(__func__, ": tunerprops.freqcorrection = ", tunerprops.freqcorrection, " PPM");
 			log_info(__func__, ": fmprops.decoderds = ", (fmprops.decoderds) ? "true" : "false");
 			log_info(__func__, ": fmprops.isrbds = ", (fmprops.isrbds) ? "true" : "false");
+			log_info(__func__, ": fmrops.samplerate = ", fmprops.samplerate, " Hz");
 			log_info(__func__, ": fmprops.downsamplequality = ", downsample_quality_to_string(static_cast<enum downsample_quality>(fmprops.downsamplequality)));
 			log_info(__func__, ": fmprops.outputgain = ", fmprops.outputgain, " dB");
 			log_info(__func__, ": fmprops.outputrate = ", fmprops.outputrate, " Hz");
@@ -1637,7 +1650,6 @@ bool addon::OpenLiveStream(kodi::addon::PVRChannel const& channel)
 
 			// Log information about the stream for diagnostic purposes
 			log_info(__func__, ": Creating hdstream for channel \"", channelprops.name, "\"");
-			log_info(__func__, ": tunerprops.samplerate = ", tunerprops.samplerate, " Hz");
 			log_info(__func__, ": tunerprops.freqcorrection = ", tunerprops.freqcorrection, " PPM");
 			log_info(__func__, ": hdprops.outputgain = ", hdprops.outputgain, " dB");
 			log_info(__func__, ": channelprops.frequency = ", channelprops.frequency, " Hz");
@@ -1656,13 +1668,14 @@ bool addon::OpenLiveStream(kodi::addon::PVRChannel const& channel)
 
 			// Set up the FM digital signal processor properties
 			struct wxprops wxprops = {};
+			wxprops.samplerate = settings.wxradio_sample_rate;
 			wxprops.outputrate = settings.wxradio_output_samplerate;
 			wxprops.outputgain = settings.wxradio_output_gain;
 
 			// Log information about the stream for diagnostic purposes
 			log_info(__func__, ": Creating wxstream for channel \"", channelprops.name, "\"");
-			log_info(__func__, ": tunerprops.samplerate = ", tunerprops.samplerate, " Hz");
 			log_info(__func__, ": tunerprops.freqcorrection = ", tunerprops.freqcorrection, " PPM");
+			log_info(__func__, ": wxprops.samplerate = ", wxprops.samplerate, " Hz");
 			log_info(__func__, ": wxprops.outputgain = ", wxprops.outputgain, " dB");
 			log_info(__func__, ": wxprops.outputrate = ", wxprops.outputrate, " Hz");
 			log_info(__func__, ": channelprops.frequency = ", channelprops.frequency, " Hz");

@@ -154,6 +154,11 @@ private:
 	fmmeter(fmmeter const&) = delete;
 	fmmeter& operator=(fmmeter const&) = delete;
 
+	// INPUT_SAMPLE_RATE
+	//
+	// Fixed input sample rate for the meter
+	static uint32_t const INPUT_SAMPLE_RATE;
+
 	// Instance Constructor
 	//
 	fmmeter(std::unique_ptr<rtldevice> device, struct tunerprops const& tunerprops, uint32_t frequency, 

@@ -96,11 +96,6 @@ struct settings {
 	// The IP address of the rtl_tcp host to connect to
 	std::string device_connection_tcp_host;
 
-	// device_sample_rate
-	//
-	// Sample rate value for the device
-	int device_sample_rate;
-
 	// device_frequency_correction
 	//
 	// Frequency correction calibration value for the device
@@ -126,6 +121,11 @@ struct settings {
 	// Specifies the Radio Data System (RDS) standard
 	enum rds_standard fmradio_rds_standard;
 
+	// fmradio_sample_rate
+	//
+	// Sample rate value for the FM DSP
+	int fmradio_sample_rate;
+
 	// fmradio_downsample_quality
 	//
 	// Specifies the FM DSP downsample quality factor
@@ -145,6 +145,11 @@ struct settings {
 	//
 	// Specifies the output gain for the HD DSP
 	float hdradio_output_gain;
+
+	// wxradio_sample_rate
+	//
+	// Sample rate value for the WX DSP
+	int wxradio_sample_rate;
 
 	// wxradio_output_samplerate
 	//
