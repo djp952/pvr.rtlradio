@@ -414,7 +414,7 @@ void enumerate_wxradio_channels(sqlite3* instance, enumerate_channels_callback c
 
 	// frequency | name | hidden | logourl
 	auto sql = "select frequency as frequency, name as name, hidden as hidden, logourl as logourl "
-		"from channel where modulation = 2 order by frequency asc";
+		"from channel where modulation = 3 order by frequency asc";
 
 	result = sqlite3_prepare_v2(instance, sql, -1, &statement, nullptr);
 	if(result != SQLITE_OK) throw sqlite_exception(result, sqlite3_errmsg(instance));
@@ -613,7 +613,7 @@ std::string export_channels(sqlite3* instance)
 
 	return execute_scalar_string(instance, "select json_group_array(json_object("
 		"'frequency', frequency, 'subchannel', subchannel, "
-		"'modulation', case modulation when 0 then 'FM' when 1 then 'HD' when 2 then 'WX' else 'FM' end, 'hidden', hidden, "
+		"'modulation', case modulation when 0 then 'FM' when 1 then 'HD' when 2 then 'DAB' when 3 then 'WX' else 'FM' end, 'hidden', hidden, "
 		"'name', name, 'autogain', autogain, 'manualgain', manualgain, 'freqcorrection', freqcorrection, 'logourl', logourl)) "
 		"from channel");
 }
@@ -722,9 +722,11 @@ void import_channels(sqlite3* instance, char const* json)
 		"  when 'FMRADIO' then 0 "
 		"  when 'HD' then 1 "
 		"  when 'HDRADIO' then 1 "
-		"  when 'WX' then 2 "
-		"  when 'WEATHER' then 2 "
-		"  else case when cast(json_extract(entry.value, '$.frequency') as integer) between 162400000 and 162550000 then 2 else 0 end end as modulation, "
+		"  when 'DAB' then 2 "
+		"  when 'DAB+' then 2 "
+		"  when 'WX' then 3 "
+		"  when 'WEATHER' then 3 "
+		"  else case when cast(json_extract(entry.value, '$.frequency') as integer) between 162400000 and 162550000 then 3 else 0 end end as modulation, "
 		"cast(ifnull(json_extract(entry.value, '$.hidden'), 0) as integer) as hidden, "
 		"cast(ifnull(json_extract(entry.value, '$.name'), '') as text) as name, "
 		"cast(ifnull(json_extract(entry.value, '$.autogain'), 0) as integer) as autogain, "
@@ -734,7 +736,7 @@ void import_channels(sqlite3* instance, char const* json)
 		"from json_each(?1) as entry "
 		"where frequency is not null and "
 		"((frequency between 87500000 and 108000000) or (frequency between 162400000 and 162550000)) "
-		"and modulation between 0 and 2 "
+		"and modulation between 0 and 3 "
 		"group by frequency, subchannel, modulation", json);
 }
 
@@ -824,8 +826,8 @@ sqlite3* open_database(char const* connstring, int flags, bool initialize)
 					"hidden integer not null, name text not null, autogain integer not null, manualgain integer not null, freqcorrection integer not null, "
 					"logourl text null, primary key(frequency, subchannel, modulation))");
 
-				// Version 1 modulation can be gleaned from the frequency, anything between 162.400MHz and 162.550MHz is WX (2), anything else is FM (0)
-				execute_non_query(instance, "insert into channel select v1.frequency, v1.subchannel, case when (v1.frequency >= 162400000 and v1.frequency <= 162550000) then 2 else 0 end, "
+				// Version 1 modulation can be gleaned from the frequency, anything between 162.400MHz and 162.550MHz is WX (3), anything else is FM (0)
+				execute_non_query(instance, "insert into channel select v1.frequency, v1.subchannel, case when (v1.frequency >= 162400000 and v1.frequency <= 162550000) then 3 else 0 end, "
 					"v1.hidden, v1.name, v1.autogain, v1.manualgain, 0, v1.logourl from channel_v1 as v1");
 
 				execute_non_query(instance, "drop table channel_v1");

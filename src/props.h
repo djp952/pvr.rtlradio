@@ -35,8 +35,9 @@
 enum class modulation {
 
 	fm = 0,				// Wideband FM radio
-	hd = 1,				// Hybrid Digital (HD) radio
-	wx = 2,				// VHF Weather radio
+	hd = 1,				// Hybrid Digital radio
+	dab = 2,			// Digital Audio Broadcast radio
+	wx = 3,				// VHF Weather radio
 };
 
 // channelprops
