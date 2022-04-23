@@ -201,7 +201,7 @@ DEMUX_PACKET* hdstream::demuxread(std::function<DEMUX_PACKET*(int)> const& alloc
 		packet->dts = packet->pts = m_dts;
 
 		int16_t* data = reinterpret_cast<int16_t*>(&packet->pData[0]);
-		for(int index = 0; index < audiopacket->count; index++) data[index] = static_cast<int16_t>(audiopacket->data[index] * m_pcmgain);
+		for(size_t index = 0; index < audiopacket->count; index++) data[index] = static_cast<int16_t>(audiopacket->data[index] * m_pcmgain);
 	}
 
 	m_dts += duration;
