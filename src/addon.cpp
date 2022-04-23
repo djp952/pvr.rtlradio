@@ -1141,9 +1141,9 @@ PVR_ERROR addon::GetChannelGroupMembers(kodi::addon::PVRChannelGroup const& grou
 
 	// Select the proper enumerator for the channel group
 	std::function<void(sqlite3*, enumerate_channels_callback)> enumerator = nullptr;
-	if(group.GetGroupName() == kodi::addon::GetLocalizedString(30002)) enumerator = enumerate_fmradio_channels;
-	else if(group.GetGroupName() == kodi::addon::GetLocalizedString(30003)) enumerator = enumerate_hdradio_channels;
-	else if(group.GetGroupName() == kodi::addon::GetLocalizedString(30004)) enumerator = enumerate_wxradio_channels;
+	if(group.GetGroupName() == kodi::addon::GetLocalizedString(30408)) enumerator = enumerate_fmradio_channels;
+	else if(group.GetGroupName() == kodi::addon::GetLocalizedString(30409)) enumerator = enumerate_hdradio_channels;
+	else if(group.GetGroupName() == kodi::addon::GetLocalizedString(30410)) enumerator = enumerate_wxradio_channels;
 
 	// If no enumerator was selected, there isn't any work to do here
 	if(enumerator == nullptr) return PVR_ERROR::PVR_ERROR_NO_ERROR;
@@ -1192,15 +1192,15 @@ PVR_ERROR addon::GetChannelGroups(bool radio, kodi::addon::PVRChannelGroupsResul
 	// The PVR only supports radio channel groups
 	if(!radio) return PVR_ERROR::PVR_ERROR_NO_ERROR;
 
-	fmradio.SetGroupName(kodi::addon::GetLocalizedString(30002));
+	fmradio.SetGroupName(kodi::addon::GetLocalizedString(30408));
 	fmradio.SetIsRadio(true);
 	results.Add(fmradio);
 
-	hdradio.SetGroupName(kodi::addon::GetLocalizedString(30003));
+	hdradio.SetGroupName(kodi::addon::GetLocalizedString(30409));
 	hdradio.SetIsRadio(true);
 	results.Add(hdradio);
 
-	wxradio.SetGroupName(kodi::addon::GetLocalizedString(30004));
+	wxradio.SetGroupName(kodi::addon::GetLocalizedString(30410));
 	wxradio.SetIsRadio(true);
 	results.Add(wxradio);
 
