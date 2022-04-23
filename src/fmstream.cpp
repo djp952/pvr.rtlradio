@@ -64,7 +64,7 @@ fmstream::fmstream(std::unique_ptr<rtldevice> device, struct tunerprops const& t
 	m_pcmgain(MPOW(10.0, (fmprops.outputgain / 10.0)))
 {
 	// The sample rate must be within 900001Hz - 3200000Hz
-	if((tunerprops.samplerate < 900001) || (tunerprops.samplerate > 3200000))
+	if((fmprops.samplerate < 900001) || (fmprops.samplerate > 3200000))
 		throw string_exception(__func__, ": Tuner device sample rate must be in the range of 900001Hz to 3200000Hz");
 
 	// The only allowable output sample rates for this stream are 44100Hz and 48000Hz
@@ -73,7 +73,7 @@ fmstream::fmstream(std::unique_ptr<rtldevice> device, struct tunerprops const& t
 
 	// Initialize the RTL-SDR device instance
 	m_device->set_frequency_correction(tunerprops.freqcorrection + channelprops.freqcorrection);
-	uint32_t samplerate = m_device->set_sample_rate(tunerprops.samplerate);
+	uint32_t samplerate = m_device->set_sample_rate(fmprops.samplerate);
 	uint32_t frequency = m_device->set_center_frequency(channelprops.frequency + (samplerate / 4));		// DC offset
 
 	// Initialize the demodulator parameters

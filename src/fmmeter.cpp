@@ -32,6 +32,11 @@
 
 #pragma warning(push, 4)
 
+// fmmeter::MAX_SAMPLE_QUEUE
+//
+// Fixed input sample rate for the meter
+uint32_t const fmmeter::INPUT_SAMPLE_RATE = 1600 KHz;
+
 //---------------------------------------------------------------------------
 // fmmeter Constructor (private)
 //
@@ -54,7 +59,7 @@ fmmeter::fmmeter(std::unique_ptr<rtldevice> device, struct tunerprops const& tun
 {
 	// Set the default frequency, sample rate, and frequency correction offset
 	m_device->set_center_frequency(m_frequency);
-	m_device->set_sample_rate(m_tunerprops.samplerate);
+	m_device->set_sample_rate(INPUT_SAMPLE_RATE);
 	m_correction = m_device->set_frequency_correction(tunerprops.freqcorrection);
 
 	// Enable automatic gain control on the device by default
@@ -274,7 +279,7 @@ void fmmeter::start(TYPEREAL maxdb, TYPEREAL mindb, size_t height, size_t width)
 		while(width > fftsize) fftsize <<= 1;
 
 		// Initialize the fast fourier transform instance
-		fft.SetFFTParams(static_cast<int>(fftsize), false, 0.0, m_tunerprops.samplerate);
+		fft.SetFFTParams(static_cast<int>(fftsize), false, 0.0, INPUT_SAMPLE_RATE);
 		fft.SetFFTAve(10);
 
 		started = true;					// Signal that the thread has started
