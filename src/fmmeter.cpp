@@ -53,9 +53,8 @@ uint32_t const fmmeter::INPUT_SAMPLE_RATE = 1600 KHz;
 
 fmmeter::fmmeter(std::unique_ptr<rtldevice> device, struct tunerprops const& tunerprops, uint32_t frequency,
 	enum modulation modulation, uint32_t fftwidth, signal_status_callback const& onstatus, int statusrate, 
-	exception_callback const& onexception) : m_device(std::move(device)), m_tunerprops(tunerprops), 
-	m_frequency(frequency), m_modulation(modulation), m_fftwidth(fftwidth), m_onstatus(onstatus), 
-	m_onstatusrate(std::min(statusrate / 10, 10)), m_onexception(onexception)
+	exception_callback const& onexception) : m_device(std::move(device)), m_frequency(frequency), m_fftwidth(fftwidth), 
+	m_modulation(modulation), m_onstatus(onstatus), m_onstatusrate(std::min(statusrate / 10, 10)), m_onexception(onexception)
 {
 	// Set the default frequency, sample rate, and frequency correction offset
 	m_device->set_center_frequency(m_frequency);
@@ -307,8 +306,8 @@ void fmmeter::start(TYPEREAL maxdb, TYPEREAL mindb, size_t height, size_t width)
 			while(m_stop.test(false) == true) {
 
 				// The currently set modulation affects how the signal is analyzed
-				enum modulation modulation = m_modulation.load();
-				uint32_t bandwidth = (modulation == modulation::wx) ? 10 KHz : 200 KHz;
+				enum modulation channelmod = m_modulation.load();
+				uint32_t bandwidth = (channelmod == modulation::wx) ? 10 KHz : 200 KHz;
 
 				// Read the next block of raw 8-bit I/Q samples from the input device
 				size_t read = 0;
@@ -383,7 +382,7 @@ void fmmeter::start(TYPEREAL maxdb, TYPEREAL mindb, size_t height, size_t width)
 					// Send all of the calculated information into the status callback
 					struct signal_status status = {};
 
-					status.modulation = modulation;								// Channel modulation
+					status.modulation = channelmod;								// Channel modulation
 					status.power = static_cast<float>(avgpower);				// Power in dB
 					status.noise = static_cast<float>(avgnoise);				// Noise in dB
 					status.snr = static_cast<float>(avgpower + -avgnoise);		// SNR in dB

@@ -169,7 +169,6 @@ private:
 	// Member Variables
 
 	std::unique_ptr<rtldevice>		m_device;				// RTL-SDR device instance
-	struct tunerprops const			m_tunerprops;			// Tuner settings
 	uint32_t const					m_frequency;			// Center frequency
 	uint32_t const					m_fftwidth;				// FFT bandwidth
 
