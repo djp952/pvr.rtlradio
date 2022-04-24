@@ -664,8 +664,9 @@ GLint channelsettings::fftshader::uModelProjMatrix(void) const
 //	tunerprops		- Tuner properties
 //	channelprops	- Channel properties
 
-channelsettings::channelsettings(std::unique_ptr<rtldevice> device, struct tunerprops const& tunerprops, struct channelprops const& channelprops) 
-	: kodi::gui::CWindow("channelsettings.xml", "skin.estuary", true), m_tunerprops(tunerprops), m_channelprops(channelprops)
+channelsettings::channelsettings(std::unique_ptr<rtldevice> device, struct tunerprops const& tunerprops, 
+	struct channelprops const& channelprops, bool isnew) : kodi::gui::CWindow("channelsettings.xml", "skin.estuary", true), 
+	m_isnew(isnew), m_tunerprops(tunerprops), m_channelprops(channelprops)
 {
 	assert(device);
 
@@ -698,10 +699,28 @@ channelsettings::~channelsettings()
 //	tunerprops		- Tuner properties
 //	channelprops	- Channel properties
 
-std::unique_ptr<channelsettings> channelsettings::create(std::unique_ptr<rtldevice> device, struct tunerprops const& tunerprops, 
+std::unique_ptr<channelsettings> channelsettings::create(std::unique_ptr<rtldevice> device, struct tunerprops const& tunerprops,
 	struct channelprops const& channelprops)
 {
-	return std::unique_ptr<channelsettings>(new channelsettings(std::move(device), tunerprops, channelprops));
+	return create(std::move(device), tunerprops, channelprops, false);
+}
+
+//---------------------------------------------------------------------------
+// channelsettings::create (static)
+//
+// Factory method, creates a new channelsettings instance
+//
+// Arguments:
+//
+//	device			- Device instance
+//	tunerprops		- Tuner properties
+//	channelprops	- Channel properties
+//	isnew			- Flag indicating if this is a new channel
+
+std::unique_ptr<channelsettings> channelsettings::create(std::unique_ptr<rtldevice> device, struct tunerprops const& tunerprops,
+	struct channelprops const& channelprops, bool isnew)
+{
+	return std::unique_ptr<channelsettings>(new channelsettings(std::move(device), tunerprops, channelprops, isnew));
 }
 
 //---------------------------------------------------------------------------
@@ -905,7 +924,8 @@ bool channelsettings::OnClick(int controlId)
 			break;
 
 		case CONTROL_SPIN_MODULATION:
-			m_signalmeter->set_modulation(static_cast<enum modulation>(m_spin_modulation->GetIntValue()));
+			if(m_isnew) m_channelprops.modulation = static_cast<enum modulation>(m_spin_modulation->GetIntValue());
+			m_signalmeter->set_modulation(m_channelprops.modulation);
 			return true;
 
 		case CONTROL_BUTTON_CHANNELICON:
@@ -958,6 +978,7 @@ bool channelsettings::OnInit(void)
 	try {
 
 		// Get references to all of the manipulable dialog controls
+		m_button_ok = std::unique_ptr<CButton>(new CButton(this, CONTROL_BUTTON_OK));
 		m_edit_frequency = std::unique_ptr<CEdit>(new CEdit(this, CONTROL_EDIT_FREQUENCY));
 		m_edit_channelname = std::unique_ptr<CEdit>(new CEdit(this, CONTROL_EDIT_CHANNELNAME));
 		m_spin_modulation = std::unique_ptr<CSpin>(new CSpin(this, CONTROL_SPIN_MODULATION));
@@ -970,6 +991,9 @@ bool channelsettings::OnInit(void)
 		m_edit_signalgain = std::unique_ptr<CEdit>(new CEdit(this, CONTROL_EDIT_METERGAIN));
 		m_edit_signalpower = std::unique_ptr<CEdit>(new CEdit(this, CONTROL_EDIT_METERPOWER));
 		m_edit_signalsnr = std::unique_ptr<CEdit>(new CEdit(this, CONTROL_EDIT_METERSNR));
+
+		// Change the text of the OK button to "Add" if we are in new channel mode
+		if(m_isnew) m_button_ok->SetLabel(kodi::addon::GetLocalizedString(15019));
 
 		// Set the channel frequency in XXX.X MHz or XXX.XXX format
 		char freqstr[128];
@@ -986,8 +1010,13 @@ bool channelsettings::OnInit(void)
 		m_spin_modulation->SetType(kodi::gui::controls::AddonGUISpinControlType::ADDON_SPIN_CONTROL_TYPE_TEXT);
 		m_spin_modulation->AddLabel(kodi::addon::GetLocalizedString(30002), static_cast<int>(modulation::fm));
 		m_spin_modulation->AddLabel(kodi::addon::GetLocalizedString(30003), static_cast<int>(modulation::hd));
-		m_spin_modulation->AddLabel(kodi::addon::GetLocalizedString(30004), static_cast<int>(modulation::wx));
+
+		// Only add WX to the spin control for existing channels or new channels that fall within the proper frequency range
+		if(!m_isnew || ((m_channelprops.frequency >= 162400000) && (m_channelprops.frequency <= 162550000)))
+			m_spin_modulation->AddLabel(kodi::addon::GetLocalizedString(30004), static_cast<int>(modulation::wx));
+
 		m_spin_modulation->SetIntValue(static_cast<int>(m_channelprops.modulation));
+		if(!m_isnew) m_spin_modulation->SetEnabled(false);
 
 		// Adjust the manual gain value to match something that the tuner supports
 		m_channelprops.manualgain = nearest_valid_gain(m_channelprops.manualgain);

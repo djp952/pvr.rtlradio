@@ -67,8 +67,10 @@ public:
 	// create (static)
 	//
 	// Factory method, creates a new channelsettings instance
-	static std::unique_ptr<channelsettings> create(std::unique_ptr<rtldevice> device, struct tunerprops const& tunerprops, 
+	static std::unique_ptr<channelsettings> create(std::unique_ptr<rtldevice> device, struct tunerprops const& tunerprops,
 		struct channelprops const& channelprops);
+	static std::unique_ptr<channelsettings> create(std::unique_ptr<rtldevice> device, struct tunerprops const& tunerprops,
+		struct channelprops const& channelprops, bool isnew);
 
 	// get_channel_properties
 	//
@@ -102,7 +104,7 @@ private:
 
 	// Instance Constructor
 	//
-	channelsettings(std::unique_ptr<rtldevice> device, struct tunerprops const& tunerprops, struct channelprops const& channelprops);
+	channelsettings(std::unique_ptr<rtldevice> device, struct tunerprops const& tunerprops, struct channelprops const& channelprops, bool isnew);
 
 	//-----------------------------------------------------------------------
 	// Private Type Declarations
@@ -254,6 +256,7 @@ private:
 	//-------------------------------------------------------------------------
 	// Member Variables
 
+	bool								m_isnew = false;		// New channel flag
 	std::unique_ptr<rtldevice> const	m_device;				// Device instance
 	struct tunerprops					m_tunerprops;			// Tuner properties
 	struct channelprops					m_channelprops;			// Channel properties
@@ -263,6 +266,7 @@ private:
 
 	// CONTROLS
 	//
+	std::unique_ptr<CButton>			m_button_ok;			// OK button
 	std::unique_ptr<CEdit>				m_edit_frequency;		// Frequency
 	std::unique_ptr<CEdit>				m_edit_channelname;		// Channel name
 	std::unique_ptr<CSpin>				m_spin_modulation;		// Channel modulation

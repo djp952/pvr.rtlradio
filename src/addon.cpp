@@ -1460,24 +1460,49 @@ int64_t addon::LengthLiveStream(void)
 
 PVR_ERROR addon::OpenDialogChannelAdd(kodi::addon::PVRChannel const& /*channel*/)
 {
+	// The channel settings dialog can't be shown when there is an active stream
+	if(m_pvrstream) {
+
+		// TODO: This message is terrible
+		kodi::gui::dialogs::OK::ShowAndGetInput(kodi::addon::GetLocalizedString(30405), "Modifying PVR Radio channel settings requires "
+			"exclusive access to the connected RTL-SDR tuner device.", "", "Active playback of PVR Radio streams must be stopped before continuing.");
+
+		return PVR_ERROR::PVR_ERROR_NO_ERROR;
+	}
+
+	// Create a copy of the current addon settings structure
+	struct settings settings = copy_settings();
+
 	try {
 
 		// Create and initialize the dialog box
-		std::unique_ptr<channeladd> dialog = channeladd::create();
-		dialog->DoModal();
+		std::unique_ptr<channeladd> adddialog = channeladd::create();
+		adddialog->DoModal();
 
 		// If the dialog was successful add the channel to the database
-		if(dialog->get_dialog_result()) {
-
-			connectionpool::handle dbhandle(m_connpool);	// Grab a database handle
+		if(adddialog->get_dialog_result()) {
 
 			// Retrieve the new channel properties from the dialog box
 			struct channelprops channelprops = {};
-			dialog->get_channel_properties(channelprops);
+			adddialog->get_channel_properties(channelprops);
 
-			// Only add the channel if it doesn't already exist in the database so that
-			// existing channel settings will be preserved
-			if(!channel_exists(dbhandle, channelprops)) add_channel(dbhandle, channelprops);
+			// Set up the tuner device properties
+			struct tunerprops tunerprops = {};
+			tunerprops.freqcorrection = settings.device_frequency_correction;
+
+			// Create and initialize the dialog box against a new signal meter instance
+			std::unique_ptr<channelsettings> settingsdialog = channelsettings::create(create_device(settings), tunerprops, channelprops, true);
+			settingsdialog->DoModal();
+
+			if(settingsdialog->get_dialog_result()) {
+
+				// Retrieve the updated channel properties from the dialog box
+				settingsdialog->get_channel_properties(channelprops);
+				
+				// Only add the channel if it doesn't already exist in the database
+				connectionpool::handle dbhandle(m_connpool);
+				if(!channel_exists(dbhandle, channelprops)) add_channel(dbhandle, channelprops);
+			}
 		}
 	}
 
@@ -1547,7 +1572,7 @@ PVR_ERROR addon::OpenDialogChannelSettings(kodi::addon::PVRChannel const& channe
 			throw string_exception("Unable to retrieve properties for channel ", channel.GetChannelName().c_str());
 
 		// Create and initialize the dialog box against a new signal meter instance
-		std::unique_ptr<channelsettings> dialog = channelsettings::create(create_device(settings), tunerprops, channelprops);
+		std::unique_ptr<channelsettings> dialog = channelsettings::create(create_device(settings), tunerprops, channelprops, false);
 		dialog->DoModal();
 
 		if(dialog->get_dialog_result()) {
