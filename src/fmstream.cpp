@@ -511,7 +511,7 @@ void fmstream::transfer(scalar_condition<bool>& started)
 		// the floating-point I/Q sample data for the demodulator to process
 		if(count == readsize) {
 
-			samples = std::unique_ptr<TYPECPX[]>(new TYPECPX[readsize]);
+			samples = std::unique_ptr<TYPECPX[]>(new TYPECPX[readsize / 2]);
 			for(int index = 0; index < m_demodulator->GetInputBufferLimit(); index++) {
 
 				// The demodulator expects the I/Q samples in the range of -32767.0 through +32767.0
