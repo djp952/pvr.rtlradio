@@ -31,6 +31,8 @@
 #include <queue>
 #include <thread>
 
+#include "fmdsp/demodulator.h"
+#include "fmdsp/fractresampler.h"
 #include "hddsp/nrsc5.h"
 
 #include "props.h"
@@ -172,6 +174,7 @@ private:
 
 		unsigned int				program;
 		size_t						count;
+		double						duration;
 		std::unique_ptr<int16_t[]>	data;
 	};
 
@@ -202,8 +205,11 @@ private:
 	// Member Variables
 
 	std::unique_ptr<rtldevice>			m_device;					// RTL-SDR device instance
-	nrsc5_t*							m_nrsc5;					// Demoudulator handle
+	nrsc5_t*							m_nrsc5;					// NRSC5 demodulator handle
+	std::unique_ptr<CDemodulator>		m_fmdemod;					// CuteSDR demodulator instance
+	std::unique_ptr<CFractResampler>	m_fmresampler;				// CuteSDR resampler instance
 
+	bool								m_hdaudio = false;			// HD Radio audio flag
 	std::string							m_muxname;					// Generated mux name
 	float								m_pcmgain;					// Output gain
 	double								m_dts{ STREAM_TIME_BASE };	// Current decode time stamp

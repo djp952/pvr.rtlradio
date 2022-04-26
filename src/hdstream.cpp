@@ -54,18 +54,38 @@ hdstream::hdstream(std::unique_ptr<rtldevice> device, struct tunerprops const& t
 {
 	// Initialize the RTL-SDR device instance
 	m_device->set_frequency_correction(tunerprops.freqcorrection + channelprops.freqcorrection);
-	m_device->set_sample_rate(1488375);
+	uint32_t samplerate = m_device->set_sample_rate(1488375);
 	m_device->set_center_frequency(channelprops.frequency);
 
 	// Adjust the device gain as specified by the channel properties
 	m_device->set_automatic_gain_control(channelprops.autogain);
 	if(channelprops.autogain == false) m_device->set_gain(channelprops.manualgain);
 
-	nrsc5_open_pipe(&m_nrsc5);							// Open NRSC5 in PIPE mode
-	nrsc5_set_mode(m_nrsc5, NRSC5_MODE_FM);				// Set for FM mode
-	nrsc5_set_callback(m_nrsc5, nrsc5_callback, this);	// Register the callback method
+	// Initialize the HD Radio demodulator
+	nrsc5_open_pipe(&m_nrsc5);
+	nrsc5_set_mode(m_nrsc5, NRSC5_MODE_FM);
+	nrsc5_set_callback(m_nrsc5, nrsc5_callback, this);
 
-	// Create a worker thread on which to perform the data transfer operations
+	// Initialize the wideband FM demodulator parameters
+	tDemodInfo demodinfo = {};
+	demodinfo.HiCutmax = 100000;
+	demodinfo.HiCut = 100000;
+	demodinfo.LowCut = -100000;
+	demodinfo.SquelchValue = -160;
+	demodinfo.WfmDownsampleQuality = DownsampleQuality::Medium;
+
+	// Initialize the wideband FM demodulator
+	m_fmdemod = std::unique_ptr<CDemodulator>(new CDemodulator());
+	//m_fmdemod->SetUSFmVersion(false);	
+	m_fmdemod->SetInputSampleRate(static_cast<TYPEREAL>(samplerate));
+	m_fmdemod->SetDemod(DEMOD_WFM, demodinfo);
+	m_fmdemod->SetDemodFreq(0);
+
+	// Initialize the output resampler
+	m_fmresampler = std::unique_ptr<CFractResampler>(new CFractResampler());
+	m_fmresampler->Init(m_fmdemod->GetInputBufferLimit());
+
+	// Create a worker thread on which to perform demodulation
 	scalar_condition<bool> started{ false };
 	m_worker = std::thread(&hdstream::transfer, this, std::ref(started));
 	started.wait_until_equals(true);
@@ -188,23 +208,20 @@ DEMUX_PACKET* hdstream::demuxread(std::function<DEMUX_PACKET*(int)> const& alloc
 	m_queue.pop();
 	lock.unlock();
 
-	// Calcuate the duration of the audio data; the sample rate is always 44.1KHz
-	double duration = (audiopacket->count / 2 / static_cast<double>(44100)) * STREAM_TIME_BASE;
-
 	// Allocate and initialize the DEMUX_PACKET
 	DEMUX_PACKET* packet = allocator(static_cast<int>(audiopacket->count * sizeof(int16_t)));
 	if(packet != nullptr) {
 
 		packet->iStreamId = STREAM_ID_AUDIO;
 		packet->iSize = static_cast<int>(audiopacket->count * sizeof(int16_t));
-		packet->duration = duration;
+		packet->duration = audiopacket->duration;
 		packet->dts = packet->pts = m_dts;
 
 		int16_t* data = reinterpret_cast<int16_t*>(&packet->pData[0]);
 		for(size_t index = 0; index < audiopacket->count; index++) data[index] = static_cast<int16_t>(audiopacket->data[index] * m_pcmgain);
-	}
 
-	m_dts += duration;
+		m_dts += packet->duration;
+	}
 
 	return packet;
 }
@@ -250,6 +267,8 @@ void hdstream::enumproperties(std::function<void(struct streamprops const& props
 	// AUDIO STREAM
 	//
 	streamprops audio = {};
+	// TODO: CuteSDR is always little endian, verify that the bit order matters for NRSC5, it
+	// may be better to swap the bytes on a (very rare?) big endian system
 	audio.codec = (get_system_endianness() == endianness::little) ? "pcm_s16le" : "pcm_s16be";
 	audio.pid = STREAM_ID_AUDIO;
 	audio.channels = 2;
@@ -315,24 +334,94 @@ void hdstream::nrsc5_callback(nrsc5_event_t const* event)
 {
 	bool	queued = false;		// Flag if an item was queued
 
+	// Output gain is applied during demux for this stream type
+	TYPEREAL const nogain = MPOW(10.0, (0.0f / 10.0));
+
 	std::unique_lock<std::mutex> lock(m_queuelock);
+
+	// NRSC5_EVENT_IQ
+	//
+	// If the HD Radio stream is not generating any audio packets, fall back on the
+	// analog signal using the Wideband FM demodulator
+	if((event->event == NRSC5_EVENT_IQ) && (!m_hdaudio)) {
+
+		// The byte count must be exact for the analog demodulator to work right
+		assert(event->iq.count == (m_fmdemod->GetInputBufferLimit() * 2));
+
+		// The FM demodulator expects the I/Q samples in the range of -32767.0 through +32767.0
+		// (32767.0 / 127.5) = 256.9960784313725
+		std::unique_ptr<TYPECPX[]> samples(new TYPECPX[event->iq.count / 2]);
+		for(int index = 0; index < m_fmdemod->GetInputBufferLimit(); index++) {
+
+			samples[index] = {
+
+			#ifdef FMDSP_USE_DOUBLE_PRECISION
+				(static_cast<TYPEREAL>(reinterpret_cast<uint8_t const*>(event->iq.data)[(index * 2)]) - 127.5) * 256.9960784313725,		// I
+				(static_cast<TYPEREAL>(reinterpret_cast<uint8_t const*>(event->iq.data)[(index * 2) + 1]) - 127.5) * 256.9960784313725,	// Q
+			#else
+				(static_cast<TYPEREAL>(reinterpret_cast<uint8_t const*>(event->iq.data)[(index * 2)]) - 127.5f) * 256.9960784313725f,		// I
+				(static_cast<TYPEREAL>(reinterpret_cast<uint8_t const*>(event->iq.data)[(index * 2) + 1]) - 127.5f) * 256.9960784313725f,	// Q
+			#endif
+			};
+		}
+
+		// Process the I/Q data, the original samples buffer can be reused/overwritten as it's processed
+		int audiopackets = m_fmdemod->ProcessData(m_fmdemod->GetInputBufferLimit(), samples.get(), samples.get());
+
+		// Remove any RDS data that was generated for now
+		tRDS_GROUPS rdsgroup = {};
+		while(m_fmdemod->GetNextRdsGroupData(&rdsgroup)) { /* DO NOTHING */ }
+
+		// Resample the audio data into an int16_t buffer. Use a fixed output rate of 44.1KHz to match
+		// NRSC5 and don't apply any output gain adjustments here, that will be done during demux
+		std::unique_ptr<int16_t[]> audio(new int16_t[audiopackets * 2]);
+		audiopackets = m_fmresampler->Resample(audiopackets, (m_fmdemod->GetOutputRate() / 44100),
+			samples.get(), reinterpret_cast<TYPESTEREO16*>(audio.get()), nogain);
+
+		// Generate and queue the demux_packet_t audio packet object
+		std::unique_ptr<demux_packet_t> packet = std::make_unique<demux_packet_t>();
+		packet->program = 0;
+		packet->count = static_cast<size_t>(audiopackets) * 2;
+		packet->duration = (audiopackets / static_cast<double>(44100)) * STREAM_TIME_BASE;
+		packet->data = std::move(audio);
+		m_queue.emplace(std::move(packet));
+		queued = true;
+	}
 
 	// NRSC5_EVENT_AUDIO
 	//
-	if(event->event == NRSC5_EVENT_AUDIO) {
+	else if(event->event == NRSC5_EVENT_AUDIO) {
 
-		// Filter out anything other than program zero for now
-		if(event->audio.program == 0) {
+		// When synchronization is first achieved, the samples will have already been
+		// processed by the analog Wideband FM implementation above; we want to ignore
+		// the first HD audio packet to produce the least audio disruption
+		//
+		// NOTE: This is not perfect as the number of audio samples generated from the 
+		// same I/Q samples differ; shouldn't be too hard to figure out a better sync
+		if(m_hdaudio) {
 
-			std::unique_ptr<demux_packet_t> packet = std::make_unique<demux_packet_t>();
-			packet->program = event->audio.program;
-			packet->count = event->audio.count;
-			packet->data = std::make_unique<int16_t[]>(event->audio.count);
-			memcpy(&packet->data[0], event->audio.data, event->audio.count * sizeof(int16_t));
-			m_queue.emplace(std::move(packet));
-			queued = true;
+			// Filter out anything other than program zero for now
+			if(event->audio.program == 0) {
+
+				std::unique_ptr<demux_packet_t> packet = std::make_unique<demux_packet_t>();
+				packet->program = event->audio.program;
+				packet->count = event->audio.count;
+				packet->duration = (event->audio.count / 2 / static_cast<double>(44100)) * STREAM_TIME_BASE;
+				packet->data = std::make_unique<int16_t[]>(event->audio.count);
+				memcpy(&packet->data[0], event->audio.data, event->audio.count * sizeof(int16_t));
+				m_queue.emplace(std::move(packet));
+				queued = true;
+			}
 		}
+
+		else m_hdaudio = true;				// HD Radio is synced and producing audio
 	}
+
+	// NRSC5_EVENT_LOST_SYNC
+	//
+	// If synchronization has been lost, fall back to using the analog signal
+	// until sync has been restored and a digital audio packet can be generated
+	else if(event->event == NRSC5_EVENT_LOST_SYNC) m_hdaudio = false;
 
 	if(queued) m_cv.notify_all();			// Notify queue was updated
 }
@@ -450,8 +539,9 @@ void hdstream::transfer(scalar_condition<bool>& started)
 	m_device->begin_stream();
 	started = true;
 
-	// Continuously read data from the device until cancel_async() has been called
-	try { m_device->read_async(read_callback_func, 32768); }
+	// Continuously read data from the device until cancel_async() has been called. Use
+	// the analog demodulator's packet size since it has to be precisely what's expected
+	try { m_device->read_async(read_callback_func, m_fmdemod->GetInputBufferLimit() * 2); }
 	catch(...) { m_worker_exception = std::current_exception(); }
 
 	m_stopped.store(true);					// Thread is stopped
