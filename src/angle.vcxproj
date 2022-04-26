@@ -102,10 +102,10 @@
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_CRT_SECURE_NO_DEPRECATE;NOMINMAX;ANGLE_IS_32_BIT_CPU;LIBANGLE_IMPLEMENTATION;ANGLE_EXPORT=;ANGLE_UTIL_EXPORT=;EGLAPI=;GL_APICALL=;GL_API=;GL_GLES_PROTOTYPES=1;EGL_EGL_PROTOTYPES=1;GL_GLEXT_PROTOTYPES=1;EGL_EGLEXT_PROTOTYPES=1;ANGLE_ENABLE_D3D11=1;ANGLE_ENABLE_ESSL=1;ANGLE_ENABLE_GLSL=1;ANGLE_ENABLE_HLSL=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>$(ProjectDir)compat;$(ProjectDir)..\depends\angle\include;$(ProjectDir)..\depends\angle\src;$(ProjectDir)..\depends\angle\src\common\third_party\base;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <LanguageStandard>stdcpp14</LanguageStandard>
       <PrecompiledHeaderFile>anglepch.h</PrecompiledHeaderFile>
       <DisableSpecificWarnings>4200;4244;4267;4305</DisableSpecificWarnings>
       <ForcedIncludeFiles>anglepch.h</ForcedIncludeFiles>
+      <LanguageStandard>stdcpp14</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -124,10 +124,10 @@
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_CRT_SECURE_NO_DEPRECATE;NOMINMAX;ANGLE_IS_64_BIT_CPU;LIBANGLE_IMPLEMENTATION;ANGLE_EXPORT=;ANGLE_UTIL_EXPORT=;EGLAPI=;GL_APICALL=;GL_API=;GL_GLES_PROTOTYPES=1;EGL_EGL_PROTOTYPES=1;GL_GLEXT_PROTOTYPES=1;EGL_EGLEXT_PROTOTYPES=1;ANGLE_ENABLE_D3D11=1;ANGLE_ENABLE_ESSL=1;ANGLE_ENABLE_GLSL=1;ANGLE_ENABLE_HLSL=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>$(ProjectDir)compat;$(ProjectDir)..\depends\angle\include;$(ProjectDir)..\depends\angle\src;$(ProjectDir)..\depends\angle\src\common\third_party\base;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <LanguageStandard>stdcpp14</LanguageStandard>
       <PrecompiledHeaderFile>anglepch.h</PrecompiledHeaderFile>
       <DisableSpecificWarnings>4200;4244;4267;4305</DisableSpecificWarnings>
       <ForcedIncludeFiles>anglepch.h</ForcedIncludeFiles>
+      <LanguageStandard>stdcpp14</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -148,10 +148,10 @@
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_CRT_SECURE_NO_DEPRECATE;NOMINMAX;ANGLE_IS_32_BIT_CPU;LIBANGLE_IMPLEMENTATION;ANGLE_EXPORT=;ANGLE_UTIL_EXPORT=;EGLAPI=;GL_APICALL=;GL_API=;GL_GLES_PROTOTYPES=1;EGL_EGL_PROTOTYPES=1;GL_GLEXT_PROTOTYPES=1;EGL_EGLEXT_PROTOTYPES=1;ANGLE_ENABLE_D3D11=1;ANGLE_ENABLE_ESSL=1;ANGLE_ENABLE_GLSL=1;ANGLE_ENABLE_HLSL=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>$(ProjectDir)compat;$(ProjectDir)..\depends\angle\include;$(ProjectDir)..\depends\angle\src;$(ProjectDir)..\depends\angle\src\common\third_party\base;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <LanguageStandard>stdcpp14</LanguageStandard>
       <PrecompiledHeaderFile>anglepch.h</PrecompiledHeaderFile>
       <DisableSpecificWarnings>4200;4244;4267;4305</DisableSpecificWarnings>
       <ForcedIncludeFiles>anglepch.h</ForcedIncludeFiles>
+      <LanguageStandard>stdcpp14</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -174,10 +174,10 @@
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_CRT_SECURE_NO_DEPRECATE;NOMINMAX;ANGLE_IS_64_BIT_CPU;LIBANGLE_IMPLEMENTATION;ANGLE_EXPORT=;ANGLE_UTIL_EXPORT=;EGLAPI=;GL_APICALL=;GL_API=;GL_GLES_PROTOTYPES=1;EGL_EGL_PROTOTYPES=1;GL_GLEXT_PROTOTYPES=1;EGL_EGLEXT_PROTOTYPES=1;ANGLE_ENABLE_D3D11=1;ANGLE_ENABLE_ESSL=1;ANGLE_ENABLE_GLSL=1;ANGLE_ENABLE_HLSL=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>$(ProjectDir)compat;$(ProjectDir)..\depends\angle\include;$(ProjectDir)..\depends\angle\src;$(ProjectDir)..\depends\angle\src\common\third_party\base;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <LanguageStandard>stdcpp14</LanguageStandard>
       <PrecompiledHeaderFile>anglepch.h</PrecompiledHeaderFile>
       <DisableSpecificWarnings>4200;4244;4267;4305</DisableSpecificWarnings>
       <ForcedIncludeFiles>anglepch.h</ForcedIncludeFiles>
+      <LanguageStandard>stdcpp14</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
