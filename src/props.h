@@ -73,6 +73,7 @@ struct fmprops {
 // Defines properties for the HD Radio digital signal processor
 struct hdprops {
 
+	bool			analogfallback;		// Flag if analog fallback should be used
 	float			outputgain;			// Output gain in Decibels
 };
 

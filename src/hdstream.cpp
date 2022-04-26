@@ -50,7 +50,8 @@ int const hdstream::STREAM_ID_AUDIO = 1;
 
 hdstream::hdstream(std::unique_ptr<rtldevice> device, struct tunerprops const& tunerprops,
 	struct channelprops const& channelprops, struct hdprops const& hdprops) :
-	m_device(std::move(device)), m_muxname(""), m_pcmgain(powf(10.0f, hdprops.outputgain / 10.0f))
+	m_device(std::move(device)), m_analogfallback(hdprops.analogfallback), m_muxname(""), 
+	m_pcmgain(powf(10.0f, hdprops.outputgain / 10.0f))
 {
 	// Initialize the RTL-SDR device instance
 	m_device->set_frequency_correction(tunerprops.freqcorrection + channelprops.freqcorrection);
@@ -343,7 +344,7 @@ void hdstream::nrsc5_callback(nrsc5_event_t const* event)
 	//
 	// If the HD Radio stream is not generating any audio packets, fall back on the
 	// analog signal using the Wideband FM demodulator
-	if((event->event == NRSC5_EVENT_IQ) && (!m_hdaudio)) {
+	if((event->event == NRSC5_EVENT_IQ) && (m_analogfallback) && (!m_hdaudio)) {
 
 		// The byte count must be exact for the analog demodulator to work right
 		assert(event->iq.count == (m_fmdemod->GetInputBufferLimit() * 2));
