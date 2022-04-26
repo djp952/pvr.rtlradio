@@ -84,6 +84,10 @@ msgctxt "#30111"
 msgid "Downsample quality"
 msgstr ""
 
+msgctxt "#30112"
+msgid "Enable analog signal audio fallback"
+msgstr ""
+
 msgctxt "#30200"
 msgid "Universal Serial Bus (USB)"
 msgstr ""
@@ -252,3 +256,6 @@ msgctxt "#30511"
 msgid "Specifies the Digital Signal Processor (DSP) downsample quality. When set to Fast, downsampling will be optimized for system performance. When set to Maximum, downsampling will be optimized for audio quality."
 msgstr ""
 
+msgctxt "#30512"
+msgid "When set to ON the Digital Signal Processor (DSP) will decode audio from the analog signal during initial synchronization or when the digitial signal has been lost. When set to OFF, audio will be muted during these events."
+msgstr ""

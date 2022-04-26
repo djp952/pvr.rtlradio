@@ -578,6 +578,7 @@ ADDON_STATUS addon::Create(void)
 			m_settings.fmradio_output_gain = kodi::GetSettingFloat("fmradio_output_gain", -3.0f);
 
 			// Load the HD Radio settings
+			m_settings.hdradio_enable_fallback = kodi::GetSettingBoolean("hdradio_enable_fallback", true);
 			m_settings.hdradio_output_gain = kodi::GetSettingFloat("hdradio_output_gain", -3.0f);
 
 			// Load the Weather Radio settings
@@ -597,6 +598,7 @@ ADDON_STATUS addon::Create(void)
 			log_info(__func__, ": m_settings.fmradio_output_samplerate         = ", m_settings.fmradio_output_samplerate);
 			log_info(__func__, ": m_settings.fmradio_rds_standard              = ", static_cast<int>(m_settings.fmradio_rds_standard));
 			log_info(__func__, ": m_settings.fmradio_sample_rate               = ", m_settings.fmradio_sample_rate);
+			log_info(__func__, ": m_settings.hdradio_enable_fallback           = ", m_settings.hdradio_enable_fallback);
 			log_info(__func__, ": m_settings.hdradio_output_gain               = ", m_settings.hdradio_output_gain);
 			log_info(__func__, ": m_settings.interface_prepend_channel_numbers = ", m_settings.interface_prepend_channel_numbers);
 			log_info(__func__, ": m_settings.wxradio_output_gain               = ", m_settings.wxradio_output_gain);
@@ -833,16 +835,28 @@ ADDON_STATUS addon::SetSetting(std::string const& settingName, kodi::CSettingVal
 		}
 	}
 
+	// hdradio_enable_fallback
+	//
+	else if(settingName == "hdradio_enable_fallback") {
+
+		bool bvalue = settingValue.GetBoolean();
+		if(bvalue != m_settings.hdradio_enable_fallback) {
+
+			m_settings.hdradio_enable_fallback = bvalue;
+			log_info(__func__, ": setting hdradio_enable_fallback changed to ", bvalue);
+		}
+	}
+
 	// hdradio_output_gain
 	//
 	else if(settingName == "hdradio_output_gain") {
 
-	float fvalue = settingValue.GetFloat();
-	if(fvalue != m_settings.hdradio_output_gain) {
+		float fvalue = settingValue.GetFloat();
+		if(fvalue != m_settings.hdradio_output_gain) {
 
-		m_settings.hdradio_output_gain = fvalue;
-		log_info(__func__, ": setting hdradio_output_gain changed to ", fvalue, "dB");
-	}
+			m_settings.hdradio_output_gain = fvalue;
+			log_info(__func__, ": setting hdradio_output_gain changed to ", fvalue, "dB");
+		}
 	}
 
 	// wxradio_sample_rate
@@ -1671,11 +1685,13 @@ bool addon::OpenLiveStream(kodi::addon::PVRChannel const& channel)
 
 			// Set up the HD Radio digital signal processor properties
 			struct hdprops hdprops = {};
+			hdprops.analogfallback = settings.hdradio_enable_fallback;
 			hdprops.outputgain = settings.hdradio_output_gain;
 
 			// Log information about the stream for diagnostic purposes
 			log_info(__func__, ": Creating hdstream for channel \"", channelprops.name, "\"");
 			log_info(__func__, ": tunerprops.freqcorrection = ", tunerprops.freqcorrection, " PPM");
+			log_info(__func__, ": hdprops.analogfallback = ", (hdprops.analogfallback) ? "true" : "false");
 			log_info(__func__, ": hdprops.outputgain = ", hdprops.outputgain, " dB");
 			log_info(__func__, ": channelprops.frequency = ", channelprops.frequency, " Hz");
 			log_info(__func__, ": channelprops.subchannel = ", channelprops.subchannel);

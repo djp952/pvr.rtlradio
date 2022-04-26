@@ -209,6 +209,7 @@ private:
 	std::unique_ptr<CDemodulator>		m_fmdemod;					// CuteSDR demodulator instance
 	std::unique_ptr<CFractResampler>	m_fmresampler;				// CuteSDR resampler instance
 
+	bool const							m_analogfallback = false;	// Flag for analog signal fallback
 	bool								m_hdaudio = false;			// HD Radio audio flag
 	std::string							m_muxname;					// Generated mux name
 	float								m_pcmgain;					// Output gain
