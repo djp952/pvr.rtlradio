@@ -28,7 +28,6 @@
 #include <memory.h>
 
 #include "align.h"
-#include "endianness.h"
 #include "string_exception.h"
 
 #pragma warning(push, 4)
@@ -268,9 +267,7 @@ void hdstream::enumproperties(std::function<void(struct streamprops const& props
 	// AUDIO STREAM
 	//
 	streamprops audio = {};
-	// TODO: CuteSDR is always little endian, verify that the bit order matters for NRSC5, it
-	// may be better to swap the bytes on a (very rare?) big endian system
-	audio.codec = (get_system_endianness() == endianness::little) ? "pcm_s16le" : "pcm_s16be";
+	audio.codec = "pcm_s16le";
 	audio.pid = STREAM_ID_AUDIO;
 	audio.channels = 2;
 	audio.samplerate = 44100;
