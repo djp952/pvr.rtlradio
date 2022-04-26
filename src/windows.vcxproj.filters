@@ -509,9 +509,6 @@
     <ClInclude Include="compat\faad2-hdc\win32_ver.h">
       <Filter>External Libraries\faad2-hdc\Header Files\compat\faad2-hdc</Filter>
     </ClInclude>
-    <ClInclude Include="endianness.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">

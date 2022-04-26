@@ -261,7 +261,6 @@
     <ClInclude Include="database.h" />
     <ClInclude Include="dbtypes.h" />
     <ClInclude Include="channelsettings.h" />
-    <ClInclude Include="endianness.h" />
     <ClInclude Include="fmdsp\datatypes.h" />
     <ClInclude Include="fmdsp\demodulator.h" />
     <ClInclude Include="fmdsp\downconvert.h" />
