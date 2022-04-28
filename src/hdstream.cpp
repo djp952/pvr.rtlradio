@@ -209,18 +209,17 @@ DEMUX_PACKET* hdstream::demuxread(std::function<DEMUX_PACKET*(int)> const& alloc
 	lock.unlock();
 
 	// Allocate and initialize the DEMUX_PACKET
-	DEMUX_PACKET* packet = allocator(static_cast<int>(audiopacket->count * sizeof(int16_t)));
+	DEMUX_PACKET* packet = allocator(audiopacket->size);
 	if(packet != nullptr) {
 
-		packet->iStreamId = STREAM_ID_AUDIO;
-		packet->iSize = static_cast<int>(audiopacket->count * sizeof(int16_t));
+		packet->iStreamId = audiopacket->streamid;
+		packet->iSize = audiopacket->size;
 		packet->duration = audiopacket->duration;
-		packet->dts = packet->pts = m_dts;
+		packet->dts = audiopacket->dts;
+		packet->pts = audiopacket->pts;
 
-		int16_t* data = reinterpret_cast<int16_t*>(&packet->pData[0]);
-		for(size_t index = 0; index < audiopacket->count; index++) data[index] = static_cast<int16_t>(audiopacket->data[index] * m_pcmgain);
-
-		m_dts += packet->duration;
+		if(audiopacket->size > 0)
+			memcpy(packet->pData, audiopacket->data.get(), audiopacket->size);
 	}
 
 	return packet;
@@ -370,18 +369,22 @@ void hdstream::nrsc5_callback(nrsc5_event_t const* event)
 		tRDS_GROUPS rdsgroup = {};
 		while(m_fmdemod->GetNextRdsGroupData(&rdsgroup)) { /* DO NOTHING */ }
 
-		// Resample the audio data into an int16_t buffer. Use a fixed output rate of 44.1KHz to match
-		// NRSC5 and don't apply any output gain adjustments here, that will be done during demux
-		std::unique_ptr<int16_t[]> audio(new int16_t[audiopackets * 2]);
+		// Resample the audio data into a TYPESTEREO16 buffer. Output rate is always 44.1KHz
+		size_t audiosize = audiopackets * sizeof(TYPESTEREO16);
+		std::unique_ptr<uint8_t[]> audiodata(new uint8_t[audiosize]);
 		audiopackets = m_fmresampler->Resample(audiopackets, (m_fmdemod->GetOutputRate() / 44100),
-			samples.get(), reinterpret_cast<TYPESTEREO16*>(audio.get()), nogain);
+			samples.get(), reinterpret_cast<TYPESTEREO16*>(audiodata.get()), static_cast<TYPEREAL>(m_pcmgain));
 
-		// Generate and queue the demux_packet_t audio packet object
+		// Generate and queue the audio packet
 		std::unique_ptr<demux_packet_t> packet = std::make_unique<demux_packet_t>();
-		packet->program = 0;
-		packet->count = static_cast<size_t>(audiopackets) * 2;
+		packet->streamid = STREAM_ID_AUDIO;
+		packet->size = audiopackets * sizeof(TYPESTEREO16);
 		packet->duration = (audiopackets / static_cast<double>(44100)) * STREAM_TIME_BASE;
-		packet->data = std::move(audio);
+		packet->dts = packet->pts = m_dts;
+		packet->data = std::move(audiodata);
+
+		m_dts += packet->duration;
+
 		m_queue.emplace(std::move(packet));
 		queued = true;
 	}
@@ -401,12 +404,25 @@ void hdstream::nrsc5_callback(nrsc5_event_t const* event)
 			// Filter out anything other than program zero for now
 			if(event->audio.program == 0) {
 
+				// Allocate an initialize a heap buffer and copy the audio data into it
+				size_t audiosize = event->audio.count * sizeof(int16_t);
+				std::unique_ptr<uint8_t[]> audiodata(new uint8_t[audiosize]);
+
+				// Apply the specified PCM output gain while copying the audio data into the packet buffer
+				int16_t* pcmdata = reinterpret_cast<int16_t*>(audiodata.get());
+				for(size_t index = 0; index < event->audio.count; index++) 
+					pcmdata[index] = static_cast<int16_t>(event->audio.data[index] * m_pcmgain);
+
+				// Generate and queue the audio packet
 				std::unique_ptr<demux_packet_t> packet = std::make_unique<demux_packet_t>();
-				packet->program = event->audio.program;
-				packet->count = event->audio.count;
-				packet->duration = (event->audio.count / 2 / static_cast<double>(44100)) * STREAM_TIME_BASE;
-				packet->data = std::make_unique<int16_t[]>(event->audio.count);
-				memcpy(&packet->data[0], event->audio.data, event->audio.count * sizeof(int16_t));
+				packet->streamid = STREAM_ID_AUDIO;
+				packet->size = static_cast<int>(audiosize);
+				packet->duration = (event->audio.count / 2.0 / 44100.0) * STREAM_TIME_BASE;
+				packet->dts = packet->pts = m_dts;
+				packet->data = std::move(audiodata);
+
+				m_dts += packet->duration;
+
 				m_queue.emplace(std::move(packet));
 				queued = true;
 			}

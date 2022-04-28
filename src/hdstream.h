@@ -169,13 +169,15 @@ private:
 
 	// demux_packet_t
 	//
-	// Defines the type of an audio packet
+	// Defines the conents of a queued demux packet
 	struct demux_packet_t {
 
-		unsigned int				program;
-		size_t						count;
-		double						duration;
-		std::unique_ptr<int16_t[]>	data;
+		int							streamid = 0;
+		int							size = 0;
+		double						duration = 0;
+		double						dts = 0;
+		double						pts = 0;
+		std::unique_ptr<uint8_t[]>	data;
 	};
 
 	// demux_queue_t
