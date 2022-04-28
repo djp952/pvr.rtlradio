@@ -1,7 +1,7 @@
 v1.1.0 (2022.04.xx)
   - Update libusb dependency to v1.0.25
   - Update rtl-sdr dependency to 20220119
-  - Update SQLite database engine to v3.38.2
+  - Update SQLite database engine to v3.38.3
   - Capture the BACKSPACE keypress in the Add Channel dialog to behave as a BACKSPACE rather than 'Previous Dialog'
   - (Android) Add support for locally attached USB RTL-SDR devices
   - Add channel-specific frequency correction fine tuning in Channel Settings dialog
