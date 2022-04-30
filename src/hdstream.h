@@ -149,10 +149,10 @@ private:
 	hdstream(hdstream const&) = delete;
 	hdstream& operator=(hdstream const&) = delete;
 
-	// MAX_SAMPLE_QUEUE
+	// MAX_PACKET_QUEUE
 	//
-	// Maximum number of queued sample sets from device
-	static size_t const MAX_SAMPLE_QUEUE;
+	// Maximum number of queued demux packets
+	static size_t const MAX_PACKET_QUEUE;
 
 	// STREAM_ID_AUDIO
 	//
@@ -216,6 +216,8 @@ private:
 	std::string							m_muxname;					// Generated mux name
 	float								m_pcmgain;					// Output gain
 	double								m_dts{ STREAM_TIME_BASE };	// Current decode time stamp
+	std::atomic<float>					m_mer{ 0 };					// Current modulation error ratio
+	std::atomic<float>					m_ber{ 0 };					// Current bit erorr rate
 
 	// STREAM CONTROL
 	//

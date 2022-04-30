@@ -32,6 +32,11 @@
 
 #pragma warning(push, 4)
 
+// hdstream::MAX_PACKET_QUEUE
+//
+// Maximum number of queued demux packets
+size_t const hdstream::MAX_PACKET_QUEUE = 200;		// ~2sec analog / ~10sec digital
+
 // hdstream::STREAM_ID_AUDIO
 //
 // Stream identifier for the audio output stream
@@ -190,7 +195,8 @@ void hdstream::demuxflush(void)
 DEMUX_PACKET* hdstream::demuxread(std::function<DEMUX_PACKET*(int)> const& allocator)
 {
 	// Wait up to 100ms for there to be a packet available for processing, don't use
-	// an unconditional wait here; unlike analog radio there won't always be data
+	// an unconditional wait here; unlike analog radio there may not be data until
+	// the digitial signal has been synchronized
 	std::unique_lock<std::mutex> lock(m_queuelock);
 	if(!m_cv.wait_for(lock, std::chrono::milliseconds(100), [&]() -> bool { return ((m_queue.size() > 0) || m_stopped.load() == true); }))
 		return allocator(0);
@@ -204,25 +210,27 @@ DEMUX_PACKET* hdstream::demuxread(std::function<DEMUX_PACKET*(int)> const& alloc
 	}
 
 	// Pop off the topmost object from the queue<> and release the lock
-	std::unique_ptr<demux_packet_t> audiopacket(std::move(m_queue.front()));
+	std::unique_ptr<demux_packet_t> packet(std::move(m_queue.front()));
 	m_queue.pop();
 	lock.unlock();
 
+	// The packet queue should never have a null packet in it
+	assert(packet);
+	if(!packet) return allocator(0);
+
 	// Allocate and initialize the DEMUX_PACKET
-	DEMUX_PACKET* packet = allocator(audiopacket->size);
-	if(packet != nullptr) {
+	DEMUX_PACKET* demuxpacket = allocator(packet->size);
+	if(demuxpacket != nullptr) {
 
-		packet->iStreamId = audiopacket->streamid;
-		packet->iSize = audiopacket->size;
-		packet->duration = audiopacket->duration;
-		packet->dts = audiopacket->dts;
-		packet->pts = audiopacket->pts;
-
-		if(audiopacket->size > 0)
-			memcpy(packet->pData, audiopacket->data.get(), audiopacket->size);
+		demuxpacket->iStreamId = packet->streamid;
+		demuxpacket->iSize = packet->size;
+		demuxpacket->duration = packet->duration;
+		demuxpacket->dts = packet->dts;
+		demuxpacket->pts = packet->pts;
+		if(packet->size > 0) memcpy(demuxpacket->pData, packet->data.get(), packet->size);
 	}
 
-	return packet;
+	return demuxpacket;
 }
 
 //---------------------------------------------------------------------------
@@ -331,9 +339,6 @@ void hdstream::nrsc5_callback(nrsc5_event_t const* event)
 {
 	bool	queued = false;		// Flag if an item was queued
 
-	// Output gain is applied during demux for this stream type
-	TYPEREAL const nogain = MPOW(10.0, (0.0f / 10.0));
-
 	std::unique_lock<std::mutex> lock(m_queuelock);
 
 	// NRSC5_EVENT_IQ
@@ -391,14 +396,12 @@ void hdstream::nrsc5_callback(nrsc5_event_t const* event)
 
 	// NRSC5_EVENT_AUDIO
 	//
+	// A digital stream audio packet has been generated
 	else if(event->event == NRSC5_EVENT_AUDIO) {
 
 		// When synchronization is first achieved, the samples will have already been
 		// processed by the analog Wideband FM implementation above; we want to ignore
-		// the first HD audio packet to produce the least audio disruption
-		//
-		// NOTE: This is not perfect as the number of audio samples generated from the 
-		// same I/Q samples differ; shouldn't be too hard to figure out a better sync
+		// the first HD audio packet to produce the least audio disruption (imperfect)
 		if(m_hdaudio) {
 
 			// Filter out anything other than program zero for now
@@ -437,7 +440,40 @@ void hdstream::nrsc5_callback(nrsc5_event_t const* event)
 	// until sync has been restored and a digital audio packet can be generated
 	else if(event->event == NRSC5_EVENT_LOST_SYNC) m_hdaudio = false;
 
-	if(queued) m_cv.notify_all();			// Notify queue was updated
+	// NRSC5_EVENT_BER
+	//
+	// Reporting the current bit error rate
+	else if(event->event == NRSC5_EVENT_BER) m_ber.store(event->ber.cber);
+
+	// NRSC5_EVENT_MER
+	//
+	// Reporting the current modulatation error ratio
+	else if(event->event == NRSC5_EVENT_MER) {
+
+		// Store the higher of the two values instead of the mean, some HD radio stations
+		// are allowed to transmit one sideband at a higher power than the other
+		m_mer.store(std::max(event->mer.lower, event->mer.upper));
+	}
+
+	if(queued) {
+
+		// If the queue size has exceeded the maximum, the packets aren't
+		// being processed quickly enough by the demux read function
+		if(m_queue.size() > MAX_PACKET_QUEUE) {
+
+			m_queue = demux_queue_t();		// Replace the queue<>
+
+			// Push a DEMUX_SPECIALID_STREAMCHANGE packet into the new queue
+			std::unique_ptr<demux_packet_t> packet = std::make_unique<demux_packet_t>();
+			packet->streamid = DEMUX_SPECIALID_STREAMCHANGE;
+			m_queue.push(std::move(packet));
+
+			// Reset the decode time stamp
+			m_dts = STREAM_TIME_BASE;
+		}
+
+		m_cv.notify_all();			// Notify queue was updated
+	}
 }
 
 //---------------------------------------------------------------------------
@@ -509,7 +545,7 @@ long long hdstream::seek(long long /*position*/, int /*whence*/)
 
 std::string hdstream::servicename(void) const
 {
-	return std::string("TODO");
+	return std::string(m_hdaudio ? "Hybrid Digital (HD) Radio" : "Wideband FM radio");
 }
 
 //---------------------------------------------------------------------------
@@ -523,7 +559,39 @@ std::string hdstream::servicename(void) const
 
 void hdstream::signalquality(int& quality, int& snr) const
 {
-	quality = snr = 0;
+	// If digital audio has not been synchronized yet and producing data,
+	// fall back on the same logic that Wideband FM Radio uses here
+	if((!m_hdaudio) && (m_analogfallback)) {
+
+		TYPEREAL demodquality = 0;
+		TYPEREAL demodsnr = 0;
+
+		m_fmdemod->GetSignalLevels(demodquality, demodsnr);
+
+		// For wideband FM, adjust the range such that 80% is nominal for
+		// signal quality and 60% is nominal for signal-to-noise; this 
+		// adjustment is based on observation and (perceived) output quality
+		quality = std::max(0, std::min(100, static_cast<int>(100.0 * (demodquality / 0.80))));
+		snr = std::max(0, std::min(100, static_cast<int>(100.0 * (demodsnr / 0.60))));
+	}
+
+	else {
+
+		// For signal quality, use the NRSC5 Bit Error Rate (BER). A BER of zero
+		// implies ideal signal quality. I have no idea what the BER tolerance
+		// is for decoding HD Radio, but from observation a BER with a value
+		// higher than 0.1 is effectively undecodable so let's call that zero
+		float ber = m_ber.load();
+		ber = std::min(std::max(ber, 0.0f), 0.1f) * 100.0f;
+		quality = static_cast<int>(((ber - 100.0f) * 100.0f) / -100.0f);
+
+		// For signal-to-noise ratio, use the NRSC5 Modulation Error Ratio (MER).
+		// A MER of 14 is apparently the ideal for HD Radio, so for now use
+		// a linear scale from (0...13) to define the SNR percentage
+		float mer = m_mer.load();
+		mer = std::max(std::min(13.0f, mer), 0.0f);
+		snr = static_cast<int>((mer * 100.0f) / 13.0f);
+	}
 }
 
 //---------------------------------------------------------------------------
