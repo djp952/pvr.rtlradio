@@ -176,7 +176,7 @@
 
         <setting id="hdradio_enable_fallback" type="boolean" label="30112" help="30512">
           <level>0</level>
-          <default>true</default>
+          <default>false</default>
           <control type="toggle"/>
         </setting>
 

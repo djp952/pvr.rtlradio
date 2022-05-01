@@ -35,6 +35,14 @@
 | PCM output sample rate | Specifies the Digital Signal Processor PCM output sample rate. | __`48.0 KHz`__ |
 | PCM output gain | Specifies the Digital Signal Processor (DSP) PCM output audio gain. Lower gain values will reduce the perceived volume of the audio, whereas higher gain values will increase the perceived volume of the audio. | __`-3.0 dB`__ |
    
+### HD Radio
+> Configures Hybrid Digital (HD) Radio settings   
+   
+| Setting | Description | Default |
+| :-- | :-- | :--: |
+| Enable analog signal audio fallback | When set to __`ON`__ the Digital Signal Processor (DSP) will decode audio from the analog signal during initial synchronization or when the digitial signal has been lost. When set to __`OFF`__, audio will be muted during these events. | __`OFF`__ |
+| PCM output gain | Specifies the Digital Signal Processor (DSP) PCM output audio gain. Lower gain values will reduce the perceived volume of the audio, whereas higher gain values will increase the perceived volume of the audio. | __`-3.0 dB`__ |
+   
 ### Weather Radio
 > Configures Weather Radio settings   
    
