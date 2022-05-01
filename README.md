@@ -1,15 +1,18 @@
 # __pvr.rtlradio__  
 
-Realtek RTL2832U RTL-SDR FM Radio PVR Client   
+Realtek RTL2832U RTL-SDR Radio PVR Client   
    
 Copyright (C)2020-2022 Michael G. Brehm    
 [MIT LICENSE](https://opensource.org/licenses/MIT)   
    
-Concept based on [__pvr.rtl.radiofm__](https://github.com/AlwinEsch/pvr.rtl.radiofm) - Copyright (C) 2015-2018 Alwin Esch   
-Wideband FM Digital Signal Processing provided by [__CuteSDR__](https://sourceforge.net/projects/cutesdr/) - Copyright (C) 2010 Moe Wheatley   
+Concept based on [__pvr.rtl.radiofm__](https://github.com/AlwinEsch/pvr.rtl.radiofm) - Copyright (C)2015-2018 Alwin Esch   
+FM Radio Digital Signal Processing derived from [__CuteSDR__](https://sourceforge.net/projects/cutesdr/) - Copyright (C)2010 Moe Wheatley   
+Hybrid Digital (HD) Radio Digital Signal Processing derived from [__NRSC5__](https://github.com/theori-io/nrsc5)   
    
-[__LIBUSB__](https://libusb.info/) - Copyright (C)2012-2020 libusb   
-[__RAPIDJSON__](https://rapidjson.org/) - Copyright (C)2015 THL A29 Limited, a Tencent company, and Milo Yip   
+[__FAAD2__](https://sourceforge.net/projects/faac/) - Copyright (C) 2003-2005 M. Bakker, Nero AG   
+[__FFTW__](https://www.fftw.org/) - Copyright (C) 2003, 2007-11 Matteo Frigo, Copyright (C) 2003, 2007-11 Massachusetts Institute of Technology   
+[__LIBUSB__](https://libusb.info/) - Copyright (C) 2012-2022 libusb   
+[__RAPIDJSON__](https://rapidjson.org/) - Copyright (C) 2015 THL A29 Limited, a Tencent company, and Milo Yip   
 [__RTL-SDR__](https://osmocom.org/projects/rtl-sdr/wiki/Rtl-sdr/) - Copyright (C)2012-2013 Steve Markgraf, Dimitri Stolnikov   
    
 ## BUILD ENVIRONMENT
@@ -126,12 +129,18 @@ Examples:
    
 ## ADDITIONAL LICENSE INFORMATION
    
+**FAAD2**   
+The FAAD2 library is licensed under the GNU Public License, v2 [(GPLv2)](https://www.gnu.org/licenses/old-licenses/gpl-2.0.html). The overarching license model for this project [(MIT)](https://opensource.org/licenses/MIT/) is assumed to be compatible with GPLv2 given the [commentary](https://www.gnu.org/licenses/license-list.en.html#GPLCompatibleLicenses) on this matter.
+   
+**FFTW**   
+The FFTW library is licensed under the GNU Public License, v2 [(GPLv2)](https://www.gnu.org/licenses/old-licenses/gpl-2.0.html). The overarching license model for this project [(MIT)](https://opensource.org/licenses/MIT/) is assumed to be compatible with GPLv2 given the [commentary](https://www.gnu.org/licenses/license-list.en.html#GPLCompatibleLicenses) on this matter.
+   
 **LIBUSB**   
 [https://www.gnu.org/licenses/gpl-faq.html#LGPLStaticVsDynamic](https://www.gnu.org/licenses/gpl-faq.html#LGPLStaticVsDynamic)   
 This library statically links with code licensed under the GNU Lesser Public License, v2.1 [(LGPLv2.1)](https://www.gnu.org/licenses/old-licenses/lgpl-2.1.en.html).  As per the terms of that license, the maintainer (djp952) must provide the library in an object (or source) format and allow the user to modify and relink against a different version(s) of the LGPL 2.1 libraries.  To use a different or custom version of libusb the user may alter the contents of the depends/libusb source directory prior to building this library.   
    
 **RTL-SDR**   
-The RTL-SDR library is licensed under the GNU Public License, v2 [(GPLv2)](https://www.gnu.org/licenses/old-licenses/gpl-2.0.html). The overarching license model for this project is assumed to be compatible with GPLv2 given the [(commentary)](https://www.gnu.org/licenses/license-list.en.html#GPLCompatibleLicenses) on this matter. If this project is deemed to be incompatible or otherwise in violation of the GPLv2 license, please contact the maintainer (djp952) so that appropriate remedies can be applied.
+The RTL-SDR library is licensed under the GNU Public License, v2 [(GPLv2)](https://www.gnu.org/licenses/old-licenses/gpl-2.0.html). The overarching license model for this project [(MIT)](https://opensource.org/licenses/MIT/) is assumed to be compatible with GPLv2 given the [commentary](https://www.gnu.org/licenses/license-list.en.html#GPLCompatibleLicenses) on this matter.
    
 **XCODE AND APPLE SDKS AGREEMENT**   
 The instructions provided above indirectly reference the use of intellectual material that is the property of Apple, Inc.  This intellectual material is not FOSS (Free and Open Source Software) and by using it you agree to be bound by the terms and conditions set forth by Apple, Inc. in the [Xcode and Apple SDKs Agreement](https://www.apple.com/legal/sla/docs/xcode.pdf).

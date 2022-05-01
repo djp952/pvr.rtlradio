@@ -19,9 +19,11 @@
 		<summary lang="en_GB">RTL-SDR Radio PVR Client</summary>
 		<description lang="en_GB">Realtek RTL28xxu Software Defined Radio (SDR) PVR client
 
-Concept based on project pvr.rtl.radiofm (https://github.com/AlwinEsch/pvr.rtl.radiofm) - Copyright (C)2015-2018 Alwin Esch
+Concept based on project pvr.rtl.radiofm (https://github.com/AlwinEsch/pvr.rtl.radiofm) - Copyright (C) 2015-2018 Alwin Esch
 
-FM Digital Signal Processing provided by CuteSDR (https://sourceforge.net/projects/cutesdr) - Copyright (C)2010 Moe Wheatley</description>
+FM Radio Digital Signal Processing derived from CuteSDR (https://sourceforge.net/projects/cutesdr) - Copyright (C) 2010 Moe Wheatley
+
+Hybrid Digital (HD) Radio Digital Signal Processing derived from NRSC5 (https://github.com/theori-io/nrsc5)</description>
 		<news><#= File.ReadAllText(this.Host.ResolvePath(this.Host.ResolveParameterValue("", "", "changelogtxt"))) #></news>
 		<license>MIT License (https://opensource.org/licenses/MIT)</license>
 		<website>https://github.com/djp952/pvr.rtlradio/wiki</website>
