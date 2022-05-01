@@ -317,6 +317,19 @@ bool channeladd::OnAction(ADDON_ACTION actionId)
 		handled = true;
 	}
 
+	// ADDON_ACTION_SELECT_ITEM --> Add
+	//
+	else if(actionId == ADDON_ACTION_SELECT_ITEM) {
+
+		// If the user has entered a complete frequency and pressed ENTER
+		// (or the equivalent), close the dialog as if the Add button was pressed
+		if(get_frequency(m_label_input->GetLabel(), m_channelprops.frequency)) {
+
+			m_result = handled = true;
+			Close();
+		}
+	}
+
 	// Skip actions that we didn't specifically handle (like mouse events)
 	if(handled) {
 

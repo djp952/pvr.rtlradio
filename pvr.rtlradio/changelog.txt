@@ -7,7 +7,7 @@ v1.1.0 (2022.05.xx)
   - Add channel-specific frequency correction fine tuning in Channel Settings dialog
   - Remove global Device 'Input sample rate' setting in favor of separate settings for FM Radio and Weather Radio
   - Rename channel groups from 'FM Radio'/'HD Radio'/'Weather Radio' to 'FM channels'/'HD channels'/'Weather channels'
-  - Capture the BACKSPACE keypress in the Add Channel dialog to behave as a BACKSPACE rather than 'Previous Dialog'
+  - Improve behavior of BACKSPACE and ENTER keypresses in the Add Channel dialog to be more intuitive
   - Chain the channel settings dialog after the channel add dialog to allow the user to set the channel modulation and settings before persisting
   - Fix bug causing constant RBDS call sign recalculations if Program Identification (PI) code falls into a special case category
   - (rtl_tcp) Reset the RTL-SDR device buffers prior to reading each time a stream is created rather than just once at startup
