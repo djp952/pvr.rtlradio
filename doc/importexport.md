@@ -14,26 +14,31 @@ Selecting this client specific setting will open a folder browser dialog allows 
 ### Clear channel data
 Selecting this client specific setting will clear all existing channel data from the PVR database.
 
+### Hybrid Digital (HD) Radio channels (North America)
+[Hybrid Digital (HD) Radio](https://hdradio.com/) channels are supported by the PVR and may be included as part of the channel import. The PVR allows for both the analog and digital signals to coexist by using separate channel numbers. Wideband FM Radio channels will be numbered by the frequency specified in Megahertz (101.9, for example), whereas Hybrid Digital (HD) Radio channels will be numbered by the frequency specified in 100 Kilohertz (1019, for example).
+
 ### Weather Radio channels (North America)
 [NOAA Weather Radio (US)](https://www.weather.gov/nwr&ln_desc=NOAA+Weather+Radio/), [Weatheradio (Canada)](https://www.canada.ca/en/environment-climate-change/services/weatheradio.html), and SARMEX (Mexico) channels are supported by the PVR and may be included as part of the channel import. Weather Radio channels must have a specified frequency between 162400000 (162.400MHz) and 162550000 (162.550MHz), but otherwise the same __JSON Schema__ requirements apply.
 
 #### JSON Schema
 The channel data JSON file must contain a single unnamed array object that in turn contains one or more unnamed objects that describe each channel. Each unnamed channel object may include the following elements:
    
-| Element | Type|Required | Description | Default |
+| Element | Type |Required | Description | Default |
 | :-- | :-- | :-- | :-- | :--: |
-| frequency | Integer  | Yes | Specifies the channel frequency in Hertz. | __`N/A`__ |
+| frequency | Integer  | __Yes__ | Specifies the channel frequency in Hertz. | __`N/A`__ |
 | subchannel | Integer | No | Reserved for future use - must be set to __`0`__. | __`0`__ |
-| hidden | Integer | No | Specifies that the channel should be reported as hidden to Kodi.  Set to __`1`__ to report the channel as hidden, __`0`__ to report the channel as visible.| __`0`__ |
+| modulation | String | No | Specifies the channel modulation. Set to __`"FM"`__ / __`"FMRADIO"`__ for analog Wideband FM, __`"HD"`__ / __`"HDRADIO"`__ for Hybrid Digital (HD) Radio, or __`"WX"`__ / __`"WEATHER"`__ for Weather Radio. | __`"FM"`__
+| hidden | Integer | No | Specifies that the channel should be reported as hidden to Kodi. Set to __`1`__ to report the channel as hidden, __`0`__ to report the channel as visible.| __`0`__ |
 | name | String | No | Specifies the name of the channel to report to Kodi. | __`""`__ |
 | autogain | Integer | No | Specifies that tuner automatic gain control (AGC) should be used for this channel. Set to __`1`__ to enable AGC, __`0`__ to disable AGC. | __`0`__ |
 | manualgain | Integer | No | Specifies that a manual antenna gain should used for this channel. Specified in tenths of a decibel. For example, to set manual gain of 32.8dB set to __`328`__. Ignored if autogain is set to __`1`__. <sup>1</sup> | __`0`__ |
+| freqcorrection | Integer | No | Specifies a channel-specific frequency correction calibration offset (PPM) to apply in additional to the globally set value in the PVR __Device__ settings. | __`0`__
 | logourl | String | No | Specifies the URL to a logo image to report to Kodi for display with this channel. | __`null`__ |
 
 > <sup>1</sup> Valid manual gain values differ among RTL-SDR tuner devices. The PVR will automatically adjust what is specified here to the nearest valid value for the detected device. See below for a table that indicates the valid manual gain values for common RTL-SDR tuner devices.   
 ***
 #### Example JSON
-This example JSON describes four channels from the Baltimore, Maryland (US) region using various options. WDCH-FM 99.1; WLIF-FM 101.9; WQSR-FM 102.7, and KEC83 (NOAA Weather Radio, 162.400MHz, WX2):
+This example JSON describes six channels from the Baltimore, Maryland (US) metro using various options. WDCH-FM 99.1; WLIF-FM 101.9; WLIF-HD 101.9, WQSR-FM 102.7, WQSR-HD 102.7, and KEC83 (NOAA Weather Radio, 162.400MHz, WX2). WLIF and WQSR are imported twice, once each as an analog Wideband FM channel and again as a Hybrid Digital (HD) Radio channel:
 ```
 [
     {
@@ -43,18 +48,37 @@ This example JSON describes four channels from the Baltimore, Maryland (US) regi
     },
     {
         "frequency": 101900000,
+        "modulation": "FM",
         "name": "WLIF-FM",
         "manualgain": 328,
         "logourl": "https://upload.wikimedia.org/wikipedia/en/4/4f/WLIF_logo_2013-.png"
     },
     {
+        "frequency": 101900000,
+        "modulation": "HD",
+        "name": "WLIF-HD",
+        "manualgain": 297,
+        "freqcorrection": 8,
+        "logourl": "https://upload.wikimedia.org/wikipedia/en/4/4f/WLIF_logo_2013-.png"
+    },
+    {
         "frequency": 102700000,
+        "modulation": "FM",
         "name": "WQSR-FM",
         "autogain": 1,
         "logourl": null
     },
     {
+        "frequency": 102700000,
+        "modulation": "HD",
+        "name": "WQSR-HD",
+        "manualgain": 229,
+        "freqcorrection": 6,
+        "logourl": "https://upload.wikimedia.org/wikipedia/commons/4/40/Jackfmbaltimore.jpg"
+    },
+    {
         "frequency": 162400000,
+        "modulation": "WX",
         "name": "KEC83",
         "autogain": 0,
         "manualgain": 480,
