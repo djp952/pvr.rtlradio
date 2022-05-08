@@ -41,6 +41,7 @@
 #include "channeladd.h"
 #include "channelsettings.h"
 #include "dbtypes.h"
+#include "filedevice.h"
 #include "fmstream.h"
 #include "hdstream.h"
 #include "string_exception.h"
@@ -54,6 +55,15 @@
 // Addon Entry Points 
 //
 ADDONCREATOR(addon)
+
+// DEBUG_RAW_FILE
+//
+// Specifies the full path to a raw I/Q data file to use when creating
+// any streams instead of accessing an RTL-SDR device.  This is not a
+// general-purpose, the raw file must have been created with the sample
+// rate that is going to be expected by the Digital Signal Processor(s)
+//
+// #define DEBUG_RAW_FILE "path/to/input/file"
 
 //---------------------------------------------------------------------------
 // addon Instance Constructor
@@ -103,6 +113,12 @@ inline struct settings addon::copy_settings(void) const
 
 std::unique_ptr<rtldevice> addon::create_device(struct settings const& settings)
 {
+
+#ifdef DEBUG_RAW_FILE
+	// See commentary above; this forces input from a raw I/Q sample file
+	return filedevice::create(DEBUG_RAW_FILE);
+#endif
+
 	// USB device
 	if(settings.device_connection == device_connection::usb)
 		return usbdevice::create(settings.device_connection_usb_index);

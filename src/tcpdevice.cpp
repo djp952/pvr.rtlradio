@@ -217,7 +217,6 @@ tcpdevice::~tcpdevice()
 
 void tcpdevice::begin_stream(void) const
 {
-	// No operation
 }
 
 //---------------------------------------------------------------------------

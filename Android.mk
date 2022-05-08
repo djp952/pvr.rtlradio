@@ -135,6 +135,7 @@ LOCAL_SRC_FILES := \
     src/channeladd.cpp \
     src/channelsettings.cpp \
     src/database.cpp \
+	src/filedevice.cpp \
     src/fmstream.cpp \
     src/hdstream.cpp \
     src/fmmeter.cpp \
