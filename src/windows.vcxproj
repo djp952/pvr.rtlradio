@@ -261,6 +261,7 @@
     <ClInclude Include="database.h" />
     <ClInclude Include="dbtypes.h" />
     <ClInclude Include="channelsettings.h" />
+    <ClInclude Include="filedevice.h" />
     <ClInclude Include="fmdsp\datatypes.h" />
     <ClInclude Include="fmdsp\demodulator.h" />
     <ClInclude Include="fmdsp\downconvert.h" />
@@ -1700,6 +1701,7 @@
     </ClCompile>
     <ClCompile Include="database.cpp" />
     <ClCompile Include="channelsettings.cpp" />
+    <ClCompile Include="filedevice.cpp" />
     <ClCompile Include="fmdsp\demodulator.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>

@@ -509,6 +509,9 @@
     <ClInclude Include="compat\faad2-hdc\win32_ver.h">
       <Filter>External Libraries\faad2-hdc\Header Files\compat\faad2-hdc</Filter>
     </ClInclude>
+    <ClInclude Include="filedevice.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -798,6 +801,9 @@
     </ClCompile>
     <ClCompile Include="compat\bionic\complex.cpp">
       <Filter>Source Files\compat\bionic</Filter>
+    </ClCompile>
+    <ClCompile Include="filedevice.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
