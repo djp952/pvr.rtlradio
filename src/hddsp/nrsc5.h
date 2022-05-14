@@ -298,6 +298,10 @@ struct nrsc5_event_t
             const char *artist;
             const char *album;
             const char *genre;
+			struct {
+				unsigned int size;
+				const uint8_t* data;
+			} raw;
             struct {
                 const char *owner;
                 const char *id;

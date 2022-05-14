@@ -285,6 +285,8 @@ static void output_id3(output_t *st, unsigned int program, uint8_t *buf, unsigne
     evt.id3.artist = artist;
     evt.id3.album = album;
     evt.id3.genre = genre;
+	evt.id3.raw.data = buf;
+	evt.id3.raw.size = len;
     evt.id3.ufid.owner = ufid_owner;
     evt.id3.ufid.id = ufid_id;
     evt.id3.xhdr.mime = xhdr_mime;

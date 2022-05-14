@@ -28,7 +28,11 @@
 #include <memory.h>
 
 #include "align.h"
+#include "id3v2tag.h"
 #include "string_exception.h"
+
+// Uncomment to test ID3 tag support
+// #define KODI_HAS_ID3
 
 #pragma warning(push, 4)
 
@@ -41,6 +45,11 @@ size_t const hdstream::MAX_PACKET_QUEUE = 200;		// ~2sec analog / ~10sec digital
 //
 // Stream identifier for the audio output stream
 int const hdstream::STREAM_ID_AUDIO = 1;
+
+// hdstream::STREAM_ID_ID3TAG
+//
+// Stream identifier for the ID3v2 tag output stream
+int const hdstream::STREAM_ID_ID3TAG = 2;
 
 //---------------------------------------------------------------------------
 // hdstream Constructor (private)
@@ -280,6 +289,15 @@ void hdstream::enumproperties(std::function<void(struct streamprops const& props
 	audio.samplerate = 44100;
 	audio.bitspersample = 16;
 	callback(audio);
+
+#ifdef KODI_HAS_ID3
+	// ID3 TAG STREAM
+	//
+	streamprops id3 = {};
+	id3.codec = "id3";
+	id3.pid = STREAM_ID_ID3TAG;
+	callback(id3);
+#endif
 }
 
 //---------------------------------------------------------------------------
@@ -454,6 +472,77 @@ void hdstream::nrsc5_callback(nrsc5_event_t const* event)
 		// are allowed to transmit one sideband at a higher power than the other
 		m_mer.store(std::max(event->mer.lower, event->mer.upper));
 	}
+
+#ifdef KODI_HAS_ID3
+	// NRSC5_EVENT_ID3
+	//
+	// Reporting ID3v2 tag data
+	else if(event->event == NRSC5_EVENT_ID3) {
+
+		// Filter out anything other than program zero for now
+		if(event->id3.program == 0) {
+
+			size_t tagsize = 0;						// Length of the ID3 tag
+			std::unique_ptr<uint8_t[]> tagdata;		// ID3 tag data
+
+			// Check for a cached LOT data item that represents the primary image
+			if(event->id3.xhdr.mime == NRSC5_MIME_PRIMARY_IMAGE) {
+
+				auto const& lot = m_lots.find(event->id3.xhdr.lot);
+				if(lot != m_lots.end()) {
+
+					// Copy the raw ID3v2 tag data into an id3v2tag instance
+					std::unique_ptr<id3v2tag> newtag = id3v2tag::create(event->id3.raw.data, event->id3.raw.size);
+
+					// Append an APIC cover art frame to the tag with the cached image and remove it from cache
+					newtag->coverart((lot->second.mime == NRSC5_MIME_JPEG) ? "image/jpeg" : "image/png", lot->second.data.get(), lot->second.size);
+					m_lots.erase(lot);
+
+					tagsize = newtag->size();
+					tagdata = std::unique_ptr<uint8_t[]>(new uint8_t[tagsize]);
+					if(!newtag->write(&tagdata[0], tagsize)) tagsize = 0;
+				}
+			}
+
+			// If a custom ID3 tag wasn't generated, use the raw ID3v2 tag data
+			if(!tagdata || (tagsize == 0)) {
+
+				tagsize = event->id3.raw.size;
+				tagdata = std::unique_ptr<uint8_t[]>(new uint8_t[tagsize]);
+				memcpy(&tagdata[0], event->id3.raw.data, event->id3.raw.size);
+			}
+
+			// If the ID3 tag data was generated, queue it as a demux packet
+			if(tagdata && (tagsize > 0)) {
+
+				std::unique_ptr<demux_packet_t> packet = std::make_unique<demux_packet_t>();
+				packet->streamid = 2;
+				packet->size = static_cast<int>(tagsize);
+				packet->data = std::move(tagdata);
+
+				m_queue.emplace(std::move(packet));
+				queued = true;
+			}
+		}
+	}
+
+	// NRSC5_EVENT_LOT
+	//
+	// Reporting LOT item data
+	else if(event->event == NRSC5_EVENT_LOT) {
+
+		// Only cache JPEG/PNG images to add to the ID3 tags as album art
+		if((event->lot.mime == NRSC5_MIME_JPEG) || (event->lot.mime == NRSC5_MIME_PNG)) {
+
+			lot_item_t item = {};
+			item.mime = event->lot.mime;
+			item.size = event->lot.size;
+			item.data = std::unique_ptr<uint8_t[]>(new uint8_t[event->lot.size]);
+			memcpy(&item.data[0], event->lot.data, event->lot.size);
+			m_lots[event->lot.lot] = std::move(item);
+		}
+	}
+#endif
 
 	if(queued) {
 

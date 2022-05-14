@@ -139,6 +139,8 @@ LOCAL_SRC_FILES := \
 	src/fmstream.cpp \
 	src/hdstream.cpp \
 	src/fmmeter.cpp \
+	src/id3v1tag.cpp \
+	src/id3v2tag.cpp \
 	src/libusb_exception.cpp \
 	src/rdsdecoder.cpp \
 	src/sqlite_exception.cpp \
