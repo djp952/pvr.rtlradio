@@ -26,6 +26,7 @@
 
 #include <atomic>
 #include <condition_variable>
+#include <map>
 #include <memory>
 #include <mutex>
 #include <queue>
@@ -159,6 +160,11 @@ private:
 	// Stream identifier for the audio output stream
 	static int const STREAM_ID_AUDIO;
 
+	// hdstream::STREAM_ID_ID3TAG
+	//
+	// Stream identifier for the ID3v2 tag output stream
+	static int const STREAM_ID_ID3TAG;
+
 	// Instance Constructor
 	//
 	hdstream(std::unique_ptr<rtldevice> device, struct tunerprops const& tunerprops,
@@ -184,6 +190,21 @@ private:
 	//
 	// Defines the type of the demux queue
 	using demux_queue_t = std::queue<std::unique_ptr<demux_packet_t>>;
+
+	// lot_item_t
+	//
+	// Defines the contents of a mapped LOT item
+	struct lot_item_t {
+
+		uint32_t					mime;
+		size_t						size;
+		std::unique_ptr<uint8_t[]>	data;
+	};
+
+	// lot_map_t
+	//
+	// Defines the LOT item cache
+	using lot_map_t = std::map<int, lot_item_t>;
 
 	//-----------------------------------------------------------------------
 	// Private Member Functions
@@ -218,6 +239,7 @@ private:
 	double								m_dts{ STREAM_TIME_BASE };	// Current decode time stamp
 	std::atomic<float>					m_mer{ 0 };					// Current modulation error ratio
 	std::atomic<float>					m_ber{ 0 };					// Current bit erorr rate
+	lot_map_t							m_lots;						// Cached LOT item data
 
 	// STREAM CONTROL
 	//

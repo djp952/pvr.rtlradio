@@ -295,6 +295,8 @@
     <ClInclude Include="hddsp\sync.h" />
     <ClInclude Include="hddsp\unicode.h" />
     <ClInclude Include="hdstream.h" />
+    <ClInclude Include="id3v1tag.h" />
+    <ClInclude Include="id3v2tag.h" />
     <ClInclude Include="libusb_exception.h" />
     <ClInclude Include="props.h" />
     <ClInclude Include="pvrstream.h" />
@@ -2070,6 +2072,8 @@
       <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(IntDir)hddsp\</ObjectFileName>
     </ClCompile>
     <ClCompile Include="hdstream.cpp" />
+    <ClCompile Include="id3v1tag.cpp" />
+    <ClCompile Include="id3v2tag.cpp" />
     <ClCompile Include="libusb_exception.cpp">
       <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(ProjectDir)..\depends\libusb\src\libusb;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(ProjectDir)..\depends\libusb\src\libusb;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
