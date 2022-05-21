@@ -94,16 +94,16 @@ LOCAL_STATIC_LIBRARIES += \
 LOCAL_LDLIBS += \
 	-llog \
 	-lm \
-    	-lGLESv3
+	-lGLESv3
 
 LOCAL_LDFLAGS += \
 	-Wl,--version-script=exportlist/exportlist.android
 
 LOCAL_SRC_FILES := \
 	depends/rtl-sdr/src/librtlsdr.c \
-    	depends/rtl-sdr/src/tuner_e4k.c \
-    	depends/rtl-sdr/src/tuner_fc0012.c \
-    	depends/rtl-sdr/src/tuner_fc0013.c \
+	depends/rtl-sdr/src/tuner_e4k.c \
+	depends/rtl-sdr/src/tuner_fc0012.c \
+	depends/rtl-sdr/src/tuner_fc0013.c \
 	depends/rtl-sdr/src/tuner_fc2580.c \
 	depends/rtl-sdr/src/tuner_r82xx.c \
 	depends/sqlite/sqlite3.c \
