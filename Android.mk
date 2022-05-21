@@ -94,29 +94,29 @@ LOCAL_STATIC_LIBRARIES += \
 LOCAL_LDLIBS += \
 	-llog \
 	-lm \
-    -lGLESv3
+	-lGLESv3
 
 LOCAL_LDFLAGS += \
 	-Wl,--version-script=exportlist/exportlist.android
 
 LOCAL_SRC_FILES := \
-    depends/rtl-sdr/src/librtlsdr.c \
-    depends/rtl-sdr/src/tuner_e4k.c \
-    depends/rtl-sdr/src/tuner_fc0012.c \
-    depends/rtl-sdr/src/tuner_fc0013.c \
-    depends/rtl-sdr/src/tuner_fc2580.c \
-    depends/rtl-sdr/src/tuner_r82xx.c \
-    depends/sqlite/sqlite3.c \
+	depends/rtl-sdr/src/librtlsdr.c \
+	depends/rtl-sdr/src/tuner_e4k.c \
+	depends/rtl-sdr/src/tuner_fc0012.c \
+	depends/rtl-sdr/src/tuner_fc0013.c \
+	depends/rtl-sdr/src/tuner_fc2580.c \
+	depends/rtl-sdr/src/tuner_r82xx.c \
+	depends/sqlite/sqlite3.c \
 	src/compat/bionic/complex.cpp \
-    src/fmdsp/demodulator.cpp \
-    src/fmdsp/downconvert.cpp \
-    src/fmdsp/fastfir.cpp \
-    src/fmdsp/fft.cpp \
-    src/fmdsp/fir.cpp \
-    src/fmdsp/fmdemod.cpp \
-    src/fmdsp/fractresampler.cpp \
-    src/fmdsp/iir.cpp \
-    src/fmdsp/wfmdemod.cpp \
+	src/fmdsp/demodulator.cpp \
+	src/fmdsp/downconvert.cpp \
+	src/fmdsp/fastfir.cpp \
+	src/fmdsp/fft.cpp \
+	src/fmdsp/fir.cpp \
+	src/fmdsp/fmdemod.cpp \
+	src/fmdsp/fractresampler.cpp \
+	src/fmdsp/iir.cpp \
+	src/fmdsp/wfmdemod.cpp \
 	src/hddsp/acquire.c \
 	src/hddsp/conv_dec.c \
 	src/hddsp/decode.c \
@@ -131,23 +131,23 @@ LOCAL_SRC_FILES := \
 	src/hddsp/strndup.c \
 	src/hddsp/sync.c \
 	src/hddsp/unicode.c \
-    src/addon.cpp \
-    src/channeladd.cpp \
-    src/channelsettings.cpp \
-    src/database.cpp \
+	src/addon.cpp \
+	src/channeladd.cpp \
+	src/channelsettings.cpp \
+	src/database.cpp \
 	src/filedevice.cpp \
-    src/fmstream.cpp \
-    src/hdstream.cpp \
-    src/fmmeter.cpp \
+	src/fmstream.cpp \
+	src/hdstream.cpp \
+	src/fmmeter.cpp \
 	src/id3v1tag.cpp \
 	src/id3v2tag.cpp \
-    src/libusb_exception.cpp \
-    src/rdsdecoder.cpp \
-    src/sqlite_exception.cpp \
-    src/uecp.cpp \
-    src/usbdevice.cpp \
-    src/tcpdevice.cpp \
-    src/wxstream.cpp
+	src/libusb_exception.cpp \
+	src/rdsdecoder.cpp \
+	src/sqlite_exception.cpp \
+	src/uecp.cpp \
+	src/usbdevice.cpp \
+	src/tcpdevice.cpp \
+	src/wxstream.cpp
 
 include $(BUILD_SHARED_LIBRARY)
 
