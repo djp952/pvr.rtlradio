@@ -4,6 +4,7 @@
   <file path="pvr.rtlradio\LICENSE.txt" source="LICENSE" normalize="windows"/>
   <file path="pvr.rtlradio\zuki.pvr.rtlradio.dll" source="out\windows-x64\Release\zuki.pvr.rtlradio.dll"/>
   <file path="pvr.rtlradio\libfftw3f-3.dll" source="depends\fftw\windows-x64\bin\libfftw3f-3.dll"/>
+  <file path="pvr.rtlradio\libmpg123-0.dll" source="depends\mpg123\windows-x64\bin\libmpg123-0.dll"/>
   <file path="pvr.rtlradio\resources\icon.png" source="pvr.rtlradio\resources\icon.png"/>
   <file path="pvr.rtlradio\resources\settings.xml" source="pvr.rtlradio\resources\settings.xml" normalize="windows"/>
   <file path="pvr.rtlradio\resources\language\resource.language.en_gb\strings.po" source="pvr.rtlradio\resources\language\resource.language.en_gb\strings.po" normalize="windows"/>

@@ -41,6 +41,11 @@
 // Maximum number of queued demux packets
 size_t const hdstream::MAX_PACKET_QUEUE = 200;		// ~2sec analog / ~10sec digital
 
+// hdstream::SAMPLE_RATE
+//
+// Fixed device sample rate required for HD Radio
+uint32_t const hdstream::SAMPLE_RATE = 1488375;
+
 // hdstream::STREAM_ID_AUDIO
 //
 // Stream identifier for the audio output stream
@@ -68,7 +73,7 @@ hdstream::hdstream(std::unique_ptr<rtldevice> device, struct tunerprops const& t
 {
 	// Initialize the RTL-SDR device instance
 	m_device->set_frequency_correction(tunerprops.freqcorrection + channelprops.freqcorrection);
-	uint32_t samplerate = m_device->set_sample_rate(1488375);
+	uint32_t samplerate = m_device->set_sample_rate(SAMPLE_RATE);
 	m_device->set_center_frequency(channelprops.frequency);
 
 	// Adjust the device gain as specified by the channel properties
@@ -355,7 +360,7 @@ void hdstream::nrsc5_callback(nrsc5_event_t const* event, void* arg)
 
 void hdstream::nrsc5_callback(nrsc5_event_t const* event)
 {
-	bool	queued = false;		// Flag if an item was queued
+	bool	queued = false;					// Flag if an item was queued
 
 	std::unique_lock<std::mutex> lock(m_queuelock);
 
@@ -555,7 +560,7 @@ void hdstream::nrsc5_callback(nrsc5_event_t const* event)
 			// Push a DEMUX_SPECIALID_STREAMCHANGE packet into the new queue
 			std::unique_ptr<demux_packet_t> packet = std::make_unique<demux_packet_t>();
 			packet->streamid = DEMUX_SPECIALID_STREAMCHANGE;
-			m_queue.push(std::move(packet));
+			m_queue.emplace(std::move(packet));
 
 			// Reset the decode time stamp
 			m_dts = STREAM_TIME_BASE;
@@ -686,7 +691,7 @@ void hdstream::signalquality(int& quality, int& snr) const
 //---------------------------------------------------------------------------
 // hdstream::transfer (private)
 //
-// Worker thread procedure used to transfer data into the ring buffer
+// Worker thread procedure used to transfer data from the device
 //
 // Arguments:
 //

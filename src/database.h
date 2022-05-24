@@ -154,10 +154,10 @@ void close_database(sqlite3* instance);
 // Deletes a channel from the database
 void delete_channel(sqlite3* instance, unsigned int id);
 
-// enumerate_channels
+// enumerate_dabradio_channels
 //
-// Enumerates all available channels
-void enumerate_channels(sqlite3* instance, enumerate_channels_callback const& callback);
+// Enumerates DAB channels
+void enumerate_dabradio_channels(sqlite3* instance, enumerate_channels_callback const& callback);
 
 // enumerate_fmradio_channels
 //

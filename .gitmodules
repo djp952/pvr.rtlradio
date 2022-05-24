@@ -19,6 +19,9 @@
 [submodule "libusb-jni"]
 	path = depends/libusb-jni
 	url = https://github.com/djp952/prebuilt-libusb-jni
+[submodule "mpg123"]
+	path = depends/mpg123
+	url = https://github.com/djp952/prebuilt-mpg123.git
 [submodule "rapidjson"]
 	path = depends/rapidjson
 	url = https://github.com/Tencent/rapidjson.git
@@ -31,3 +34,4 @@
 [submodule "xbmc"]
 	path = depends/xbmc
 	url = https://github.com/xbmc/xbmc.git
+

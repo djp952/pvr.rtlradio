@@ -108,6 +108,12 @@
     <Filter Include="Source Files\compat\bionic">
       <UniqueIdentifier>{583fe5f9-9b7e-414b-8d29-daa8f6222f62}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\dabdsp">
+      <UniqueIdentifier>{53275165-3ad6-4707-bd9a-ff0ff28dcb2b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\dabdsp">
+      <UniqueIdentifier>{75698c94-46bf-4b25-bdcf-b16d9fadf90d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">
@@ -518,6 +524,135 @@
     <ClInclude Include="id3v1tag.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="dabdsp\channels.h">
+      <Filter>Header Files\dabdsp</Filter>
+    </ClInclude>
+    <ClInclude Include="dabdsp\char.h">
+      <Filter>Header Files\dabdsp</Filter>
+    </ClInclude>
+    <ClInclude Include="dabdsp\charsets.h">
+      <Filter>Header Files\dabdsp</Filter>
+    </ClInclude>
+    <ClInclude Include="dabdsp\dab_decoder.h">
+      <Filter>Header Files\dabdsp</Filter>
+    </ClInclude>
+    <ClInclude Include="dabdsp\dab-audio.h">
+      <Filter>Header Files\dabdsp</Filter>
+    </ClInclude>
+    <ClInclude Include="dabdsp\dab-constants.h">
+      <Filter>Header Files\dabdsp</Filter>
+    </ClInclude>
+    <ClInclude Include="dabdsp\dabplus_decoder.h">
+      <Filter>Header Files\dabdsp</Filter>
+    </ClInclude>
+    <ClInclude Include="dabdsp\dab-processor.h">
+      <Filter>Header Files\dabdsp</Filter>
+    </ClInclude>
+    <ClInclude Include="dabdsp\dab-virtual.h">
+      <Filter>Header Files\dabdsp</Filter>
+    </ClInclude>
+    <ClInclude Include="dabdsp\decode_rs.h">
+      <Filter>Header Files\dabdsp</Filter>
+    </ClInclude>
+    <ClInclude Include="dabdsp\decoder_adapter.h">
+      <Filter>Header Files\dabdsp</Filter>
+    </ClInclude>
+    <ClInclude Include="dabdsp\eep-protection.h">
+      <Filter>Header Files\dabdsp</Filter>
+    </ClInclude>
+    <ClInclude Include="dabdsp\encode_rs.h">
+      <Filter>Header Files\dabdsp</Filter>
+    </ClInclude>
+    <ClInclude Include="dabdsp\energy_dispersal.h">
+      <Filter>Header Files\dabdsp</Filter>
+    </ClInclude>
+    <ClInclude Include="dabdsp\fec.h">
+      <Filter>Header Files\dabdsp</Filter>
+    </ClInclude>
+    <ClInclude Include="dabdsp\fft.h">
+      <Filter>Header Files\dabdsp</Filter>
+    </ClInclude>
+    <ClInclude Include="dabdsp\fib-processor.h">
+      <Filter>Header Files\dabdsp</Filter>
+    </ClInclude>
+    <ClInclude Include="dabdsp\fic-handler.h">
+      <Filter>Header Files\dabdsp</Filter>
+    </ClInclude>
+    <ClInclude Include="dabdsp\freq-interleaver.h">
+      <Filter>Header Files\dabdsp</Filter>
+    </ClInclude>
+    <ClInclude Include="dabdsp\init_rs.h">
+      <Filter>Header Files\dabdsp</Filter>
+    </ClInclude>
+    <ClInclude Include="dabdsp\MathHelper.h">
+      <Filter>Header Files\dabdsp</Filter>
+    </ClInclude>
+    <ClInclude Include="dabdsp\mot_manager.h">
+      <Filter>Header Files\dabdsp</Filter>
+    </ClInclude>
+    <ClInclude Include="dabdsp\msc-handler.h">
+      <Filter>Header Files\dabdsp</Filter>
+    </ClInclude>
+    <ClInclude Include="dabdsp\ofdm-decoder.h">
+      <Filter>Header Files\dabdsp</Filter>
+    </ClInclude>
+    <ClInclude Include="dabdsp\ofdm-processor.h">
+      <Filter>Header Files\dabdsp</Filter>
+    </ClInclude>
+    <ClInclude Include="dabdsp\pad_decoder.h">
+      <Filter>Header Files\dabdsp</Filter>
+    </ClInclude>
+    <ClInclude Include="dabdsp\phasereference.h">
+      <Filter>Header Files\dabdsp</Filter>
+    </ClInclude>
+    <ClInclude Include="dabdsp\phasetable.h">
+      <Filter>Header Files\dabdsp</Filter>
+    </ClInclude>
+    <ClInclude Include="dabdsp\profiling.h">
+      <Filter>Header Files\dabdsp</Filter>
+    </ClInclude>
+    <ClInclude Include="dabdsp\protection.h">
+      <Filter>Header Files\dabdsp</Filter>
+    </ClInclude>
+    <ClInclude Include="dabdsp\protTables.h">
+      <Filter>Header Files\dabdsp</Filter>
+    </ClInclude>
+    <ClInclude Include="dabdsp\radio-controller.h">
+      <Filter>Header Files\dabdsp</Filter>
+    </ClInclude>
+    <ClInclude Include="dabdsp\radio-receiver.h">
+      <Filter>Header Files\dabdsp</Filter>
+    </ClInclude>
+    <ClInclude Include="dabdsp\radio-receiver-options.h">
+      <Filter>Header Files\dabdsp</Filter>
+    </ClInclude>
+    <ClInclude Include="dabdsp\ringbuffer.h">
+      <Filter>Header Files\dabdsp</Filter>
+    </ClInclude>
+    <ClInclude Include="dabdsp\rs-common.h">
+      <Filter>Header Files\dabdsp</Filter>
+    </ClInclude>
+    <ClInclude Include="dabdsp\subchannel_sink.h">
+      <Filter>Header Files\dabdsp</Filter>
+    </ClInclude>
+    <ClInclude Include="dabdsp\tii-decoder.h">
+      <Filter>Header Files\dabdsp</Filter>
+    </ClInclude>
+    <ClInclude Include="dabdsp\tools.h">
+      <Filter>Header Files\dabdsp</Filter>
+    </ClInclude>
+    <ClInclude Include="dabdsp\uep-protection.h">
+      <Filter>Header Files\dabdsp</Filter>
+    </ClInclude>
+    <ClInclude Include="dabdsp\viterbi.h">
+      <Filter>Header Files\dabdsp</Filter>
+    </ClInclude>
+    <ClInclude Include="dabdsp\Xtan2.h">
+      <Filter>Header Files\dabdsp</Filter>
+    </ClInclude>
+    <ClInclude Include="dabstream.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -815,6 +950,99 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="id3v1tag.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="dabdsp\channels.cpp">
+      <Filter>Source Files\dabdsp</Filter>
+    </ClCompile>
+    <ClCompile Include="dabdsp\charsets.cpp">
+      <Filter>Source Files\dabdsp</Filter>
+    </ClCompile>
+    <ClCompile Include="dabdsp\dab_decoder.cpp">
+      <Filter>Source Files\dabdsp</Filter>
+    </ClCompile>
+    <ClCompile Include="dabdsp\dab-audio.cpp">
+      <Filter>Source Files\dabdsp</Filter>
+    </ClCompile>
+    <ClCompile Include="dabdsp\dab-constants.cpp">
+      <Filter>Source Files\dabdsp</Filter>
+    </ClCompile>
+    <ClCompile Include="dabdsp\dabplus_decoder.cpp">
+      <Filter>Source Files\dabdsp</Filter>
+    </ClCompile>
+    <ClCompile Include="dabdsp\decoder_adapter.cpp">
+      <Filter>Source Files\dabdsp</Filter>
+    </ClCompile>
+    <ClCompile Include="dabdsp\eep-protection.cpp">
+      <Filter>Source Files\dabdsp</Filter>
+    </ClCompile>
+    <ClCompile Include="dabdsp\fft.cpp">
+      <Filter>Source Files\dabdsp</Filter>
+    </ClCompile>
+    <ClCompile Include="dabdsp\fib-processor.cpp">
+      <Filter>Source Files\dabdsp</Filter>
+    </ClCompile>
+    <ClCompile Include="dabdsp\fic-handler.cpp">
+      <Filter>Source Files\dabdsp</Filter>
+    </ClCompile>
+    <ClCompile Include="dabdsp\freq-interleaver.cpp">
+      <Filter>Source Files\dabdsp</Filter>
+    </ClCompile>
+    <ClCompile Include="dabdsp\mot_manager.cpp">
+      <Filter>Source Files\dabdsp</Filter>
+    </ClCompile>
+    <ClCompile Include="dabdsp\msc-handler.cpp">
+      <Filter>Source Files\dabdsp</Filter>
+    </ClCompile>
+    <ClCompile Include="dabdsp\ofdm-decoder.cpp">
+      <Filter>Source Files\dabdsp</Filter>
+    </ClCompile>
+    <ClCompile Include="dabdsp\ofdm-processor.cpp">
+      <Filter>Source Files\dabdsp</Filter>
+    </ClCompile>
+    <ClCompile Include="dabdsp\pad_decoder.cpp">
+      <Filter>Source Files\dabdsp</Filter>
+    </ClCompile>
+    <ClCompile Include="dabdsp\phasereference.cpp">
+      <Filter>Source Files\dabdsp</Filter>
+    </ClCompile>
+    <ClCompile Include="dabdsp\phasetable.cpp">
+      <Filter>Source Files\dabdsp</Filter>
+    </ClCompile>
+    <ClCompile Include="dabdsp\profiling.cpp">
+      <Filter>Source Files\dabdsp</Filter>
+    </ClCompile>
+    <ClCompile Include="dabdsp\protTables.cpp">
+      <Filter>Source Files\dabdsp</Filter>
+    </ClCompile>
+    <ClCompile Include="dabdsp\radio-receiver.cpp">
+      <Filter>Source Files\dabdsp</Filter>
+    </ClCompile>
+    <ClCompile Include="dabdsp\tii-decoder.cpp">
+      <Filter>Source Files\dabdsp</Filter>
+    </ClCompile>
+    <ClCompile Include="dabdsp\tools.cpp">
+      <Filter>Source Files\dabdsp</Filter>
+    </ClCompile>
+    <ClCompile Include="dabdsp\uep-protection.cpp">
+      <Filter>Source Files\dabdsp</Filter>
+    </ClCompile>
+    <ClCompile Include="dabdsp\viterbi.cpp">
+      <Filter>Source Files\dabdsp</Filter>
+    </ClCompile>
+    <ClCompile Include="dabdsp\Xtan2.cpp">
+      <Filter>Source Files\dabdsp</Filter>
+    </ClCompile>
+    <ClCompile Include="dabdsp\decode_rs_char.c">
+      <Filter>Source Files\dabdsp</Filter>
+    </ClCompile>
+    <ClCompile Include="dabdsp\encode_rs_char.c">
+      <Filter>Source Files\dabdsp</Filter>
+    </ClCompile>
+    <ClCompile Include="dabdsp\init_rs_char.c">
+      <Filter>Source Files\dabdsp</Filter>
+    </ClCompile>
+    <ClCompile Include="dabstream.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

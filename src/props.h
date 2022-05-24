@@ -55,6 +55,14 @@ struct channelprops {
 	int					freqcorrection;	// Frequency correction for this channel
 };
 
+// dabprops
+//
+// Defines properties for the DAB/DAB+ digital signal processor
+struct dabprops {
+
+	float			outputgain;			// Output gain in Decibels
+};
+
 // fmprops
 //
 // Defines properties for the FM Radio digital signal processor

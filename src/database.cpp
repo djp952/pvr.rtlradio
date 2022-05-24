@@ -283,20 +283,51 @@ void delete_channel(sqlite3* instance, unsigned int id)
 }
 
 //---------------------------------------------------------------------------
-// enumerate_channels
+// enumerate_dabradio_channels
 //
-// Enumerates the available channels
+// Enumerates DAB channels
 //
 // Arguments:
 //
 //	instance	- Database instance
 //	callback	- Callback function
 
-void enumerate_channels(sqlite3* instance, enumerate_channels_callback const& callback)
+void enumerate_dabradio_channels(sqlite3* instance, enumerate_channels_callback const& callback)
 {
-	enumerate_fmradio_channels(instance, callback);		// FM Radio
-	enumerate_hdradio_channels(instance, callback);		// HD Radio
-	enumerate_wxradio_channels(instance, callback);		// Weather Radio
+	sqlite3_stmt*				statement;			// SQL statement to execute
+	int							result;				// Result from SQLite function
+
+	if(instance == nullptr) throw std::invalid_argument("instance");
+
+	// frequency | subchannel | name | hidden | logourl
+	auto sql = "select frequency as frequency, subchannel as subchannel, name as name, hidden as hidden, logourl as logourl "
+		"from channel where modulation = 2 order by frequency, subchannel asc";
+
+	result = sqlite3_prepare_v2(instance, sql, -1, &statement, nullptr);
+	if(result != SQLITE_OK) throw sqlite_exception(result, sqlite3_errmsg(instance));
+
+	try {
+
+		// Execute the query and iterate over all returned rows
+		while(sqlite3_step(statement) == SQLITE_ROW) {
+
+			struct channel item = {};
+			channelid channelid(sqlite3_column_int(statement, 0), sqlite3_column_int(statement, 1), modulation::dab);
+
+			item.id = channelid.id();
+			item.channel = channelid.frequency() / 100000;
+			item.subchannel = channelid.subchannel();
+			item.name = reinterpret_cast<char const*>(sqlite3_column_text(statement, 2));
+			item.hidden = (sqlite3_column_int(statement, 3) != 0);
+			item.logourl = reinterpret_cast<char const*>(sqlite3_column_text(statement, 4));
+
+			callback(item);						// Invoke caller-supplied callback
+		}
+
+		sqlite3_finalize(statement);			// Finalize the SQLite statement
+	}
+
+	catch(...) { sqlite3_finalize(statement); throw; }
 }
 
 //---------------------------------------------------------------------------
@@ -794,25 +825,25 @@ sqlite3* open_database(char const* connstring, int flags, bool initialize)
 			//
 			int dbversion = execute_scalar_int(instance, "pragma user_version");
 
-			// SCHEMA VERSION 0 -> VERSION 2 (NEW DATABASE)
+			// SCHEMA VERSION 0 -> VERSION 1
 			//
 			if(dbversion == 0) {
 
 				// table: channel
 				//
-				// frequency(pk) | subchannel(pk) | modulation (pk) | hidden | name | autogain | manualgain | freqcorrection | logourl
+				// frequency(pk) | subchannel(pk) | hidden | name | autogain | manualgain | freqcorrection | logourl
 				execute_non_query(instance, "drop table if exists channel");
-				execute_non_query(instance, "create table channel(frequency integer not null, subchannel integer not null, modulation integer not null, "
+				execute_non_query(instance, "create table channel(frequency integer not null, subchannel integer not null, "
 					"hidden integer not null, name text not null, autogain integer not null, manualgain integer not null, freqcorrection integer not null, "
-					"logourl text null, primary key(frequency, subchannel, modulation))");
+					"logourl text null, primary key(frequency, subchannel))");
 
-
-				execute_non_query(instance, "pragma user_version = 2");
+				execute_non_query(instance, "pragma user_version = 1");
+				dbversion = 1;
 			}
 
 			// SCHEMA VERSION 1 -> VERSION 2
 			//
-			else if(dbversion == 1) {
+			if(dbversion == 1) {
 
 				// table: channel_v1
 				//
@@ -832,6 +863,7 @@ sqlite3* open_database(char const* connstring, int flags, bool initialize)
 
 				execute_non_query(instance, "drop table channel_v1");
 				execute_non_query(instance, "pragma user_version = 2");
+				dbversion = 2;
 			}
 		}
 	}
