@@ -42,6 +42,7 @@
 #include "channelsettings.h"
 #include "dbtypes.h"
 #include "filedevice.h"
+#include "dabstream.h"
 #include "fmstream.h"
 #include "hdstream.h"
 #include "string_exception.h"
@@ -586,6 +587,7 @@ ADDON_STATUS addon::Create(void)
 			m_settings.interface_prepend_channel_numbers = kodi::addon::GetSettingBoolean("interface_prepend_channel_numbers", false);
 
 			// Load the FM Radio settings
+			m_settings.fmradio_enable = kodi::addon::GetSettingBoolean("fmradio_enable", true);
 			m_settings.fmradio_enable_rds = kodi::addon::GetSettingBoolean("fmradio_enable_rds", true);
 			m_settings.fmradio_rds_standard = kodi::addon::GetSettingEnum("fmradio_rds_standard", rds_standard::automatic);
 			m_settings.fmradio_sample_rate = kodi::addon::GetSettingInt("fmradio_sample_rate", (1600 KHz));
@@ -594,29 +596,40 @@ ADDON_STATUS addon::Create(void)
 			m_settings.fmradio_output_gain = kodi::addon::GetSettingFloat("fmradio_output_gain", -3.0f);
 
 			// Load the HD Radio settings
+			m_settings.hdradio_enable = kodi::addon::GetSettingBoolean("hdradio_enable", false);
 			m_settings.hdradio_enable_fallback = kodi::addon::GetSettingBoolean("hdradio_enable_fallback", true);
 			m_settings.hdradio_output_gain = kodi::addon::GetSettingFloat("hdradio_output_gain", -3.0f);
 
+			// Load the DAB/DAB+ settings
+			m_settings.dabradio_enable = kodi::addon::GetSettingBoolean("dabradio_enable", false);
+			m_settings.dabradio_output_gain = kodi::addon::GetSettingFloat("dabradio_output_gain", -3.0f);
+
 			// Load the Weather Radio settings
+			m_settings.wxradio_enable = kodi::addon::GetSettingBoolean("wxradio_enable", false);
 			m_settings.wxradio_sample_rate = kodi::addon::GetSettingInt("wxradio_sample_rate", (1600 KHz));
 			m_settings.wxradio_output_samplerate = kodi::addon::GetSettingInt("wxradio_output_samplerate", 48000);
 			m_settings.wxradio_output_gain = kodi::addon::GetSettingFloat("wxradio_output_gain", -3.0f);
 
 			// Log the setting values; these are for diagnostic purposes just use the raw values
+			log_info(__func__, ": m_settings.dabradio_enable                   = ", m_settings.dabradio_enable);
+			log_info(__func__, ": m_settings.dabradio_output_gain              = ", m_settings.dabradio_output_gain);
 			log_info(__func__, ": m_settings.device_connection                 = ", static_cast<int>(m_settings.device_connection));
 			log_info(__func__, ": m_settings.device_connection_tcp_host        = ", m_settings.device_connection_tcp_host);
 			log_info(__func__, ": m_settings.device_connection_tcp_port        = ", m_settings.device_connection_tcp_port);
 			log_info(__func__, ": m_settings.device_connection_usb_index       = ", m_settings.device_connection_usb_index);
 			log_info(__func__, ": m_settings.device_frequency_correction       = ", m_settings.device_frequency_correction);
+			log_info(__func__, ": m_settings.fmradio_enable                    = ", m_settings.fmradio_enable);
 			log_info(__func__, ": m_settings.fmradio_downsample_quality        = ", static_cast<int>(m_settings.fmradio_downsample_quality));
 			log_info(__func__, ": m_settings.fmradio_enable_rds                = ", m_settings.fmradio_enable_rds);
 			log_info(__func__, ": m_settings.fmradio_output_gain               = ", m_settings.fmradio_output_gain);
 			log_info(__func__, ": m_settings.fmradio_output_samplerate         = ", m_settings.fmradio_output_samplerate);
 			log_info(__func__, ": m_settings.fmradio_rds_standard              = ", static_cast<int>(m_settings.fmradio_rds_standard));
 			log_info(__func__, ": m_settings.fmradio_sample_rate               = ", m_settings.fmradio_sample_rate);
+			log_info(__func__, ": m_settings.hdradio_enable                    = ", m_settings.hdradio_enable);
 			log_info(__func__, ": m_settings.hdradio_enable_fallback           = ", m_settings.hdradio_enable_fallback);
 			log_info(__func__, ": m_settings.hdradio_output_gain               = ", m_settings.hdradio_output_gain);
 			log_info(__func__, ": m_settings.interface_prepend_channel_numbers = ", m_settings.interface_prepend_channel_numbers);
+			log_info(__func__, ": m_settings.wxradio_enable                    = ", m_settings.wxradio_enable);
 			log_info(__func__, ": m_settings.wxradio_output_gain               = ", m_settings.wxradio_output_gain);
 			log_info(__func__, ": m_settings.wxradio_output_samplerate         = ", m_settings.wxradio_output_samplerate);
 			log_info(__func__, ": m_settings.wxradio_sample_rate               = ", m_settings.wxradio_sample_rate);
@@ -779,6 +792,21 @@ ADDON_STATUS addon::SetSetting(std::string const& settingName, kodi::addon::CSet
 		}
 	}
 
+	// fmradio_enable
+	//
+	else if(settingName == "fmradio_enable") {
+
+		bool bvalue = settingValue.GetBoolean();
+		if(bvalue != m_settings.fmradio_enable) {
+
+			m_settings.fmradio_enable = bvalue;
+			log_info(__func__, ": setting fmradio_enable changed to ", bvalue);
+			
+			// Trigger an update to refresh the channel groups
+			TriggerChannelGroupsUpdate();
+		}
+	}
+
 	// fmradio_enable_rds
 	//
 	else if(settingName == "fmradio_enable_rds") {
@@ -851,6 +879,19 @@ ADDON_STATUS addon::SetSetting(std::string const& settingName, kodi::addon::CSet
 		}
 	}
 
+	else if(settingName == "hdradio_enable") {
+
+		bool bvalue = settingValue.GetBoolean();
+		if(bvalue != m_settings.hdradio_enable) {
+
+			m_settings.hdradio_enable = bvalue;
+			log_info(__func__, ": setting hdradio_enable changed to ", bvalue);
+			
+			// Trigger an update to refresh the channel groups
+			TriggerChannelGroupsUpdate();
+		}
+	}
+
 	// hdradio_enable_fallback
 	//
 	else if(settingName == "hdradio_enable_fallback") {
@@ -872,6 +913,46 @@ ADDON_STATUS addon::SetSetting(std::string const& settingName, kodi::addon::CSet
 
 			m_settings.hdradio_output_gain = fvalue;
 			log_info(__func__, ": setting hdradio_output_gain changed to ", fvalue, "dB");
+		}
+	}
+
+	// dabradio_enable
+	//
+	else if(settingName == "dabradio_enable") {
+
+		bool bvalue = settingValue.GetBoolean();
+		if(bvalue != m_settings.dabradio_enable) {
+
+			m_settings.dabradio_enable = bvalue;
+			log_info(__func__, ": setting dabradio_enable changed to ", bvalue);
+
+			// Trigger an update to refresh the channel groups
+			TriggerChannelGroupsUpdate();
+		}
+	}
+
+	// dabradio_output_gain
+	//
+	else if(settingName == "dabradio_output_gain") {
+
+		float fvalue = settingValue.GetFloat();
+		if(fvalue != m_settings.dabradio_output_gain) {
+
+			m_settings.dabradio_output_gain = fvalue;
+			log_info(__func__, ": setting dabradio_output_gain changed to ", fvalue, "dB");
+		}
+	}
+
+	else if(settingName == "wxradio_enable") {
+
+		bool bvalue = settingValue.GetBoolean();
+		if(bvalue != m_settings.wxradio_enable) {
+
+			m_settings.wxradio_enable = bvalue;
+			log_info(__func__, ": setting wxradio_enable changed to ", bvalue);
+			
+			// Trigger an update to refresh the channel groups
+			TriggerChannelGroupsUpdate();
 		}
 	}
 
@@ -1149,7 +1230,7 @@ PVR_ERROR addon::GetCapabilities(kodi::addon::PVRCapabilities& capabilities)
 
 PVR_ERROR addon::GetChannelGroupsAmount(int& amount)
 {
-	amount = 3;				// "FM Radio", "HD Radio", "Weather Radio"
+	amount = 4;				// "FM Radio", "HD Radio", "DAB", "Weather Radio"
 
 	return PVR_ERROR::PVR_ERROR_NO_ERROR;
 }
@@ -1169,17 +1250,26 @@ PVR_ERROR addon::GetChannelGroupMembers(kodi::addon::PVRChannelGroup const& grou
 	// Only interested in radio channel groups
 	if(!group.GetIsRadio()) return PVR_ERROR::PVR_ERROR_NO_ERROR;
 
+	// Create a copy of the current addon settings structure
+	struct settings settings = copy_settings();
+
 	// Select the proper enumerator for the channel group
 	std::function<void(sqlite3*, enumerate_channels_callback)> enumerator = nullptr;
-	if(group.GetGroupName() == kodi::addon::GetLocalizedString(30408)) enumerator = enumerate_fmradio_channels;
-	else if(group.GetGroupName() == kodi::addon::GetLocalizedString(30409)) enumerator = enumerate_hdradio_channels;
-	else if(group.GetGroupName() == kodi::addon::GetLocalizedString(30410)) enumerator = enumerate_wxradio_channels;
+	
+	if((group.GetGroupName() == kodi::addon::GetLocalizedString(30408)) && (settings.fmradio_enable)) 
+		enumerator = enumerate_fmradio_channels;
+
+	else if((group.GetGroupName() == kodi::addon::GetLocalizedString(30409)) && (settings.hdradio_enable)) 
+		enumerator = enumerate_hdradio_channels;
+
+	else if((group.GetGroupName() == kodi::addon::GetLocalizedString(30411)) && (settings.dabradio_enable))
+		enumerator = enumerate_dabradio_channels;
+
+	else if((group.GetGroupName() == kodi::addon::GetLocalizedString(30410)) && (settings.wxradio_enable))
+		enumerator = enumerate_wxradio_channels;
 
 	// If no enumerator was selected, there isn't any work to do here
 	if(enumerator == nullptr) return PVR_ERROR::PVR_ERROR_NO_ERROR;
-
-	// Create a copy of the current addon settings structure
-	struct settings settings = copy_settings();
 
 	try {
 
@@ -1217,6 +1307,7 @@ PVR_ERROR addon::GetChannelGroups(bool radio, kodi::addon::PVRChannelGroupsResul
 {
 	kodi::addon::PVRChannelGroup	fmradio;			// FM Radio
 	kodi::addon::PVRChannelGroup	hdradio;			// HD Radio
+	kodi::addon::PVRChannelGroup	dabradio;			// DAB
 	kodi::addon::PVRChannelGroup	wxradio;			// Weather Radio
 
 	// The PVR only supports radio channel groups
@@ -1229,6 +1320,10 @@ PVR_ERROR addon::GetChannelGroups(bool radio, kodi::addon::PVRChannelGroupsResul
 	hdradio.SetGroupName(kodi::addon::GetLocalizedString(30409));
 	hdradio.SetIsRadio(true);
 	results.Add(hdradio);
+
+	dabradio.SetGroupName(kodi::addon::GetLocalizedString(30411));
+	dabradio.SetIsRadio(true);
+	results.Add(dabradio);
 
 	wxradio.SetGroupName(kodi::addon::GetLocalizedString(30410));
 	wxradio.SetIsRadio(true);
@@ -1257,8 +1352,7 @@ PVR_ERROR addon::GetChannels(bool radio, kodi::addon::PVRChannelsResultSet& resu
 
 	try {
 
-		// Enumerate all of the channels in the database
-		enumerate_channels(connectionpool::handle(m_connpool), [&](struct channel const& item) -> void {
+		auto callback = [&](struct channel const& item) -> void {
 
 			kodi::addon::PVRChannel channel;
 
@@ -1283,7 +1377,13 @@ PVR_ERROR addon::GetChannels(bool radio, kodi::addon::PVRChannelsResultSet& resu
 			channel.SetIsHidden(item.hidden);
 
 			results.Add(channel);
-		});
+		};
+
+		connectionpool::handle dbhandle(m_connpool);
+		if(settings.fmradio_enable) enumerate_fmradio_channels(dbhandle, callback);
+		if(settings.hdradio_enable) enumerate_hdradio_channels(dbhandle, callback);
+		if(settings.dabradio_enable) enumerate_dabradio_channels(dbhandle, callback);
+		if(settings.wxradio_enable) enumerate_wxradio_channels(dbhandle, callback);
 	}
 
 	catch(std::exception& ex) { return handle_stdexception(__func__, ex, PVR_ERROR::PVR_ERROR_FAILED); }
@@ -1707,6 +1807,28 @@ bool addon::OpenLiveStream(kodi::addon::PVRChannel const& channel)
 
 			// Create the HD Radio stream
 			m_pvrstream = hdstream::create(create_device(settings), tunerprops, channelprops, hdprops);
+		}
+
+		// DAB/DAB+
+		//
+		else if(channelprops.modulation == modulation::dab) {
+
+			// Set up the DAB/DAB+ digital signal processor properties
+			struct dabprops dabprops = {};
+			dabprops.outputgain = settings.dabradio_output_gain;
+
+			// Log information about the stream for diagnostic purposes
+			log_info(__func__, ": Creating dabstream for channel \"", channelprops.name, "\"");
+			log_info(__func__, ": tunerprops.freqcorrection = ", tunerprops.freqcorrection, " PPM");
+			log_info(__func__, ": dabrops.outputgain = ", dabprops.outputgain, " dB");
+			log_info(__func__, ": channelprops.frequency = ", channelprops.frequency, " Hz");
+			log_info(__func__, ": channelprops.subchannel = ", channelprops.subchannel);
+			log_info(__func__, ": channelprops.autogain = ", (channelprops.autogain) ? "true" : "false");
+			log_info(__func__, ": channelprops.manualgain = ", channelprops.manualgain / 10, " dB");
+			log_info(__func__, ": channelprops.freqcorrection = ", channelprops.freqcorrection, " PPM");
+
+			// Create the DAB/DAB+ stream
+			m_pvrstream = dabstream::create(create_device(settings), tunerprops, channelprops, dabprops);
 		}
 
 		// Weather Radio

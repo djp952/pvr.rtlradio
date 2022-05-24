@@ -36,6 +36,10 @@ msgctxt "#30004"
 msgid "Weather Radio"
 msgstr ""
 
+msgctxt "#30005"
+msgid "DAB/DAB+"
+msgstr ""
+
 msgctxt "#30100"
 msgid "Connection type"
 msgstr ""
@@ -86,6 +90,22 @@ msgstr ""
 
 msgctxt "#30112"
 msgid "Enable analog signal audio fallback"
+msgstr ""
+
+msgctxt "#30113"
+msgid "Enable FM Radio"
+msgstr ""
+
+msgctxt "#30114"
+msgid "Enable HD Radio"
+msgstr ""
+
+msgctxt "#30115"
+msgid "Enable DAB/DAB+"
+msgstr ""
+
+msgctxt "#30116"
+msgid "Enable Weather Radio"
 msgstr ""
 
 msgctxt "#30200"
@@ -208,6 +228,10 @@ msgctxt "#30410"
 msgid "Weather channels"
 msgstr ""
 
+msgctxt "#30411"
+msgid "DAB channels"
+msgstr ""
+
 msgctxt "#30500"
 msgid "Specifies the RTL-SDR device connection type. When set to Universal Serial Bus (USB), the device must be connected locally to this system. When set to Network (rtl_tcp), the device must be attached to a system running the rtl_tcp server application."
 msgstr ""
@@ -258,4 +282,20 @@ msgstr ""
 
 msgctxt "#30512"
 msgid "When set to ON the Digital Signal Processor (DSP) will decode audio from the analog signal during initial synchronization or when the digitial signal has been lost. When set to OFF, audio will be muted during these events."
+msgstr ""
+
+msgctxt "#30513"
+msgid "TODO - Enable FM Radio"
+msgstr ""
+
+msgctxt "#30514"
+msgid "TODO - Enable HD Radio"
+msgstr ""
+
+msgctxt "#30515"
+msgid "TODO - Enable DAB/DAB+"
+msgstr ""
+
+msgctxt "#30516"
+msgid "TODO - Enable Weather Radio"
 msgstr ""

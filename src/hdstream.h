@@ -155,12 +155,17 @@ private:
 	// Maximum number of queued demux packets
 	static size_t const MAX_PACKET_QUEUE;
 
+	// SAMPLE_RATE
+	//
+	// Fixed device sample rate required for HD Radio
+	static uint32_t const SAMPLE_RATE;
+
 	// STREAM_ID_AUDIO
 	//
 	// Stream identifier for the audio output stream
 	static int const STREAM_ID_AUDIO;
 
-	// hdstream::STREAM_ID_ID3TAG
+	// STREAM_ID_ID3TAG
 	//
 	// Stream identifier for the ID3v2 tag output stream
 	static int const STREAM_ID_ID3TAG;
@@ -221,7 +226,7 @@ private:
 
 	// transfer
 	//
-	// Worker thread procedure used to transfer data into the ring buffer
+	// Worker thread procedure used to transfer data from the device
 	void transfer(scalar_condition<bool>& started);
 
 	//-----------------------------------------------------------------------
@@ -235,7 +240,7 @@ private:
 	bool const							m_analogfallback = false;	// Flag for analog signal fallback
 	bool								m_hdaudio = false;			// HD Radio audio flag
 	std::string							m_muxname;					// Generated mux name
-	float								m_pcmgain;					// Output gain
+	float const							m_pcmgain;					// Output gain
 	double								m_dts{ STREAM_TIME_BASE };	// Current decode time stamp
 	std::atomic<float>					m_mer{ 0 };					// Current modulation error ratio
 	std::atomic<float>					m_ber{ 0 };					// Current bit erorr rate

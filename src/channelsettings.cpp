@@ -1010,6 +1010,7 @@ bool channelsettings::OnInit(void)
 		m_spin_modulation->SetType(kodi::gui::controls::AddonGUISpinControlType::ADDON_SPIN_CONTROL_TYPE_TEXT);
 		m_spin_modulation->AddLabel(kodi::addon::GetLocalizedString(30002), static_cast<int>(modulation::fm));
 		m_spin_modulation->AddLabel(kodi::addon::GetLocalizedString(30003), static_cast<int>(modulation::hd));
+		m_spin_modulation->AddLabel(kodi::addon::GetLocalizedString(30005), static_cast<int>(modulation::dab));
 
 		// Only add WX to the spin control for existing channels or new channels that fall within the proper frequency range
 		if(!m_isnew || ((m_channelprops.frequency >= 162400000) && (m_channelprops.frequency <= 162550000)))

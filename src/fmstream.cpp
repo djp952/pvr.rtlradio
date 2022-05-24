@@ -532,12 +532,12 @@ void fmstream::transfer(scalar_condition<bool>& started)
 		// Push the converted samples into the queue<> for processing.  If there is insufficient space
 		// left in the queue<>, the samples aren't being processed quickly enough to keep up with the rate
 		std::unique_lock<std::mutex> lock(m_queuelock);
-		if(m_queue.size() < MAX_SAMPLE_QUEUE) m_queue.push(std::move(samples));
+		if(m_queue.size() < MAX_SAMPLE_QUEUE) m_queue.emplace(std::move(samples));
 		else {
 
 			m_queue = sample_queue_t();							// Replace the queue<>
 			m_queue.push(nullptr);								// Push a resync packet (null)
-			if(samples) m_queue.push(std::move(samples));		// Push samples
+			if(samples) m_queue.emplace(std::move(samples));	// Push samples
 		}
 
 		// Notify any threads waiting on the lock that the queue<> has been updated

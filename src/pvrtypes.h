@@ -111,6 +111,11 @@ struct settings {
 	// Flag to include the channel number in the channel name
 	bool interface_prepend_channel_numbers;
 
+	// fmradio_enable
+	//
+	// Enables the FM DSP
+	bool fmradio_enable;
+
 	// fmradio_enable_rds
 	//
 	// Enables passing decoded RDS information to Kodi
@@ -141,6 +146,11 @@ struct settings {
 	// Specifies the output gain for the FM DSP
 	float fmradio_output_gain;
 
+	// hdradio_enable
+	//
+	// Enables the HD Radio DSP
+	bool hdradio_enable;
+
 	// hdradio_enable_fallback
 	//
 	// Specifies if analog audio fallback is allowable
@@ -150,6 +160,21 @@ struct settings {
 	//
 	// Specifies the output gain for the HD DSP
 	float hdradio_output_gain;
+
+	// dabradio_enable
+	//
+	// Enables/disables the DAB/DAB+ DSP
+	bool dabradio_enable;
+
+	// dabradio_output_gain
+	//
+	// Specifies the output gain for the DAB/DAB+ DSP
+	float dabradio_output_gain;
+
+	// wxradio_enable
+	//
+	// Enables the WX DSP
+	bool wxradio_enable;
 
 	// wxradio_sample_rate
 	//

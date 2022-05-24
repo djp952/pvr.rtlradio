@@ -36,6 +36,13 @@ LOCAL_MODULE := libfftw-prebuilt
 LOCAL_SRC_FILES := depends/fftw/$(TARGET_ABI)/lib/libfftw3f.a
 include $(PREBUILT_STATIC_LIBRARY)
 
+# libmpg123
+#
+include $(CLEAR_VARS)
+LOCAL_MODULE := libmpg123-prebuilt
+LOCAL_SRC_FILES := depends/mpg123/$(TARGET_ABI)/lib/libmpg123.a
+include $(PREBUILT_STATIC_LIBRARY)
+
 # libusb
 #
 include $(CLEAR_VARS)
@@ -61,8 +68,9 @@ LOCAL_C_INCLUDES += \
 	depends/xbmc/xbmc/linux \
 	depends/xbmc/xbmc/addons/kodi-dev-kit/include \
 	depends/xbmc/xbmc/cores/VideoPlayer/Interface/Addon \
-	depends/faad-hdc/$(TARGET_ABI)/include \
+	depends/faad2-hdc/$(TARGET_ABI)/include \
 	depends/fftw/$(TARGET_ABI)/include \
+	depends/mpg123/$(TARGET_ABI)/include \
 	depends/libusb-jni/$(TARGET_ABI)/include \
 	depends/rapidjson/include \
 	depends/rtl-sdr/include \
@@ -76,7 +84,8 @@ LOCAL_CFLAGS += \
 	-Wno-unused-const-variable \
 	-DNDEBUG \
 	-DSQLITE_THREADSAFE=2 \
-	-DSQLITE_TEMP_STORE=3
+	-DSQLITE_TEMP_STORE=3 \
+	-DDABLIN_AAC_FAAD2
 	
 LOCAL_CPP_FEATURES := \
 	exceptions \
@@ -89,6 +98,7 @@ LOCAL_CPPFLAGS += \
 LOCAL_STATIC_LIBRARIES += \
 	libfaad-hdc-prebuilt \
 	libfftw-prebuilt \
+	libmpg123-prebuilt \
 	libusb-jni-prebuilt
 
 LOCAL_LDLIBS += \
@@ -108,6 +118,36 @@ LOCAL_SRC_FILES := \
 	depends/rtl-sdr/src/tuner_r82xx.c \
 	depends/sqlite/sqlite3.c \
 	src/compat/bionic/complex.cpp \
+	src/dabdsp/channels.cpp \
+	src/dabdsp/charsets.cpp \
+	src/dabdsp/dab_decoder.cpp \
+	src/dabdsp/dab-audio.cpp \
+	src/dabdsp/dab-constants.cpp \
+	src/dabdsp/dabplus_decoder.cpp \
+	src/dabdsp/decode_rs_char.c \
+	src/dabdsp/decoder_adapter.cpp \
+	src/dabdsp/eep-protection.cpp \
+	src/dabdsp/encode_rs_char.c \
+	src/dabdsp/fft.cpp \
+	src/dabdsp/fib-processor.cpp \
+	src/dabdsp/fic-handler.cpp \
+	src/dabdsp/freq-interleaver.cpp \
+	src/dabdsp/init_rs_char.c \
+	src/dabdsp/mot_manager.cpp \
+	src/dabdsp/msc-handler.cpp \
+	src/dabdsp/ofdm-decoder.cpp \
+	src/dabdsp/ofdm-processor.cpp \
+	src/dabdsp/pad_decoder.cpp \
+	src/dabdsp/phasereference.cpp \
+	src/dabdsp/phasetable.cpp \
+	src/dabdsp/profiling.cpp \
+	src/dabdsp/protTables.cpp \
+	src/dabdsp/radio-receiver.cpp \
+	src/dabdsp/tii-decoder.cpp \
+	src/dabdsp/tools.cpp \
+	src/dabdsp/uep-protection.cpp \
+	src/dabdsp/viterbi.cpp \
+	src/dabdsp/Xtan2.cpp \
 	src/fmdsp/demodulator.cpp \
 	src/fmdsp/downconvert.cpp \
 	src/fmdsp/fastfir.cpp \
@@ -136,6 +176,7 @@ LOCAL_SRC_FILES := \
 	src/channelsettings.cpp \
 	src/database.cpp \
 	src/filedevice.cpp \
+	src/dabstream.cpp \
 	src/fmstream.cpp \
 	src/hdstream.cpp \
 	src/fmmeter.cpp \
