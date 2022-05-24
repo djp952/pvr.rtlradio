@@ -180,7 +180,7 @@ id3v1tag::~id3v1tag()
 
 void id3v1tag::album(char const* album)
 {
-	if(album == nullptr) throw std::invalid_argument("album");
+	if(album == nullptr) album = "";
 
 	memset(&m_tag.album, 0, std::extent<decltype(id3v1_tag_t::album)>::value);
 	size_t len = std::min(strlen(album), std::extent<decltype(id3v1_tag_t::album)>::value);
@@ -198,7 +198,7 @@ void id3v1tag::album(char const* album)
 
 void id3v1tag::artist(char const* artist)
 {
-	if(artist == nullptr) throw std::invalid_argument("artist");
+	if(artist == nullptr) artist = "";
 
 	memset(&m_tag.artist, 0, std::extent<decltype(id3v1_tag_t::artist)>::value);
 	size_t len = std::min(strlen(artist), std::extent<decltype(id3v1_tag_t::artist)>::value);
@@ -216,7 +216,7 @@ void id3v1tag::artist(char const* artist)
 
 void id3v1tag::comment(char const* comment)
 {
-	if(comment == nullptr) throw std::invalid_argument("comment");
+	if(comment == nullptr) comment = "";
 
 	// Track number shares the final two bytes of the comment field. If a track 
 	// number has already been set, the comment field becomes 2 bytes shorter
@@ -282,7 +282,7 @@ void id3v1tag::genre(uint8_t genre)
 
 void id3v1tag::genre(char const* genre)
 {
-	if(genre == nullptr) throw std::invalid_argument("genre");
+	if(genre == nullptr) genre = "";
 
 	// Assume there will not be a matching genre string in the table
 	uint8_t mapped = UNSPECIFIED_GENRE;
@@ -326,7 +326,7 @@ size_t id3v1tag::size(void) const
 
 void id3v1tag::song(char const* song)
 {
-	if(song == nullptr) throw std::invalid_argument("song");
+	if(song == nullptr) song = "";
 
 	memset(&m_tag.song, 0, std::extent<decltype(id3v1_tag_t::song)>::value);
 	size_t len = std::min(strlen(song), std::extent<decltype(id3v1_tag_t::song)>::value);
@@ -387,7 +387,7 @@ bool id3v1tag::write(uint8_t* buffer, size_t length) const
 
 void id3v1tag::year(char const* year)
 {
-	if(year == nullptr) throw std::invalid_argument("year");
+	if(year == nullptr) year = "";
 
 	memset(&m_tag.year, 0, std::extent<decltype(id3v1_tag_t::year)>::value);
 	size_t len = std::min(strlen(year), std::extent<decltype(id3v1_tag_t::year)>::value);
