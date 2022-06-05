@@ -427,6 +427,49 @@ void enumerate_hdradio_channels(sqlite3* instance, enumerate_channels_callback c
 }
 
 //---------------------------------------------------------------------------
+// enumerate_rawfiles
+//
+// Enumerates available raw files registered in the database
+//
+// Arguments:
+//
+//	instance	- Database instance
+//	callback	- Callback function
+
+void enumerate_rawfiles(sqlite3* instance, enumerate_rawfiles_callback const& callback)
+{
+	sqlite3_stmt*				statement;			// SQL statement to execute
+	int							result;				// Result from SQLite function
+
+	if(instance == nullptr) throw std::invalid_argument("instance");
+
+	// path | name | samplerate
+	auto sql = "select path as path, name || ' (' || cast(samplerate as text) || ')' as name, samplerate as samplerate from rawfile order by name, samplerate asc";
+
+	result = sqlite3_prepare_v2(instance, sql, -1, &statement, nullptr);
+	if(result != SQLITE_OK) throw sqlite_exception(result, sqlite3_errmsg(instance));
+
+	try {
+
+		// Execute the query and iterate over all returned rows
+		while(sqlite3_step(statement) == SQLITE_ROW) {
+
+			struct rawfile item = {};
+
+			item.path = reinterpret_cast<char const*>(sqlite3_column_text(statement, 0));
+			item.name = reinterpret_cast<char const*>(sqlite3_column_text(statement, 1));
+			item.samplerate = static_cast<uint32_t>(sqlite3_column_int64(statement, 2));
+
+			callback(item);						// Invoke caller-supplied callback
+		}
+
+		sqlite3_finalize(statement);			// Finalize the SQLite statement
+	}
+
+	catch(...) { sqlite3_finalize(statement); throw; }
+}
+
+//---------------------------------------------------------------------------
 // enumerate_wxradio_channels
 //
 // Enumerates Weather Radio channels
@@ -729,6 +772,22 @@ bool get_channel_properties(sqlite3* instance, unsigned int id, struct channelpr
 }
 
 //---------------------------------------------------------------------------
+// has_rawfiles
+//
+// Gets a flag indicating if there are raw input files available to use
+//
+// Arguments:
+//
+//	instance	- Database instance
+
+bool has_rawfiles(sqlite3* instance)
+{
+	if(instance == nullptr) throw std::invalid_argument("instance");
+
+	return execute_scalar_int(instance, "select exists(select path from rawfile)") != 0;
+}
+
+//---------------------------------------------------------------------------
 // import_channels
 //
 // Imports channels from a JSON string
@@ -864,6 +923,20 @@ sqlite3* open_database(char const* connstring, int flags, bool initialize)
 				execute_non_query(instance, "drop table channel_v1");
 				execute_non_query(instance, "pragma user_version = 2");
 				dbversion = 2;
+			}
+
+			// SCHEMA VERSION 2 -> VERSION 3
+			//
+			if(dbversion == 2) {
+
+				// table: rawfile
+				//
+				// path(pk) | name | samplerate
+				execute_non_query(instance, "drop table if exists rawfile");
+				execute_non_query(instance, "create table rawfile(path text not null, name text not null, samplerate integer not null, primary key(path))");
+
+				execute_non_query(instance, "pragma user_version = 3");
+				dbversion = 3;
 			}
 		}
 	}

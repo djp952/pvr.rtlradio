@@ -108,6 +108,16 @@ struct channel {
 	char const*		logourl;
 };
 
+// rawfile
+//
+// Information about a single raw file enumerated from the database
+struct rawfile {
+
+	char const*		path;
+	char const*		name;
+	uint32_t		samplerate;
+};
+
 //---------------------------------------------------------------------------
 
 #pragma warning(pop)

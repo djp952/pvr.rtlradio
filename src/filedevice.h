@@ -65,7 +65,7 @@ public:
 	// create (static)
 	//
 	// Factory method, creates a new filedevice instance
-	static std::unique_ptr<filedevice> create(char const* filename);
+	static std::unique_ptr<filedevice> create(char const* filename, uint32_t samplerate);
 
 	// get_device_name
 	//
@@ -124,13 +124,14 @@ private:
 
 	// Instance Constructor
 	//
-	filedevice(char const* filename);
+	filedevice(char const* filename, uint32_t samplerate);
 
 	//-----------------------------------------------------------------------
 	// Member Variables
 
-	std::string			m_filename;						// File name
-	FILE*				m_file = nullptr;				// File handle
+	std::string				m_filename;						// File name
+	uint32_t const			m_samplerate;					// Sample rate
+	FILE*					m_file = nullptr;				// File handle
 
 	// ASYNCHRONOUS SUPPORT
 	//
