@@ -29,9 +29,12 @@
 #include <kodi/General.h>
 #include <kodi/gui/dialogs/FileBrowser.h>
 #include <kodi/gui/dialogs/OK.h>
+#include <kodi/gui/dialogs/Select.h>
 #include <rapidjson/document.h>
 #include <rapidjson/error/en.h>
 #include <rapidjson/prettywriter.h>
+#include <utility>
+#include <vector>
 #include <version.h>
 
 #ifdef __ANDROID__
@@ -56,15 +59,6 @@
 // Addon Entry Points 
 //
 ADDONCREATOR(addon)
-
-// DEBUG_RAW_FILE
-//
-// Specifies the full path to a raw I/Q data file to use when creating
-// any streams instead of accessing an RTL-SDR device.  This is not a
-// general-purpose, the raw file must have been created with the sample
-// rate that is going to be expected by the Digital Signal Processor(s)
-//
-// #define DEBUG_RAW_FILE "path/to/input/file"
 
 //---------------------------------------------------------------------------
 // addon Instance Constructor
@@ -114,22 +108,44 @@ inline struct settings addon::copy_settings(void) const
 
 std::unique_ptr<rtldevice> addon::create_device(struct settings const& settings)
 {
+	// Pull a database handle out of the connection pool
+	connectionpool::handle dbhandle(m_connpool);
 
-#ifdef DEBUG_RAW_FILE
-	// See commentary above; this forces input from a raw I/Q sample file
-	return filedevice::create(DEBUG_RAW_FILE);
-#endif
+	// File device
+	if(has_rawfiles(dbhandle)) {
+
+		std::vector<std::string>						names;		// File names
+		std::vector<std::pair<std::string, uint32_t>>	files;		// File paths and sample rates
+
+		// Enumerate the available raw files registered in the database
+		enumerate_rawfiles(dbhandle, [&](struct rawfile const& item) -> void {
+
+			if((item.path != nullptr) && (item.name != nullptr) && (item.samplerate > 0)) {
+
+				names.emplace_back(std::string(item.name));
+				files.emplace_back(std::string(item.path), item.samplerate);
+			}
+		});
+
+		// Prompt to select from among the available files, or cancel the operation
+		int selected = kodi::gui::dialogs::Select::Show(kodi::GetLocalizedString(30412), names, -1, 0);
+		if(selected >= 0) {
+
+			auto const& item = files[selected];
+			return filedevice::create(item.first.c_str(), item.second);
+		}
+	}
 
 	// USB device
 	if(settings.device_connection == device_connection::usb)
 		return usbdevice::create(settings.device_connection_usb_index);
 
 	// Network device
-	else if(settings.device_connection == device_connection::rtltcp)
+	if(settings.device_connection == device_connection::rtltcp)
 		return tcpdevice::create(settings.device_connection_tcp_host.c_str(), static_cast<uint16_t>(settings.device_connection_tcp_port));
 
 	// Unknown device type
-	else throw string_exception("invalid device_connection type specified");
+	throw string_exception("invalid device_connection type specified");
 }
 
 //---------------------------------------------------------------------------

@@ -23,9 +23,11 @@
 #include "stdafx.h"
 #include "filedevice.h"
 
+#include <chrono>
 #include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <thread>
 
 #include "string_exception.h"
 
@@ -37,8 +39,9 @@
 // Arguments:
 //
 //	filename	- Target file name
+//	samplerate	- Target file sample rate
 
-filedevice::filedevice(char const* filename)
+filedevice::filedevice(char const* filename, uint32_t samplerate) : m_samplerate(samplerate)
 {
 	if(filename == nullptr) throw std::invalid_argument("filename");
 
@@ -106,10 +109,11 @@ void filedevice::cancel_async(void) const
 // Arguments:
 //
 //	filename	- Target file name
+//	samplerate	- Target file sample rate
 
-std::unique_ptr<filedevice> filedevice::create(char const* filename)
+std::unique_ptr<filedevice> filedevice::create(char const* filename, uint32_t samplerate)
 {
-	return std::unique_ptr<filedevice>(new filedevice(filename));
+	return std::unique_ptr<filedevice>(new filedevice(filename, samplerate));
 }
 
 //---------------------------------------------------------------------------
@@ -152,9 +156,18 @@ void filedevice::get_valid_gains(std::vector<int>& /*dbs*/) const
 size_t filedevice::read(uint8_t* buffer, size_t count) const
 {
 	assert(m_file != nullptr);
+	assert(m_samplerate != 0);
 
+	// Determine how long this operation should take to execute to maintain sample rate
+	int duration = static_cast<int>(static_cast<double>(count) / ((m_samplerate * 2) / 1000000.0));
+	auto timeout = std::chrono::high_resolution_clock::now() + std::chrono::microseconds(duration);
+
+	// Synchronously read the requested amount of data from the input file
 	size_t read = fread(buffer, sizeof(uint8_t), count, m_file);
 	if((read == 0) && (ferror(m_file) != 0)) throw string_exception(__func__, ": fread() failed");
+
+	// Sleep until the calcuated timeout has been reached
+	std::this_thread::sleep_until(timeout);
 
 	return read;
 }

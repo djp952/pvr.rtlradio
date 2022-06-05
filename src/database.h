@@ -45,6 +45,11 @@
 // Callback function passed to enumerate_channels
 using enumerate_channels_callback = std::function<void(struct channel const& channel)>;
 
+// enumerate_rawfiles_callback
+//
+// Callback function passed to enumerate_rawfiles
+using enumerate_rawfiles_callback = std::function<void(struct rawfile const& rawfile)>;
+
 //---------------------------------------------------------------------------
 // connectionpool
 //
@@ -169,6 +174,11 @@ void enumerate_fmradio_channels(sqlite3* instance, enumerate_channels_callback c
 // Enumerates HD Radio channels
 void enumerate_hdradio_channels(sqlite3* instance, enumerate_channels_callback const& callback);
 
+// enumerate_rawfiles
+//
+// Enumerates available raw files registered in the database
+void enumerate_rawfiles(sqlite3* instance, enumerate_rawfiles_callback const& callback);
+
 // enumerate_wxradio_channels
 //
 // Enumerates Weather Radio channels
@@ -188,6 +198,11 @@ int get_channel_count(sqlite3* instance);
 //
 // Gets the tuning properties of a channel from the database
 bool get_channel_properties(sqlite3* instance, unsigned int id, struct channelprops& channelprops);
+
+// has_rawfiles
+//
+// Gets a flag indicating if there are raw input files available to use
+bool has_rawfiles(sqlite3* instance);
 
 // import_channels
 //

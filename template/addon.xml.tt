@@ -21,9 +21,11 @@
 
 Concept based on project pvr.rtl.radiofm (https://github.com/AlwinEsch/pvr.rtl.radiofm) - Copyright (C) 2015-2018 Alwin Esch
 
-FM Radio Digital Signal Processing derived from CuteSDR (https://sourceforge.net/projects/cutesdr) - Copyright (C) 2010 Moe Wheatley
+FM Radio Digital Signal Processing adapted from project CuteSDR (https://sourceforge.net/projects/cutesdr) - Copyright (C) 2010 Moe Wheatley
 
-Hybrid Digital (HD) Radio Digital Signal Processing derived from NRSC5 (https://github.com/theori-io/nrsc5)</description>
+Hybrid Digital (HD) Radio Digital Signal Processing adapted from project NRSC5 (https://github.com/theori-io/nrsc5)
+
+DAB/DAB+ Digital Signal Processing adapted from project welle.io (https://github.com/AlbrechtL/welle.io)</description>
 		<news><#= File.ReadAllText(this.Host.ResolvePath(this.Host.ResolveParameterValue("", "", "changelogtxt"))) #></news>
 		<license>MIT License (https://opensource.org/licenses/MIT)</license>
 		<website>https://github.com/djp952/pvr.rtlradio/wiki</website>
