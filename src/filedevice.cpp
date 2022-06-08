@@ -158,16 +158,20 @@ size_t filedevice::read(uint8_t* buffer, size_t count) const
 	assert(m_file != nullptr);
 	assert(m_samplerate != 0);
 
-	// Determine how long this operation should take to execute to maintain sample rate
-	int duration = static_cast<int>(static_cast<double>(count) / ((m_samplerate * 2) / 1000000.0));
-	auto timeout = std::chrono::high_resolution_clock::now() + std::chrono::microseconds(duration);
+	auto start = std::chrono::steady_clock::now();
 
 	// Synchronously read the requested amount of data from the input file
 	size_t read = fread(buffer, sizeof(uint8_t), count, m_file);
-	if((read == 0) && (ferror(m_file) != 0)) throw string_exception(__func__, ": fread() failed");
 
-	// Sleep until the calcuated timeout has been reached
-	std::this_thread::sleep_until(timeout);
+	if(read > 0) {
+
+		// Determine how long this operation should take to execute to maintain sample rate
+		int duration = static_cast<int>(static_cast<double>(read) / ((m_samplerate * 2) / 1000000.0));
+		auto end = start + std::chrono::microseconds(duration);
+
+		// Yield until the calculated duration has expired
+		while(std::chrono::steady_clock::now() < end) { std::this_thread::yield(); }
+	}
 
 	return read;
 }
@@ -185,7 +189,6 @@ size_t filedevice::read(uint8_t* buffer, size_t count) const
 void filedevice::read_async(rtldevice::asynccallback const& callback, uint32_t bufferlength) const
 {
 	std::unique_ptr<uint8_t[]>	buffer(new uint8_t[bufferlength]);		// Input data buffer
-	size_t						offset = 0;								// Buffer offset
 
 	m_stop = false;
 	m_stopped = false;
@@ -196,12 +199,8 @@ void filedevice::read_async(rtldevice::asynccallback const& callback, uint32_t b
 		while(m_stop.test(true) == false) {
 
 			// Try to read enough data to fill the input buffer
-			offset += read(&buffer[offset], bufferlength - offset);
-			if(offset == bufferlength) {
-
-				callback(&buffer[0], offset);		// Buffer is full, invoke callback
-				offset = 0;							// Reset buffer offset
-			}
+			size_t cb = read(&buffer[0], bufferlength);
+			callback(&buffer[0], cb);
 		}
 
 		m_stopped = true;							// Operation has been stopped

@@ -248,9 +248,6 @@
     <ClInclude Include="win32_exception.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="fmmeter.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="fmdsp\fmdemod.h">
       <Filter>Header Files\fmdsp</Filter>
     </ClInclude>
@@ -653,6 +650,9 @@
     <ClInclude Include="dabstream.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="signalmeter.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -755,9 +755,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="win32_exception.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="fmmeter.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="fmdsp\fmdemod.cpp">
@@ -1043,6 +1040,9 @@
       <Filter>Source Files\dabdsp</Filter>
     </ClCompile>
     <ClCompile Include="dabstream.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="signalmeter.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

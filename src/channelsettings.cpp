@@ -27,7 +27,10 @@
 #include <cmath>
 #include <glm/gtc/type_ptr.hpp>
 #include <kodi/General.h>
+#include <kodi/gui/controls/Label.h>
 #include <kodi/gui/dialogs/FileBrowser.h>
+
+#include "string_exception.h"
 
 #ifdef HAS_GLES
 #include <EGL/egl.h>
@@ -37,6 +40,7 @@
 
 // Control Identifiers
 //
+static const int CONTROL_LABEL_HEADERLABEL		= 2;
 static const int CONTROL_BUTTON_OK				= 100;
 static const int CONTROL_BUTTON_CANCEL			= 101;
 static const int CONTROL_EDIT_FREQUENCY			= 200;
@@ -49,7 +53,7 @@ static const int CONTROL_RENDER_SIGNALMETER		= 206;
 static const int CONTROL_EDIT_METERGAIN			= 207;
 static const int CONTROL_EDIT_METERPOWER		= 208;
 static const int CONTROL_EDIT_METERSNR			= 209;
-static const int CONTROL_SPIN_MODULATION		= 210;
+static const int CONTROL_EDIT_MODULATION		= 210;
 static const int CONTROL_SLIDER_CORRECTION		= 211;
 
 // channelsettings::FFT_BANDWIDTH
@@ -92,7 +96,7 @@ static bool is_platform_opengles(void)
 //	controlid	- Identifier of the control within the parent CWindow instance
 
 channelsettings::fftcontrol::fftcontrol(kodi::gui::CWindow* window, int controlid) : 
-	renderingcontrol(window, controlid), m_modulation(modulation::fm)
+	renderingcontrol(window, controlid)
 {
 	// Store some handy floating point copies of the width and height for rendering
 	m_widthf = static_cast<GLfloat>(m_width);
@@ -100,6 +104,9 @@ channelsettings::fftcontrol::fftcontrol(kodi::gui::CWindow* window, int controli
 
 	// Allocate the buffer to hold the scaled FFT data
 	m_fft = std::unique_ptr<glm::vec2[]>(new glm::vec2[m_width]);
+
+	// Initialize the cut points
+	m_fftlowcut = m_ffthighcut = -1;
 
 	// Create the model/view/projection matrix based on width and height
 	m_modelProjMat = glm::ortho(0.0f, m_widthf, m_heightf, 0.0f);
@@ -212,24 +219,6 @@ void channelsettings::fftcontrol::render(void)
 		render_line(glm::vec4(1.0f, 1.0f, 1.0f, 0.2f), dbline);
 	}
 
-	if(m_modulation == modulation::hd) {
-
-		// Lower digital sideband
-		glm::vec2 ldsrect[4] = { { 0.0f, 0.0f }, { 0.0f, m_heightf }, { m_lowcut, 0.0f }, { m_lowcut, m_heightf } };
-		render_rect(glm::vec4(1.0f, 1.0f, 1.0f, 0.2f), ldsrect);
-
-		// Upper digital sideband
-		glm::vec2 udsrect[4] = { { m_highcut, 0.0f }, { m_highcut, m_heightf }, { m_widthf, 0.0f }, { m_widthf, m_heightf } };
-		render_rect(glm::vec4(1.0f, 1.0f, 1.0f, 0.2f), udsrect);
-	}
-
-	else {
-
-		// Bandwidth
-		glm::vec2 cutrect[4] = { { m_lowcut, 0.0f }, { m_lowcut, m_heightf }, { m_highcut, 0.0f }, { m_highcut, m_heightf } };
-		render_rect(glm::vec4(1.0f, 1.0f, 1.0f, 0.2f), cutrect);
-	}
-
 	// Power range
 	glm::vec2 powerrect[4] = { { 0.0f, m_power }, { m_widthf, m_power }, { 0.0f, m_noise }, { m_widthf, m_noise } };
 	render_rect(glm::vec4(0.0f, 1.0f, 0.0f, 0.1f), powerrect);
@@ -238,13 +227,21 @@ void channelsettings::fftcontrol::render(void)
 
 	// Noise range
 	glm::vec2 noiserect[4] = { { 0.0f, m_noise }, { m_widthf, m_noise }, { 0.0f, m_heightf }, { m_widthf, m_heightf } };
-	render_rect(glm::vec4(1.0f, 0.0f, 0.0f, 0.1f), noiserect);
+	render_rect(glm::vec4(1.0f, 0.0f, 0.0f, 0.15f), noiserect);
 	glm::vec2 noiseline[2] = { { 0.0f, m_noise }, { m_width, m_noise } };
 	render_line(glm::vec4(1.0f, 0.0f, 0.0f, 0.75f), noiseline);
 
 	// Center frequency
 	glm::vec2 centerline[2] = { { m_widthf / 2.0f, 0.0f }, { m_widthf / 2.0f, m_heightf } };
 	render_line(glm::vec4(1.0f, 1.0f, 0.0f, 0.75f), centerline);
+
+	// Low cut
+	glm::vec2 lowcutline[2] = { { static_cast<GLfloat>(m_fftlowcut), 0.0f }, { static_cast<GLfloat>(m_fftlowcut), m_heightf } };
+	render_line(glm::vec4(1.0f, 1.0f, 1.0f, 0.4f), lowcutline);
+
+	// High cut
+	glm::vec2 highcutline[2] = { { static_cast<GLfloat>(m_ffthighcut), 0.0f }, { static_cast<GLfloat>(m_ffthighcut), m_heightf } };
+	render_line(glm::vec4(1.0f, 1.0f, 1.0f, 0.4f), highcutline);
 
 	// FFT
 	if(!m_overload) render_line_strip(glm::vec3(1.0f, 1.0f, 1.0f), m_fft.get(), m_width);
@@ -464,32 +461,29 @@ void channelsettings::fftcontrol::render_triangle(glm::vec4 color, glm::vec2 ver
 //
 //	NONE
 
-void channelsettings::fftcontrol::update(struct fmmeter::signal_status const& status)
+void channelsettings::fftcontrol::update(struct signalmeter::signal_status const& status)
 {
-	// The current modulation impacts the rendering
-	m_modulation = status.modulation;
-
 	// Power and noise values are supplied as dB and need to be scaled to the viewport
 	m_power = db_to_height(status.power);
 	m_noise = db_to_height(status.noise);
 
-	// Calculate the horizontal offsets of the low and high cut points and where to put the power meter
-	m_lowcut = (((status.fftbandwidth / 2.0f) + status.fftlowcut) / status.fftbandwidth) * m_widthf;
-	m_highcut = (((status.fftbandwidth / 2.0f) + status.ffthighcut) / status.fftbandwidth) * m_widthf;
+	// The low and high cuts are provided as indexes into the plot data
+	m_fftlowcut = status.lowcut;
+	m_ffthighcut = status.highcut;
 
 	// The length of the fft data should match the width of the control, but watch for overrruns
-	assert(status.fftsize == m_width);
-	size_t length = std::min(status.fftsize, static_cast<size_t>(m_width));
+	assert(status.plotsize == m_width);
+	size_t length = std::min(status.plotsize, static_cast<size_t>(m_width));
 
 	// The FFT data merely needs to be converted into an X,Y vertex to be used by the renderer
 	for(size_t index = 0; index < length; index++) m_fft[index] = glm::vec2(static_cast<float>(index), 
-		static_cast<float>(status.fftdata[index]));
+		static_cast<float>(status.plotdata[index]));
 
 	// The FFT line strip will be shown in a different color upon overload
 	m_overload = status.overload;
 
 	// In the event of an FFT data underrun, flat-line the remainder of the data points
-	if(m_width > status.fftsize) {
+	if(m_width > status.plotsize) {
 
 		for(size_t index = length; index < m_width; index++) m_fft[index] = glm::vec2(static_cast<float>(index), m_heightf);
 	}
@@ -666,17 +660,61 @@ GLint channelsettings::fftshader::uModelProjMatrix(void) const
 
 channelsettings::channelsettings(std::unique_ptr<rtldevice> device, struct tunerprops const& tunerprops, 
 	struct channelprops const& channelprops, bool isnew) : kodi::gui::CWindow("channelsettings.xml", "skin.estuary", true), 
-	m_isnew(isnew), m_tunerprops(tunerprops), m_channelprops(channelprops)
+	m_device(std::move(device)), m_tunerprops(tunerprops), m_channelprops(channelprops), m_isnew(isnew)
 {
-	assert(device);
+	assert(m_device);
+	
+	// Analog FM
+	//
+	if(channelprops.modulation == modulation::fm) {
 
-	// Create the signal meter instance with the specified device and tuner properties, set for a 500ms callback rate
-	m_signalmeter = fmmeter::create(std::move(device), tunerprops, channelprops.frequency, channelprops.modulation, FFT_BANDWIDTH,
-		std::bind(&channelsettings::fm_meter_status, this, std::placeholders::_1), 500, 
-		std::bind(&channelsettings::fm_meter_exception, this, std::placeholders::_1));
+		m_signalprops.samplerate = 1600 KHz;
+		m_signalprops.bandwidth = 220 KHz;
+		m_signalprops.lowcut = -103 KHz;
+		m_signalprops.highcut = 103 KHz;
+	}
 
-	// Get the vector<> of valid manual gain values for the attached device
-	m_signalmeter->get_valid_manual_gains(m_manualgains);
+	// HD Radio
+	//
+	else if(channelprops.modulation == modulation::hd) {
+
+		m_signalprops.samplerate = 1488375;
+		m_signalprops.bandwidth = 440 KHz;
+		m_signalprops.lowcut = -204 KHz;
+		m_signalprops.highcut = 204 KHz;
+	}
+
+	// DAB Ensemble
+	//
+	else if(channelprops.modulation == modulation::dab) {
+
+		m_signalprops.samplerate = 2048 KHz;
+		m_signalprops.bandwidth = 1712 KHz;
+		m_signalprops.lowcut = -780 KHz;
+		m_signalprops.highcut = 780 KHz;
+	}
+
+	// Weather Radio
+	//
+	else if(channelprops.modulation == modulation::wx) {
+
+		m_signalprops.samplerate = 1600 KHz;
+		m_signalprops.bandwidth = 200 KHz;
+		m_signalprops.lowcut = -8 KHz;
+		m_signalprops.highcut = 8 KHz;
+	}
+
+	else throw string_exception("unknown channel modulation");
+
+	// Get the valid manual gain values supported by the device
+	m_device->get_valid_gains(m_manualgains);
+
+	// Set the device to match the channel properties at time of construction (prior to OnCreate)
+	m_device->set_center_frequency(m_channelprops.frequency);
+	m_device->set_frequency_correction(m_tunerprops.freqcorrection + m_channelprops.freqcorrection);
+	m_device->set_sample_rate(m_signalprops.samplerate);
+	m_device->set_automatic_gain_control(m_channelprops.autogain);
+	if(!m_channelprops.autogain) m_device->set_gain(m_channelprops.manualgain);
 }
 
 //---------------------------------------------------------------------------
@@ -684,8 +722,25 @@ channelsettings::channelsettings(std::unique_ptr<rtldevice> device, struct tuner
 
 channelsettings::~channelsettings()
 {
-	// Stop the signal meter
-	m_signalmeter->stop();
+	m_stop = true;								// Signal worker thread to stop
+	if(m_device) m_device->cancel_async();		// Cancel any async read operations
+	if(m_worker.joinable()) m_worker.join();	// Wait for thread to exit
+	m_device.reset();							// Release RTL-SDR device
+}
+
+//---------------------------------------------------------------------------
+// channelsettings::close
+//
+// Closes the dialog box
+//
+// Arguments:
+//
+//	result		- Result value from the dialog box operation
+
+void channelsettings::close(bool result)
+{
+	m_result = result;							// Set the result code
+	Close();									// Close the dialog box
 }
 
 //---------------------------------------------------------------------------
@@ -721,55 +776,6 @@ std::unique_ptr<channelsettings> channelsettings::create(std::unique_ptr<rtldevi
 	struct channelprops const& channelprops, bool isnew)
 {
 	return std::unique_ptr<channelsettings>(new channelsettings(std::move(device), tunerprops, channelprops, isnew));
-}
-
-//---------------------------------------------------------------------------
-// channelsettings::fm_meter_exception (private)
-//
-// Callback to handle an exception raised by the signal meter
-//
-// Arguments:
-//
-//	ex		- Exception that was raised by the signal meter
-
-void channelsettings::fm_meter_exception(std::exception const& ex)
-{
-	kodi::QueueFormattedNotification(QueueMsg::QUEUE_ERROR, "Unable to read from device: %s", ex.what());
-}
-
-//---------------------------------------------------------------------------
-// channelsettings::fm_meter_status (private)
-//
-// Updates the state of the signal meter
-//
-// Arguments:
-//
-//	status		- Updated signal status from the signal meter
-
-void channelsettings::fm_meter_status(struct fmmeter::signal_status const& status)
-{
-	char strbuf[64] = {};						// snprintf() text buffer
-
-	// Signal Meter
-	//
-	m_render_signalmeter->update(status);
-
-	// Signal Strength
-	//
-	if(!std::isnan(status.power)) {
-
-		snprintf(strbuf, std::extent<decltype(strbuf)>::value, "%.1F dB", status.power);
-		m_edit_signalpower->SetText(strbuf);
-	}
-	else m_edit_signalpower->SetText("N/A");
-
-	// Signal-to-noise
-	//
-	if(!std::isnan(status.snr)) {
-		snprintf(strbuf, std::extent<decltype(strbuf)>::value, "%d dB", static_cast<int>(status.snr));
-		m_edit_signalsnr->SetText(strbuf);
-	}
-	else m_edit_signalsnr->SetText("N/A");
 }
 
 //---------------------------------------------------------------------------
@@ -823,6 +829,41 @@ void channelsettings::get_channel_properties(struct channelprops& channelprops) 
 bool channelsettings::get_dialog_result(void) const
 {
 	return m_result;
+}
+
+//---------------------------------------------------------------------------
+// channelsettings::meter_status (private)
+//
+// Updates the state of the signal meter
+//
+// Arguments:
+//
+//	status		- Updated signal status from the signal meter
+
+void channelsettings::meter_status(struct signalmeter::signal_status const& status)
+{
+	char strbuf[64] = {};						// snprintf() text buffer
+
+	// Signal Meter
+	//
+	m_render_signalmeter->update(status);
+
+	// Signal Strength
+	//
+	if(!std::isnan(status.power)) {
+
+		snprintf(strbuf, std::extent<decltype(strbuf)>::value, "%.1F dB", status.power);
+		m_edit_signalpower->SetText(strbuf);
+	}
+	else m_edit_signalpower->SetText("N/A");
+
+	// Signal-to-noise
+	//
+	if(!std::isnan(status.snr)) {
+		snprintf(strbuf, std::extent<decltype(strbuf)>::value, "%d dB", static_cast<int>(status.snr));
+		m_edit_signalsnr->SetText(strbuf);
+	}
+	else m_edit_signalsnr->SetText("N/A");
 }
 
 //---------------------------------------------------------------------------
@@ -891,6 +932,39 @@ void channelsettings::update_gain(void)
 }
 
 //---------------------------------------------------------------------------
+// channelsettings::worker (private)
+//
+// Worker thread procedure used to pump data into the signal meter
+//
+// Arguments:
+//
+//	started		- Condition variable to set when thread has started
+
+void channelsettings::worker(scalar_condition<bool>& started)
+{
+	assert(m_device);
+	assert(m_signalmeter);
+
+	// read_callback_func (local)
+	//
+	// Asynchronous read callback function for the RTL-SDR device
+	auto read_callback_func = [&](uint8_t const* buffer, size_t count) -> void {
+
+		m_signalmeter->inputsamples(buffer, count);
+	};
+
+	// Begin streaming from the device and inform the caller that the thread is running
+	m_device->begin_stream();
+	started = true;
+
+	// Continuously read data from the device until cancel_async() has been called
+	try { m_device->read_async(read_callback_func, static_cast<uint32_t>(32 KiB)); }
+	catch(...) { m_worker_exception = std::current_exception(); }
+
+	m_stopped.store(true);					// Thread is stopped
+}
+
+//---------------------------------------------------------------------------
 // CWINDOW IMPLEMENTATION
 //---------------------------------------------------------------------------
 
@@ -917,47 +991,48 @@ bool channelsettings::OnAction(ADDON_ACTION actionId)
 
 bool channelsettings::OnClick(int controlId)
 {
+	uint32_t			browseheading = 30312;			// "Browse for channel logo"
+
+	// "Browse for multiplex logo" / "Browse for emsemble logo"
+	if(m_channelprops.modulation == modulation::hd) browseheading = 30313;
+	else if(m_channelprops.modulation == modulation::dab) browseheading = 30314;
+
 	switch(controlId) {
 
 		case CONTROL_EDIT_CHANNELNAME:
 			m_channelprops.name = m_edit_channelname->GetText();
 			break;
 
-		case CONTROL_SPIN_MODULATION:
-			if(m_isnew) m_channelprops.modulation = static_cast<enum modulation>(m_spin_modulation->GetIntValue());
-			m_signalmeter->set_modulation(m_channelprops.modulation);
-			return true;
-
 		case CONTROL_BUTTON_CHANNELICON:
-			kodi::gui::dialogs::FileBrowser::ShowAndGetImage("local|network|pictures", kodi::addon::GetLocalizedString(30406), m_channelprops.logourl);
+			kodi::gui::dialogs::FileBrowser::ShowAndGetImage("local|network|pictures", kodi::addon::GetLocalizedString(browseheading), m_channelprops.logourl);
 			m_image_channelicon->SetFileName(m_channelprops.logourl, false);
 			return true;
 
 		case CONTROL_RADIO_AUTOMATICGAIN:
 			m_channelprops.autogain = m_radio_autogain->IsSelected();
-			m_signalmeter->set_automatic_gain(m_channelprops.autogain);
+			m_device->set_automatic_gain_control(m_channelprops.autogain);
+			if(!m_channelprops.autogain) m_device->set_gain(m_channelprops.manualgain);
 			m_slider_manualgain->SetEnabled(!m_channelprops.autogain);
 			update_gain();
 			return true;
 
 		case CONTROL_SLIDER_MANUALGAIN:
 			m_channelprops.manualgain = percent_to_gain(static_cast<int>(m_slider_manualgain->GetPercentage()));
-			m_signalmeter->set_manual_gain(m_channelprops.manualgain);
+			if(!m_channelprops.autogain) m_device->set_gain(m_channelprops.manualgain);
 			update_gain();
 			return true;
 
 		case CONTROL_SLIDER_CORRECTION:
 			m_channelprops.freqcorrection = m_slider_correction->GetIntValue();
-			m_signalmeter->set_frequency_correction(m_tunerprops.freqcorrection + m_channelprops.freqcorrection);
+			m_device->set_frequency_correction(m_tunerprops.freqcorrection + m_channelprops.freqcorrection);
 			return true;
 
 		case CONTROL_BUTTON_OK:
-			m_result = true;
-			Close();
+			close(true);
 			return true;
 
 		case CONTROL_BUTTON_CANCEL:
-			Close();
+			close(false);
 			return true;
 	}
 
@@ -975,13 +1050,15 @@ bool channelsettings::OnClick(int controlId)
 
 bool channelsettings::OnInit(void)
 {
+	assert(m_device);
+
 	try {
 
 		// Get references to all of the manipulable dialog controls
 		m_button_ok = std::unique_ptr<CButton>(new CButton(this, CONTROL_BUTTON_OK));
 		m_edit_frequency = std::unique_ptr<CEdit>(new CEdit(this, CONTROL_EDIT_FREQUENCY));
 		m_edit_channelname = std::unique_ptr<CEdit>(new CEdit(this, CONTROL_EDIT_CHANNELNAME));
-		m_spin_modulation = std::unique_ptr<CSpin>(new CSpin(this, CONTROL_SPIN_MODULATION));
+		m_edit_modulation = std::unique_ptr<CEdit>(new CEdit(this, CONTROL_EDIT_MODULATION));
 		m_button_channelicon = std::unique_ptr<CButton>(new CButton(this, CONTROL_BUTTON_CHANNELICON));
 		m_image_channelicon = std::unique_ptr<CImage>(new CImage(this, CONTROL_IMAGE_CHANNELICON));
 		m_radio_autogain = std::unique_ptr<CRadioButton>(new CRadioButton(this, CONTROL_RADIO_AUTOMATICGAIN));
@@ -992,14 +1069,21 @@ bool channelsettings::OnInit(void)
 		m_edit_signalpower = std::unique_ptr<CEdit>(new CEdit(this, CONTROL_EDIT_METERPOWER));
 		m_edit_signalsnr = std::unique_ptr<CEdit>(new CEdit(this, CONTROL_EDIT_METERSNR));
 
+		// Set the window title based on if this is a single channel or a multiplex/ensemble
+		std::unique_ptr<CLabel> headerlabel(new CLabel(this, CONTROL_LABEL_HEADERLABEL));
+		headerlabel->SetLabel(kodi::addon::GetLocalizedString(30301));
+		if(m_channelprops.modulation == modulation::hd) headerlabel->SetLabel(kodi::addon::GetLocalizedString(30302));
+		else if(m_channelprops.modulation == modulation::dab) headerlabel->SetLabel(kodi::addon::GetLocalizedString(30303));
+
 		// Change the text of the OK button to "Add" if we are in new channel mode
 		if(m_isnew) m_button_ok->SetLabel(kodi::addon::GetLocalizedString(15019));
 
-		// Set the channel frequency in XXX.X MHz or XXX.XXX format
+		// Set the channel frequency in XXX.X MHz (FM/HD) or XXX.XXX format (DAB/WX)
 		char freqstr[128];
 		double frequency = (m_channelprops.frequency / static_cast<double>(100000)) / 10.0;
-		if(m_channelprops.modulation == modulation::wx) snprintf(freqstr, std::extent<decltype(freqstr)>::value, "%.3f", frequency);
-		else snprintf(freqstr, std::extent<decltype(freqstr)>::value, "%.1f", frequency);
+		if((m_channelprops.modulation == modulation::dab) || (m_channelprops.modulation == modulation::wx)) 
+			snprintf(freqstr, std::extent<decltype(freqstr)>::value, "%.3f MHz", frequency);
+		else snprintf(freqstr, std::extent<decltype(freqstr)>::value, "%.1f MHz", frequency);
 		m_edit_frequency->SetText(freqstr);
 
 		// Set the channel name and logo/icon
@@ -1007,17 +1091,18 @@ bool channelsettings::OnInit(void)
 		m_image_channelicon->SetFileName(m_channelprops.logourl, false);
 
 		// Set the modulation type
-		m_spin_modulation->SetType(kodi::gui::controls::AddonGUISpinControlType::ADDON_SPIN_CONTROL_TYPE_TEXT);
-		m_spin_modulation->AddLabel(kodi::addon::GetLocalizedString(30002), static_cast<int>(modulation::fm));
-		m_spin_modulation->AddLabel(kodi::addon::GetLocalizedString(30003), static_cast<int>(modulation::hd));
-		m_spin_modulation->AddLabel(kodi::addon::GetLocalizedString(30005), static_cast<int>(modulation::dab));
+		if(m_channelprops.modulation == modulation::fm) m_edit_modulation->SetText(kodi::addon::GetLocalizedString(30304));
+		else if(m_channelprops.modulation == modulation::hd) m_edit_modulation->SetText(kodi::addon::GetLocalizedString(30305));
+		else if(m_channelprops.modulation == modulation::dab) m_edit_modulation->SetText(kodi::addon::GetLocalizedString(30306));
+		else if(m_channelprops.modulation == modulation::wx) m_edit_modulation->SetText(kodi::addon::GetLocalizedString(30307));
 
-		// Only add WX to the spin control for existing channels or new channels that fall within the proper frequency range
-		if(!m_isnew || ((m_channelprops.frequency >= 162400000) && (m_channelprops.frequency <= 162550000)))
-			m_spin_modulation->AddLabel(kodi::addon::GetLocalizedString(30004), static_cast<int>(modulation::wx));
+		// Change the text of the Name edit for multiplex/ensemble channels (HD/DAB)
+		if(m_channelprops.modulation == modulation::hd) m_edit_channelname->SetLabel(kodi::addon::GetLocalizedString(30308));
+		else if(m_channelprops.modulation == modulation::dab) m_edit_channelname->SetLabel(kodi::addon::GetLocalizedString(30309));
 
-		m_spin_modulation->SetIntValue(static_cast<int>(m_channelprops.modulation));
-		if(!m_isnew) m_spin_modulation->SetEnabled(false);
+		// Change the text of the Logo button for multiplex/ensemble channels (HD/DAB)
+		if(m_channelprops.modulation == modulation::hd) m_button_channelicon->SetLabel(kodi::addon::GetLocalizedString(30310));
+		else if(m_channelprops.modulation == modulation::dab) m_button_channelicon->SetLabel(kodi::addon::GetLocalizedString(30311));
 
 		// Adjust the manual gain value to match something that the tuner supports
 		m_channelprops.manualgain = nearest_valid_gain(m_channelprops.manualgain);
@@ -1037,12 +1122,20 @@ bool channelsettings::OnInit(void)
 		m_edit_signalpower->SetText("N/A");
 		m_edit_signalsnr->SetText("N/A");
 
-		// Start the signal meter instance
-		m_signalmeter->set_automatic_gain(m_channelprops.autogain);
-		m_signalmeter->set_modulation(m_channelprops.modulation);
-		m_signalmeter->set_frequency_correction(m_tunerprops.freqcorrection + m_channelprops.freqcorrection);
-		m_signalmeter->set_manual_gain(m_channelprops.manualgain);
-		m_signalmeter->start(FFT_MAXDB, FFT_MINDB, m_render_signalmeter->height(), m_render_signalmeter->width());
+		// Initialize the signal meter plot properties based on the size of the render control
+		struct signalplotprops plotprops = {};
+		plotprops.height = m_render_signalmeter->height();
+		plotprops.width = m_render_signalmeter->width();
+		plotprops.mindb = FFT_MINDB;
+		plotprops.maxdb = FFT_MAXDB;
+
+		// Create the signal meter instance with a 100ms callback rate
+		m_signalmeter = signalmeter::create(m_signalprops, plotprops, 100, std::bind(&channelsettings::meter_status, this, std::placeholders::_1));
+
+		// Create a worker thread on which to pump data into the signal meter
+		scalar_condition<bool> started{ false };
+		m_worker = std::thread(&channelsettings::worker, this, std::ref(started));
+		started.wait_until_equals(true);
 	}
 
 	catch(...) { return false; }

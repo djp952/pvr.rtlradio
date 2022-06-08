@@ -30,6 +30,7 @@
 
 // Control Identifiers
 //
+static const int CONTROL_LABEL_HEADERLABEL	= 2;
 static const int CONTROL_BUTTON_ADD			= 100;
 static const int CONTROL_BUTTON_CLOSE		= 101;
 static const int CONTROL_BUTTON_0			= 200;
@@ -50,9 +51,10 @@ static const int CONTROL_LABEL_INPUT		= 300;
 //
 // Arguments:
 //
-//	NONE
+//	modulation		- Modulation of the channel being added
 
-channeladd::channeladd() : kodi::gui::CWindow("channeladd.xml", "skin.estuary", true)
+channeladd::channeladd(enum modulation modulation) : kodi::gui::CWindow("channeladd.xml", "skin.estuary", true),
+	m_modulation(modulation)
 {
 }
 
@@ -63,11 +65,11 @@ channeladd::channeladd() : kodi::gui::CWindow("channeladd.xml", "skin.estuary", 
 //
 // Arguments:
 //
-//	NONE
+//	modulation		- Modulation of the channel being added
 
-std::unique_ptr<channeladd> channeladd::create(void)
+std::unique_ptr<channeladd> channeladd::create(enum modulation modulation)
 {
-	return std::unique_ptr<channeladd>(new channeladd());
+	return std::unique_ptr<channeladd>(new channeladd(modulation));
 }
 
 //---------------------------------------------------------------------------
@@ -140,9 +142,6 @@ bool channeladd::get_frequency(std::string const& input, uint32_t& frequency) co
 	// There should be two integer parts to the string, megahertz and kilohertz
 	if(sscanf(input.c_str(), "%u.%u", &mhz, &khz) != 2) return false;
 
-	// WX channels require three digits to specify the kilohertz
-	if((mhz == 162) && (khz < 100)) return false;
-
 	// FM channels are specified as 100KHz, scale the value
 	if(khz < 10) khz *= 100;
 
@@ -186,13 +185,13 @@ void channeladd::on_digit(int digit)
 	// Only allow input that is valid based on the existing input, the period
 	// will be done automatically when the label is formatted
 	//
-	// Ranges: 87.5 -> 108.0 (FM) / 162.400 -> 162.550 (WX)
+	// Ranges: 87.5 -> 108.0 (FM), 87.9 -> 107.9 (HD Radio)
 
 	// Position 0
 	//
 	if(input.length() == 0) {
 
-		// [1, 8-9]
+		// [1, 8, 9]
 		if((digit == 1) || (digit == 8) || (digit == 9)) input += chdigit;
 	}
 
@@ -206,78 +205,63 @@ void channeladd::on_digit(int digit)
 		// 9x -> [0-9]
 		else if(input[0] == '9') input += chdigit;
 
-		// 1x -> [0, 6]
-		else if((input[0] == '1') && ((digit == 0) || (digit == 6))) input += chdigit;
+		// 1x -> [0]
+		else if((input[0] == '1') && (digit == 0)) input += chdigit;
 	}
 
 	// Position 2
 	//
 	else if(input.length() == 2) {
 
-		// 8x.x, 9x.x -> [0-9]
-		if((input[0] == '8') || (input[0] == '9')) input += chdigit;
+		if(m_modulation == modulation::hd) {
 
-		// 10x -> [0-8]
-		else if((input[0] == '1') && (input[1] == '0') && (digit <= 8)) input += chdigit;
+			// 87.x -> [9]
+			if((input[0] == '8') && (input[1] == '7') && (digit == 9)) input += chdigit;
 
-		// 16x -> [2]]
-		else if((input[0] == '1') && (input[1] == '6') && (digit == 2)) input += chdigit;
+			// 88.x / 89.x -> [1, 3, 5, 7, 9]
+			else if((input[0] == '8') && (input[1] > '7') && ((digit % 2) == 1)) input += chdigit;
+
+			// 9x.x -> [1, 3, 5, 7, 9]
+			else if((input[0] == '9') && ((digit % 2) == 1)) input += chdigit;
+
+			// 10x -> [0-7]
+			else if((input[0] == '1') && (input[1] == '0') && (digit <= 7)) input += chdigit;
+		}
+
+		else {
+
+
+			// 87.x -> [5, 6, 7, 8, 9]
+			if((input[0] == '8') && (input[1] == '7') && (digit >= 5)) input += chdigit;
+
+			// 8x.x -> [0-9]
+			else if((input[0] == '8') && (input[1] > '7')) input += chdigit;
+
+			// 9x.x -> [0-9]
+			else if(input[0] == '9') input += chdigit;
+
+			// 10x -> [0-8]
+			else if((input[0] == '1') && (input[1] == '0') && (digit <= 8)) input += chdigit;
+		}
 	}
 
 	// Position 3
 	//
 	else if(input.length() == 3) {
 
-		// 108.x -> [0]
-		if((input[0] == '1') && (input[1] == '0') && (input[2] == '8') && (digit == 0)) input += chdigit;
+		if(m_modulation == modulation::hd) {
 
-		// 10x.x -> [0-9]
-		else if((input[0] == '1') && (input[1] == '0')) input += chdigit;
-
-		// 162.x -> [4-5]
-		else if((input[0] == '1') && (input[1] == '6') && (input[2] == '2') && ((digit == 4) || (digit == 5))) input += chdigit;
-	}
-
-	// Position 4
-	//
-	else if(input.length() == 4) {
-
-		if((input[0] == '1') && (input[1] == '6') && (input[2] == '2')) {
-
-			// 162.4x = [0, 2, 5, 7]
-			if((input[3] == '4') && ((digit == 0) || (digit == 2) || (digit == 5) || (digit == 7))) input += chdigit;
-
-			// 162.5x = [0, 2, 5]
-			else if((input[3] == '5') && ((digit == 0) || (digit == 2) || (digit == 5))) input += chdigit;
+			// 10x.x -> [1, 3, 5, 7, 9]
+			if((input[0] == '1') && (input[1] == '0') && ((digit % 2) == 1)) input += chdigit;
 		}
-	}
 
-	// Position 5
-	//
-	else if(input.length() == 5) {
+		else {
 
-		if((input[0] == '1') && (input[1] == '6') && (input[2] == '2')) {
+			// 108.x -> [0]
+			if((input[0] == '1') && (input[1] == '0') && (input[2] == '8') && (digit == 0)) input += chdigit;
 
-			// 162.40x -> [0]
-			if((input[3] == '4') && (input[4] == '0') && (digit == 0)) input += chdigit;
-
-			// 162.42x -> [5]
-			else if((input[3] == '4') && (input[4] == '2') && (digit == 5)) input += chdigit;
-
-			// 162.45x -> [0]
-			else if((input[3] == '4') && (input[4] == '5') && (digit == 0)) input += chdigit;
-
-			// 162.47x -> [5]
-			else if((input[3] == '4') && (input[4] == '7') && (digit == 5)) input += chdigit;
-
-			// 162.50x -> [0]
-			else if((input[3] == '5') && (input[4] == '0') && (digit == 0)) input += chdigit;
-
-			// 162.52x -> [5]
-			else if((input[3] == '5') && (input[4] == '2') && (digit == 5)) input += chdigit;
-
-			// 162.55x -> [0]
-			else if((input[3] == '5') && (input[4] == '5') && (digit == 0)) input += chdigit;
+			// 10x.x -> [0-9]
+			else if((input[0] == '1') && (input[1] == '0') && (input[2] < '8')) input += chdigit;
 		}
 	}
 
@@ -419,10 +403,15 @@ bool channeladd::OnInit(void)
 		m_label_input = std::unique_ptr<CLabel>(new CLabel(this, CONTROL_LABEL_INPUT));
 		m_button_add = std::unique_ptr<CButton>(new CButton(this, CONTROL_BUTTON_ADD));
 
+		// Set the window title based on if this is a single channel or a multiplex/ensemble
+		std::unique_ptr<CLabel> headerlabel(new CLabel(this, CONTROL_LABEL_HEADERLABEL));
+		headerlabel->SetLabel(kodi::addon::GetLocalizedString(30300));
+
 		// The add button is disabled by default
 		m_button_add->SetEnabled(false);
 
 		// Initialize the non-default channelprops structure members
+		m_channelprops.modulation = m_modulation;
 		m_channelprops.name = kodi::addon::GetLocalizedString(19204, "New channel");
 		m_channelprops.autogain = false;
 	}

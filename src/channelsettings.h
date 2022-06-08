@@ -24,12 +24,12 @@
 #define __CHANNELSETTINGS_H_
 #pragma once
 
+#include <atomic>
 #include <glm/glm.hpp>
 #include <kodi/gui/controls/Button.h>
 #include <kodi/gui/controls/Edit.h>
 #include <kodi/gui/controls/Image.h>
 #include <kodi/gui/controls/RadioButton.h>
-#include <kodi/gui/controls/Spin.h>
 #include <kodi/gui/controls/SettingsSlider.h>
 #include <kodi/gui/gl/GL.h>
 #include <kodi/gui/gl/Shader.h>
@@ -37,12 +37,14 @@
 #include <memory>
 #include <vector>
 #include <string>
+#include <thread>
 #include <utility>
 
-#include "fmmeter.h"
 #include "props.h"
 #include "renderingcontrol.h"
 #include "rtldevice.h"
+#include "scalar_condition.h"
+#include "signalmeter.h"
 
 #pragma warning(push, 4)
 
@@ -158,7 +160,7 @@ private:
 		//
 		size_t	height(void) const;
 		size_t	width(void) const;
-		void	update(struct fmmeter::signal_status const& status);
+		void	update(struct signalmeter::signal_status const& status);
 
 	private:
 
@@ -192,14 +194,13 @@ private:
 		glm::mat4				m_modelProjMat;			// Model/Projection matrix
 
 		bool					m_dirty = false;		// Dirty flag
-		enum modulation			m_modulation;			// Current modulation type
 		GLfloat					m_power = 0.0f;			// Power level
 		GLfloat					m_noise = 0.0f;			// Noise level
-		GLfloat					m_lowcut = 0.0f;		// Low cut
-		GLfloat					m_highcut = 0.0f;		// High cut
 		bool					m_overload = false;		// Overload flag
 
 		std::unique_ptr<glm::vec2[]>	m_fft;			// FFT vertices
+		int								m_fftlowcut;	// FFT low cut index
+		int								m_ffthighcut;	// FFT high cut index
 	};
 
 	//-------------------------------------------------------------------------
@@ -223,20 +224,20 @@ private:
 	//-------------------------------------------------------------------------
 	// Private Member Functions
 
-	// fm_meter_exception
+	// close
 	//
-	// Callback to handle an exception raised by the signal meter
-	void fm_meter_exception(std::exception const& ex);
-
-	// fm_meter_status
-	//
-	// Updates the state of the signal meter
-	void fm_meter_status(struct fmmeter::signal_status const& status);
+	// Closes the dialog box
+	void close(bool result);
 
 	// gain_to_percent
 	//
 	// Converts a manual gain value into a percentage
 	int gain_to_percent(int gain) const;
+
+	// fm_meter_status
+	//
+	// Updates the state of the signal meter
+	void meter_status(struct signalmeter::signal_status const& status);
 
 	// nearest_valid_gain
 	//
@@ -253,23 +254,34 @@ private:
 	// Updates the state of the gain control
 	void update_gain(void);
 
+	// worker
+	//
+	// Worker thread procedure used to pump data into the signal meter
+	void worker(scalar_condition<bool>& started);
+		
 	//-------------------------------------------------------------------------
 	// Member Variables
 
+	std::unique_ptr<rtldevice>			m_device;				// Device instance
+	struct tunerprops					m_tunerprops = {};		// Tuner properties
+	struct channelprops					m_channelprops = {};	// Channel properties
+	struct signalprops					m_signalprops = {};		// Signal properties
 	bool								m_isnew = false;		// New channel flag
-	std::unique_ptr<rtldevice> const	m_device;				// Device instance
-	struct tunerprops					m_tunerprops;			// Tuner properties
-	struct channelprops					m_channelprops;			// Channel properties
-	std::unique_ptr<fmmeter>			m_signalmeter;			// Signal meter instance
+	std::unique_ptr<signalmeter>		m_signalmeter;			// Signal meter instance
 	std::vector<int>					m_manualgains;			// Manual gain values
 	bool								m_result = false;		// Dialog result
 
+	std::thread							m_worker;				// Worker thread
+	std::exception_ptr					m_worker_exception;		// Exception on worker thread
+	scalar_condition<bool>				m_stop{ false };		// Condition to stop data transfer
+	std::atomic<bool>					m_stopped{ false };		// Data transfer stopped flag
+	
 	// CONTROLS
 	//
 	std::unique_ptr<CButton>			m_button_ok;			// OK button
 	std::unique_ptr<CEdit>				m_edit_frequency;		// Frequency
 	std::unique_ptr<CEdit>				m_edit_channelname;		// Channel name
-	std::unique_ptr<CSpin>				m_spin_modulation;		// Channel modulation
+	std::unique_ptr<CEdit>				m_edit_modulation;		// Channel modulation
 	std::unique_ptr<CButton>			m_button_channelicon;	// Channel icon
 	std::unique_ptr<CImage>				m_image_channelicon;	// Channel icon
 	std::unique_ptr<CRadioButton>		m_radio_autogain;		// Automatic gain

@@ -202,15 +202,6 @@
           <control type="toggle"/>
         </setting>
 
-        <setting id="hdradio_enable_fallback" type="boolean" label="30112" help="30512">
-          <level>0</level>
-          <default>false</default>
-          <dependencies>
-            <dependency type="enable" setting="hdradio_enable">true</dependency>
-          </dependencies>
-          <control type="toggle"/>
-        </setting>
-
         <setting id="hdradio_output_gain" type="number" label="30109" help="30509">
           <level>0</level>
           <default>-3.0</default>

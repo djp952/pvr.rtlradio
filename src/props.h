@@ -45,14 +45,13 @@ enum class modulation {
 // Defines properties for a radio channel
 struct channelprops {
 
-	uint32_t			frequency;		// Center frequency
-	uint32_t			subchannel;		// Subchannel (digital modulations only)
-	enum modulation		modulation;		// Modulation
-	std::string			name;			// Station name / call sign
-	std::string			logourl;		// Station logo URL
-	bool				autogain;		// Flag indicating if automatic gain should be used
-	int					manualgain;		// Manual gain value as 10*dB (i.e. 32.8dB = 328)
-	int					freqcorrection;	// Frequency correction for this channel
+	uint32_t			frequency;			// Center frequency
+	enum modulation		modulation;			// Modulation
+	std::string			name;				// Channel name
+	std::string			logourl;			// Channel logo URL
+	bool				autogain;			// Flag indicating if automatic gain should be used
+	int					manualgain;			// Manual gain value as 10*dB (i.e. 32.8dB = 328)
+	int					freqcorrection;		// Frequency correction for this channel
 };
 
 // dabprops
@@ -81,8 +80,29 @@ struct fmprops {
 // Defines properties for the HD Radio digital signal processor
 struct hdprops {
 
-	bool			analogfallback;		// Flag if analog fallback should be used
 	float			outputgain;			// Output gain in Decibels
+};
+
+// signalplotprops
+//
+// Defines signal meter plot properties
+struct signalplotprops {
+
+	size_t			height;			// Plot height
+	size_t			width;			// Plot width
+	float			mindb;			// Plot minimum dB value
+	float			maxdb;			// Plot maximum dB value
+};
+
+// signalprops
+//
+// Defines signal-specific properties
+struct signalprops {
+
+	uint32_t			samplerate;			// Signal sampling rate
+	uint32_t			bandwidth;			// Signal bandwidth
+	int32_t				lowcut;				// low cut from center
+	int32_t				highcut;			// high cut from center
 };
 
 // streamprops

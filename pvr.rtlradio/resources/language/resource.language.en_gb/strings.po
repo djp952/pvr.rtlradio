@@ -16,6 +16,10 @@ msgstr ""
 "Language: en\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
+#
+# 300XX - Setting categories
+#
+
 msgctxt "#30000"
 msgid "Device"
 msgstr ""
@@ -37,8 +41,12 @@ msgid "Weather Radio"
 msgstr ""
 
 msgctxt "#30005"
-msgid "DAB/DAB+"
+msgid "DAB"
 msgstr ""
+
+#
+# 301XX - Setting names
+#
 
 msgctxt "#30100"
 msgid "Connection type"
@@ -88,10 +96,6 @@ msgctxt "#30111"
 msgid "Downsample quality"
 msgstr ""
 
-msgctxt "#30112"
-msgid "Enable analog signal audio fallback"
-msgstr ""
-
 msgctxt "#30113"
 msgid "Enable FM Radio"
 msgstr ""
@@ -111,6 +115,10 @@ msgstr ""
 msgctxt "#30200"
 msgid "Universal Serial Bus (USB)"
 msgstr ""
+
+#
+# 302XX - Setting values
+#
 
 msgctxt "#30201"
 msgid "Network (rtl_tcp)"
@@ -180,9 +188,73 @@ msgctxt "#30218"
 msgid "Maximum"
 msgstr ""
 
+#
+# 303XX - Dialog box controls
+# 
+
 msgctxt "#30300"
-msgid "OK"
+msgid "Enter frequency"
 msgstr ""
+
+msgctxt "#30301"
+msgid "Channel settings"
+msgstr ""
+
+msgctxt "#30302"
+msgid "Multiplex Settings"
+msgstr ""
+
+msgctxt "#30303"
+msgid "Ensemble Settings"
+msgstr ""
+
+msgctxt "#30304"
+msgid "Wideband FM"
+msgstr ""
+
+msgctxt "#30305"
+msgid "Hybrid Digital (HD)"
+msgstr ""
+
+msgctxt "#30306"
+msgid "Digital Audio Broadcast (DAB)"
+msgstr ""
+
+msgctxt "#30307"
+msgid "Narrowband FM/VHF"
+msgstr ""
+
+msgctxt "#30308"
+msgid "Multiplex name"
+msgstr ""
+
+msgctxt "#30309"
+msgid "Ensemble name"
+msgstr ""
+
+msgctxt "#30310"
+msgid "Multiplex logo"
+msgstr ""
+
+msgctxt "#30311"
+msgid "Ensemble logo"
+msgstr ""
+
+msgctxt "#30312"
+msgid "Browse for channel logo"
+msgstr ""
+
+msgctxt "#30313"
+msgid "Browse for multiplex logo"
+msgstr ""
+
+msgctxt "#30314"
+msgid "Browse for ensemble logo"
+msgstr ""
+
+#
+# 304XX - PVR Client implementation
+#
 
 msgctxt "#30400"
 msgid "Import channel data"
@@ -208,10 +280,6 @@ msgctxt "#30405"
 msgid "RTL-SDR device in use"
 msgstr ""
 
-msgctxt "#30406"
-msgid "Browse for channel icon"
-msgstr ""
-
 msgctxt "#30407"
 msgid "Channel settings"
 msgstr ""
@@ -235,6 +303,42 @@ msgstr ""
 msgctxt "#30412"
 msgid "Select raw input file"
 msgstr ""
+
+msgctxt "#30413"
+msgid "Select channel type"
+msgstr ""
+
+msgctxt "#30414"
+msgid "FM channel"
+msgstr ""
+
+msgctxt "#30415"
+msgid "HD Radio multiplex"
+msgstr ""
+
+msgctxt "#30416"
+msgid "DAB ensemble"
+msgstr ""
+
+msgctxt "#30417"
+msgid "Weather Radio channel"
+msgstr ""
+
+msgctxt "#30418"
+msgid "Select DAB ensemble"
+msgstr ""
+
+msgctxt "#30419"
+msgid "New DAB ensemble"
+msgstr ""
+
+msgctxt "#30420"
+msgid "New Weather Radio channel"
+msgstr ""
+
+#
+# 305XX - Setting help text
+#
 
 msgctxt "#30500"
 msgid "Specifies the RTL-SDR device connection type. When set to Universal Serial Bus (USB), the device must be connected locally to this system. When set to Network (rtl_tcp), the device must be attached to a system running the rtl_tcp server application."
@@ -282,10 +386,6 @@ msgstr ""
 
 msgctxt "#30511"
 msgid "Specifies the Digital Signal Processor (DSP) downsample quality. When set to Fast, downsampling will be optimized for system performance. When set to Maximum, downsampling will be optimized for audio quality."
-msgstr ""
-
-msgctxt "#30512"
-msgid "When set to ON the Digital Signal Processor (DSP) will decode audio from the analog signal during initial synchronization or when the digitial signal has been lost. When set to OFF, audio will be muted during these events."
 msgstr ""
 
 msgctxt "#30513"

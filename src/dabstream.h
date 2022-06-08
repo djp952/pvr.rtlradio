@@ -32,6 +32,7 @@
 #include <thread>
 
 #include "dabdsp/radio-receiver.h"
+#include "dabdsp/ringbuffer.h"
 
 #include "props.h"
 #include "pvrstream.h"
@@ -305,6 +306,7 @@ private:
 
 	std::unique_ptr<rtldevice>		m_device;				// RTL-SDR device instance
 	aligned_ptr<RadioReceiver>		m_receiver;				// RadioReceiver instance
+	RingBuffer<uint8_t>				m_ringbuffer;			// I/Q sample ring buffer
 
 	// STREAM CONTROL
 	//
@@ -320,12 +322,6 @@ private:
 	demux_queue_t					m_queue;				// queue<> of demux objects
 	mutable std::mutex				m_queuelock;			// Synchronization object
 	std::condition_variable			m_queuecv;				// Event condition variable
-
-	// RING BUFFER
-	//
-	std::unique_ptr<uint8_t[]>		m_buffer;				// Input ring buffer
-	size_t							m_head{ 0 };			// Ring buffer head position
-	size_t							m_tail{ 0 };			// Ring buffer tail position
 
 	// WORKER THREAD
 	//

@@ -151,11 +151,6 @@ struct settings {
 	// Enables the HD Radio DSP
 	bool hdradio_enable;
 
-	// hdradio_enable_fallback
-	//
-	// Specifies if analog audio fallback is allowable
-	bool hdradio_enable_fallback;
-
 	// hdradio_output_gain
 	//
 	// Specifies the output gain for the HD DSP
