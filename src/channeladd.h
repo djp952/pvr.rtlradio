@@ -49,7 +49,7 @@ public:
 	// create (static)
 	//
 	// Factory method, creates a new channelsettings instance
-	static std::unique_ptr<channeladd> create(void);
+	static std::unique_ptr<channeladd> create(enum modulation modulation);
 
 	// get_channel_properties
 	//
@@ -68,7 +68,7 @@ private:
 
 	// Instance Constructor
 	//
-	channeladd();
+	channeladd(enum modulation modulation);
 
 	//-------------------------------------------------------------------------
 	// CWindow Implementation
@@ -114,6 +114,7 @@ private:
 	//-------------------------------------------------------------------------
 	// Member Variables
 
+	enum modulation const		m_modulation;				// Channel modulation
 	struct channelprops			m_channelprops = {};		// Channel properties
 	bool						m_result = false;			// Dialog result
 	std::string					m_input;					// Input string

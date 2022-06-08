@@ -32,8 +32,6 @@
 #include <queue>
 #include <thread>
 
-#include "fmdsp/demodulator.h"
-#include "fmdsp/fractresampler.h"
 #include "hddsp/nrsc5.h"
 
 #include "props.h"
@@ -224,21 +222,18 @@ private:
 	// NRSC5 library event callback function
 	void nrsc5_callback(nrsc5_event_t const* event);
 
-	// transfer
+	// worker
 	//
 	// Worker thread procedure used to transfer data from the device
-	void transfer(scalar_condition<bool>& started);
+	void worker(scalar_condition<bool>& started);
 
 	//-----------------------------------------------------------------------
 	// Member Variables
 
 	std::unique_ptr<rtldevice>			m_device;					// RTL-SDR device instance
 	nrsc5_t*							m_nrsc5;					// NRSC5 demodulator handle
-	std::unique_ptr<CDemodulator>		m_fmdemod;					// CuteSDR demodulator instance
-	std::unique_ptr<CFractResampler>	m_fmresampler;				// CuteSDR resampler instance
 
-	bool const							m_analogfallback = false;	// Flag for analog signal fallback
-	bool								m_hdaudio = false;			// HD Radio audio flag
+	uint32_t							m_subchannel{ 1 };			// Multiplex subchannel number
 	std::string							m_muxname;					// Generated mux name
 	float const							m_pcmgain;					// Output gain
 	double								m_dts{ STREAM_TIME_BASE };	// Current decode time stamp

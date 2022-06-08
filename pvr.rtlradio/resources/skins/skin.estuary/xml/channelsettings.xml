@@ -33,13 +33,6 @@
           <textcolor>button_focus</textcolor>
           <shadowcolor>black</shadowcolor>
         </control>
-        <control type="label" id="9000">
-          <top>77</top>
-          <left>595</left>
-          <width>80</width>
-          <align>right</align>
-          <label>MHz</label>
-        </control>
         <control type="grouplist" id="1100">
           <top>50</top>
           <onup>205</onup>
@@ -49,18 +42,19 @@
           <itemgap>-25</itemgap>
           <control type="edit" id="200">
             <description>Frequency</description>
-            <width>615</width>
+            <width>700</width>
             <include>SettingsItemCommon</include>
             <label>Frequency</label>
             <enable>false</enable>
-            <disabledcolor>white</disabledcolor>
+            <disabledcolor>darkgray</disabledcolor>
           </control>
-          <control type="spincontrolex" id="210">
+          <control type="edit" id="210">
             <description>Channel modulation</description>
             <width>700</width>
             <include>SettingsItemCommon</include>
             <label>Modulation</label>
-            <disabledcolor>white</disabledcolor>
+            <enable>false</enable>
+            <disabledcolor>darkgray</disabledcolor>
           </control>
           <control type="edit" id="201">
             <description>Channel name</description>

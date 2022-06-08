@@ -86,7 +86,7 @@ public:
 
 	unsigned int id(void) const { return m_channelid.value; }
 
-	int modulation(void) const { return static_cast<int>(m_channelid.parts.modulation); }
+	enum modulation modulation(void) const { return static_cast<enum modulation>(m_channelid.parts.modulation); }
 
 	int subchannel(void) const { return static_cast<int>(m_channelid.parts.subchannel); }
 
@@ -104,8 +104,16 @@ struct channel {
 	unsigned int	channel;
 	unsigned int	subchannel;
 	char const*		name;
-	bool			hidden;
 	char const*		logourl;
+};
+
+// namedchannel
+//
+// Information about a single named channel enumerated from the database
+struct namedchannel {
+
+	uint32_t		frequency;
+	char const*		name;
 };
 
 // rawfile

@@ -50,7 +50,7 @@ public:
 
 	// Move Constructor
 	//
-	string_exception(string_exception&& rhs) : m_what(std::move(rhs.m_what)) {}
+	string_exception(string_exception&& rhs) noexcept : m_what(std::move(rhs.m_what)) {}
 
 	// char const* conversion operator
 	//

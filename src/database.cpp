@@ -153,9 +153,9 @@ void connectionpool::release(sqlite3* handle)
 
 bool add_channel(sqlite3* instance, struct channelprops const& channelprops)
 {
-	// frequency | subchannel | modulation | hidden | name | autogain | manualgain | freqcorrection | logourl
-	return execute_non_query(instance, "replace into channel values(?1, ?2, ?3, 0, ?4, ?5, ?6, ?7, ?8)",
-		channelprops.frequency, channelprops.subchannel, static_cast<int>(channelprops.modulation), channelprops.name.c_str(),
+	// frequency | modulation | name | autogain | manualgain | freqcorrection | logourl
+	return execute_non_query(instance, "replace into channel values(?1, ?2, ?3, ?4, ?5, ?6, ?7)",
+		channelprops.frequency, static_cast<int>(channelprops.modulation), channelprops.name.c_str(),
 		(channelprops.autogain) ? 1 : 0, channelprops.manualgain, channelprops.freqcorrection, channelprops.logourl.c_str()) > 0;
 }
 
@@ -229,8 +229,8 @@ bool channel_exists(sqlite3* instance, struct channelprops const& channelprops)
 {
 	if(instance == nullptr) throw std::invalid_argument("instance");
 
-	return execute_scalar_int(instance, "select exists(select * from channel where frequency = ?1 and subchannel = ?2 and modulation = ?3)",
-		channelprops.frequency, channelprops.subchannel, static_cast<int>(channelprops.modulation)) == 1;
+	return execute_scalar_int(instance, "select exists(select * from channel where frequency = ?1 and modulation = ?2)",
+		channelprops.frequency, static_cast<int>(channelprops.modulation)) == 1;
 }
 
 //---------------------------------------------------------------------------
@@ -271,15 +271,17 @@ void close_database(sqlite3* instance)
 // Arguments:
 //
 //	instance	- Database instance
-//	id			- ID of the channel to be deleted
+//	frequency	- Frequency of the channel to be deleted
+//	modulation	- Modulation of the channel to be deleted
 
-void delete_channel(sqlite3* instance, unsigned int id)
+void delete_channel(sqlite3* instance, uint32_t frequency, enum modulation modulation)
 {
 	if(instance == nullptr) throw std::invalid_argument("instance");
 
-	channelid channelid(id);
-	execute_non_query(instance, "delete from channel where frequency = ?1 and subchannel = ?2 and modulation = ?3", 
-		channelid.frequency(), channelid.subchannel(), channelid.modulation());
+	// todo: delete subchannels first
+
+	execute_non_query(instance, "delete from channel where frequency = ?1 and modulation = ?2", 
+		frequency, static_cast<int>(modulation));
 }
 
 //---------------------------------------------------------------------------
@@ -299,9 +301,15 @@ void enumerate_dabradio_channels(sqlite3* instance, enumerate_channels_callback 
 
 	if(instance == nullptr) throw std::invalid_argument("instance");
 
-	// frequency | subchannel | name | hidden | logourl
-	auto sql = "select frequency as frequency, subchannel as subchannel, name as name, hidden as hidden, logourl as logourl "
-		"from channel where modulation = 2 order by frequency, subchannel asc";
+	//
+	// DAB Band III channel numbers are arbitrarily assigned in the range of 301 (5A) through 338 (13F) based
+	// on the content of the (static) namedchannel table
+	//
+
+	// frequency | channelnumber | subchannelnumber | name | logourl
+	auto sql = "select channel.frequency as frequency, namedchannel.number as channelnumber, 0 as subchannelnumber, "
+		"channel.name as name, channel.logourl as logourl from channel inner join namedchannel on channel.frequency = namedchannel.frequency "
+		"and channel.modulation = namedchannel.modulation where channel.modulation = 2 order by channelnumber, subchannelnumber asc";
 
 	result = sqlite3_prepare_v2(instance, sql, -1, &statement, nullptr);
 	if(result != SQLITE_OK) throw sqlite_exception(result, sqlite3_errmsg(instance));
@@ -312,13 +320,12 @@ void enumerate_dabradio_channels(sqlite3* instance, enumerate_channels_callback 
 		while(sqlite3_step(statement) == SQLITE_ROW) {
 
 			struct channel item = {};
-			channelid channelid(sqlite3_column_int(statement, 0), sqlite3_column_int(statement, 1), modulation::dab);
+			channelid channelid(sqlite3_column_int(statement, 0), sqlite3_column_int(statement, 2), modulation::dab);
 
 			item.id = channelid.id();
-			item.channel = channelid.frequency() / 100000;
-			item.subchannel = channelid.subchannel();
-			item.name = reinterpret_cast<char const*>(sqlite3_column_text(statement, 2));
-			item.hidden = (sqlite3_column_int(statement, 3) != 0);
+			item.channel = sqlite3_column_int(statement, 1);
+			item.subchannel = sqlite3_column_int(statement, 2);
+			item.name = reinterpret_cast<char const*>(sqlite3_column_text(statement, 3));
 			item.logourl = reinterpret_cast<char const*>(sqlite3_column_text(statement, 4));
 
 			callback(item);						// Invoke caller-supplied callback
@@ -347,9 +354,15 @@ void enumerate_fmradio_channels(sqlite3* instance, enumerate_channels_callback c
 
 	if(instance == nullptr) throw std::invalid_argument("instance");
 
-	// frequency | name | hidden | logourl
-	auto sql = "select frequency as frequency, name as name, hidden as hidden, logourl as logourl "
-		"from channel where modulation = 0 order by frequency asc";
+	//
+	// FM Radio channel/subchannel numbers are assigned in the range of 87.5 through 108.0 based on the 
+	// channel frequency in Megahertz
+	//
+
+	// frequency | channelnumber | subchannelnumber | name | logourl
+	auto sql = "select channel.frequency as frequency, channel.frequency / 1000000 as channelnumber, "
+		"(channel.frequency % 1000000) / 100000 as subchannelnumber, channel.name as name, channel.logourl as logourl "
+		"from channel where channel.modulation = 0 order by channelnumber, subchannelnumber asc";
 
 	result = sqlite3_prepare_v2(instance, sql, -1, &statement, nullptr);
 	if(result != SQLITE_OK) throw sqlite_exception(result, sqlite3_errmsg(instance));
@@ -363,11 +376,10 @@ void enumerate_fmradio_channels(sqlite3* instance, enumerate_channels_callback c
 			channelid channelid(sqlite3_column_int(statement, 0), modulation::fm);
 
 			item.id = channelid.id();
-			item.channel = channelid.frequency() / 1000000;
-			item.subchannel = (channelid.frequency() % 1000000) / 100000;
-			item.name = reinterpret_cast<char const*>(sqlite3_column_text(statement, 1));
-			item.hidden = (sqlite3_column_int(statement, 2) != 0);
-			item.logourl = reinterpret_cast<char const*>(sqlite3_column_text(statement, 3));
+			item.channel = sqlite3_column_int(statement, 1);
+			item.subchannel = sqlite3_column_int(statement, 2);
+			item.name = reinterpret_cast<char const*>(sqlite3_column_text(statement, 3));
+			item.logourl = reinterpret_cast<char const*>(sqlite3_column_text(statement, 4));
 
 			callback(item);						// Invoke caller-supplied callback
 		}
@@ -390,14 +402,20 @@ void enumerate_fmradio_channels(sqlite3* instance, enumerate_channels_callback c
 
 void enumerate_hdradio_channels(sqlite3* instance, enumerate_channels_callback const& callback)
 {
-	sqlite3_stmt* statement;			// SQL statement to execute
+	sqlite3_stmt*				statement;			// SQL statement to execute
 	int							result;				// Result from SQLite function
 
 	if(instance == nullptr) throw std::invalid_argument("instance");
 
-	// frequency | subchannel | name | hidden | logourl
-	auto sql = "select frequency as frequency, subchannel as subchannel, name as name, hidden as hidden, logourl as logourl "
-		"from channel where modulation = 1 order by frequency, subchannel asc";
+	//
+	// HD Radio channel numbers are assigned in the range of 200-300 based on
+	// https://en.wikipedia.org/wiki/List_of_channel_numbers_assigned_to_FM_frequencies_in_North_America
+	// 
+
+	// frequency | channelnumber | subchannelnumber | name | logourl
+	auto sql = "select channel.frequency as frequency, (((channel.frequency / 100000) - 879) / 2) + 200 as channelnumber, "
+		"0 as subchannelnumber, channel.name as name, channel.logourl as logourl "
+		"from channel where channel.modulation = 1 order by channelnumber, subchannelnumber asc";
 
 	result = sqlite3_prepare_v2(instance, sql, -1, &statement, nullptr);
 	if(result != SQLITE_OK) throw sqlite_exception(result, sqlite3_errmsg(instance));
@@ -408,14 +426,60 @@ void enumerate_hdradio_channels(sqlite3* instance, enumerate_channels_callback c
 		while(sqlite3_step(statement) == SQLITE_ROW) {
 
 			struct channel item = {};
-			channelid channelid(sqlite3_column_int(statement, 0), sqlite3_column_int(statement, 1), modulation::hd);
+			channelid channelid(sqlite3_column_int(statement, 0), sqlite3_column_int(statement, 2), modulation::hd);
 
 			item.id = channelid.id();
-			item.channel = channelid.frequency() / 100000;
-			item.subchannel = channelid.subchannel();
-			item.name = reinterpret_cast<char const*>(sqlite3_column_text(statement, 2));
-			item.hidden = (sqlite3_column_int(statement, 3) != 0);
+			item.channel = sqlite3_column_int(statement, 1);
+			item.subchannel = sqlite3_column_int(statement, 2);
+			item.name = reinterpret_cast<char const*>(sqlite3_column_text(statement, 3));
 			item.logourl = reinterpret_cast<char const*>(sqlite3_column_text(statement, 4));
+
+			callback(item);						// Invoke caller-supplied callback
+		}
+
+		sqlite3_finalize(statement);			// Finalize the SQLite statement
+	}
+
+	catch(...) { sqlite3_finalize(statement); throw; }
+}
+
+//---------------------------------------------------------------------------
+// enumerate_namedchannels
+//
+// Enumerates the named channels for a specific modulation
+//
+// Arguments:
+//
+//	instance	- Database instance
+//	modulation	- Modulation type
+//	callback	- Callback function
+
+void enumerate_namedchannels(sqlite3* instance, enum modulation modulation, enumerate_namedchannels_callback const& callback)
+{
+	sqlite3_stmt*				statement;			// SQL statement to execute
+	int							result;				// Result from SQLite function
+
+	if(instance == nullptr) throw std::invalid_argument("instance");
+
+	// frequency | name
+	auto sql = "select frequency as frequency, name as name from namedchannel where modulation = ?1 order by number asc";
+
+	result = sqlite3_prepare_v2(instance, sql, -1, &statement, nullptr);
+	if(result != SQLITE_OK) throw sqlite_exception(result, sqlite3_errmsg(instance));
+
+	try {
+
+		// Bind the query parameters
+		result = sqlite3_bind_int(statement, 1, static_cast<int>(modulation));
+		if(result != SQLITE_OK) throw sqlite_exception(result);
+
+		// Execute the query and iterate over all returned rows
+		while(sqlite3_step(statement) == SQLITE_ROW) {
+
+			struct namedchannel item = {};
+
+			item.frequency = static_cast<uint32_t>(sqlite3_column_int64(statement, 0));
+			item.name = reinterpret_cast<char const*>(sqlite3_column_text(statement, 1));
 
 			callback(item);						// Invoke caller-supplied callback
 		}
@@ -486,9 +550,15 @@ void enumerate_wxradio_channels(sqlite3* instance, enumerate_channels_callback c
 
 	if(instance == nullptr) throw std::invalid_argument("instance");
 
-	// frequency | name | hidden | logourl
-	auto sql = "select frequency as frequency, name as name, hidden as hidden, logourl as logourl "
-		"from channel where modulation = 3 order by frequency asc";
+	//
+	// Weather Radio channel numbers are arbitrarily assigned in the range of 401 (WX1) through 407 (WX7) based
+	// on the content of the (static) namedchannel table
+	//
+
+	// frequency | channelnumber | subchannelnumber | name | logourl
+	auto sql = "select channel.frequency as frequency, namedchannel.number as channelnumber, 0 as subchannelnumber, "
+		"channel.name as name, channel.logourl as logourl from channel inner join namedchannel on channel.frequency = namedchannel.frequency "
+		"and channel.modulation = namedchannel.modulation where channel.modulation = 3 order by channelnumber, subchannelnumber asc";
 
 	result = sqlite3_prepare_v2(instance, sql, -1, &statement, nullptr);
 	if(result != SQLITE_OK) throw sqlite_exception(result, sqlite3_errmsg(instance));
@@ -502,11 +572,10 @@ void enumerate_wxradio_channels(sqlite3* instance, enumerate_channels_callback c
 			channelid channelid(sqlite3_column_int(statement, 0), modulation::wx);
 
 			item.id = channelid.id();
-			item.channel = (channelid.frequency() - 162000000) / 1000;
-			item.subchannel = 0;
-			item.name = reinterpret_cast<char const*>(sqlite3_column_text(statement, 1));
-			item.hidden = (sqlite3_column_int(statement, 2) != 0);
-			item.logourl = reinterpret_cast<char const*>(sqlite3_column_text(statement, 3));
+			item.channel = sqlite3_column_int(statement, 1);
+			item.subchannel = sqlite3_column_int(statement, 2);
+			item.name = reinterpret_cast<char const*>(sqlite3_column_text(statement, 3));
+			item.logourl = reinterpret_cast<char const*>(sqlite3_column_text(statement, 4));
 
 			callback(item);						// Invoke caller-supplied callback
 		}
@@ -686,8 +755,7 @@ std::string export_channels(sqlite3* instance)
 	if(instance == nullptr) throw std::invalid_argument("instance");
 
 	return execute_scalar_string(instance, "select json_group_array(json_object("
-		"'frequency', frequency, 'subchannel', subchannel, "
-		"'modulation', case modulation when 0 then 'FM' when 1 then 'HD' when 2 then 'DAB' when 3 then 'WX' else 'FM' end, 'hidden', hidden, "
+		"'frequency', frequency, 'modulation', case modulation when 0 then 'FM' when 1 then 'HD' when 2 then 'DAB' when 3 then 'WX' else 'FM' end, "
 		"'name', name, 'autogain', autogain, 'manualgain', manualgain, 'freqcorrection', freqcorrection, 'logourl', logourl)) "
 		"from channel");
 }
@@ -716,10 +784,12 @@ int get_channel_count(sqlite3* instance)
 // Arguments:
 //
 //	instance		- SQLite database instance
+//	frequency		- Channel frequency
+//	modulation		- Channel modulation
 //	id				- Channel unique identifier
 //	channelprops	- Structure to receive the channel properties
 
-bool get_channel_properties(sqlite3* instance, unsigned int id, struct channelprops& channelprops)
+bool get_channel_properties(sqlite3* instance, uint32_t frequency, enum modulation modulation, struct channelprops& channelprops)
 {
 	sqlite3_stmt*				statement;			// SQL statement to execute
 	int							result;				// Result from SQLite function
@@ -728,27 +798,23 @@ bool get_channel_properties(sqlite3* instance, unsigned int id, struct channelpr
 	if(instance == nullptr) throw std::invalid_argument("instance");
 
 	// name | autogain | manualgain | freqcorrection | logourl
-	auto sql = "select name, autogain, manualgain, freqcorrection, logourl from channel where frequency = ?1 and subchannel = ?2 and modulation = ?3";
+	auto sql = "select name, autogain, manualgain, freqcorrection, logourl from channel where frequency = ?1 and modulation = ?2";
 
 	result = sqlite3_prepare_v2(instance, sql, -1, &statement, nullptr);
 	if(result != SQLITE_OK) throw sqlite_exception(result, sqlite3_errmsg(instance));
 
 	try {
 
-		channelid channelid(id);
-
 		// Bind the query parameters
-		result = sqlite3_bind_int(statement, 1, channelid.frequency());
-		if(result == SQLITE_OK) sqlite3_bind_int(statement, 2, channelid.subchannel());
-		if(result == SQLITE_OK) sqlite3_bind_int(statement, 3, channelid.modulation());
+		result = sqlite3_bind_int64(statement, 1, static_cast<int64_t>(frequency));
+		if(result == SQLITE_OK) sqlite3_bind_int(statement, 2, static_cast<int>(modulation));
 		if(result != SQLITE_OK) throw sqlite_exception(result);
 
 		// Execute the query; there should be one and only one row returned
 		if(sqlite3_step(statement) == SQLITE_ROW) {
 
-			channelprops.frequency = static_cast<uint32_t>(channelid.frequency());
-			channelprops.subchannel = static_cast<uint32_t>(channelid.subchannel());
-			channelprops.modulation = static_cast<enum modulation>(channelid.modulation());
+			channelprops.frequency = frequency;
+			channelprops.modulation = modulation;
 
 			unsigned char const* name = sqlite3_column_text(statement, 0);
 			channelprops.name.assign((name == nullptr) ? "" : reinterpret_cast<char const*>(name));
@@ -802,11 +868,16 @@ void import_channels(sqlite3* instance, char const* json)
 	if(instance == nullptr) throw std::invalid_argument("instance");
 	if((json == nullptr) || (*json == '\0')) throw std::invalid_argument("instance");
 
+	//
+	// TODO: Add a 'channel' element that can replace frequency/modulation for named channels.
+	// The JSON will likely need to be put into a temp table anyway to deal with subchannels
+	// so this entire operation will likely need to be redone regardless
+	//
+
 	// Massage the input as much as possible, only the frequency is actually required,
 	// the rest can be defaulted if not present. Also watch out for duplicates and the frequency range
 	execute_non_query(instance, "replace into channel "
 		"select cast(json_extract(entry.value, '$.frequency') as integer) as frequency, "
-		"cast(ifnull(json_extract(entry.value, '$.subchannel'), 0) as integer) as subchannel, "
 		"case upper(cast(ifnull(json_extract(entry.value, '$.modulation'), '') as text)) "
 		"  when 'FM' then 0 "
 		"  when 'FMRADIO' then 0 "
@@ -816,8 +887,11 @@ void import_channels(sqlite3* instance, char const* json)
 		"  when 'DAB+' then 2 "
 		"  when 'WX' then 3 "
 		"  when 'WEATHER' then 3 "
-		"  else case when cast(json_extract(entry.value, '$.frequency') as integer) between 162400000 and 162550000 then 3 else 0 end end as modulation, "
-		"cast(ifnull(json_extract(entry.value, '$.hidden'), 0) as integer) as hidden, "
+		"  else case "
+		"    when cast(json_extract(entry.value, '$.frequency') as integer) between 174928000 and 239200000 then 2 "		// DAB
+		"    when cast(json_extract(entry.value, '$.frequency') as integer) between 162400000 and 162550000 then 3 "		// WX
+		"    else 0 end "																									// FM
+		"  end as modulation, "
 		"cast(ifnull(json_extract(entry.value, '$.name'), '') as text) as name, "
 		"cast(ifnull(json_extract(entry.value, '$.autogain'), 0) as integer) as autogain, "
 		"cast(ifnull(json_extract(entry.value, '$.manualgain'), 0) as integer) as manualgain, "
@@ -825,9 +899,27 @@ void import_channels(sqlite3* instance, char const* json)
 		"json_extract(entry.value, '$.logourl') as logourl "	// <-- this one allows nulls
 		"from json_each(?1) as entry "
 		"where frequency is not null and "
-		"((frequency between 87500000 and 108000000) or (frequency between 162400000 and 162550000)) "
-		"and modulation between 0 and 3 "
-		"group by frequency, subchannel, modulation", json);
+		"  ((frequency between 87500000 and 108000000) or "		// FM / HD
+		"  (frequency between 174928000 and 239200000) or "		// DAB
+		"  (frequency between 162400000 and 162550000)) "		// WX
+		"  and modulation between 0 and 3 "
+		"group by frequency, modulation", json);
+
+	// Remove any FM channels that are outside the frequency range
+	execute_non_query(instance, "delete from channel where modulation = 0 and "
+		"frequency not between 87500000 and 108000000");
+
+	// Remove any HD Radio channels that are outside the frequency range
+	execute_non_query(instance, "delete from channel where modulation = 0 and "
+		"(frequency not between 87900000 and 107900000 or (frequency / 100000) % 2 = 0)");
+
+	// Remove any DAB channels that don't match an entry in namedchannel
+	execute_non_query(instance, "delete from channel where modulation = 2 and "
+		"frequency not in(select frequency from namedchannel where modulation = 2)");
+
+	// Remove any Weather Radio channels that don't match an entry in namedchannel
+	execute_non_query(instance, "delete from channel where modulation = 3 and "
+		"frequency not in(select frequency from namedchannel where modulation = 3)");
 }
 
 //---------------------------------------------------------------------------
@@ -929,11 +1021,104 @@ sqlite3* open_database(char const* connstring, int flags, bool initialize)
 			//
 			if(dbversion == 2) {
 
+				// table: channel_v2
+				//
+				// frequency(pk) | subchannel(pk) | modulation (pk) | hidden | name | autogain | manualgain | freqcorrection | logourl
+				execute_non_query(instance, "alter table channel rename to channel_v2");
+
+				// table: channel
+				//
+				// frequency(pk) | modulation (pk) | name | autogain | manualgain | freqcorrection | logourl
+				execute_non_query(instance, "create table channel(frequency integer not null, modulation integer not null, "
+					"name text not null, autogain integer not null, manualgain integer not null, freqcorrection integer not null, "
+					"logourl text null, primary key(frequency, modulation))");
+
+				// There shouldn't be any channels with a subchannel number in the previous version of the table, but clean them
+				// out during the upgrade just in case to avoid possible primary key violation on the reload
+				execute_non_query(instance, "delete from channel_v2 where subchannel != 0");
+				execute_non_query(instance, "insert into channel select v2.frequency, v2.modulation, v2.name, v2.autogain, v2.manualgain, "
+					"v2.freqcorrection, v2.logourl from channel_v2 as v2");
+
+				//// table: subchannel
+				////
+				//// frequency(pk) | subchannel(pk) | modulation (pk) | name
+				//execute_non_query(instance, "drop table if exists subchannel");
+				//execute_non_query(instance, "create table subchannel(frequency integer not null, subchannel integer not null, modulation integer not null, "
+				//	"name text null, primary key(frequency, subchannel, modulation))");
+				//
+				//// Automatically create .1 "HD1" subchannels for any pre-existing HD Radio multiplexes
+				//execute_non_query(instance, "insert into subchannel select v2.frequency, 1, v2.modulation, v2.name || ' HD1' from channel_v2 as v2 "
+				//	"where v2.modulation = 1");
+
+				execute_non_query(instance, "drop table channel_v2");
+
 				// table: rawfile
 				//
 				// path(pk) | name | samplerate
 				execute_non_query(instance, "drop table if exists rawfile");
 				execute_non_query(instance, "create table rawfile(path text not null, name text not null, samplerate integer not null, primary key(path))");
+
+				// table: namedchannel
+				//
+				// frequency(pk) | modulation(pk) | name | number
+				execute_non_query(instance, "drop table if exists namedchannel");
+				execute_non_query(instance, "create table namedchannel(frequency integer not null, modulation integer not null, "
+					"name text not null, number not null, primary key(frequency, modulation))");
+
+				// DAB Band III
+				//
+				execute_non_query(instance, "insert into namedchannel values(174928000, 2, '5A',  301)");
+				execute_non_query(instance, "insert into namedchannel values(176640000, 2, '5B',  302)");
+				execute_non_query(instance, "insert into namedchannel values(178352000, 2, '5C',  303)");
+				execute_non_query(instance, "insert into namedchannel values(180064000, 2, '5D',  304)");
+				execute_non_query(instance, "insert into namedchannel values(181936000, 2, '6A',  305)");
+				execute_non_query(instance, "insert into namedchannel values(183648000, 2, '6B',  306)");
+				execute_non_query(instance, "insert into namedchannel values(185360000, 2, '6C',  307)");
+				execute_non_query(instance, "insert into namedchannel values(187072000, 2, '6D',  308)");
+				execute_non_query(instance, "insert into namedchannel values(188928000, 2, '7A',  309)");
+				execute_non_query(instance, "insert into namedchannel values(190640000, 2, '7B',  310)");
+				execute_non_query(instance, "insert into namedchannel values(192352000, 2, '7C',  311)");
+				execute_non_query(instance, "insert into namedchannel values(194064000, 2, '7D',  312)");
+				execute_non_query(instance, "insert into namedchannel values(195936000, 2, '8A',  313)");
+				execute_non_query(instance, "insert into namedchannel values(197648000, 2, '8B',  314)");
+				execute_non_query(instance, "insert into namedchannel values(199360000, 2, '8C',  315)");
+				execute_non_query(instance, "insert into namedchannel values(201072000, 2, '8D',  316)");
+				execute_non_query(instance, "insert into namedchannel values(202928000, 2, '9A',  317)");
+				execute_non_query(instance, "insert into namedchannel values(204640000, 2, '9B',  318)");
+				execute_non_query(instance, "insert into namedchannel values(206352000, 2, '9C',  319)");
+				execute_non_query(instance, "insert into namedchannel values(208064000, 2, '9D',  320)");
+				execute_non_query(instance, "insert into namedchannel values(209936000, 2, '10A', 321)");
+				execute_non_query(instance, "insert into namedchannel values(211648000, 2, '10B', 322)");
+				execute_non_query(instance, "insert into namedchannel values(213360000, 2, '10C', 323)");
+				execute_non_query(instance, "insert into namedchannel values(215072000, 2, '10D', 324)");
+				execute_non_query(instance, "insert into namedchannel values(216928000, 2, '11A', 325)");
+				execute_non_query(instance, "insert into namedchannel values(218640000, 2, '11B', 326)");
+				execute_non_query(instance, "insert into namedchannel values(220352000, 2, '11C', 327)");
+				execute_non_query(instance, "insert into namedchannel values(222064000, 2, '11D', 328)");
+				execute_non_query(instance, "insert into namedchannel values(223936000, 2, '12A', 329)");
+				execute_non_query(instance, "insert into namedchannel values(225648000, 2, '12B', 330)");
+				execute_non_query(instance, "insert into namedchannel values(227360000, 2, '12C', 331)");
+				execute_non_query(instance, "insert into namedchannel values(229072000, 2, '12D', 332)");
+				execute_non_query(instance, "insert into namedchannel values(230784000, 2, '13A', 333)");
+				execute_non_query(instance, "insert into namedchannel values(232496000, 2, '13B', 334)");
+				execute_non_query(instance, "insert into namedchannel values(234208000, 2, '13C', 335)");
+				execute_non_query(instance, "insert into namedchannel values(235776000, 2, '13D', 336)");
+				execute_non_query(instance, "insert into namedchannel values(237488000, 2, '13E', 337)");
+				execute_non_query(instance, "insert into namedchannel values(239200000, 2, '13F', 338)");
+
+				// Weather Radio
+				//
+				execute_non_query(instance, "insert into namedchannel values(162400000, 3, 'WX2', 402)");
+				execute_non_query(instance, "insert into namedchannel values(162425000, 3, 'WX4', 404)");
+				execute_non_query(instance, "insert into namedchannel values(162450000, 3, 'WX5', 405)");
+				execute_non_query(instance, "insert into namedchannel values(162475000, 3, 'WX3', 403)");
+				execute_non_query(instance, "insert into namedchannel values(162500000, 3, 'WX6', 406)");
+				execute_non_query(instance, "insert into namedchannel values(162525000, 3, 'WX7', 407)");
+				execute_non_query(instance, "insert into namedchannel values(162550000, 3, 'WX1', 401)");
+
+				// Remove any Weather Radio channels that don't match an entry in namedchannel
+				execute_non_query(instance, "delete from channel where modulation = 3 and "
+					"frequency not in(select frequency from namedchannel where modulation = 3)");
 
 				execute_non_query(instance, "pragma user_version = 3");
 				dbversion = 3;
@@ -955,38 +1140,36 @@ sqlite3* open_database(char const* connstring, int flags, bool initialize)
 // Arguments:
 //
 //	instance	- Database instance
-//	id			- ID of the channel to be renamed
+//	frequency	- Frequency of the channel to be renamed
+//	modulation	- Modulation of the channel to be renamed
 //	newname		- New name to assign to the channel
 
-void rename_channel(sqlite3* instance, unsigned int id, char const* newname)
+void rename_channel(sqlite3* instance, uint32_t frequency, enum modulation modulation, char const* newname)
 {
 	if(instance == nullptr) throw std::invalid_argument("instance");
 
-	channelid channelid(id);
-	execute_non_query(instance, "update channel set name = ?1 where frequency = ?2 and subchannel = ?3 and modulation = ?4",
-		(newname == nullptr) ? "" : newname, channelid.frequency(), channelid.subchannel(), channelid.modulation());
+	execute_non_query(instance, "update channel set name = ?1 where frequency = ?2 and modulation = ?3",
+		(newname == nullptr) ? "" : newname, frequency, static_cast<int>(modulation));
 }
 
 //---------------------------------------------------------------------------
-// update_channel_properties
+// update_channel
 //
 // Updates the tuning properties of a channel in the database
 //
 // Arguments:
 //
 //	instance		- SQLite database instance
-//	id				- Channel unique identifier
 //	channelprops	- Structure containing the updated channel properties
 
-bool update_channel_properties(sqlite3* instance, unsigned int id, struct channelprops const& channelprops)
+bool update_channel(sqlite3* instance, struct channelprops const& channelprops)
 {
 	if(instance == nullptr) throw std::invalid_argument("instance");
 
-	channelid channelid(id);
 	return execute_non_query(instance, "update channel set name = ?1, autogain = ?2, manualgain = ?3, freqcorrection = ?4, logourl = ?5 "
-		"where frequency = ?6 and subchannel = ?7 and modulation = ?8", channelprops.name.c_str(), (channelprops.autogain) ? 1 : 0,
-		channelprops.manualgain, channelprops.freqcorrection, channelprops.logourl.c_str(), channelid.frequency(), channelid.subchannel(), 
-		static_cast<int>(channelid.modulation())) > 0;
+		"where frequency = ?6 and modulation = ?7", channelprops.name.c_str(), (channelprops.autogain) ? 1 : 0,
+		channelprops.manualgain, channelprops.freqcorrection, channelprops.logourl.c_str(), channelprops.frequency,
+		static_cast<int>(channelprops.modulation)) > 0;
 }
 
 //---------------------------------------------------------------------------

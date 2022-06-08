@@ -233,9 +233,16 @@ private:
 	// Uninitializes/unloads the addon instance
 	void Destroy(void) noexcept;
 
+	// Channel Add Helpers
+	//
+	bool channeladd_dab(struct settings const& settings, struct channelprops& channelprops) const;
+	bool channeladd_fm(struct settings const& settings, struct channelprops& channelprops) const;
+	bool channeladd_hd(struct settings const& settings, struct channelprops& channelprops) const;
+	bool channeladd_wx(struct settings const& settings, struct channelprops& channelprops) const;
+
 	// Device Helpers
 	//
-	std::unique_ptr<rtldevice> create_device(struct settings const& settings);
+	std::unique_ptr<rtldevice> create_device(struct settings const& settings) const;
 
 	// Exception Helpers
 	//

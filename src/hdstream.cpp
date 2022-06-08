@@ -68,12 +68,12 @@ int const hdstream::STREAM_ID_ID3TAG = 2;
 
 hdstream::hdstream(std::unique_ptr<rtldevice> device, struct tunerprops const& tunerprops,
 	struct channelprops const& channelprops, struct hdprops const& hdprops) :
-	m_device(std::move(device)), m_analogfallback(hdprops.analogfallback), m_muxname(""), 
-	m_pcmgain(powf(10.0f, hdprops.outputgain / 10.0f))
+	m_device(std::move(device)), m_subchannel(1),
+	m_muxname(""), m_pcmgain(powf(10.0f, hdprops.outputgain / 10.0f))
 {
 	// Initialize the RTL-SDR device instance
 	m_device->set_frequency_correction(tunerprops.freqcorrection + channelprops.freqcorrection);
-	uint32_t samplerate = m_device->set_sample_rate(SAMPLE_RATE);
+	m_device->set_sample_rate(SAMPLE_RATE);
 	m_device->set_center_frequency(channelprops.frequency);
 
 	// Adjust the device gain as specified by the channel properties
@@ -85,28 +85,9 @@ hdstream::hdstream(std::unique_ptr<rtldevice> device, struct tunerprops const& t
 	nrsc5_set_mode(m_nrsc5, NRSC5_MODE_FM);
 	nrsc5_set_callback(m_nrsc5, nrsc5_callback, this);
 
-	// Initialize the wideband FM demodulator parameters
-	tDemodInfo demodinfo = {};
-	demodinfo.HiCutmax = 100000;
-	demodinfo.HiCut = 100000;
-	demodinfo.LowCut = -100000;
-	demodinfo.SquelchValue = -160;
-	demodinfo.WfmDownsampleQuality = DownsampleQuality::Medium;
-
-	// Initialize the wideband FM demodulator
-	m_fmdemod = std::unique_ptr<CDemodulator>(new CDemodulator());
-	//m_fmdemod->SetUSFmVersion(false);	
-	m_fmdemod->SetInputSampleRate(static_cast<TYPEREAL>(samplerate));
-	m_fmdemod->SetDemod(DEMOD_WFM, demodinfo);
-	m_fmdemod->SetDemodFreq(0);
-
-	// Initialize the output resampler
-	m_fmresampler = std::unique_ptr<CFractResampler>(new CFractResampler());
-	m_fmresampler->Init(m_fmdemod->GetInputBufferLimit());
-
 	// Create a worker thread on which to perform demodulation
 	scalar_condition<bool> started{ false };
-	m_worker = std::thread(&hdstream::transfer, this, std::ref(started));
+	m_worker = std::thread(&hdstream::worker, this, std::ref(started));
 	started.wait_until_equals(true);
 }
 
@@ -364,104 +345,37 @@ void hdstream::nrsc5_callback(nrsc5_event_t const* event)
 
 	std::unique_lock<std::mutex> lock(m_queuelock);
 
-	// NRSC5_EVENT_IQ
-	//
-	// If the HD Radio stream is not generating any audio packets, fall back on the
-	// analog signal using the Wideband FM demodulator
-	if((event->event == NRSC5_EVENT_IQ) && (m_analogfallback) && (!m_hdaudio)) {
-
-		// The byte count must be exact for the analog demodulator to work right
-		assert(event->iq.count == (m_fmdemod->GetInputBufferLimit() * 2));
-
-		// The FM demodulator expects the I/Q samples in the range of -32767.0 through +32767.0
-		// (32767.0 / 127.5) = 256.9960784313725
-		std::unique_ptr<TYPECPX[]> samples(new TYPECPX[event->iq.count / 2]);
-		for(int index = 0; index < m_fmdemod->GetInputBufferLimit(); index++) {
-
-			samples[index] = {
-
-			#ifdef FMDSP_USE_DOUBLE_PRECISION
-				(static_cast<TYPEREAL>(reinterpret_cast<uint8_t const*>(event->iq.data)[(index * 2)]) - 127.5) * 256.9960784313725,		// I
-				(static_cast<TYPEREAL>(reinterpret_cast<uint8_t const*>(event->iq.data)[(index * 2) + 1]) - 127.5) * 256.9960784313725,	// Q
-			#else
-				(static_cast<TYPEREAL>(reinterpret_cast<uint8_t const*>(event->iq.data)[(index * 2)]) - 127.5f) * 256.9960784313725f,		// I
-				(static_cast<TYPEREAL>(reinterpret_cast<uint8_t const*>(event->iq.data)[(index * 2) + 1]) - 127.5f) * 256.9960784313725f,	// Q
-			#endif
-			};
-		}
-
-		// Process the I/Q data, the original samples buffer can be reused/overwritten as it's processed
-		int audiopackets = m_fmdemod->ProcessData(m_fmdemod->GetInputBufferLimit(), samples.get(), samples.get());
-
-		// Remove any RDS data that was generated for now
-		tRDS_GROUPS rdsgroup = {};
-		while(m_fmdemod->GetNextRdsGroupData(&rdsgroup)) { /* DO NOTHING */ }
-
-		// Resample the audio data into a TYPESTEREO16 buffer. Output rate is always 44.1KHz
-		size_t audiosize = audiopackets * sizeof(TYPESTEREO16);
-		std::unique_ptr<uint8_t[]> audiodata(new uint8_t[audiosize]);
-		audiopackets = m_fmresampler->Resample(audiopackets, (m_fmdemod->GetOutputRate() / 44100),
-			samples.get(), reinterpret_cast<TYPESTEREO16*>(audiodata.get()), static_cast<TYPEREAL>(m_pcmgain));
-
-		// Generate and queue the audio packet
-		std::unique_ptr<demux_packet_t> packet = std::make_unique<demux_packet_t>();
-		packet->streamid = STREAM_ID_AUDIO;
-		packet->size = audiopackets * sizeof(TYPESTEREO16);
-		packet->duration = (audiopackets / static_cast<double>(44100)) * STREAM_TIME_BASE;
-		packet->dts = packet->pts = m_dts;
-		packet->data = std::move(audiodata);
-
-		m_dts += packet->duration;
-
-		m_queue.emplace(std::move(packet));
-		queued = true;
-	}
-
 	// NRSC5_EVENT_AUDIO
 	//
 	// A digital stream audio packet has been generated
-	else if(event->event == NRSC5_EVENT_AUDIO) {
+	if(event->event == NRSC5_EVENT_AUDIO) {
 
-		// When synchronization is first achieved, the samples will have already been
-		// processed by the analog Wideband FM implementation above; we want to ignore
-		// the first HD audio packet to produce the least audio disruption (imperfect)
-		if(m_hdaudio) {
+		// Filter out anything other than program zero for now
+		if(event->audio.program == (m_subchannel - 1)) {
 
-			// Filter out anything other than program zero for now
-			if(event->audio.program == 0) {
+			// Allocate an initialize a heap buffer and copy the audio data into it
+			size_t audiosize = event->audio.count * sizeof(int16_t);
+			std::unique_ptr<uint8_t[]> audiodata(new uint8_t[audiosize]);
 
-				// Allocate an initialize a heap buffer and copy the audio data into it
-				size_t audiosize = event->audio.count * sizeof(int16_t);
-				std::unique_ptr<uint8_t[]> audiodata(new uint8_t[audiosize]);
+			// Apply the specified PCM output gain while copying the audio data into the packet buffer
+			int16_t* pcmdata = reinterpret_cast<int16_t*>(audiodata.get());
+			for(size_t index = 0; index < event->audio.count; index++) 
+				pcmdata[index] = static_cast<int16_t>(event->audio.data[index] * m_pcmgain);
 
-				// Apply the specified PCM output gain while copying the audio data into the packet buffer
-				int16_t* pcmdata = reinterpret_cast<int16_t*>(audiodata.get());
-				for(size_t index = 0; index < event->audio.count; index++) 
-					pcmdata[index] = static_cast<int16_t>(event->audio.data[index] * m_pcmgain);
+			// Generate and queue the audio packet
+			std::unique_ptr<demux_packet_t> packet = std::make_unique<demux_packet_t>();
+			packet->streamid = STREAM_ID_AUDIO;
+			packet->size = static_cast<int>(audiosize);
+			packet->duration = (event->audio.count / 2.0 / 44100.0) * STREAM_TIME_BASE;
+			packet->dts = packet->pts = m_dts;
+			packet->data = std::move(audiodata);
 
-				// Generate and queue the audio packet
-				std::unique_ptr<demux_packet_t> packet = std::make_unique<demux_packet_t>();
-				packet->streamid = STREAM_ID_AUDIO;
-				packet->size = static_cast<int>(audiosize);
-				packet->duration = (event->audio.count / 2.0 / 44100.0) * STREAM_TIME_BASE;
-				packet->dts = packet->pts = m_dts;
-				packet->data = std::move(audiodata);
+			m_dts += packet->duration;
 
-				m_dts += packet->duration;
-
-				m_queue.emplace(std::move(packet));
-				queued = true;
-			}
+			m_queue.emplace(std::move(packet));
+			queued = true;
 		}
-
-		else m_hdaudio = true;				// HD Radio is synced and producing audio
 	}
-
-	// NRSC5_EVENT_LOST_SYNC
-	//
-	// If synchronization has been lost, fall back to using the analog signal
-	// until sync has been restored and a digital audio packet can be generated
-	else if(event->event == NRSC5_EVENT_LOST_SYNC) m_hdaudio = false;
 
 	// NRSC5_EVENT_BER
 	//
@@ -639,7 +553,7 @@ long long hdstream::seek(long long /*position*/, int /*whence*/)
 
 std::string hdstream::servicename(void) const
 {
-	return std::string(m_hdaudio ? "Hybrid Digital (HD) Radio" : "Wideband FM radio");
+	return std::string("Hybrid Digital (HD) Radio");
 }
 
 //---------------------------------------------------------------------------
@@ -653,43 +567,24 @@ std::string hdstream::servicename(void) const
 
 void hdstream::signalquality(int& quality, int& snr) const
 {
-	// If digital audio has not been synchronized yet and producing data,
-	// fall back on the same logic that Wideband FM Radio uses here
-	if((!m_hdaudio) && (m_analogfallback)) {
+	// For signal quality, use the NRSC5 Bit Error Rate (BER). A BER of zero
+	// implies ideal signal quality. I have no idea what the BER tolerance
+	// is for decoding HD Radio, but from observation a BER with a value
+	// higher than 0.1 is effectively undecodable so let's call that zero
+	float ber = m_ber.load();
+	ber = std::min(std::max(ber, 0.0f), 0.1f) * 100.0f;
+	quality = static_cast<int>(((ber - 100.0f) * 100.0f) / -100.0f);
 
-		TYPEREAL demodquality = 0;
-		TYPEREAL demodsnr = 0;
-
-		m_fmdemod->GetSignalLevels(demodquality, demodsnr);
-
-		// For wideband FM, adjust the range such that 80% is nominal for
-		// signal quality and 60% is nominal for signal-to-noise; this 
-		// adjustment is based on observation and (perceived) output quality
-		quality = std::max(0, std::min(100, static_cast<int>(100.0 * (demodquality / 0.80))));
-		snr = std::max(0, std::min(100, static_cast<int>(100.0 * (demodsnr / 0.60))));
-	}
-
-	else {
-
-		// For signal quality, use the NRSC5 Bit Error Rate (BER). A BER of zero
-		// implies ideal signal quality. I have no idea what the BER tolerance
-		// is for decoding HD Radio, but from observation a BER with a value
-		// higher than 0.1 is effectively undecodable so let's call that zero
-		float ber = m_ber.load();
-		ber = std::min(std::max(ber, 0.0f), 0.1f) * 100.0f;
-		quality = static_cast<int>(((ber - 100.0f) * 100.0f) / -100.0f);
-
-		// For signal-to-noise ratio, use the NRSC5 Modulation Error Ratio (MER).
-		// A MER of 14 is apparently the ideal for HD Radio, so for now use
-		// a linear scale from (0...13) to define the SNR percentage
-		float mer = m_mer.load();
-		mer = std::max(std::min(13.0f, mer), 0.0f);
-		snr = static_cast<int>((mer * 100.0f) / 13.0f);
-	}
+	// For signal-to-noise ratio, use the NRSC5 Modulation Error Ratio (MER).
+	// A MER of 14 is apparently the ideal for HD Radio, so for now use
+	// a linear scale from (0...13) to define the SNR percentage
+	float mer = m_mer.load();
+	mer = std::max(std::min(13.0f, mer), 0.0f);
+	snr = static_cast<int>((mer * 100.0f) / 13.0f);
 }
 
 //---------------------------------------------------------------------------
-// hdstream::transfer (private)
+// hdstream::worker (private)
 //
 // Worker thread procedure used to transfer data from the device
 //
@@ -697,7 +592,7 @@ void hdstream::signalquality(int& quality, int& snr) const
 //
 //	started		- Condition variable to set when thread has started
 
-void hdstream::transfer(scalar_condition<bool>& started)
+void hdstream::worker(scalar_condition<bool>& started)
 {
 	assert(m_device);
 	assert(m_nrsc5);
@@ -715,9 +610,9 @@ void hdstream::transfer(scalar_condition<bool>& started)
 	m_device->begin_stream();
 	started = true;
 
-	// Continuously read data from the device until cancel_async() has been called. Use
-	// the analog demodulator's packet size since it has to be precisely what's expected
-	try { m_device->read_async(read_callback_func, m_fmdemod->GetInputBufferLimit() * 2); }
+	// Continuously read data from the device until cancel_async() has been called
+	// 32 KiB = ~1/100 of a second of data
+	try { m_device->read_async(read_callback_func, 32 KiB); }
 	catch(...) { m_worker_exception = std::current_exception(); }
 
 	m_stopped.store(true);					// Thread is stopped

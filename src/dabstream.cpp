@@ -35,12 +35,12 @@ int const dabstream::DEFAULT_AUDIO_RATE = 48000;
 // dabstream::MAX_PACKET_QUEUE
 //
 // Maximum number of queued demux packets
-size_t const dabstream::MAX_PACKET_QUEUE = 200;		// ~5 seconds @ 24ms; 12 seconds @ 60ms
+size_t const dabstream::MAX_PACKET_QUEUE = 200;			// ~5 seconds @ 24ms; 12 seconds @ 60ms
 
 // dabstream::RING_BUFFER_SIZE
 //
 // Input ring buffer size
-size_t const dabstream::RING_BUFFER_SIZE = (256 KiB);
+size_t const dabstream::RING_BUFFER_SIZE = (4 MiB);		// 1 second @ 2048000
 
 // dabstream::SAMPLE_RATE
 //
@@ -69,12 +69,8 @@ int const dabstream::STREAM_ID_ID3TAG = 0;
 
 dabstream::dabstream(std::unique_ptr<rtldevice> device, struct tunerprops const& tunerprops,
 	struct channelprops const& channelprops, struct dabprops const& dabprops) : m_device(std::move(device)),
-	m_subchannel((channelprops.subchannel == 0) ? 1 : channelprops.subchannel), m_pcmgain(powf(10.0f, dabprops.outputgain / 10.0f))
+	m_ringbuffer(RING_BUFFER_SIZE), m_subchannel(1), m_pcmgain(powf(10.0f, dabprops.outputgain / 10.0f))
 {
-	// Allocate the input ring buffer
-	m_buffer = std::unique_ptr<uint8_t[]>(new uint8_t[RING_BUFFER_SIZE]);
-	if(!m_buffer) throw std::bad_alloc();
-
 	// Initialize the RTL-SDR device instance
 	m_device->set_frequency_correction(tunerprops.freqcorrection + channelprops.freqcorrection);
 	m_device->set_sample_rate(SAMPLE_RATE);
@@ -130,14 +126,14 @@ bool dabstream::canseek(void) const
 
 void dabstream::close(void)
 {
-	m_stop = true;
-	if(m_worker.joinable()) m_worker.join();
+	m_stop = true;								// Signal worker thread to stop
+	if(m_device) m_device->cancel_async();		// Cancel any async read operations
+	if(m_worker.joinable()) m_worker.join();	// Wait for thread
 
-	if(m_receiver) m_receiver->stop();
-	m_receiver.reset();
+	if(m_receiver) m_receiver->stop();			// Stop receiver
+	m_receiver.reset();							// Reset receiver instance
 
-	if(m_device) m_device->cancel_async();
-	m_device.reset();
+	m_device.reset();							// Release RTL-SDR device
 }
 
 //---------------------------------------------------------------------------
@@ -413,77 +409,81 @@ void dabstream::worker(scalar_condition<bool>& started)
 	assert(m_device);
 	assert(m_receiver);
 
+	// read_callback_func (local)
+	//
+	// Asynchronous read callback function for the RTL-SDR device
+	auto read_callback_func = [&](uint8_t const* buffer, size_t count) -> void {
+
+		// Trigger an InputFailure event if no data has been returned from the device
+		if(count == 0) m_streamok.store(false);
+
+		// Copy the input data into the ring buffer
+		assert(count <= std::numeric_limits<int32_t>::max());
+		m_ringbuffer.putDataIntoBuffer(buffer, static_cast<int32_t>(count));
+
+		// Check for and process any new events
+		std::unique_lock<std::mutex> eventslock(m_eventslock);
+		if(m_events.empty() == false) {
+
+			// The threading model is a bit weird here; the callback that queued a new
+			// event needs to be free to continue execution otherwise the DSP may deadlock 
+			// while we process that event. Combat this by swapping the queue<> with a new
+			// one, release the lock, then go ahead and process each of the queued events
+
+			event_queue_t events;							// Empty event queue<>
+			m_events.swap(events);							// Swap with existing queue<>
+			eventslock.unlock();							// Release the queue<> lock
+
+			while(!events.empty()) {
+
+				eventid_t eventid = events.front();			// eventid_t
+				events.pop();								// Remove from queue<>
+
+				switch(eventid) {
+
+					// InputFailure
+					//
+					// Something has gone wrong with the input stream
+					case eventid_t::InputFailure:
+
+						throw string_exception("Input Failure");		// TODO: message
+						break;
+
+					// ServiceDetected
+					//
+					// A new service has been detected
+					case eventid_t::ServiceDetected:
+
+						if(foundsub) break;				// Subchannel has already been found; ignore
+
+						// Determine if the desired subchannel is now present in the decoded services
+						servicelist = m_receiver->getServiceList();
+						for (auto const& service : servicelist) {
+							for (auto const& component : m_receiver->getComponents(service)) {
+
+								if(component.subchannelId == static_cast<int16_t>(m_subchannel)) {
+
+									// The desired subchannel has been found; begin audio playback
+									ProgrammeHandlerInterface& phi = *static_cast<ProgrammeHandlerInterface*>(this);
+									m_receiver->playSingleProgramme(phi, {}, service);
+
+									foundsub = true;					//  Stop processing service events
+								}
+							}
+						}
+						break;
+				}
+			}
+		}
+	};
+
+	// Begin streaming from the device via the receiver and inform the caller that the thread is running
 	m_receiver->restart(false);
 	started = true;
 
-	try {
-
-		// Loop to process queued events until the worker is signaled to stop
-		while(m_stop.test(true) == false) {
-
-			// Check for and process all new events; hold the lock on the queue until
-			// every queued event has been processed
-			std::unique_lock<std::mutex> lock(m_eventslock);
-			m_eventscv.wait_for(lock, std::chrono::milliseconds(50), [&]() -> bool {
-
-				// No events
-				if(m_events.empty()) return true;
-
-				// The threading model is a bit weird here; the callback that queued a new
-				// event needs to be free to continue execution otherwise the DSP may deadlock 
-				// while we process that event. Combat this by swapping the queue<> with a new
-				// one, release the lock, then go ahead and process each of the queued events
-
-				event_queue_t events;							// Empty event queue<>
-				m_events.swap(events);							// Swap with existing queue<>
-				lock.unlock();									// Release the queue<> lock
-
-				while(!events.empty()) {
-
-					eventid_t eventid = events.front();			// eventid_t
-					events.pop();								// Remove from queue<>
-
-					switch(eventid) {
-
-						// InputFailure
-						//
-						// Something has gone wrong with the input stream
-						case eventid_t::InputFailure:
-
-							throw string_exception("Input Failure");		// TODO: message
-							break;
-
-						// ServiceDetected
-						//
-						// A new service has been detected
-						case eventid_t::ServiceDetected:
-
-							if(foundsub) break;				// Subchannel has already been found; ignore
-
-							// Determine if the desired subchannel is now present in the decoded services
-							servicelist = m_receiver->getServiceList();
-							for (auto const& service : servicelist) {
-								for (auto const& component : m_receiver->getComponents(service)) {
-
-									if(component.subchannelId == static_cast<int16_t>(m_subchannel)) {
-
-										// The desired subchannel has been found; begin audio playback
-										ProgrammeHandlerInterface& phi = *static_cast<ProgrammeHandlerInterface*>(this);
-										m_receiver->playSingleProgramme(phi, {}, service);
-
-										foundsub = true;					//  Stop processing service events
-									}
-								}
-							}
-							break;
-					}
-				}
-
-				return true;
-			});
-		}
-	}
-
+	// Continuously read data from the device until cancel_async() has been called
+	// 40 KiB = ~1/100 of a second of data
+	try { m_device->read_async(read_callback_func, 40 KiB); }
 	catch(...) { m_worker_exception = std::current_exception(); }
 
 	m_stopped.store(true);					// Worker thread is now stopped
@@ -502,20 +502,25 @@ void dabstream::worker(scalar_condition<bool>& started)
 
 int32_t dabstream::getSamples(DSPCOMPLEX* buffer, int32_t size)
 {
-	int32_t numsamples = std::min(size, getSamplesToRead());
-	for(int32_t index = 0; index < numsamples; index++) {
+	int32_t			numsamples = 0;			// Number of available samples in the buffer
 
-		// Scale the input data from [0,255] to [-1,1] for the demodulator
+	// Allocate a temporary buffer to pull the data out of the ring buffer
+	std::unique_ptr<uint8_t[]> tempbuffer(new uint8_t[size * 2]);
+
+	// Get the data from the ring buffer
+	numsamples = m_ringbuffer.getDataFromBuffer(tempbuffer.get(), size * 2);
+
+	// Scale the input data from [0,255] to [-1,1] for the demodulator
+	for(int32_t index = 0; index < numsamples / 2; index++) {
+
 		buffer[index] = DSPCOMPLEX(
-			(static_cast<float>(m_buffer[m_tail]) - 128.0f) / 128.0f,		// real
-			(static_cast<float>(m_buffer[m_tail + 1]) - 128.0f) / 128.0f	// imaginary
+			(static_cast<float>(tempbuffer[index * 2]) - 128.0f) / 128.0f,			// real
+			(static_cast<float>(tempbuffer[(index * 2) + 1]) - 128.0f) / 128.0f		// imaginary
 		);
-
-		m_tail += 2;
-		if(m_tail >= RING_BUFFER_SIZE) m_tail = 0;
 	}
 
-	return numsamples;
+	return numsamples / 2;
+
 }
 
 //---------------------------------------------------------------------------
@@ -529,38 +534,7 @@ int32_t dabstream::getSamples(DSPCOMPLEX* buffer, int32_t size)
 
 int32_t dabstream::getSamplesToRead(void)
 {
-	size_t const READ_RATE = (SAMPLE_RATE / 100);			// .01 seconds worth of samples
-
-	assert(m_device);
-
-	// Determine how much data is available to read from the ring buffer, and if it has fallen
-	// below the threshold read more input data from the device
-	size_t available = (m_tail > m_head) ? (RING_BUFFER_SIZE - m_tail) + m_head : m_head - m_tail;
-	if(available < READ_RATE) {
-
-		// Read another set of data from the input device
-		size_t cb = READ_RATE;
-		while(cb) {
-
-			// If the head is behind the tail linearly, take the data between them otherwise
-			// take the data between the end of the buffer and the head
-			size_t chunk = (m_head < m_tail) ? std::min(cb, m_tail - m_head) : std::min(cb, RING_BUFFER_SIZE - m_head);
-			size_t read = m_device->read(&m_buffer[m_head], chunk);
-
-			// If no data was read from the device, something is wrong ...
-			if(read == 0) { m_streamok.store(false); return 0; }
-
-			m_head += read;					// Increment the head position
-			cb -= read;						// Decrement remaining bytes
-
-			// If the head has reached the end of the buffer, reset it back to zero
-			if(m_head >= RING_BUFFER_SIZE) m_head = 0;
-		}
-
-		available = (m_tail > m_head) ? (RING_BUFFER_SIZE - m_tail) + m_head : m_head - m_tail;
-	}
-
-	return static_cast<int32_t>(available / 2);
+	return m_ringbuffer.GetRingBufferReadAvailable() / 2;
 }
 
 //---------------------------------------------------------------------------

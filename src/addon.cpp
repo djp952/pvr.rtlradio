@@ -83,6 +83,260 @@ addon::~addon()
 }
 
 //---------------------------------------------------------------------------
+// addon::channeladd_dab (private)
+//
+// Performs the channel add operation for DAB
+//
+// Arguments:
+//
+//	settings		- Current addon settings
+//	channelprops	- Channel properties to be populated on success
+
+bool addon::channeladd_dab(struct settings const& settings, struct channelprops& channelprops) const
+{
+	std::vector<std::string>	channelnames;			// Channel names
+	std::vector<uint32_t>		channelfrequencies;		// Channel frequencies
+
+	// Pull a database handle out of the connection pool
+	connectionpool::handle dbhandle(m_connpool);
+
+	// Enumerate the named channels available for the specified modulation (DAB)
+	enumerate_namedchannels(dbhandle, modulation::dab, [&](struct namedchannel const& item) -> void {
+
+		if((item.frequency > 0) && (item.name != nullptr)) {
+
+			// Append the frequency of the channel in megahertz (xxx.xxx format) to the channel name
+			char name[256]{};
+			unsigned int mhz = item.frequency / 1000000;
+			unsigned int khz = (item.frequency % 1000000) / 1000;
+			snprintf(name, std::extent<decltype(name)>::value, "%s (%u.%u MHz)", item.name, mhz, khz);
+
+			channelnames.emplace_back(name);
+			channelfrequencies.emplace_back(item.frequency);
+		}
+	});
+
+	assert(channelnames.size() == channelfrequencies.size());
+	if(channelnames.size() == 0) throw string_exception("No DAB ensembles were enumerated from the database");
+
+	// The user has to select what DAB ensemble will be added from the hard-coded options in the database
+	int selected = kodi::gui::dialogs::Select::Show(kodi::addon::GetLocalizedString(30418), channelnames);
+	if(selected < 0) return false;
+
+	// Initialize enough properties for the settings dialog to work
+	channelprops.frequency = channelfrequencies[selected];
+	channelprops.modulation = modulation::dab;
+	channelprops.name = kodi::addon::GetLocalizedString(30419);
+
+	// If the channel already exists in the database, get the previously set properties
+	bool exists = channel_exists(dbhandle, channelprops);
+	if(exists) get_channel_properties(dbhandle, channelprops.frequency, channelprops.modulation, channelprops);
+
+	// Set up the tuner device properties
+	struct tunerprops tunerprops = {};
+	tunerprops.freqcorrection = settings.device_frequency_correction;
+
+	// Create and initialize a channel settings dialog instance to allow the user to fine-tune the channel
+	std::unique_ptr<channelsettings> settingsdialog = channelsettings::create(create_device(settings), tunerprops, channelprops, true);
+	settingsdialog->DoModal();
+
+	if(settingsdialog->get_dialog_result() == true) {
+
+		// Retrieve the updated channel properties from the dialog box
+		settingsdialog->get_channel_properties(channelprops);
+				
+		// Add or update the channel in the database
+		if(!exists) add_channel(dbhandle, channelprops);
+		else update_channel(dbhandle, channelprops);
+
+		return true;
+	}
+
+	return false;
+}
+
+//---------------------------------------------------------------------------
+// addon::channeladd_fm (private)
+//
+// Performs the channel add operation for FM Radio
+//
+// Arguments:
+//
+//	settings		- Current addon settings
+//	channelprops	- Channel properties to be populated on success
+
+bool addon::channeladd_fm(struct settings const& settings, struct channelprops& channelprops) const
+{
+	// Create and initialize the frequency input dialog box
+	std::unique_ptr<channeladd> adddialog = channeladd::create(modulation::fm);
+	adddialog->DoModal();
+
+	// If the dialog was successful add the channel to the database
+	if(adddialog->get_dialog_result()) {
+
+		// Retrieve the new channel properties from the dialog box
+		adddialog->get_channel_properties(channelprops);
+		assert(channelprops.modulation == modulation::fm);
+
+		// Pull a database handle out of the connection pool
+		connectionpool::handle dbhandle(m_connpool);
+
+		// If the channel already exists in the database, get the previously set properties
+		bool exists = channel_exists(dbhandle, channelprops);
+		if(exists) get_channel_properties(dbhandle, channelprops.frequency, channelprops.modulation, channelprops);
+
+		// Set up the tuner device properties
+		struct tunerprops tunerprops = {};
+		tunerprops.freqcorrection = settings.device_frequency_correction;
+
+		// Create and initialize the dialog box against a new signal meter instance
+		std::unique_ptr<channelsettings> settingsdialog = channelsettings::create(create_device(settings), tunerprops, channelprops, true);
+		settingsdialog->DoModal();
+
+		if(settingsdialog->get_dialog_result()) {
+
+			// Retrieve the updated channel properties from the dialog box
+			settingsdialog->get_channel_properties(channelprops);
+			
+			// Add or update the channel in the database
+			if(!exists) add_channel(dbhandle, channelprops);
+			else update_channel(dbhandle, channelprops);
+		}
+
+		return true;
+	}
+
+	return false;
+}
+
+//---------------------------------------------------------------------------
+// addon::channeladd_hd (private)
+//
+// Performs the channel add operation for HD Radio
+//
+// Arguments:
+//
+//	settings		- Current addon settings
+//	channelprops	- Channel properties to be populated on success
+
+bool addon::channeladd_hd(struct settings const& settings, struct channelprops& channelprops) const
+{
+	// Create and initialize the frequency input dialog box
+	std::unique_ptr<channeladd> adddialog = channeladd::create(modulation::hd);
+	adddialog->DoModal();
+
+	// If the dialog was successful add the channel to the database
+	if(adddialog->get_dialog_result()) {
+
+		// Retrieve the new channel properties from the dialog box
+		adddialog->get_channel_properties(channelprops);
+		assert(channelprops.modulation == modulation::hd);
+
+		// Pull a database handle out of the connection pool
+		connectionpool::handle dbhandle(m_connpool);
+
+		// If the channel already exists in the database, get the previously set properties
+		bool exists = channel_exists(dbhandle, channelprops);
+		if(exists) get_channel_properties(dbhandle, channelprops.frequency, channelprops.modulation, channelprops);
+
+		// Set up the tuner device properties
+		struct tunerprops tunerprops = {};
+		tunerprops.freqcorrection = settings.device_frequency_correction;
+
+		// Create and initialize the dialog box against a new signal meter instance
+		std::unique_ptr<channelsettings> settingsdialog = channelsettings::create(create_device(settings), tunerprops, channelprops, true);
+		settingsdialog->DoModal();
+
+		if(settingsdialog->get_dialog_result()) {
+
+			// Retrieve the updated channel properties from the dialog box
+			settingsdialog->get_channel_properties(channelprops);
+
+			// Add or update the channel in the database
+			if(!exists) add_channel(dbhandle, channelprops);
+			else update_channel(dbhandle, channelprops);
+		}
+
+		return true;
+	}
+
+	return false;
+}
+
+//---------------------------------------------------------------------------
+// addon::channeladd_wx (private)
+//
+// Performs the channel add operation for Weather Radio
+//
+// Arguments:
+//
+//	settings		- Current addon settings
+//	channelprops	- Channel properties to be populated on success
+
+bool addon::channeladd_wx(struct settings const& settings, struct channelprops& channelprops) const
+{
+	std::vector<std::string>	channelnames;			// Channel names
+	std::vector<uint32_t>		channelfrequencies;		// Channel frequencies
+
+	// Pull a database handle out of the connection pool
+	connectionpool::handle dbhandle(m_connpool);
+
+	// Enumerate the named channels available for the specified modulation (WX)
+	enumerate_namedchannels(dbhandle, modulation::wx, [&](struct namedchannel const& item) -> void {
+
+		if((item.frequency > 0) && (item.name != nullptr)) {
+
+			// Append the frequency of the channel in megahertz (xxx.xxx format) to the channel name
+			char name[256]{};
+			unsigned int mhz = item.frequency / 1000000;
+			unsigned int khz = (item.frequency % 1000000) / 1000;
+			snprintf(name, std::extent<decltype(name)>::value, "%s (%u.%u MHz)", item.name, mhz, khz);
+
+			channelnames.emplace_back(name);
+			channelfrequencies.emplace_back(item.frequency);
+		}
+	});
+
+	assert(channelnames.size() == channelfrequencies.size());
+	if(channelnames.size() == 0) throw string_exception("No Weather Radio channels were enumerated from the database");
+
+	// The user has to select what Weather Radio channel will be added from the hard-coded options in the database
+	int selected = kodi::gui::dialogs::Select::Show(kodi::addon::GetLocalizedString(30428), channelnames);
+	if(selected < 0) return false;
+
+	// Initialize enough properties for the settings dialog to work
+	channelprops.frequency = channelfrequencies[selected];
+	channelprops.modulation = modulation::wx;
+	channelprops.name = kodi::addon::GetLocalizedString(30420);
+
+	// If the channel already exists in the database, get the previously set properties
+	bool exists = channel_exists(dbhandle, channelprops);
+	if(exists) get_channel_properties(dbhandle, channelprops.frequency, channelprops.modulation, channelprops);
+
+	// Set up the tuner device properties
+	struct tunerprops tunerprops = {};
+	tunerprops.freqcorrection = settings.device_frequency_correction;
+
+	// Create and initialize a channel settings dialog instance to allow the user to fine-tune the channel
+	std::unique_ptr<channelsettings> settingsdialog = channelsettings::create(create_device(settings), tunerprops, channelprops, true);
+	settingsdialog->DoModal();
+
+	if(settingsdialog->get_dialog_result() == true) {
+
+		// Retrieve the updated channel properties from the dialog box
+		settingsdialog->get_channel_properties(channelprops);
+				
+		// Add or update the channel in the database
+		if(!exists) add_channel(dbhandle, channelprops);
+		else update_channel(dbhandle, channelprops);
+
+		return true;
+	}
+
+	return false;
+}
+
+//---------------------------------------------------------------------------
 // addon::copy_settings (private, inline)
 //
 // Atomically creates a copy of the member addon_settings structure
@@ -106,7 +360,7 @@ inline struct settings addon::copy_settings(void) const
 //
 //	settings		- Current addon settings structure
 
-std::unique_ptr<rtldevice> addon::create_device(struct settings const& settings)
+std::unique_ptr<rtldevice> addon::create_device(struct settings const& settings) const
 {
 	// Pull a database handle out of the connection pool
 	connectionpool::handle dbhandle(m_connpool);
@@ -613,7 +867,6 @@ ADDON_STATUS addon::Create(void)
 
 			// Load the HD Radio settings
 			m_settings.hdradio_enable = kodi::GetSettingBoolean("hdradio_enable", false);
-			m_settings.hdradio_enable_fallback = kodi::GetSettingBoolean("hdradio_enable_fallback", true);
 			m_settings.hdradio_output_gain = kodi::GetSettingFloat("hdradio_output_gain", -3.0f);
 
 			// Load the DAB/DAB+ settings
@@ -642,7 +895,6 @@ ADDON_STATUS addon::Create(void)
 			log_info(__func__, ": m_settings.fmradio_rds_standard              = ", static_cast<int>(m_settings.fmradio_rds_standard));
 			log_info(__func__, ": m_settings.fmradio_sample_rate               = ", m_settings.fmradio_sample_rate);
 			log_info(__func__, ": m_settings.hdradio_enable                    = ", m_settings.hdradio_enable);
-			log_info(__func__, ": m_settings.hdradio_enable_fallback           = ", m_settings.hdradio_enable_fallback);
 			log_info(__func__, ": m_settings.hdradio_output_gain               = ", m_settings.hdradio_output_gain);
 			log_info(__func__, ": m_settings.interface_prepend_channel_numbers = ", m_settings.interface_prepend_channel_numbers);
 			log_info(__func__, ": m_settings.wxradio_enable                    = ", m_settings.wxradio_enable);
@@ -908,18 +1160,6 @@ ADDON_STATUS addon::SetSetting(std::string const& settingName, kodi::CSettingVal
 		}
 	}
 
-	// hdradio_enable_fallback
-	//
-	else if(settingName == "hdradio_enable_fallback") {
-
-		bool bvalue = settingValue.GetBoolean();
-		if(bvalue != m_settings.hdradio_enable_fallback) {
-
-			m_settings.hdradio_enable_fallback = bvalue;
-			log_info(__func__, ": setting hdradio_enable_fallback changed to ", bvalue);
-		}
-	}
-
 	// hdradio_output_gain
 	//
 	else if(settingName == "hdradio_output_gain") {
@@ -1088,8 +1328,10 @@ PVR_ERROR addon::DeleteChannel(kodi::addon::PVRChannel const& channel)
 {
 	try {
 
+		channelid channelid(channel.GetUniqueId());			// Convert UniqueID back into a channelid
+
 		// Remove the channel from the database
-		delete_channel(connectionpool::handle(m_connpool), channel.GetUniqueId()); 
+		delete_channel(connectionpool::handle(m_connpool), channelid.frequency(), channelid.modulation()); 
 
 		TriggerChannelGroupsUpdate();				// Update the channel groups
 	}
@@ -1397,7 +1639,7 @@ PVR_ERROR addon::GetChannels(bool radio, kodi::addon::PVRChannelsResultSet& resu
 			}
 
 			if(item.logourl != nullptr) channel.SetIconPath(item.logourl);
-			channel.SetIsHidden(item.hidden);
+			// TODO: Set HD/DAB "base channel" as hidden
 
 			results.Add(channel);
 		};
@@ -1612,7 +1854,53 @@ int64_t addon::LengthLiveStream(void)
 
 PVR_ERROR addon::OpenDialogChannelAdd(kodi::addon::PVRChannel const& /*channel*/)
 {
-	// The channel settings dialog can't be shown when there is an active stream
+	// Create a copy of the current addon settings structure
+	struct settings settings = copy_settings();
+	
+	// The user has the option to disable support for each type of channel
+	std::vector<std::string> channeltypes;
+	std::vector<enum modulation> modulationtypes;
+
+	if(settings.fmradio_enable) {
+
+		channeltypes.emplace_back(kodi::addon::GetLocalizedString(30414));
+		modulationtypes.emplace_back(modulation::fm);
+	}
+
+	if(settings.hdradio_enable) {
+
+		channeltypes.emplace_back(kodi::addon::GetLocalizedString(30415));
+		modulationtypes.emplace_back(modulation::hd);
+	}
+
+	if(settings.dabradio_enable) {
+
+		channeltypes.emplace_back(kodi::addon::GetLocalizedString(30416));
+		modulationtypes.emplace_back(modulation::dab);
+	}
+
+	if(settings.wxradio_enable) {
+
+		channeltypes.emplace_back(kodi::addon::GetLocalizedString(30417));
+		modulationtypes.emplace_back(modulation::wx);
+	}
+
+	assert(channeltypes.size() == modulationtypes.size());
+	
+	// If the user has no channel types enabled, just return without error
+	if((channeltypes.size() == 0) || (modulationtypes.size() == 0)) return PVR_ERROR::PVR_ERROR_NO_ERROR;
+
+	// If more than one modulation type is available, prompt the user to select one
+	enum modulation modulationtype = modulationtypes[0];
+	if(modulationtypes.size() > 1) {
+
+		int selected = kodi::gui::dialogs::Select::Show(kodi::addon::GetLocalizedString(30413), channeltypes);
+		if(selected < 0) return PVR_ERROR::PVR_ERROR_NO_ERROR;
+
+		modulationtype = modulationtypes[selected];
+	}
+
+	// TODO: see if there is a better way we can work with this
 	if(m_pvrstream) {
 
 		// TODO: This message is terrible
@@ -1622,50 +1910,29 @@ PVR_ERROR addon::OpenDialogChannelAdd(kodi::addon::PVRChannel const& /*channel*/
 		return PVR_ERROR::PVR_ERROR_NO_ERROR;
 	}
 
-	// Create a copy of the current addon settings structure
-	struct settings settings = copy_settings();
-
 	try {
 
-		// Create and initialize the dialog box
-		std::unique_ptr<channeladd> adddialog = channeladd::create();
-		adddialog->DoModal();
+		struct channelprops channelprops = {};			// New channel properties
+		bool result = false;							// Result from channel add helper
 
-		// If the dialog was successful add the channel to the database
-		if(adddialog->get_dialog_result()) {
+		if(modulationtype == modulation::fm) result = channeladd_fm(settings, channelprops);
+		else if(modulationtype == modulation::hd) result = channeladd_hd(settings, channelprops);
+		else if(modulationtype == modulation::dab) result = channeladd_dab(settings, channelprops);
+		else if(modulationtype == modulation::wx) result = channeladd_wx(settings, channelprops);
 
-			// Retrieve the new channel properties from the dialog box
-			struct channelprops channelprops = {};
-			adddialog->get_channel_properties(channelprops);
-
-			// Set up the tuner device properties
-			struct tunerprops tunerprops = {};
-			tunerprops.freqcorrection = settings.device_frequency_correction;
-
-			// Create and initialize the dialog box against a new signal meter instance
-			std::unique_ptr<channelsettings> settingsdialog = channelsettings::create(create_device(settings), tunerprops, channelprops, true);
-			settingsdialog->DoModal();
-
-			if(settingsdialog->get_dialog_result()) {
-
-				// Retrieve the updated channel properties from the dialog box
-				settingsdialog->get_channel_properties(channelprops);
-				
-				// Only add the channel if it doesn't already exist in the database
-				connectionpool::handle dbhandle(m_connpool);
-				if(!channel_exists(dbhandle, channelprops)) add_channel(dbhandle, channelprops);
-			}
-			
-			TriggerChannelGroupsUpdate();					// Update the channel groups
-		}
+		
+		TriggerChannelGroupsUpdate();					// Update the channel groups
+		
+		if(result == false) return PVR_ERROR::PVR_ERROR_NO_ERROR;
 	}
 
 	catch(std::exception& ex) {
 
+		// todo: this goes away, 30407 is gone
 		// Log the error and inform the user that the operation failed, do not return an error code
 		handle_stdexception(__func__, ex);
-		kodi::gui::dialogs::OK::ShowAndGetInput(kodi::GetLocalizedString(30407), "An error occurred displaying the "
-			"add channel dialog:", "", ex.what());
+		//kodi::gui::dialogs::OK::ShowAndGetInput(kodi::GetLocalizedString(30407), "An error occurred displaying the "
+		//	"add channel dialog:", "", ex.what());
 	}
 
 	catch(...) { return handle_generalexception(__func__, PVR_ERROR::PVR_ERROR_FAILED); }
@@ -1720,9 +1987,11 @@ PVR_ERROR addon::OpenDialogChannelSettings(kodi::addon::PVRChannel const& channe
 		struct tunerprops tunerprops = {};
 		tunerprops.freqcorrection = settings.device_frequency_correction;
 
+		channelid channelid(channel.GetUniqueId());			// Convert UniqueID back into a channelid
+
 		// Get the properties of the channel to be manipulated
 		struct channelprops channelprops = {};
-		if(!get_channel_properties(connectionpool::handle(m_connpool), channel.GetUniqueId(), channelprops))
+		if(!get_channel_properties(connectionpool::handle(m_connpool), channelid.frequency(), channelid.modulation(), channelprops))
 			throw string_exception("Unable to retrieve properties for channel ", channel.GetChannelName().c_str());
 
 		// Create and initialize the dialog box against a new signal meter instance
@@ -1733,7 +2002,7 @@ PVR_ERROR addon::OpenDialogChannelSettings(kodi::addon::PVRChannel const& channe
 
 			// Retrieve the updated channel properties from the dialog box and persist them
 			dialog->get_channel_properties(channelprops);
-			update_channel_properties(connectionpool::handle(m_connpool), channel.GetUniqueId(), channelprops);
+			update_channel(connectionpool::handle(m_connpool), channelprops);
 
 			TriggerChannelUpdate();						// Trigger channel metadata update
 		}
@@ -1775,9 +2044,11 @@ bool addon::OpenLiveStream(kodi::addon::PVRChannel const& channel)
 		struct tunerprops tunerprops = {};
 		tunerprops.freqcorrection = settings.device_frequency_correction;
 
+		channelid channelid(channel.GetUniqueId());		// Convert UniqueID back into a channelid
+
 		// Retrieve the tuning properties for the channel from the database
 		struct channelprops channelprops = {};
-		if(!get_channel_properties(connectionpool::handle(m_connpool), channel.GetUniqueId(), channelprops))
+		if(!get_channel_properties(connectionpool::handle(m_connpool), channelid.frequency(), channelid.modulation(), channelprops))
 			throw string_exception("channel ", channel.GetUniqueId(), " (", channel.GetChannelName().c_str(), ") was not found in the database");
 
 		// FM Radio
@@ -1817,16 +2088,13 @@ bool addon::OpenLiveStream(kodi::addon::PVRChannel const& channel)
 
 			// Set up the HD Radio digital signal processor properties
 			struct hdprops hdprops = {};
-			hdprops.analogfallback = settings.hdradio_enable_fallback;
 			hdprops.outputgain = settings.hdradio_output_gain;
 
 			// Log information about the stream for diagnostic purposes
 			log_info(__func__, ": Creating hdstream for channel \"", channelprops.name, "\"");
 			log_info(__func__, ": tunerprops.freqcorrection = ", tunerprops.freqcorrection, " PPM");
-			log_info(__func__, ": hdprops.analogfallback = ", (hdprops.analogfallback) ? "true" : "false");
 			log_info(__func__, ": hdprops.outputgain = ", hdprops.outputgain, " dB");
 			log_info(__func__, ": channelprops.frequency = ", channelprops.frequency, " Hz");
-			log_info(__func__, ": channelprops.subchannel = ", channelprops.subchannel);
 			log_info(__func__, ": channelprops.autogain = ", (channelprops.autogain) ? "true" : "false");
 			log_info(__func__, ": channelprops.manualgain = ", channelprops.manualgain / 10, " dB");
 			log_info(__func__, ": channelprops.freqcorrection = ", channelprops.freqcorrection, " PPM");
@@ -1848,7 +2116,6 @@ bool addon::OpenLiveStream(kodi::addon::PVRChannel const& channel)
 			log_info(__func__, ": tunerprops.freqcorrection = ", tunerprops.freqcorrection, " PPM");
 			log_info(__func__, ": dabrops.outputgain = ", dabprops.outputgain, " dB");
 			log_info(__func__, ": channelprops.frequency = ", channelprops.frequency, " Hz");
-			log_info(__func__, ": channelprops.subchannel = ", channelprops.subchannel);
 			log_info(__func__, ": channelprops.autogain = ", (channelprops.autogain) ? "true" : "false");
 			log_info(__func__, ": channelprops.manualgain = ", channelprops.manualgain / 10, " dB");
 			log_info(__func__, ": channelprops.freqcorrection = ", channelprops.freqcorrection, " PPM");
@@ -1923,7 +2190,9 @@ int addon::ReadLiveStream(unsigned char* /*buffer*/, unsigned int /*size*/)
 
 PVR_ERROR addon::RenameChannel(kodi::addon::PVRChannel const& channel)
 {
-	try { rename_channel(connectionpool::handle(m_connpool), channel.GetUniqueId(), channel.GetChannelName().c_str()); }
+	channelid channelid(channel.GetUniqueId());			// Convert UniqueID back into a channelid
+
+	try { rename_channel(connectionpool::handle(m_connpool), channelid.frequency(), channelid.modulation(), channel.GetChannelName().c_str()); }
 	catch(std::exception& ex) { return handle_stdexception(__func__, ex, PVR_ERROR::PVR_ERROR_FAILED); }
 	catch(...) { return handle_generalexception(__func__, PVR_ERROR::PVR_ERROR_FAILED); }
 

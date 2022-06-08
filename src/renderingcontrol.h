@@ -102,12 +102,12 @@ protected:
 	// Protected Member Variables
 	//-------------------------------------------------------------------------
 
-	size_t					m_left;		// Horizontal position of the control
-	size_t					m_top;		// Vertical position of the control
-	size_t					m_width;	// Width of the control
-	size_t					m_height;	// Height of the control
+	size_t					m_left{};		// Horizontal position of the control
+	size_t					m_top{};		// Vertical position of the control
+	size_t					m_width{};		// Width of the control
+	size_t					m_height{};		// Height of the control
 
-	kodi::HardwareContext	m_device;	// Device to use, only set for DirectX
+	kodi::HardwareContext	m_device{};		// Device to use, only set for DirectX
 
 private:
 

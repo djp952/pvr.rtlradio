@@ -45,6 +45,11 @@
 // Callback function passed to enumerate_channels
 using enumerate_channels_callback = std::function<void(struct channel const& channel)>;
 
+// enumerate_namedchannels_callback
+//
+// Callback function passed to enumerate_namedchannels
+using enumerate_namedchannels_callback = std::function<void(struct namedchannel const& namedchannel)>;
+
 // enumerate_rawfiles_callback
 //
 // Callback function passed to enumerate_rawfiles
@@ -157,7 +162,7 @@ void close_database(sqlite3* instance);
 // delete_channel
 //
 // Deletes a channel from the database
-void delete_channel(sqlite3* instance, unsigned int id);
+void delete_channel(sqlite3* instance, uint32_t frequency, enum modulation modulation);
 
 // enumerate_dabradio_channels
 //
@@ -173,6 +178,11 @@ void enumerate_fmradio_channels(sqlite3* instance, enumerate_channels_callback c
 //
 // Enumerates HD Radio channels
 void enumerate_hdradio_channels(sqlite3* instance, enumerate_channels_callback const& callback);
+
+// enumerate_namedchannels
+//
+// Enumerates the named channels for a specific modulation
+void enumerate_namedchannels(sqlite3* instance, enum modulation modulation, enumerate_namedchannels_callback const& callback);
 
 // enumerate_rawfiles
 //
@@ -197,7 +207,7 @@ int get_channel_count(sqlite3* instance);
 // get_channel_properties
 //
 // Gets the tuning properties of a channel from the database
-bool get_channel_properties(sqlite3* instance, unsigned int id, struct channelprops& channelprops);
+bool get_channel_properties(sqlite3* instance, uint32_t frequency, enum modulation modulation, struct channelprops& channelprops);
 
 // has_rawfiles
 //
@@ -218,12 +228,12 @@ sqlite3* open_database(char const* connstring, int flags, bool initialize);
 // rename_channel
 //
 // Renames a channel in the database
-void rename_channel(sqlite3* instance, unsigned int id, char const* newname);
+void rename_channel(sqlite3* instance, uint32_t frequency, enum modulation modulation, char const* newname);
 
-// update_channel_properties
+// update_channel
 //
-// Gets the tuning properties of a channel from the database
-bool update_channel_properties(sqlite3* instance, unsigned int id, struct channelprops const& channelprops);
+// Updates the tuning properties of a channel in the database
+bool update_channel(sqlite3* instance, struct channelprops const& channelprops);
 
 //---------------------------------------------------------------------------
 

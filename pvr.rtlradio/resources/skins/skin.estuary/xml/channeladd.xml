@@ -13,7 +13,7 @@
         <param name="width" value="696" />
         <param name="height" value="600" />
         <param name="header_label" value="$LOCALIZE[19204]" />
-        <param name="header_id" value="" />
+        <param name="header_id" value="2" />
       </include>
       <!-- Input label -->
       <control type="group" id="3000">
