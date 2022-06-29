@@ -120,13 +120,13 @@ bool addon::channeladd_dab(struct settings const& settings, struct channelprops&
 	if(channelnames.size() == 0) throw string_exception("No DAB ensembles were enumerated from the database");
 
 	// The user has to select what DAB ensemble will be added from the hard-coded options in the database
-	int selected = kodi::gui::dialogs::Select::Show(kodi::addon::GetLocalizedString(30418), channelnames);
+	int selected = kodi::gui::dialogs::Select::Show(kodi::GetLocalizedString(30418), channelnames);
 	if(selected < 0) return false;
 
 	// Initialize enough properties for the settings dialog to work
 	channelprops.frequency = channelfrequencies[selected];
 	channelprops.modulation = modulation::dab;
-	channelprops.name = kodi::addon::GetLocalizedString(30419);
+	channelprops.name = kodi::GetLocalizedString(30419);
 
 	// If the channel already exists in the database, get the previously set properties
 	bool exists = channel_exists(dbhandle, channelprops);
@@ -301,13 +301,13 @@ bool addon::channeladd_wx(struct settings const& settings, struct channelprops& 
 	if(channelnames.size() == 0) throw string_exception("No Weather Radio channels were enumerated from the database");
 
 	// The user has to select what Weather Radio channel will be added from the hard-coded options in the database
-	int selected = kodi::gui::dialogs::Select::Show(kodi::addon::GetLocalizedString(30428), channelnames);
+	int selected = kodi::gui::dialogs::Select::Show(kodi::GetLocalizedString(30428), channelnames);
 	if(selected < 0) return false;
 
 	// Initialize enough properties for the settings dialog to work
 	channelprops.frequency = channelfrequencies[selected];
 	channelprops.modulation = modulation::wx;
-	channelprops.name = kodi::addon::GetLocalizedString(30420);
+	channelprops.name = kodi::GetLocalizedString(30420);
 
 	// If the channel already exists in the database, get the previously set properties
 	bool exists = channel_exists(dbhandle, channelprops);
@@ -1326,9 +1326,9 @@ void addon::CloseLiveStream(void)
 
 PVR_ERROR addon::DeleteChannel(kodi::addon::PVRChannel const& channel)
 {
-	try {
+	channelid channelid(channel.GetUniqueId());			// Convert UniqueID back into a channelid
 
-		channelid channelid(channel.GetUniqueId());			// Convert UniqueID back into a channelid
+	try {
 
 		// Remove the channel from the database
 		delete_channel(connectionpool::handle(m_connpool), channelid.frequency(), channelid.modulation()); 
@@ -1863,25 +1863,25 @@ PVR_ERROR addon::OpenDialogChannelAdd(kodi::addon::PVRChannel const& /*channel*/
 
 	if(settings.fmradio_enable) {
 
-		channeltypes.emplace_back(kodi::addon::GetLocalizedString(30414));
+		channeltypes.emplace_back(kodi::GetLocalizedString(30414));
 		modulationtypes.emplace_back(modulation::fm);
 	}
 
 	if(settings.hdradio_enable) {
 
-		channeltypes.emplace_back(kodi::addon::GetLocalizedString(30415));
+		channeltypes.emplace_back(kodi::GetLocalizedString(30415));
 		modulationtypes.emplace_back(modulation::hd);
 	}
 
 	if(settings.dabradio_enable) {
 
-		channeltypes.emplace_back(kodi::addon::GetLocalizedString(30416));
+		channeltypes.emplace_back(kodi::GetLocalizedString(30416));
 		modulationtypes.emplace_back(modulation::dab);
 	}
 
 	if(settings.wxradio_enable) {
 
-		channeltypes.emplace_back(kodi::addon::GetLocalizedString(30417));
+		channeltypes.emplace_back(kodi::GetLocalizedString(30417));
 		modulationtypes.emplace_back(modulation::wx);
 	}
 
@@ -1894,7 +1894,7 @@ PVR_ERROR addon::OpenDialogChannelAdd(kodi::addon::PVRChannel const& /*channel*/
 	enum modulation modulationtype = modulationtypes[0];
 	if(modulationtypes.size() > 1) {
 
-		int selected = kodi::gui::dialogs::Select::Show(kodi::addon::GetLocalizedString(30413), channeltypes);
+		int selected = kodi::gui::dialogs::Select::Show(kodi::GetLocalizedString(30413), channeltypes);
 		if(selected < 0) return PVR_ERROR::PVR_ERROR_NO_ERROR;
 
 		modulationtype = modulationtypes[selected];
@@ -1920,7 +1920,6 @@ PVR_ERROR addon::OpenDialogChannelAdd(kodi::addon::PVRChannel const& /*channel*/
 		else if(modulationtype == modulation::dab) result = channeladd_dab(settings, channelprops);
 		else if(modulationtype == modulation::wx) result = channeladd_wx(settings, channelprops);
 
-		
 		TriggerChannelGroupsUpdate();					// Update the channel groups
 		
 		if(result == false) return PVR_ERROR::PVR_ERROR_NO_ERROR;

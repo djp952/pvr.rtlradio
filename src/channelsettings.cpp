@@ -1071,9 +1071,9 @@ bool channelsettings::OnInit(void)
 
 		// Set the window title based on if this is a single channel or a multiplex/ensemble
 		std::unique_ptr<CLabel> headerlabel(new CLabel(this, CONTROL_LABEL_HEADERLABEL));
-		headerlabel->SetLabel(kodi::addon::GetLocalizedString(30301));
-		if(m_channelprops.modulation == modulation::hd) headerlabel->SetLabel(kodi::addon::GetLocalizedString(30302));
-		else if(m_channelprops.modulation == modulation::dab) headerlabel->SetLabel(kodi::addon::GetLocalizedString(30303));
+		headerlabel->SetLabel(kodi::GetLocalizedString(30301));
+		if(m_channelprops.modulation == modulation::hd) headerlabel->SetLabel(kodi::GetLocalizedString(30302));
+		else if(m_channelprops.modulation == modulation::dab) headerlabel->SetLabel(kodi::GetLocalizedString(30303));
 
 		// Change the text of the OK button to "Add" if we are in new channel mode
 		if(m_isnew) m_button_ok->SetLabel(kodi::GetLocalizedString(15019));
@@ -1091,18 +1091,18 @@ bool channelsettings::OnInit(void)
 		m_image_channelicon->SetFileName(m_channelprops.logourl, false);
 
 		// Set the modulation type
-		if(m_channelprops.modulation == modulation::fm) m_edit_modulation->SetText(kodi::addon::GetLocalizedString(30304));
-		m_spin_modulation->AddLabel(kodi::addon::GetLocalizedString(30002), static_cast<int>(modulation::fm));
-		m_spin_modulation->AddLabel(kodi::addon::GetLocalizedString(30003), static_cast<int>(modulation::hd));
-		m_spin_modulation->AddLabel(kodi::addon::GetLocalizedString(30005), static_cast<int>(modulation::dab));
+		if(m_channelprops.modulation == modulation::fm) m_edit_modulation->SetText(kodi::GetLocalizedString(30304));
+		else if(m_channelprops.modulation == modulation::hd) m_edit_modulation->SetText(kodi::GetLocalizedString(30305));
+		else if(m_channelprops.modulation == modulation::dab) m_edit_modulation->SetText(kodi::GetLocalizedString(30306));
+		else if(m_channelprops.modulation == modulation::wx) m_edit_modulation->SetText(kodi::GetLocalizedString(30307));
 
 		// Change the text of the Name edit for multiplex/ensemble channels (HD/DAB)
-			m_spin_modulation->AddLabel(kodi::addon::GetLocalizedString(30004), static_cast<int>(modulation::wx));
-		else if(m_channelprops.modulation == modulation::dab) m_edit_channelname->SetLabel(kodi::addon::GetLocalizedString(30309));
+		if(m_channelprops.modulation == modulation::hd) m_edit_channelname->SetLabel(kodi::GetLocalizedString(30308));
+		else if(m_channelprops.modulation == modulation::dab) m_edit_channelname->SetLabel(kodi::GetLocalizedString(30309));
 
 		// Change the text of the Logo button for multiplex/ensemble channels (HD/DAB)
-		if(m_channelprops.modulation == modulation::hd) m_button_channelicon->SetLabel(kodi::addon::GetLocalizedString(30310));
-		else if(m_channelprops.modulation == modulation::dab) m_button_channelicon->SetLabel(kodi::addon::GetLocalizedString(30311));
+		if(m_channelprops.modulation == modulation::hd) m_button_channelicon->SetLabel(kodi::GetLocalizedString(30310));
+		else if(m_channelprops.modulation == modulation::dab) m_button_channelicon->SetLabel(kodi::GetLocalizedString(30311));
 
 		// Adjust the manual gain value to match something that the tuner supports
 		m_channelprops.manualgain = nearest_valid_gain(m_channelprops.manualgain);

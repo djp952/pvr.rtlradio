@@ -405,7 +405,7 @@ bool channeladd::OnInit(void)
 
 		// Set the window title based on if this is a single channel or a multiplex/ensemble
 		std::unique_ptr<CLabel> headerlabel(new CLabel(this, CONTROL_LABEL_HEADERLABEL));
-		headerlabel->SetLabel(kodi::addon::GetLocalizedString(30300));
+		headerlabel->SetLabel(kodi::GetLocalizedString(30300));
 
 		// The add button is disabled by default
 		m_button_add->SetEnabled(false);
