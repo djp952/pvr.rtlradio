@@ -653,6 +653,15 @@
     <ClInclude Include="signalmeter.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="muxscanner.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="hdmuxscanner.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="dabmuxscanner.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -1043,6 +1052,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="signalmeter.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="hdmuxscanner.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="dabmuxscanner.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
