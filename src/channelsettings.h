@@ -40,6 +40,7 @@
 #include <thread>
 #include <utility>
 
+#include "muxscanner.h"
 #include "props.h"
 #include "renderingcontrol.h"
 #include "rtldevice.h"
@@ -234,10 +235,15 @@ private:
 	// Converts a manual gain value into a percentage
 	int gain_to_percent(int gain) const;
 
-	// fm_meter_status
+	// meter_status
 	//
 	// Updates the state of the signal meter
 	void meter_status(struct signalmeter::signal_status const& status);
+
+	// mux_data
+	//
+	// Updates the state of the multiplex information
+	void mux_data(struct muxscanner::multiplex const& muxdata);
 
 	// nearest_valid_gain
 	//
@@ -268,6 +274,7 @@ private:
 	struct signalprops					m_signalprops = {};		// Signal properties
 	bool								m_isnew = false;		// New channel flag
 	std::unique_ptr<signalmeter>		m_signalmeter;			// Signal meter instance
+	std::unique_ptr<muxscanner>			m_muxscanner;			// Multiplex scanner instance
 	std::vector<int>					m_manualgains;			// Manual gain values
 	bool								m_result = false;		// Dialog result
 

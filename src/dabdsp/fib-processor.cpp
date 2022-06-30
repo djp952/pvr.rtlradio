@@ -811,7 +811,11 @@ void FIBProcessor::process_FIG1(uint8_t *d)
                 service->serviceLabel.fig1_flag = getBits(d, offset, 16);
                 service->serviceLabel.fig1_label = label;
                 service->serviceLabel.setCharset(charSet);
-                // std::clog << "fib-processor:" << "FIG1/1: SId = %4x\t%s\n", SId, label) << std::endl;
+
+				// MB: Added
+				myRadioInterface.onSetServiceLabel(SId, service->serviceLabel);
+
+				// std::clog << "fib-processor:" << "FIG1/1: SId = %4x\t%s\n", SId, label) << std::endl;
             }
             break;
 
@@ -867,6 +871,9 @@ void FIBProcessor::process_FIG1(uint8_t *d)
                 service->serviceLabel.fig1_flag = getBits(d, offset, 16);
                 service->serviceLabel.fig1_label = label;
                 service->serviceLabel.setCharset(charSet);
+				
+				// MB: Added
+				myRadioInterface.onSetServiceLabel(SId, service->serviceLabel);
 
 #ifdef  MSC_DATA__
                 myRadioInterface.onServiceDetected(SId);

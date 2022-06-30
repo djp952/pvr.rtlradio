@@ -331,7 +331,6 @@ private:
 	std::atomic<bool>				m_stopped{ false };		// Data transfer stopped flag
 	event_queue_t					m_events;				// queue<> of worker events
 	mutable std::mutex				m_eventslock;			// Synchronization object
-	std::condition_variable			m_eventscv;				// Event condition variable
 };
 
 //-----------------------------------------------------------------------------

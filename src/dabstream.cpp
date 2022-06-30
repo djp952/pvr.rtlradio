@@ -520,7 +520,6 @@ int32_t dabstream::getSamples(DSPCOMPLEX* buffer, int32_t size)
 	}
 
 	return numsamples / 2;
-
 }
 
 //---------------------------------------------------------------------------
@@ -697,7 +696,6 @@ void dabstream::onInputFailure(void)
 {
 	std::unique_lock<std::mutex> lock(m_eventslock);
 	m_events.emplace(eventid_t::InputFailure);
-	m_eventscv.notify_all();
 }
 
 //---------------------------------------------------------------------------
@@ -713,7 +711,6 @@ void dabstream::onServiceDetected(uint32_t /*sId*/)
 {
 	std::unique_lock<std::mutex> lock(m_eventslock);
 	m_events.emplace(eventid_t::ServiceDetected);
-	m_eventscv.notify_all();
 }
 
 //---------------------------------------------------------------------------

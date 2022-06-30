@@ -300,6 +300,7 @@
     <ClInclude Include="dabdsp\uep-protection.h" />
     <ClInclude Include="dabdsp\viterbi.h" />
     <ClInclude Include="dabdsp\Xtan2.h" />
+    <ClInclude Include="dabmuxscanner.h" />
     <ClInclude Include="dabstream.h" />
     <ClInclude Include="database.h" />
     <ClInclude Include="dbtypes.h" />
@@ -337,10 +338,12 @@
     <ClInclude Include="hddsp\rs_char.h" />
     <ClInclude Include="hddsp\sync.h" />
     <ClInclude Include="hddsp\unicode.h" />
+    <ClInclude Include="hdmuxscanner.h" />
     <ClInclude Include="hdstream.h" />
     <ClInclude Include="id3v1tag.h" />
     <ClInclude Include="id3v2tag.h" />
     <ClInclude Include="libusb_exception.h" />
+    <ClInclude Include="muxscanner.h" />
     <ClInclude Include="props.h" />
     <ClInclude Include="pvrstream.h" />
     <ClInclude Include="pvrtypes.h" />
@@ -2164,6 +2167,7 @@
       <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">4018;4244;4267;4305;4309</DisableSpecificWarnings>
       <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='Release|x64'">4018;4244;4267;4305;4309</DisableSpecificWarnings>
     </ClCompile>
+    <ClCompile Include="dabmuxscanner.cpp" />
     <ClCompile Include="dabstream.cpp" />
     <ClCompile Include="database.cpp" />
     <ClCompile Include="channelsettings.cpp" />
@@ -2535,6 +2539,7 @@
       <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(IntDir)hddsp\</ObjectFileName>
       <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(IntDir)hddsp\</ObjectFileName>
     </ClCompile>
+    <ClCompile Include="hdmuxscanner.cpp" />
     <ClCompile Include="hdstream.cpp" />
     <ClCompile Include="id3v1tag.cpp" />
     <ClCompile Include="id3v2tag.cpp" />

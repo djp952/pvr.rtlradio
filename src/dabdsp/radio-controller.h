@@ -100,6 +100,10 @@ class RadioControllerInterface {
         /* A new service with service ID sId was detected. */
 		virtual void onServiceDetected(uint32_t sId) {}
 
+		// MB: Added (fib-processor.cpp)
+		/* When a service label changes */
+		virtual void onSetServiceLabel(uint32_t sId, DabLabel& label) {}
+
         /* When the ensemble changes */
 		virtual void onNewEnsemble(uint16_t eId) {}
 

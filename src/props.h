@@ -29,16 +29,7 @@
 
 #pragma warning(push, 4)
 
-// modulation
-//
-// Defines the modulation of a channel
-enum class modulation {
-
-	fm = 0,				// Wideband FM radio
-	hd = 1,				// Hybrid Digital radio
-	dab = 2,			// Digital Audio Broadcast radio
-	wx = 3,				// VHF Weather radio
-};
+enum class modulation;
 
 // channelprops
 //
@@ -83,15 +74,26 @@ struct hdprops {
 	float			outputgain;			// Output gain in Decibels
 };
 
+// modulation
+//
+// Defines the modulation of a channel
+enum class modulation {
+
+	fm = 0,				// Wideband FM radio
+	hd = 1,				// Hybrid Digital radio
+	dab = 2,			// Digital Audio Broadcast radio
+	wx = 3,				// VHF Weather radio
+};
+
 // signalplotprops
 //
 // Defines signal meter plot properties
 struct signalplotprops {
 
-	size_t			height;			// Plot height
-	size_t			width;			// Plot width
-	float			mindb;			// Plot minimum dB value
-	float			maxdb;			// Plot maximum dB value
+	size_t			height;				// Plot height
+	size_t			width;				// Plot width
+	float			mindb;				// Plot minimum dB value
+	float			maxdb;				// Plot maximum dB value
 };
 
 // signalprops
@@ -99,10 +101,10 @@ struct signalplotprops {
 // Defines signal-specific properties
 struct signalprops {
 
-	uint32_t			samplerate;			// Signal sampling rate
-	uint32_t			bandwidth;			// Signal bandwidth
-	int32_t				lowcut;				// low cut from center
-	int32_t				highcut;			// high cut from center
+	uint32_t		samplerate;			// Signal sampling rate
+	uint32_t		bandwidth;			// Signal bandwidth
+	int32_t			lowcut;				// low cut from center
+	int32_t			highcut;			// high cut from center
 };
 
 // streamprops

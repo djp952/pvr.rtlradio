@@ -30,6 +30,8 @@
 #include <kodi/gui/controls/Label.h>
 #include <kodi/gui/dialogs/FileBrowser.h>
 
+#include "dabmuxscanner.h"
+#include "hdmuxscanner.h"
 #include "string_exception.h"
 
 #ifdef HAS_GLES
@@ -867,6 +869,19 @@ void channelsettings::meter_status(struct signalmeter::signal_status const& stat
 }
 
 //---------------------------------------------------------------------------
+// channelsettings::mux_data (private)
+//
+// Updates the state of the multiplex data
+//
+// Arguments:
+//
+//	muxdata		- Updated multiplex data from the mux scanner
+
+void channelsettings::mux_data(struct muxscanner::multiplex const& /*muxdata*/)
+{
+}
+
+//---------------------------------------------------------------------------
 // channelsettings::nearest_valid_gain (private)
 //
 // Gets the closest valid value for a manual gain setting
@@ -950,7 +965,9 @@ void channelsettings::worker(scalar_condition<bool>& started)
 	// Asynchronous read callback function for the RTL-SDR device
 	auto read_callback_func = [&](uint8_t const* buffer, size_t count) -> void {
 
+		// Feed the signal meter, and optionally the multiplex scanner
 		m_signalmeter->inputsamples(buffer, count);
+		if(m_muxscanner) m_muxscanner->inputsamples(buffer, count);
 	};
 
 	// Begin streaming from the device and inform the caller that the thread is running
@@ -1131,6 +1148,12 @@ bool channelsettings::OnInit(void)
 
 		// Create the signal meter instance with a 100ms callback rate
 		m_signalmeter = signalmeter::create(m_signalprops, plotprops, 100, std::bind(&channelsettings::meter_status, this, std::placeholders::_1));
+
+		// Create the multiplex scanner instance if applicable to the modulation
+		if(m_channelprops.modulation == modulation::hd) m_muxscanner = hdmuxscanner::create(m_signalprops.samplerate, 
+			std::bind(&channelsettings::mux_data, this, std::placeholders::_1));
+		else if(m_channelprops.modulation == modulation::dab) m_muxscanner = dabmuxscanner::create(m_signalprops.samplerate,
+			std::bind(&channelsettings::mux_data, this, std::placeholders::_1));
 
 		// Create a worker thread on which to pump data into the signal meter
 		scalar_condition<bool> started{ false };

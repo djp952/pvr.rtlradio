@@ -76,7 +76,7 @@ LOCAL_C_INCLUDES += \
 	depends/rtl-sdr/include \
 	depends/sqlite \
 	tmp/version
-	
+
 LOCAL_CFLAGS += \
 	-Wall \
 	-Wno-unused-function \
@@ -86,15 +86,15 @@ LOCAL_CFLAGS += \
 	-DSQLITE_THREADSAFE=2 \
 	-DSQLITE_TEMP_STORE=3 \
 	-DDABLIN_AAC_FAAD2
-	
+
 LOCAL_CPP_FEATURES := \
 	exceptions \
 	rtti
-	
+
 LOCAL_CPPFLAGS += \
 	-std=c++14 \
 	-Wno-unknown-pragmas
-	
+
 LOCAL_STATIC_LIBRARIES += \
 	libfaad-hdc-prebuilt \
 	libfftw-prebuilt \
@@ -175,9 +175,11 @@ LOCAL_SRC_FILES := \
 	src/channeladd.cpp \
 	src/channelsettings.cpp \
 	src/database.cpp \
-	src/filedevice.cpp \
+	src/dabmuxscanner.cpp \
 	src/dabstream.cpp \
+	src/filedevice.cpp \
 	src/fmstream.cpp \
+	src/hdmuxscanner.cpp \
 	src/hdstream.cpp \
 	src/id3v1tag.cpp \
 	src/id3v2tag.cpp \
@@ -220,7 +222,7 @@ include $(BUILD_SHARED_LIBRARY)
 #    depends/rtl-sdr/src/convenience/convenience.c \
 #    depends/rtl-sdr/src/getopt/getopt.c \
 #    depends/rtl-sdr/src/rtl_adsb.c
-#	
+#
 # include $(BUILD_EXECUTABLE)
 
 # rtl_biast
@@ -242,15 +244,15 @@ LOCAL_LDLIBS += \
 	-llog
 
 LOCAL_SRC_FILES := \
-    depends/rtl-sdr/src/librtlsdr.c \
-    depends/rtl-sdr/src/tuner_e4k.c \
-    depends/rtl-sdr/src/tuner_fc0012.c \
-    depends/rtl-sdr/src/tuner_fc0013.c \
-    depends/rtl-sdr/src/tuner_fc2580.c \
-    depends/rtl-sdr/src/tuner_r82xx.c \
-    depends/rtl-sdr/src/convenience/convenience.c \
-    depends/rtl-sdr/src/getopt/getopt.c \
-    depends/rtl-sdr/src/rtl_biast.c
+	depends/rtl-sdr/src/librtlsdr.c \
+	depends/rtl-sdr/src/tuner_e4k.c \
+	depends/rtl-sdr/src/tuner_fc0012.c \
+	depends/rtl-sdr/src/tuner_fc0013.c \
+	depends/rtl-sdr/src/tuner_fc2580.c \
+	depends/rtl-sdr/src/tuner_r82xx.c \
+	depends/rtl-sdr/src/convenience/convenience.c \
+	depends/rtl-sdr/src/getopt/getopt.c \
+	depends/rtl-sdr/src/rtl_biast.c
 	
 include $(BUILD_EXECUTABLE)
 
@@ -273,15 +275,15 @@ LOCAL_LDLIBS += \
 	-llog
 
 LOCAL_SRC_FILES := \
-    depends/rtl-sdr/src/librtlsdr.c \
-    depends/rtl-sdr/src/tuner_e4k.c \
-    depends/rtl-sdr/src/tuner_fc0012.c \
-    depends/rtl-sdr/src/tuner_fc0013.c \
-    depends/rtl-sdr/src/tuner_fc2580.c \
-    depends/rtl-sdr/src/tuner_r82xx.c \
-    depends/rtl-sdr/src/convenience/convenience.c \
-    depends/rtl-sdr/src/getopt/getopt.c \
-    depends/rtl-sdr/src/rtl_eeprom.c
+	depends/rtl-sdr/src/librtlsdr.c \
+	depends/rtl-sdr/src/tuner_e4k.c \
+	depends/rtl-sdr/src/tuner_fc0012.c \
+	depends/rtl-sdr/src/tuner_fc0013.c \
+	depends/rtl-sdr/src/tuner_fc2580.c \
+	depends/rtl-sdr/src/tuner_r82xx.c \
+	depends/rtl-sdr/src/convenience/convenience.c \
+	depends/rtl-sdr/src/getopt/getopt.c \
+	depends/rtl-sdr/src/rtl_eeprom.c
 	
 include $(BUILD_EXECUTABLE)
 
@@ -304,15 +306,15 @@ LOCAL_LDLIBS += \
 	-llog
 
 LOCAL_SRC_FILES := \
-    depends/rtl-sdr/src/librtlsdr.c \
-    depends/rtl-sdr/src/tuner_e4k.c \
-    depends/rtl-sdr/src/tuner_fc0012.c \
-    depends/rtl-sdr/src/tuner_fc0013.c \
-    depends/rtl-sdr/src/tuner_fc2580.c \
-    depends/rtl-sdr/src/tuner_r82xx.c \
-    depends/rtl-sdr/src/convenience/convenience.c \
-    depends/rtl-sdr/src/getopt/getopt.c \
-    depends/rtl-sdr/src/rtl_fm.c
+	depends/rtl-sdr/src/librtlsdr.c \
+	depends/rtl-sdr/src/tuner_e4k.c \
+	depends/rtl-sdr/src/tuner_fc0012.c \
+	depends/rtl-sdr/src/tuner_fc0013.c \
+	depends/rtl-sdr/src/tuner_fc2580.c \
+	depends/rtl-sdr/src/tuner_r82xx.c \
+	depends/rtl-sdr/src/convenience/convenience.c \
+	depends/rtl-sdr/src/getopt/getopt.c \
+	depends/rtl-sdr/src/rtl_fm.c
 	
 include $(BUILD_EXECUTABLE)
 
@@ -335,15 +337,15 @@ LOCAL_LDLIBS += \
 	-llog
 
 LOCAL_SRC_FILES := \
-    depends/rtl-sdr/src/librtlsdr.c \
-    depends/rtl-sdr/src/tuner_e4k.c \
-    depends/rtl-sdr/src/tuner_fc0012.c \
-    depends/rtl-sdr/src/tuner_fc0013.c \
-    depends/rtl-sdr/src/tuner_fc2580.c \
-    depends/rtl-sdr/src/tuner_r82xx.c \
-    depends/rtl-sdr/src/convenience/convenience.c \
-    depends/rtl-sdr/src/getopt/getopt.c \
-    depends/rtl-sdr/src/rtl_power.c
+	depends/rtl-sdr/src/librtlsdr.c \
+	depends/rtl-sdr/src/tuner_e4k.c \
+	depends/rtl-sdr/src/tuner_fc0012.c \
+	depends/rtl-sdr/src/tuner_fc0013.c \
+	depends/rtl-sdr/src/tuner_fc2580.c \
+	depends/rtl-sdr/src/tuner_r82xx.c \
+	depends/rtl-sdr/src/convenience/convenience.c \
+	depends/rtl-sdr/src/getopt/getopt.c \
+	depends/rtl-sdr/src/rtl_power.c
 	
 include $(BUILD_EXECUTABLE)
 
@@ -366,15 +368,15 @@ LOCAL_LDLIBS += \
 	-llog
 
 LOCAL_SRC_FILES := \
-    depends/rtl-sdr/src/librtlsdr.c \
-    depends/rtl-sdr/src/tuner_e4k.c \
-    depends/rtl-sdr/src/tuner_fc0012.c \
-    depends/rtl-sdr/src/tuner_fc0013.c \
-    depends/rtl-sdr/src/tuner_fc2580.c \
-    depends/rtl-sdr/src/tuner_r82xx.c \
-    depends/rtl-sdr/src/convenience/convenience.c \
-    depends/rtl-sdr/src/getopt/getopt.c \
-    depends/rtl-sdr/src/rtl_sdr.c
+	depends/rtl-sdr/src/librtlsdr.c \
+	depends/rtl-sdr/src/tuner_e4k.c \
+	depends/rtl-sdr/src/tuner_fc0012.c \
+	depends/rtl-sdr/src/tuner_fc0013.c \
+	depends/rtl-sdr/src/tuner_fc2580.c \
+	depends/rtl-sdr/src/tuner_r82xx.c \
+	depends/rtl-sdr/src/convenience/convenience.c \
+	depends/rtl-sdr/src/getopt/getopt.c \
+	depends/rtl-sdr/src/rtl_sdr.c
 	
 include $(BUILD_EXECUTABLE)
 
@@ -397,15 +399,15 @@ LOCAL_LDLIBS += \
 	-llog
 
 LOCAL_SRC_FILES := \
-    depends/rtl-sdr/src/librtlsdr.c \
-    depends/rtl-sdr/src/tuner_e4k.c \
-    depends/rtl-sdr/src/tuner_fc0012.c \
-    depends/rtl-sdr/src/tuner_fc0013.c \
-    depends/rtl-sdr/src/tuner_fc2580.c \
-    depends/rtl-sdr/src/tuner_r82xx.c \
-    depends/rtl-sdr/src/convenience/convenience.c \
-    depends/rtl-sdr/src/getopt/getopt.c \
-    depends/rtl-sdr/src/rtl_tcp.c
+	depends/rtl-sdr/src/librtlsdr.c \
+	depends/rtl-sdr/src/tuner_e4k.c \
+	depends/rtl-sdr/src/tuner_fc0012.c \
+	depends/rtl-sdr/src/tuner_fc0013.c \
+	depends/rtl-sdr/src/tuner_fc2580.c \
+	depends/rtl-sdr/src/tuner_r82xx.c \
+	depends/rtl-sdr/src/convenience/convenience.c \
+	depends/rtl-sdr/src/getopt/getopt.c \
+	depends/rtl-sdr/src/rtl_tcp.c
 	
 include $(BUILD_EXECUTABLE)
 
@@ -428,15 +430,15 @@ LOCAL_LDLIBS += \
 	-llog
 
 LOCAL_SRC_FILES := \
-    depends/rtl-sdr/src/librtlsdr.c \
-    depends/rtl-sdr/src/tuner_e4k.c \
-    depends/rtl-sdr/src/tuner_fc0012.c \
-    depends/rtl-sdr/src/tuner_fc0013.c \
-    depends/rtl-sdr/src/tuner_fc2580.c \
-    depends/rtl-sdr/src/tuner_r82xx.c \
-    depends/rtl-sdr/src/convenience/convenience.c \
-    depends/rtl-sdr/src/getopt/getopt.c \
-    depends/rtl-sdr/src/rtl_test.c
+	depends/rtl-sdr/src/librtlsdr.c \
+	depends/rtl-sdr/src/tuner_e4k.c \
+	depends/rtl-sdr/src/tuner_fc0012.c \
+	depends/rtl-sdr/src/tuner_fc0013.c \
+	depends/rtl-sdr/src/tuner_fc2580.c \
+	depends/rtl-sdr/src/tuner_r82xx.c \
+	depends/rtl-sdr/src/convenience/convenience.c \
+	depends/rtl-sdr/src/getopt/getopt.c \
+	depends/rtl-sdr/src/rtl_test.c
 	
 include $(BUILD_EXECUTABLE)
 
