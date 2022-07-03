@@ -182,7 +182,8 @@ static std::string ebulatin_to_utf8(void const* buffer, size_t num_bytes)
 	}
 
 	// Use the lookup table to convert EBU Latin into UCS-2
-	for(size_t index = 0; index < num_bytes; index++) ucs2 += ebuLatinToUcs2[ptr[index]];
+	for(size_t index = 0; index < num_bytes; index++) 
+		ucs2 += ebuLatinToUcs2[reinterpret_cast<uint8_t const*>(buffer)[index]];
 
 	// Convert the UCS-2 into UTF-8
 	return ucs2_to_utf8(ucs2.c_str(), 0);
