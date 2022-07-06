@@ -49,12 +49,23 @@ inline std::string trim(const std::string& str)
 // Arguments:
 //
 //	samplerate		- Sample rate of the input data
+//	frequency		- Input data frequency in Hz
 //	callback		- Callback function to invoke on status change
 
-hdmuxscanner::hdmuxscanner(uint32_t samplerate, callback const& callback) : m_callback(callback)
+hdmuxscanner::hdmuxscanner(uint32_t samplerate, uint32_t frequency, callback const& callback) : m_callback(callback)
 {
 	assert(samplerate == SAMPLE_RATE);
 	if(samplerate != SAMPLE_RATE) throw std::invalid_argument("samplerate");
+
+	assert((frequency >= 87900000) && (frequency <= 107900000));
+	if((frequency < 87900000) || (frequency > 107900000)) throw std::invalid_argument("frequency");
+
+	// Generate the default multiplex/subchannel name prefix (xxx.xb)
+	char prefix[256]{};
+	unsigned int mhz = frequency / 1000000;
+	unsigned int hundredkhz = (frequency % 1000000) / 100000;
+	snprintf(prefix, std::extent<decltype(prefix)>::value, "%u.%u ", mhz, hundredkhz);
+	m_prefix.assign(prefix);
 
 	// Initialize the HD Radio demodulator
 	nrsc5_open_pipe(&m_nrsc5);
@@ -79,11 +90,12 @@ hdmuxscanner::~hdmuxscanner()
 // Arguments:
 //
 //	samplerate		- Sample rate of the input data
+//	frequency		- Input data frequency in Hz
 //	callback		- Callback function to invoke on status change
 
-std::unique_ptr<hdmuxscanner> hdmuxscanner::create(uint32_t samplerate, callback const& callback)
+std::unique_ptr<hdmuxscanner> hdmuxscanner::create(uint32_t samplerate, uint32_t frequency, callback const& callback)
 {
-	return std::unique_ptr<hdmuxscanner>(new hdmuxscanner(samplerate, callback));
+	return std::unique_ptr<hdmuxscanner>(new hdmuxscanner(samplerate, frequency, callback));
 }
 
 //---------------------------------------------------------------------------
@@ -170,7 +182,7 @@ void hdmuxscanner::nrsc5_callback(nrsc5_event_t const* event)
 
 				assert(service->number > 0);			// Should never happen
 
-				std::string servicename = trim((service->name != nullptr) ? service->name : "");
+				std::string servicename = trim(m_prefix + ((service->name != nullptr) ? service->name : ""));
 
 				auto found = std::find_if(m_muxdata.subchannels.begin(), m_muxdata.subchannels.end(),
 					[&](auto const& val) -> bool { return val.number == service->number; });
@@ -204,7 +216,7 @@ void hdmuxscanner::nrsc5_callback(nrsc5_event_t const* event)
 	// Station Information Service (SIS) data has been decoded
 	else if(event->event == NRSC5_EVENT_SIS) {
 
-		std::string name = trim((event->sis.name != nullptr) ? event->sis.name : "");
+		std::string name = trim(m_prefix + ((event->sis.name != nullptr) ? event->sis.name : ""));
 		if(name != m_muxdata.name) {
 
 			m_muxdata.name = name;

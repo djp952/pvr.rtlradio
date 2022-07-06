@@ -61,12 +61,14 @@
             <width>700</width>
             <include>SettingsItemCommon</include>
             <label>Name</label>
+            <disabledcolor>darkgray</disabledcolor>
           </control>
           <control type="button" id="202">
             <description>Channel logo button</description>
             <width>700</width>
             <include>SettingsItemCommon</include>
             <label>Logo</label>
+            <disabledcolor>darkgray</disabledcolor>
           </control>
         </control>
         <control type="image" id="203">

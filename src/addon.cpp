@@ -95,6 +95,7 @@ addon::~addon()
 bool addon::channeladd_dab(struct settings const& settings, struct channelprops& channelprops) const
 {
 	std::vector<std::string>	channelnames;			// Channel names
+	std::vector<std::string>	channellabels;			// Channel labels
 	std::vector<uint32_t>		channelfrequencies;		// Channel frequencies
 
 	// Pull a database handle out of the connection pool
@@ -105,28 +106,29 @@ bool addon::channeladd_dab(struct settings const& settings, struct channelprops&
 
 		if((item.frequency > 0) && (item.name != nullptr)) {
 
-			// Append the frequency of the channel in megahertz (xxx.xxx format) to the channel name
-			char name[256]{};
+			// Append the frequency of the channel in megahertz (xxx.xxx format) to the channel label
+			char label[256]{};
 			unsigned int mhz = item.frequency / 1000000;
 			unsigned int khz = (item.frequency % 1000000) / 1000;
-			snprintf(name, std::extent<decltype(name)>::value, "%s (%u.%u MHz)", item.name, mhz, khz);
+			snprintf(label, std::extent<decltype(label)>::value, "%s (%u.%u MHz)", item.name, mhz, khz);
 
-			channelnames.emplace_back(name);
+			channelnames.emplace_back(item.name);
+			channellabels.emplace_back(label);
 			channelfrequencies.emplace_back(item.frequency);
 		}
 	});
 
-	assert(channelnames.size() == channelfrequencies.size());
+	assert((channelnames.size() == channellabels.size()) && (channelnames.size() == channelfrequencies.size()));
 	if(channelnames.size() == 0) throw string_exception("No DAB ensembles were enumerated from the database");
 
 	// The user has to select what DAB ensemble will be added from the hard-coded options in the database
-	int selected = kodi::gui::dialogs::Select::Show(kodi::addon::GetLocalizedString(30418), channelnames);
+	int selected = kodi::gui::dialogs::Select::Show(kodi::addon::GetLocalizedString(30418), channellabels);
 	if(selected < 0) return false;
 
 	// Initialize enough properties for the settings dialog to work
 	channelprops.frequency = channelfrequencies[selected];
 	channelprops.modulation = modulation::dab;
-	channelprops.name = kodi::addon::GetLocalizedString(30419);
+	channelprops.name = channelnames[selected];
 
 	// If the channel already exists in the database, get the previously set properties
 	bool exists = channel_exists(dbhandle, channelprops);
@@ -232,6 +234,13 @@ bool addon::channeladd_hd(struct settings const& settings, struct channelprops& 
 		adddialog->get_channel_properties(channelprops);
 		assert(channelprops.modulation == modulation::hd);
 
+		// Generate the default channel name (xxx.x HD)
+		char name[256]{};
+		unsigned int mhz = channelprops.frequency / 1000000;
+		unsigned int hundredkhz = (channelprops.frequency % 1000000) / 100000;
+		snprintf(name, std::extent<decltype(name)>::value, "%u.%u HD", mhz, hundredkhz);
+		channelprops.name.assign(name);
+
 		// Pull a database handle out of the connection pool
 		connectionpool::handle dbhandle(m_connpool);
 
@@ -276,6 +285,7 @@ bool addon::channeladd_hd(struct settings const& settings, struct channelprops& 
 bool addon::channeladd_wx(struct settings const& settings, struct channelprops& channelprops) const
 {
 	std::vector<std::string>	channelnames;			// Channel names
+	std::vector<std::string>	channellabels;			// Channel labels
 	std::vector<uint32_t>		channelfrequencies;		// Channel frequencies
 
 	// Pull a database handle out of the connection pool
@@ -287,27 +297,28 @@ bool addon::channeladd_wx(struct settings const& settings, struct channelprops& 
 		if((item.frequency > 0) && (item.name != nullptr)) {
 
 			// Append the frequency of the channel in megahertz (xxx.xxx format) to the channel name
-			char name[256]{};
+			char label[256]{};
 			unsigned int mhz = item.frequency / 1000000;
 			unsigned int khz = (item.frequency % 1000000) / 1000;
-			snprintf(name, std::extent<decltype(name)>::value, "%s (%u.%u MHz)", item.name, mhz, khz);
+			snprintf(label, std::extent<decltype(label)>::value, "%s (%u.%u MHz)", item.name, mhz, khz);
 
-			channelnames.emplace_back(name);
+			channelnames.emplace_back(item.name);
+			channellabels.emplace_back(label);
 			channelfrequencies.emplace_back(item.frequency);
 		}
 	});
 
-	assert(channelnames.size() == channelfrequencies.size());
+	assert((channelnames.size() == channellabels.size()) && (channelnames.size() == channelfrequencies.size()));
 	if(channelnames.size() == 0) throw string_exception("No Weather Radio channels were enumerated from the database");
 
 	// The user has to select what Weather Radio channel will be added from the hard-coded options in the database
-	int selected = kodi::gui::dialogs::Select::Show(kodi::addon::GetLocalizedString(30428), channelnames);
+	int selected = kodi::gui::dialogs::Select::Show(kodi::addon::GetLocalizedString(30428), channellabels);
 	if(selected < 0) return false;
 
 	// Initialize enough properties for the settings dialog to work
 	channelprops.frequency = channelfrequencies[selected];
 	channelprops.modulation = modulation::wx;
-	channelprops.name = kodi::addon::GetLocalizedString(30420);
+	channelprops.name = channelnames[selected];
 
 	// If the channel already exists in the database, get the previously set properties
 	bool exists = channel_exists(dbhandle, channelprops);

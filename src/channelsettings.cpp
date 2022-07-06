@@ -877,8 +877,17 @@ void channelsettings::meter_status(struct signalmeter::signal_status const& stat
 //
 //	muxdata		- Updated multiplex data from the mux scanner
 
-void channelsettings::mux_data(struct muxscanner::multiplex const& /*muxdata*/)
+void channelsettings::mux_data(struct muxscanner::multiplex const& muxdata)
 {
+	// Copy the updated multiplex information
+	m_muxdata = muxdata;
+
+	// Change the channel name automatically if the channel is new
+	if(m_isnew && !m_muxdata.name.empty()) {
+
+		m_channelprops.name = m_muxdata.name;
+		m_edit_channelname->SetText(m_channelprops.name);
+	}
 }
 
 //---------------------------------------------------------------------------
@@ -1107,6 +1116,10 @@ bool channelsettings::OnInit(void)
 		m_edit_channelname->SetText(m_channelprops.name);
 		m_image_channelicon->SetFileName(m_channelprops.logourl, false);
 
+		// Channel name is disabled for multiplex/ensemble modulations
+		if((m_channelprops.modulation == modulation::hd) || (m_channelprops.modulation == modulation::dab))
+			m_edit_channelname->SetEnabled(false);
+
 		// Set the modulation type
 		if(m_channelprops.modulation == modulation::fm) m_edit_modulation->SetText(kodi::addon::GetLocalizedString(30304));
 		else if(m_channelprops.modulation == modulation::hd) m_edit_modulation->SetText(kodi::addon::GetLocalizedString(30305));
@@ -1150,7 +1163,7 @@ bool channelsettings::OnInit(void)
 		m_signalmeter = signalmeter::create(m_signalprops, plotprops, 100, std::bind(&channelsettings::meter_status, this, std::placeholders::_1));
 
 		// Create the multiplex scanner instance if applicable to the modulation
-		if(m_channelprops.modulation == modulation::hd) m_muxscanner = hdmuxscanner::create(m_signalprops.samplerate, 
+		if(m_channelprops.modulation == modulation::hd) m_muxscanner = hdmuxscanner::create(m_signalprops.samplerate, m_channelprops.frequency,
 			std::bind(&channelsettings::mux_data, this, std::placeholders::_1));
 		else if(m_channelprops.modulation == modulation::dab) m_muxscanner = dabmuxscanner::create(m_signalprops.samplerate,
 			std::bind(&channelsettings::mux_data, this, std::placeholders::_1));
