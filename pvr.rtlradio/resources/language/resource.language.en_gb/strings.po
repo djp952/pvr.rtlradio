@@ -328,14 +328,6 @@ msgctxt "#30418"
 msgid "Select DAB ensemble"
 msgstr ""
 
-msgctxt "#30419"
-msgid "New DAB ensemble"
-msgstr ""
-
-msgctxt "#30420"
-msgid "New Weather Radio channel"
-msgstr ""
-
 #
 # 305XX - Setting help text
 #

@@ -272,6 +272,7 @@ private:
 	struct tunerprops					m_tunerprops = {};		// Tuner properties
 	struct channelprops					m_channelprops = {};	// Channel properties
 	struct signalprops					m_signalprops = {};		// Signal properties
+	struct muxscanner::multiplex		m_muxdata = {};			// Multiplex properties
 	bool								m_isnew = false;		// New channel flag
 	std::unique_ptr<signalmeter>		m_signalmeter;			// Signal meter instance
 	std::unique_ptr<muxscanner>			m_muxscanner;			// Multiplex scanner instance

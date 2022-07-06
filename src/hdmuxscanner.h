@@ -53,7 +53,7 @@ public:
 	// create (static)
 	//
 	// Factory method, creates a new hdmuxscanner instance
-	static std::unique_ptr<hdmuxscanner> create(uint32_t samplerate, callback const& callback);
+	static std::unique_ptr<hdmuxscanner> create(uint32_t samplerate, uint32_t frequency, callback const& callback);
 
 	// inputsamples
 	//
@@ -67,7 +67,7 @@ private:
 
 	// Instance Constructor
 	//
-	hdmuxscanner(uint32_t samplerate, callback const& callback);
+	hdmuxscanner(uint32_t samplerate, uint32_t frequency, callback const& callback);
 
 	// SAMPLE_RATE
 	//
@@ -91,7 +91,8 @@ private:
 	// Member Variables
 
 	nrsc5_t*				m_nrsc5;			// NRSC5 demodulator handle
-	callback const			m_callback;			// Callback function 
+	callback const			m_callback;			// Callback function
+	std::string				m_prefix;			// Multiplex/subchannel name prefix
 	struct multiplex		m_muxdata = {};		// Multiplex data
 };
 
