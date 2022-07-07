@@ -47,7 +47,7 @@ struct channelprops {
 
 // dabprops
 //
-// Defines properties for the DAB/DAB+ digital signal processor
+// Defines properties for the DAB digital signal processor
 struct dabprops {
 
 	float			outputgain;			// Output gain in Decibels
@@ -79,10 +79,21 @@ struct hdprops {
 // Defines the modulation of a channel
 enum class modulation {
 
-	fm = 0,				// Wideband FM radio
-	hd = 1,				// Hybrid Digital radio
-	dab = 2,			// Digital Audio Broadcast radio
-	wx = 3,				// VHF Weather radio
+	fm		= 0,			// Wideband FM radio
+	hd		= 1,			// Hybrid Digital radio
+	dab		= 2,			// Digital Audio Broadcast radio
+	wx		= 3,			// VHF Weather radio
+};
+
+// regioncode
+//
+// Defines the possible region codes
+enum class regioncode {
+
+	notset			= 0,	// Unknown
+	world			= 1,	// FM
+	northamerica	= 2,	// FM/HD/WX
+	europe			= 3,	// FM/DAB
 };
 
 // signalplotprops

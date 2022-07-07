@@ -25,7 +25,7 @@ msgid "Device"
 msgstr ""
 
 msgctxt "#30001"
-msgid "Interface"
+msgid "Region"
 msgstr ""
 
 msgctxt "#30002"
@@ -64,9 +64,7 @@ msgctxt "#30103"
 msgid "rtl_tcp server port"
 msgstr ""
 
-msgctxt "#30104"
-msgid "Radio Data System (RDS) region"
-msgstr ""
+# 30104 can be reused
 
 msgctxt "#30105"
 msgid "PCM output sample rate"
@@ -77,7 +75,7 @@ msgid "Enable Radio Data System (RDS)"
 msgstr ""
 
 msgctxt "#30107"
-msgid "Prepend channel numbers to channel names"
+msgid "Radio region"
 msgstr ""
 
 msgctxt "#30108"
@@ -105,36 +103,32 @@ msgid "Enable HD Radio"
 msgstr ""
 
 msgctxt "#30115"
-msgid "Enable DAB/DAB+"
+msgid "Enable DAB"
 msgstr ""
 
 msgctxt "#30116"
 msgid "Enable Weather Radio"
 msgstr ""
 
-msgctxt "#30200"
-msgid "Universal Serial Bus (USB)"
+msgctxt "#30117"
+msgid "Prepend channel numbers to channel names"
 msgstr ""
 
 #
 # 302XX - Setting values
 #
 
+msgctxt "#30200"
+msgid "Universal Serial Bus (USB)"
+msgstr ""
+
 msgctxt "#30201"
 msgid "Network (rtl_tcp)"
 msgstr ""
 
-msgctxt "#30202"
-msgid "Automatic"
-msgstr ""
-
-msgctxt "#30203"
-msgid "World (RDS)"
-msgstr ""
-
-msgctxt "#30204"
-msgid "North America (RBDS)"
-msgstr ""
+# 30202 can be reused
+# 30203 can be reused
+# 30204 can be reused
 
 msgctxt "#30205"
 msgid "44.1 KHz"
@@ -186,6 +180,22 @@ msgstr ""
 
 msgctxt "#30218"
 msgid "Maximum"
+msgstr ""
+
+msgctxt "#30219"
+msgid "Not set"
+msgstr ""
+
+msgctxt "#30220"
+msgid "World"
+msgstr ""
+
+msgctxt "#30221"
+msgid "North America"
+msgstr ""
+
+msgctxt "#30222"
+msgid "Europe / Australia"
 msgstr ""
 
 #
@@ -250,6 +260,22 @@ msgstr ""
 
 msgctxt "#30314"
 msgid "Browse for ensemble logo"
+msgstr ""
+
+msgctxt "#30315"
+msgid "Select PVR Radio region"
+msgstr ""
+
+msgctxt "#30316"
+msgid "World"
+msgstr ""
+
+msgctxt "#30317"
+msgid "North America"
+msgstr ""
+
+msgctxt "#30318"
+msgid "Europe / Australia"
 msgstr ""
 
 #
@@ -348,20 +374,18 @@ msgctxt "#30503"
 msgid "Specifies the port number that the rtl_tcp server will be listening for client connections. If no port number was specified to rtl_tcp leave set to the default port number 1234."
 msgstr ""
 
-msgctxt "#30504"
-msgid "Specifies the Radio Data System (RDS) region. When set to Automatic the region will be automatically detected. When set to World the global RDS standard will be used. When set to North America the RBDS standard will be used."
-msgstr ""
+# 30504 can be reused
 
 msgctxt "#30505"
 msgid "Specifies the Digital Signal Processor (DSP) PCM output sample rate."
 msgstr ""
 
 msgctxt "#30506"
-msgid "When set to ON detected Radio Data System (RDS) data embedded in the FM signal will be decoded and processed."
+msgid "When set to ON detected Radio Data System (RDS) / Radio Broadcast Data System (RBDS) information embedded in the FM signal will be decoded and processed."
 msgstr ""
 
 msgctxt "#30507"
-msgid "When set to ON the channel number will be prepended to the channel name when reported to Kodi."
+msgid "Specifies the region where the RTL-SDR device is being used. When set to North America, FM Radio will default to the RBDS standard and HD Radio and Weather Radio will be available by default. When set to Europe / Australia, FM Radio will default to the RDS standard and DAB Radio will be enabled by default. When set to World, FM Radio will default to the RDS standard and no other modulations will be enabled by default."
 msgstr ""
 
 msgctxt "#30508"
@@ -381,17 +405,21 @@ msgid "Specifies the Digital Signal Processor (DSP) downsample quality. When set
 msgstr ""
 
 msgctxt "#30513"
-msgid "TODO - Enable FM Radio"
+msgid "When set to ON new FM Radio channels may be added and existing FM Radio channels will be available for playback. When set to OFF, FM Radio channels may not be added and existing FM Radio channels will not be available for playback."
 msgstr ""
 
 msgctxt "#30514"
-msgid "TODO - Enable HD Radio"
+msgid "When set to ON new Hybrid Digital (HD) Radio channels may be added and existing HD Radio channels will be available for playback. When set to OFF, HD Radio channels may not be added and existing HD Radio channels will not be available for playback. This option should only be enabled when the RTL-SDR device is in the North America region."
 msgstr ""
 
 msgctxt "#30515"
-msgid "TODO - Enable DAB/DAB+"
+msgid "When set to ON new Digital Audio Broadcast (DAB) channels may be added and existing DAB channels will be available for playback. When set to OFF, DAB channels may not be added and existing DAB channels will not be available for playback. This option should only be enabled when the RTL-SDR device is in the Europe/Australia region."
 msgstr ""
 
 msgctxt "#30516"
-msgid "TODO - Enable Weather Radio"
+msgid "When set to ON new Weather Radio channels may be added and existing Weather Radio channels will be available for playback. When set to OFF, Weather Radio channels may not be added and existing Weather Radio channels will not be available for playback. This option should only be enabled when the RTL-SDR device is in the North America region."
+msgstr ""
+
+msgctxt "#30507"
+msgid "When set to ON the channel number will be prepended to the channel name when reported to Kodi."
 msgstr ""

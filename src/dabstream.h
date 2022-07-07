@@ -44,7 +44,7 @@
 //---------------------------------------------------------------------------
 // Class dabstream
 //
-// Implements a DAB/DAB+ stream
+// Implements a DAB stream
 
 class dabstream : public pvrstream, private InputInterface, private ProgrammeHandlerInterface, 
 	private RadioControllerInterface

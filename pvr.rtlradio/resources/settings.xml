@@ -75,13 +75,21 @@
       </group>
     </category>
 
-    <category id="interface" label="30001">
+    <category id="region" label="30001">
       <group id="1" label="-1">
 
-        <setting id="interface_prepend_channel_numbers" type="boolean" label="30107" help="30507">
+        <setting id="region_regioncode" type="integer" label="30107" help="30507">
           <level>0</level>
-          <default>false</default>
-          <control type="toggle"/>
+          <default>0</default>
+          <constraints>
+            <options>
+              <option label="30219">0</option>  <!--Not set-->
+              <option label="30221">2</option>  <!--North America-->
+              <option label="30222">3</option>  <!--Europe/Australia-->
+              <option label="30220">1</option>  <!--World-->
+            </options>
+          </constraints>
+          <control type="spinner" format="integer"/>
         </setting>
 
       </group>
@@ -105,21 +113,10 @@
           <control type="toggle"/>
         </setting>
 
-        <setting id="fmradio_rds_standard" type="integer" parent="fmradio_enable_rds" label="30104" help="30504">
+        <setting id="fmradio_prepend_channel_numbers" type="boolean" label="30117" help="30517">
           <level>0</level>
-          <default>0</default>
-          <constraints>
-            <options>
-              <option label="30202">0</option>
-              <option label="30203">1</option>
-              <option label="30204">2</option>
-            </options>
-          </constraints>
-          <dependencies>
-            <dependency type="enable" setting="fmradio_enable">true</dependency>
-            <dependency type="enable" setting="fmradio_enable_rds">true</dependency>
-          </dependencies>
-          <control type="spinner" format="integer"/>
+          <default>false</default>
+          <control type="toggle"/>
         </setting>
 
         <setting id="fmradio_sample_rate" type="integer" label="30110" help="30510">

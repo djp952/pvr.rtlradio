@@ -29,6 +29,7 @@
 #include <mutex>
 
 #include "database.h"
+#include "props.h"
 #include "pvrstream.h"
 #include "pvrtypes.h"
 #include "rtldevice.h"
@@ -253,11 +254,11 @@ private:
 
 	// Log Helpers
 	//
-	template<typename... _args> void log_debug(_args&&... args);
-	template<typename... _args> void log_error(_args&&... args);
-	template<typename... _args> void log_info(_args&&... args);
-	template<typename... _args> void log_message(ADDON_LOG level, _args&&... args);
-	template<typename... _args> void log_warning(_args&&... args);
+	template<typename... _args> void log_debug(_args&&... args) const;
+	template<typename... _args> void log_error(_args&&... args) const;
+	template<typename... _args> void log_info(_args&&... args) const;
+	template<typename... _args> void log_message(ADDON_LOG level, _args&&... args) const;
+	template<typename... _args> void log_warning(_args&&... args) const;
 
 	// Menu Hook Helpers
 	//
@@ -267,14 +268,15 @@ private:
 
 	// Regional Helpers
 	//
-	enum rds_standard get_regional_rds_standard(enum rds_standard standard) const;
+	bool is_region_rbds(struct settings const& settings) const;
+	void update_regioncode(enum regioncode code) const;
 
 	// Settings Helpers
 	//
 	struct settings copy_settings(void) const;
 	static std::string device_connection_to_string(enum device_connection connection);
 	static std::string downsample_quality_to_string(enum downsample_quality quality);
-	static std::string rds_standard_to_string(enum rds_standard mode);
+	static std::string regioncode_to_string(enum regioncode code);
 
 	//-------------------------------------------------------------------------
 	// Member Variables
@@ -283,7 +285,7 @@ private:
 	std::unique_ptr<pvrstream>		m_pvrstream;			// Active PVR stream instance
 	mutable std::mutex				m_pvrstream_lock;		// Synchronization object
 	struct settings					m_settings;				// Custom addon settings
-	mutable std::mutex				m_settings_lock;		// Synchronization object
+	mutable std::recursive_mutex	m_settings_lock;		// Synchronization object
 };
 
 //-----------------------------------------------------------------------------

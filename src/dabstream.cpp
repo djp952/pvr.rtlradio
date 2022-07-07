@@ -65,7 +65,7 @@ int const dabstream::STREAM_ID_ID3TAG = 0;
 //	device			- RTL-SDR device instance
 //	tunerprops		- Tuner device properties
 //	channelprops	- Channel properties
-//	dabprops		- DAB/DAB+ digital signal processor properties
+//	dabprops		- DAB digital signal processor properties
 
 dabstream::dabstream(std::unique_ptr<rtldevice> device, struct tunerprops const& tunerprops,
 	struct channelprops const& channelprops, struct dabprops const& dabprops) : m_device(std::move(device)),
@@ -146,7 +146,7 @@ void dabstream::close(void)
 //	device			- RTL-SDR device instance
 //	tunerprops		- Tunder device properties
 //	channelprops	- Channel properties
-//	dabprops		- DAB/DAB+ digital signal processor properties
+//	dabprops		- DAB digital signal processor properties
 
 std::unique_ptr<dabstream> dabstream::create(std::unique_ptr<rtldevice> device, struct tunerprops const& tunerprops,
 	struct channelprops const& channelprops, struct dabprops const& dabprops)
