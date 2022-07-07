@@ -172,7 +172,7 @@ void enumerate_dabradio_channels(sqlite3* instance, enumerate_channels_callback 
 // enumerate_fmradio_channels
 //
 // Enumerates FM Radio channels
-void enumerate_fmradio_channels(sqlite3* instance, enumerate_channels_callback const& callback);
+void enumerate_fmradio_channels(sqlite3* instance, bool prependnumber, enumerate_channels_callback const& callback);
 
 // enumerate_hdradio_channels
 //
@@ -229,6 +229,11 @@ sqlite3* open_database(char const* connstring, int flags, bool initialize);
 //
 // Renames a channel in the database
 void rename_channel(sqlite3* instance, uint32_t frequency, enum modulation modulation, char const* newname);
+
+// try_execute_non_query
+//
+// executes a non-query against the database but eats any exceptions
+bool try_execute_non_query(sqlite3* instance, char const* sql);
 
 // update_channel
 //

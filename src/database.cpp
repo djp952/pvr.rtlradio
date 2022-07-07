@@ -344,10 +344,11 @@ void enumerate_dabradio_channels(sqlite3* instance, enumerate_channels_callback 
 //
 // Arguments:
 //
-//	instance	- Database instance
-//	callback	- Callback function
+//	instance		- Database instance
+//	prependnumber	- Flag to prepend the channel number to the name
+//	callback		- Callback function
 
-void enumerate_fmradio_channels(sqlite3* instance, enumerate_channels_callback const& callback)
+void enumerate_fmradio_channels(sqlite3* instance, bool prependnumber, enumerate_channels_callback const& callback)
 {
 	sqlite3_stmt*				statement;			// SQL statement to execute
 	int							result;				// Result from SQLite function
@@ -361,13 +362,18 @@ void enumerate_fmradio_channels(sqlite3* instance, enumerate_channels_callback c
 
 	// frequency | channelnumber | subchannelnumber | name | logourl
 	auto sql = "select channel.frequency as frequency, channel.frequency / 1000000 as channelnumber, "
-		"(channel.frequency % 1000000) / 100000 as subchannelnumber, channel.name as name, channel.logourl as logourl "
-		"from channel where channel.modulation = 0 order by channelnumber, subchannelnumber asc";
+		"(channel.frequency % 1000000) / 100000 as subchannelnumber, "
+		"case ?1 when 0 then channel.name else cast(channel.frequency / 1000000 as text) || '.' || cast((channel.frequency % 1000000) / 100000 as text) || ' ' || channel.name end as name, "
+		"channel.logourl as logourl from channel where channel.modulation = 0 order by channelnumber, subchannelnumber asc";
 
 	result = sqlite3_prepare_v2(instance, sql, -1, &statement, nullptr);
 	if(result != SQLITE_OK) throw sqlite_exception(result, sqlite3_errmsg(instance));
 
 	try {
+
+		// Bind the query parameters
+		result = sqlite3_bind_int(statement, 1, (prependnumber) ? 1 : 0);
+		if(result != SQLITE_OK) throw sqlite_exception(result);
 
 		// Execute the query and iterate over all returned rows
 		while(sqlite3_step(statement) == SQLITE_ROW) {
@@ -1150,6 +1156,24 @@ void rename_channel(sqlite3* instance, uint32_t frequency, enum modulation modul
 
 	execute_non_query(instance, "update channel set name = ?1 where frequency = ?2 and modulation = ?3",
 		(newname == nullptr) ? "" : newname, frequency, static_cast<int>(modulation));
+}
+
+//---------------------------------------------------------------------------
+// try_execute_non_query
+//
+// Executes a non-query against the database and eats any exceptions
+//
+// Arguments:
+//
+//	instance	- Database instance
+//	sql			- SQL non-query to execute
+
+bool try_execute_non_query(sqlite3* instance, char const* sql)
+{
+	try { execute_non_query(instance, sql); }
+	catch(...) { return false; }
+
+	return true;
 }
 
 //---------------------------------------------------------------------------

@@ -358,7 +358,7 @@ bool addon::channeladd_wx(struct settings const& settings, struct channelprops& 
 
 inline struct settings addon::copy_settings(void) const
 {
-	std::unique_lock<std::mutex> settings_lock(m_settings_lock);
+	std::unique_lock<std::recursive_mutex> settings_lock(m_settings_lock);
 	return m_settings;
 }
 
@@ -426,9 +426,9 @@ std::string addon::downsample_quality_to_string(enum downsample_quality quality)
 {
 	switch(quality) {
 
-		case downsample_quality::fast: return "Fast";
-		case downsample_quality::standard: return "Standard";
-		case downsample_quality::maximum: return "Maximum";
+		case downsample_quality::fast: return kodi::GetLocalizedString(30216);
+		case downsample_quality::standard: return kodi::GetLocalizedString(30217);
+		case downsample_quality::maximum: return kodi::GetLocalizedString(30218);
 	}
 
 	return "Unknown";
@@ -447,35 +447,38 @@ std::string addon::device_connection_to_string(enum device_connection connection
 {
 	switch(connection) {
 
-		case device_connection::usb: return "USB";
-		case device_connection::rtltcp: return "Network (rtl_tcp)";
+		case device_connection::usb: return kodi::GetLocalizedString(30200);
+		case device_connection::rtltcp: return kodi::GetLocalizedString(30201);
 	}
 
 	return "Unknown";
 }
 
 //---------------------------------------------------------------------------
-// addon::get_regional_rds_standard (private, static)
+// addon::is_region_rbds (private)
 //
-// Figures out whether or not RDS or RBDS should be used in this region
+// Determines if the currently set region is RBDS (North America)
 //
 // Arguments:
 //
-//	standard		- RDS standard to be converted if applicable
+//	settings		- Reference to the current addon settings
 
-enum rds_standard addon::get_regional_rds_standard(enum rds_standard standard) const
+bool addon::is_region_rbds(struct settings const& settings) const
 {
-	// If the standard isn't set to automatic, just regurgitate it
-	if(standard != rds_standard::automatic) return standard;
+	// If a region code has not been set, try to determine if the RTL-SDR device is
+	// being operated in North America based on the ISO language code
+	if(settings.region_regioncode == regioncode::notset) {
 
-	std::string language = kodi::GetLanguage(LANG_FMT_ISO_639_1, true);
+		std::string language = kodi::GetLanguage(LANG_FMT_ISO_639_1, true);
 
-	// Only North American countries use the RBDS standard
-	if(language.find("-us") != std::string::npos) return rds_standard::rbds;
-	else if(language.find("-ca") != std::string::npos) return rds_standard::rbds;
-	else if(language.find("-mx") != std::string::npos) return rds_standard::rbds;
+		// Only North American countries use the RBDS standard
+		if(language.find("-us") != std::string::npos) return true;
+		else if(language.find("-ca") != std::string::npos) return true;
+		else if(language.find("-mx") != std::string::npos) return true;
+		else return false;
+	}
 
-	return rds_standard::rds;			// Everyone else uses RDS
+	return (settings.region_regioncode == regioncode::northamerica);
 }
 
 //---------------------------------------------------------------------------
@@ -552,7 +555,7 @@ _result addon::handle_stdexception(char const* function, std::exception const& e
 //	args	- Variadic argument list
 
 template<typename... _args>
-void addon::log_debug(_args&&... args)
+void addon::log_debug(_args&&... args) const
 {
 	log_message(AddonLog::ADDON_LOG_DEBUG, std::forward<_args>(args)...);
 }
@@ -567,7 +570,7 @@ void addon::log_debug(_args&&... args)
 //	args	- Variadic argument list
 
 template<typename... _args>
-void addon::log_error(_args&&... args)
+void addon::log_error(_args&&... args) const
 {
 	log_message(AddonLog::ADDON_LOG_ERROR, std::forward<_args>(args)...);
 }
@@ -582,7 +585,7 @@ void addon::log_error(_args&&... args)
 //	args	- Variadic argument list
 
 template<typename... _args>
-void addon::log_info(_args&&... args)
+void addon::log_info(_args&&... args) const
 {
 	log_message(AddonLog::ADDON_LOG_INFO, std::forward<_args>(args)...);
 }
@@ -597,7 +600,7 @@ void addon::log_info(_args&&... args)
 //	args	- Variadic argument list
 
 template<typename... _args>
-void addon::log_message(AddonLog level, _args&&... args)
+void addon::log_message(AddonLog level, _args&&... args) const
 {
 	std::ostringstream stream;
 	int unpack[] = { 0, (static_cast<void>(stream << args), 0) ... };
@@ -629,7 +632,7 @@ void addon::log_message(AddonLog level, _args&&... args)
 //	args	- Variadic argument list
 
 template<typename... _args>
-void addon::log_warning(_args&&... args)
+void addon::log_warning(_args&&... args) const
 {
 	log_message(AddonLog::ADDON_LOG_WARNING, std::forward<_args>(args)...);
 }
@@ -795,24 +798,90 @@ void addon::menuhook_importchannels(void)
 }
 
 //---------------------------------------------------------------------------
-// addon::rds_standard_to_string (private, static)
+// addon::regioncode_to_string (private, static)
 //
-// Converts an rds_standard enumeration value into a string
+// Converts a regioncode enumeration value into a string
 //
 // Arguments:
 //
-//	mode		- Mode value to be converted into a string
+//	code		- Region code value to be converted into a string
 
-std::string addon::rds_standard_to_string(enum rds_standard mode)
+std::string addon::regioncode_to_string(enum regioncode code)
 {
-	switch(mode) {
+	switch(code) {
 
-		case rds_standard::automatic: return "Automatic";
-		case rds_standard::rds: return "World (RDS)";
-		case rds_standard::rbds: return "North America (RBDS)";
+		case regioncode::notset: return kodi::GetLocalizedString(30219);
+		case regioncode::world: return kodi::GetLocalizedString(30220);
+		case regioncode::northamerica: return kodi::GetLocalizedString(30221);
+		case regioncode::europe: return kodi::GetLocalizedString(30222);
 	}
 
 	return "Unknown";
+}
+
+//---------------------------------------------------------------------------
+// addon::update_regioncode (private)
+//
+// Updates the addon region code
+//
+// Arguments:
+//
+//	code		- The updated region code
+
+void addon::update_regioncode(enum regioncode code) const
+{
+	std::string region = regioncode_to_string(code);
+
+	// NORTH AMERICA
+	//
+	if(code == regioncode::northamerica) {
+
+		kodi::SetSettingBoolean("fmradio_enable", true);
+		log_info(__func__, ": setting fmradio_enable systemically changed to true for region ", region);
+
+		kodi::SetSettingBoolean("hdradio_enable", true);
+		log_info(__func__, ": setting hdradio_enable systemically changed to true for region ", region);
+
+		kodi::SetSettingBoolean("dabradio_enable", false);
+		log_info(__func__, ": setting dabradio_enable systemically changed to false for region ", region);
+
+		kodi::SetSettingBoolean("wxradio_enable", true);
+		log_info(__func__, ": setting wxradio_enable systemically changed to true for region ", region);
+	}
+
+	// EUROPE/AUSTRALIA
+	//
+	else if(code == regioncode::europe) {
+
+		kodi::SetSettingBoolean("fmradio_enable", true);
+		log_info(__func__, ": setting fmradio_enable systemically changed to true for region ", region);
+
+		kodi::SetSettingBoolean("hdradio_enable", false);
+		log_info(__func__, ": setting hdradio_enable systemically changed to false for region ", region);
+
+		kodi::SetSettingBoolean("dabradio_enable", true);
+		log_info(__func__, ": setting dabradio_enable systemically changed to true for region ", region);
+
+		kodi::SetSettingBoolean("wxradio_enable", false);
+		log_info(__func__, ": setting wxradio_enable systemically changed to false for region ", region);
+	}
+
+	// WORLD
+	//
+	else {
+
+		kodi::SetSettingBoolean("fmradio_enable", true);
+		log_info(__func__, ": setting fmradio_enable systemically changed to true for region ", region);
+
+		kodi::SetSettingBoolean("hdradio_enable", false);
+		log_info(__func__, ": setting hdradio_enable systemically changed to false for region ", region);
+
+		kodi::SetSettingBoolean("dabradio_enable", false);
+		log_info(__func__, ": setting dabradio_enable systemically changed to false for region ", region);
+
+		kodi::SetSettingBoolean("wxradio_enable", false);
+		log_info(__func__, ": setting wxradio_enable systemically changed to false for region ", region);
+	}
 }
 
 //---------------------------------------------------------------------------
@@ -864,13 +933,13 @@ ADDON_STATUS addon::Create(void)
 			m_settings.device_connection_tcp_port = kodi::GetSettingInt("device_connection_tcp_port", 1234);
 			m_settings.device_frequency_correction = kodi::GetSettingInt("device_frequency_correction", 0);
 
-			// Load the Interface settings
-			m_settings.interface_prepend_channel_numbers = kodi::GetSettingBoolean("interface_prepend_channel_numbers", false);
+			// Load the region settings
+			m_settings.region_regioncode = kodi::GetSettingEnum("region_regioncode", regioncode::notset);
 
 			// Load the FM Radio settings
 			m_settings.fmradio_enable = kodi::GetSettingBoolean("fmradio_enable", true);
 			m_settings.fmradio_enable_rds = kodi::GetSettingBoolean("fmradio_enable_rds", true);
-			m_settings.fmradio_rds_standard = kodi::GetSettingEnum("fmradio_rds_standard", rds_standard::automatic);
+			m_settings.fmradio_prepend_channel_numbers = kodi::GetSettingBoolean("fmradio_prepend_channel_numbers", false);
 			m_settings.fmradio_sample_rate = kodi::GetSettingInt("fmradio_sample_rate", (1600 KHz));
 			m_settings.fmradio_downsample_quality = kodi::GetSettingEnum("fmradio_downsample_quality", downsample_quality::standard);
 			m_settings.fmradio_output_samplerate = kodi::GetSettingInt("fmradio_output_samplerate", 48000);
@@ -880,7 +949,7 @@ ADDON_STATUS addon::Create(void)
 			m_settings.hdradio_enable = kodi::GetSettingBoolean("hdradio_enable", false);
 			m_settings.hdradio_output_gain = kodi::GetSettingFloat("hdradio_output_gain", -3.0f);
 
-			// Load the DAB/DAB+ settings
+			// Load the DAB settings
 			m_settings.dabradio_enable = kodi::GetSettingBoolean("dabradio_enable", false);
 			m_settings.dabradio_output_gain = kodi::GetSettingFloat("dabradio_output_gain", -3.0f);
 
@@ -890,24 +959,24 @@ ADDON_STATUS addon::Create(void)
 			m_settings.wxradio_output_samplerate = kodi::GetSettingInt("wxradio_output_samplerate", 48000);
 			m_settings.wxradio_output_gain = kodi::GetSettingFloat("wxradio_output_gain", -3.0f);
 
-			// Log the setting values; these are for diagnostic purposes just use the raw values
+			// Log the setting values
 			log_info(__func__, ": m_settings.dabradio_enable                   = ", m_settings.dabradio_enable);
 			log_info(__func__, ": m_settings.dabradio_output_gain              = ", m_settings.dabradio_output_gain);
-			log_info(__func__, ": m_settings.device_connection                 = ", static_cast<int>(m_settings.device_connection));
+			log_info(__func__, ": m_settings.device_connection                 = ", device_connection_to_string(m_settings.device_connection));
 			log_info(__func__, ": m_settings.device_connection_tcp_host        = ", m_settings.device_connection_tcp_host);
 			log_info(__func__, ": m_settings.device_connection_tcp_port        = ", m_settings.device_connection_tcp_port);
 			log_info(__func__, ": m_settings.device_connection_usb_index       = ", m_settings.device_connection_usb_index);
 			log_info(__func__, ": m_settings.device_frequency_correction       = ", m_settings.device_frequency_correction);
 			log_info(__func__, ": m_settings.fmradio_enable                    = ", m_settings.fmradio_enable);
-			log_info(__func__, ": m_settings.fmradio_downsample_quality        = ", static_cast<int>(m_settings.fmradio_downsample_quality));
+			log_info(__func__, ": m_settings.fmradio_downsample_quality        = ", downsample_quality_to_string(m_settings.fmradio_downsample_quality));
 			log_info(__func__, ": m_settings.fmradio_enable_rds                = ", m_settings.fmradio_enable_rds);
+			log_info(__func__, ": m_settings.fmradio_prepend_channel_numbers   = ", m_settings.fmradio_prepend_channel_numbers);
 			log_info(__func__, ": m_settings.fmradio_output_gain               = ", m_settings.fmradio_output_gain);
 			log_info(__func__, ": m_settings.fmradio_output_samplerate         = ", m_settings.fmradio_output_samplerate);
-			log_info(__func__, ": m_settings.fmradio_rds_standard              = ", static_cast<int>(m_settings.fmradio_rds_standard));
 			log_info(__func__, ": m_settings.fmradio_sample_rate               = ", m_settings.fmradio_sample_rate);
 			log_info(__func__, ": m_settings.hdradio_enable                    = ", m_settings.hdradio_enable);
 			log_info(__func__, ": m_settings.hdradio_output_gain               = ", m_settings.hdradio_output_gain);
-			log_info(__func__, ": m_settings.interface_prepend_channel_numbers = ", m_settings.interface_prepend_channel_numbers);
+			log_info(__func__, ": m_settings.region_regioncode                 = ", regioncode_to_string(m_settings.region_regioncode));
 			log_info(__func__, ": m_settings.wxradio_enable                    = ", m_settings.wxradio_enable);
 			log_info(__func__, ": m_settings.wxradio_output_gain               = ", m_settings.wxradio_output_gain);
 			log_info(__func__, ": m_settings.wxradio_output_samplerate         = ", m_settings.wxradio_output_samplerate);
@@ -928,6 +997,39 @@ ADDON_STATUS addon::Create(void)
 
 				log_error(__func__, ": unable to create/open the channels database ", databasefile, " - ", dbex.what());
 				throw;
+			}
+
+			// If the user has not specified a region code, attempt to get them to do it during startup
+			if(m_settings.region_regioncode == regioncode::notset) {
+
+				std::vector<enum regioncode>	regioncodes;		// Region codes
+				std::vector<std::string>		regionlabels;		// Region labels
+
+				// NORTH AMERICA (FM / HD / WX)
+				//
+				regioncodes.emplace_back(regioncode::northamerica);
+				regionlabels.emplace_back(kodi::GetLocalizedString(30317));
+
+				// EUROPE/AUSTRALIA (FM / DAB)
+				//
+				regioncodes.emplace_back(regioncode::europe);
+				regionlabels.emplace_back(kodi::GetLocalizedString(30318));
+
+				// WORLD (FM)
+				//
+				regioncodes.emplace_back(regioncode::world);
+				regionlabels.emplace_back(kodi::GetLocalizedString(30316));
+
+				assert(regioncodes.size() == regionlabels.size());
+
+				// Prompt the user; if they cancel the operation the region will remain as "not set"
+				// and default to "world" for things like FM Radio RDS vs RBDS
+				result = kodi::gui::dialogs::Select::Show(kodi::GetLocalizedString(30315), regionlabels);
+				if(result >= 0) {
+
+					kodi::SetSettingEnum<enum regioncode>("region_regioncode", regioncodes[result]);
+					update_regioncode(regioncodes[result]);
+				}
 			}
 		}
 
@@ -991,7 +1093,8 @@ void addon::Destroy(void) noexcept
 
 ADDON_STATUS addon::SetSetting(std::string const& settingName, kodi::CSettingValue const& settingValue)
 {
-	std::unique_lock<std::mutex> settings_lock(m_settings_lock);
+	// Changing settings may be recursive operation, use recursive_lock
+	std::unique_lock<std::recursive_mutex> settings_lock(m_settings_lock);
 
 	// For comparison purposes
 	struct settings previous = m_settings;
@@ -1056,21 +1159,6 @@ ADDON_STATUS addon::SetSetting(std::string const& settingName, kodi::CSettingVal
 		}
 	}
 
-	// interface_prepend_channel_numbers
-	//
-	else if(settingName == "interface_prepend_channel_numbers") {
-
-		bool bvalue = settingValue.GetBoolean();
-		if(bvalue != m_settings.interface_prepend_channel_numbers) {
-
-			m_settings.interface_prepend_channel_numbers = bvalue;
-			log_info(__func__, ": setting interface_prepend_channel_numbers changed to ", bvalue);
-
-			// Trigger an update to refresh the channel names
-			TriggerChannelUpdate();
-		}
-	}
-
 	// fmradio_enable
 	//
 	else if(settingName == "fmradio_enable") {
@@ -1098,15 +1186,18 @@ ADDON_STATUS addon::SetSetting(std::string const& settingName, kodi::CSettingVal
 		}
 	}
 
-	// fmradio_rds_standard
+	// fmradio_prepend_channel_numbers
 	//
-	else if(settingName == "fmradio_rds_standard") {
+	else if(settingName == "fmradio_prepend_channel_numbers") {
 
-		enum rds_standard value = settingValue.GetEnum<enum rds_standard>();
-		if(value != m_settings.fmradio_rds_standard) {
+		bool bvalue = settingValue.GetBoolean();
+		if(bvalue != m_settings.fmradio_prepend_channel_numbers) {
 
-			m_settings.fmradio_rds_standard = value;
-			log_info(__func__, ": setting fmradio_rds_standard changed to ", rds_standard_to_string(value).c_str());
+			m_settings.fmradio_prepend_channel_numbers = bvalue;
+			log_info(__func__, ": setting fmradio_prepend_channel_numbers changed to ", bvalue);
+
+			// Trigger an update to refresh the channel names
+			TriggerChannelUpdate();
 		}
 	}
 
@@ -1210,6 +1301,23 @@ ADDON_STATUS addon::SetSetting(std::string const& settingName, kodi::CSettingVal
 		}
 	}
 
+	// region_regioncode
+	//
+	if(settingName == "region_regioncode") {
+
+		enum regioncode value = settingValue.GetEnum<enum regioncode>();
+		if(value != m_settings.region_regioncode) {
+
+			m_settings.region_regioncode = value;
+			log_info(__func__, ": setting region_regioncode changed to ", regioncode_to_string(value).c_str());
+
+			// Update the region code (warning: recursive)
+			update_regioncode(m_settings.region_regioncode);
+		}
+	}
+
+	// wxradio_enable
+	//
 	else if(settingName == "wxradio_enable") {
 
 		bool bvalue = settingValue.GetBoolean();
@@ -1533,9 +1641,9 @@ PVR_ERROR addon::GetChannelGroupMembers(kodi::addon::PVRChannelGroup const& grou
 	std::function<void(sqlite3*, enumerate_channels_callback)> enumerator = nullptr;
 	
 	if((group.GetGroupName() == kodi::GetLocalizedString(30408)) && (settings.fmradio_enable))
-		enumerator = enumerate_fmradio_channels;
+		enumerator = std::bind(enumerate_fmradio_channels, std::placeholders::_1, settings.fmradio_prepend_channel_numbers, std::placeholders::_2);
 
-	else if((group.GetGroupName() == kodi::GetLocalizedString(30409)) && (settings.hdradio_enable))
+	else if((group.GetGroupName() == kodi::GetLocalizedString(30409)) && (settings.hdradio_enable)) 
 		enumerator = enumerate_hdradio_channels;
 
 	else if((group.GetGroupName() == kodi::GetLocalizedString(30411)) && (settings.dabradio_enable))
@@ -1636,19 +1744,7 @@ PVR_ERROR addon::GetChannels(bool radio, kodi::addon::PVRChannelsResultSet& resu
 			channel.SetIsRadio(true);
 			channel.SetChannelNumber(item.channel);
 			channel.SetSubChannelNumber(item.subchannel);
-
-			if(item.name != nullptr) {
-
-				if(settings.interface_prepend_channel_numbers) {
-
-					char strChannelName[PVR_ADDON_NAME_STRING_LENGTH]{};
-					snprintf(strChannelName, std::extent<decltype(strChannelName)>::value, "%u.%u %s", item.channel, item.subchannel, item.name);
-					channel.SetChannelName(strChannelName);
-				}
-
-				else channel.SetChannelName(item.name);
-			}
-
+			if(item.name != nullptr) channel.SetChannelName(item.name);
 			if(item.logourl != nullptr) channel.SetIconPath(item.logourl);
 			// TODO: Set HD/DAB "base channel" as hidden
 
@@ -1656,7 +1752,7 @@ PVR_ERROR addon::GetChannels(bool radio, kodi::addon::PVRChannelsResultSet& resu
 		};
 
 		connectionpool::handle dbhandle(m_connpool);
-		if(settings.fmradio_enable) enumerate_fmradio_channels(dbhandle, callback);
+		if(settings.fmradio_enable) enumerate_fmradio_channels(dbhandle, settings.fmradio_prepend_channel_numbers, callback);
 		if(settings.hdradio_enable) enumerate_hdradio_channels(dbhandle, callback);
 		if(settings.dabradio_enable) enumerate_dabradio_channels(dbhandle, callback);
 		if(settings.wxradio_enable) enumerate_wxradio_channels(dbhandle, callback);
@@ -1938,11 +2034,10 @@ PVR_ERROR addon::OpenDialogChannelAdd(kodi::addon::PVRChannel const& /*channel*/
 
 	catch(std::exception& ex) {
 
-		// todo: this goes away, 30407 is gone
 		// Log the error and inform the user that the operation failed, do not return an error code
 		handle_stdexception(__func__, ex);
-		//kodi::gui::dialogs::OK::ShowAndGetInput(kodi::GetLocalizedString(30407), "An error occurred displaying the "
-		//	"add channel dialog:", "", ex.what());
+		kodi::gui::dialogs::OK::ShowAndGetInput(kodi::GetLocalizedString(30407), "An error occurred displaying the "
+			"add channel dialog:", "", ex.what());
 	}
 
 	catch(...) { return handle_generalexception(__func__, PVR_ERROR::PVR_ERROR_FAILED); }
@@ -2068,7 +2163,7 @@ bool addon::OpenLiveStream(kodi::addon::PVRChannel const& channel)
 			// Set up the FM digital signal processor properties
 			struct fmprops fmprops = {};
 			fmprops.decoderds = settings.fmradio_enable_rds;
-			fmprops.isrbds = (get_regional_rds_standard(settings.fmradio_rds_standard) == rds_standard::rbds);
+			fmprops.isrbds = is_region_rbds(settings);
 			fmprops.samplerate = settings.fmradio_sample_rate;
 			fmprops.downsamplequality = static_cast<int>(settings.fmradio_downsample_quality);
 			fmprops.outputrate = settings.fmradio_output_samplerate;
@@ -2113,11 +2208,11 @@ bool addon::OpenLiveStream(kodi::addon::PVRChannel const& channel)
 			m_pvrstream = hdstream::create(create_device(settings), tunerprops, channelprops, hdprops);
 		}
 
-		// DAB/DAB+
+		// DAB
 		//
 		else if(channelprops.modulation == modulation::dab) {
 
-			// Set up the DAB/DAB+ digital signal processor properties
+			// Set up the DAB digital signal processor properties
 			struct dabprops dabprops = {};
 			dabprops.outputgain = settings.dabradio_output_gain;
 
@@ -2130,7 +2225,7 @@ bool addon::OpenLiveStream(kodi::addon::PVRChannel const& channel)
 			log_info(__func__, ": channelprops.manualgain = ", channelprops.manualgain / 10, " dB");
 			log_info(__func__, ": channelprops.freqcorrection = ", channelprops.freqcorrection, " PPM");
 
-			// Create the DAB/DAB+ stream
+			// Create the DAB stream
 			m_pvrstream = dabstream::create(create_device(settings), tunerprops, channelprops, dabprops);
 		}
 

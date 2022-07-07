@@ -25,7 +25,7 @@ FM Radio Digital Signal Processing adapted from project CuteSDR (https://sourcef
 
 Hybrid Digital (HD) Radio Digital Signal Processing adapted from project NRSC5 (https://github.com/theori-io/nrsc5)
 
-DAB/DAB+ Digital Signal Processing adapted from project welle.io (https://github.com/AlbrechtL/welle.io)</description>
+Digital Audio Broadcast (DAB) Digital Signal Processing adapted from project welle.io (https://github.com/AlbrechtL/welle.io)</description>
 		<news><#= File.ReadAllText(this.Host.ResolvePath(this.Host.ResolveParameterValue("", "", "changelogtxt"))) #></news>
 		<license>MIT License (https://opensource.org/licenses/MIT)</license>
 		<website>https://github.com/djp952/pvr.rtlradio/wiki</website>

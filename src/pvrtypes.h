@@ -66,16 +66,6 @@ enum downsample_quality {
 	maximum = 2,			// Optimize for quality
 };
 
-// rds_standard
-//
-// Defines the Radio Data System (RDS) standard
-enum rds_standard {
-
-	automatic = 0,			// Automatically detect RDS standard
-	rds = 1,				// Global RDS standard
-	rbds = 2,				// North American RBDS standard
-};
-
 // settings
 //
 // Defines all of the configurable addon settings
@@ -106,10 +96,10 @@ struct settings {
 	// The port number of the rtl_tcp host to connect to
 	int device_connection_tcp_port;
 
-	// interface_prepend_channel_numbers
+	// region_regioncode
 	//
-	// Flag to include the channel number in the channel name
-	bool interface_prepend_channel_numbers;
+	// The region in which the RTL-SDR device is operating
+	enum regioncode region_regioncode;
 
 	// fmradio_enable
 	//
@@ -121,10 +111,10 @@ struct settings {
 	// Enables passing decoded RDS information to Kodi
 	bool fmradio_enable_rds;
 
-	// fmradio_rds_standard
+	// fmradio_prepend_channel_numbers
 	//
-	// Specifies the Radio Data System (RDS) standard
-	enum rds_standard fmradio_rds_standard;
+	// Flag to include the channel number in the channel name
+	bool fmradio_prepend_channel_numbers;
 
 	// fmradio_sample_rate
 	//
@@ -158,12 +148,12 @@ struct settings {
 
 	// dabradio_enable
 	//
-	// Enables/disables the DAB/DAB+ DSP
+	// Enables/disables the DAB DSP
 	bool dabradio_enable;
 
 	// dabradio_output_gain
 	//
-	// Specifies the output gain for the DAB/DAB+ DSP
+	// Specifies the output gain for the DAB DSP
 	float dabradio_output_gain;
 
 	// wxradio_enable
