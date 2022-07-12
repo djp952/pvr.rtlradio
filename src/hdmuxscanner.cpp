@@ -161,8 +161,6 @@ void hdmuxscanner::nrsc5_callback(nrsc5_event_t const* event)
 		if(m_muxdata.sync == true) {
 
 			m_muxdata.sync = false;
-			m_muxdata.name.clear();
-			m_muxdata.subchannels.clear();
 			m_callback(m_muxdata);
 		}
 	}

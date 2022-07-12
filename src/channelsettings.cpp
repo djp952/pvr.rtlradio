@@ -246,8 +246,16 @@ void channelsettings::fftcontrol::render(void)
 	render_line(glm::vec4(1.0f, 1.0f, 1.0f, 0.4f), highcutline);
 
 	// FFT
-	if(!m_overload) render_line_strip(glm::vec3(1.0f, 1.0f, 1.0f), m_fft.get(), m_width);
-	else render_line_strip(glm::vec3(1.0f, 0.0f, 0.0f), m_fft.get(), m_width);
+	glm::vec3 fftcolor(0.5f, 0.5f, 0.5f);
+	if(m_overload) fftcolor = glm::vec3(1.0f, 0.0f, 0.0f);
+	else if(m_signallock) {
+
+		// If there is also a lock on the multiplex use a green line
+		if(m_muxlock) fftcolor = glm::vec3(0.2823f, 0.7333f, 0.0901f);	// Kelly Green (#4CBB17)
+		else fftcolor = glm::vec3(1.0f, 1.0f, 1.0f);
+	}
+	
+	render_line_strip(fftcolor, m_fft.get(), m_width);
 
 	glDisableVertexAttribArray(m_shader.aPosition());	// Disable the vertex array
 	glBindBuffer(GL_ARRAY_BUFFER, 0);					// Unbind the VBO
@@ -461,9 +469,11 @@ void channelsettings::fftcontrol::render_triangle(glm::vec4 color, glm::vec2 ver
 //
 // Arguments:
 //
-//	NONE
+//	status		- Signal meter status
+//	signallock	- Flag indicating a signal lock
+//	muxlock		- Flag indicating a multiplex lock
 
-void channelsettings::fftcontrol::update(struct signalmeter::signal_status const& status)
+void channelsettings::fftcontrol::update(struct signalmeter::signal_status const& status, bool signallock, bool muxlock)
 {
 	// Power and noise values are supplied as dB and need to be scaled to the viewport
 	m_power = db_to_height(status.power);
@@ -481,8 +491,10 @@ void channelsettings::fftcontrol::update(struct signalmeter::signal_status const
 	for(size_t index = 0; index < length; index++) m_fft[index] = glm::vec2(static_cast<float>(index), 
 		static_cast<float>(status.plotdata[index]));
 
-	// The FFT line strip will be shown in a different color upon overload
+	// The FFT line strip will be shown in a different color based on this information
 	m_overload = status.overload;
+	m_signallock = signallock;
+	m_muxlock = muxlock;
 
 	// In the event of an FFT data underrun, flat-line the remainder of the data points
 	if(m_width > status.plotsize) {
@@ -844,11 +856,33 @@ bool channelsettings::get_dialog_result(void) const
 
 void channelsettings::meter_status(struct signalmeter::signal_status const& status)
 {
-	char strbuf[64] = {};						// snprintf() text buffer
+	std::unique_lock<std::mutex>	lock(m_muxdatalock);	// Synchronization object
+	bool							signallock = true;		// Signal lock
+	bool							muxlock = false;		// Multiplex lock
+	char							strbuf[64] = {};		// snprintf() text buffer
+
+	// For digital signals we can determine signal lock and multiplex lock values
+	if(m_muxscanner) {
+
+		signallock = m_muxdata.sync;
+		if(signallock) {
+
+			// A multiplex lock occurs when a name has been assigned to the multiplex
+			// as well as all of the detected subchannels within that multiplex
+			if((!m_muxdata.name.empty()) && (m_muxdata.subchannels.size() > 0)) {
+
+				muxlock = true;
+				for(auto const& iterator : m_muxdata.subchannels)
+					if(iterator.name.empty()) { muxlock = false; break; }
+			}
+		}
+	}
+
+	lock.unlock();					// Release multiplex data lock
 
 	// Signal Meter
 	//
-	m_render_signalmeter->update(status);
+	m_render_signalmeter->update(status, signallock, muxlock);
 
 	// Signal Strength
 	//
@@ -862,6 +896,7 @@ void channelsettings::meter_status(struct signalmeter::signal_status const& stat
 	// Signal-to-noise
 	//
 	if(!std::isnan(status.snr)) {
+
 		snprintf(strbuf, std::extent<decltype(strbuf)>::value, "%d dB", static_cast<int>(status.snr));
 		m_edit_signalsnr->SetText(strbuf);
 	}
@@ -879,8 +914,9 @@ void channelsettings::meter_status(struct signalmeter::signal_status const& stat
 
 void channelsettings::mux_data(struct muxscanner::multiplex const& muxdata)
 {
-	// Copy the updated multiplex information
-	m_muxdata = muxdata;
+	std::unique_lock<std::mutex> lock(m_muxdatalock);
+
+	m_muxdata = muxdata;			// Copy the updated mutex information
 
 	// Change the channel name automatically if the channel is new
 	if(m_isnew && !m_muxdata.name.empty()) {

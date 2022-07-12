@@ -150,8 +150,6 @@ void dabmuxscanner::inputsamples(uint8_t const* samples, size_t length)
 				if(m_muxdata.sync == true) {
 
 					m_muxdata.sync = false;
-					m_muxdata.name.clear();
-					m_muxdata.subchannels.clear();
 					invokecallback = true;
 				}
 			}

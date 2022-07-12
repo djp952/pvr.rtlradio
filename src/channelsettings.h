@@ -35,6 +35,7 @@
 #include <kodi/gui/gl/Shader.h>
 #include <kodi/gui/Window.h>
 #include <memory>
+#include <mutex>
 #include <vector>
 #include <string>
 #include <thread>
@@ -161,7 +162,7 @@ private:
 		//
 		size_t	height(void) const;
 		size_t	width(void) const;
-		void	update(struct signalmeter::signal_status const& status);
+		void	update(struct signalmeter::signal_status const& status, bool signallock, bool muxlockupdate);
 
 	private:
 
@@ -198,6 +199,8 @@ private:
 		GLfloat					m_power = 0.0f;			// Power level
 		GLfloat					m_noise = 0.0f;			// Noise level
 		bool					m_overload = false;		// Overload flag
+		bool					m_signallock = false;	// Signal lock flag
+		bool					m_muxlock = false;		// Multiplex lock flag
 
 		std::unique_ptr<glm::vec2[]>	m_fft;			// FFT vertices
 		int								m_fftlowcut;	// FFT low cut index
@@ -273,6 +276,7 @@ private:
 	struct channelprops					m_channelprops = {};	// Channel properties
 	struct signalprops					m_signalprops = {};		// Signal properties
 	struct muxscanner::multiplex		m_muxdata = {};			// Multiplex properties
+	mutable std::mutex					m_muxdatalock;			// Multiplex properties lock
 	bool								m_isnew = false;		// New channel flag
 	std::unique_ptr<signalmeter>		m_signalmeter;			// Signal meter instance
 	std::unique_ptr<muxscanner>			m_muxscanner;			// Multiplex scanner instance
