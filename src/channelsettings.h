@@ -86,6 +86,11 @@ public:
 	// Gets the result code from the dialog box
 	bool get_dialog_result(void) const;
 
+	// get_subchannel_properties
+	//
+	// Gets the updated subchannel properties from the dialog box
+	void get_subchannel_properties(std::vector<struct subchannelprops>& subchannelprops) const;
+
 private:
 
 	channelsettings(channelsettings const&) = delete;

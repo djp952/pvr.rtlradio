@@ -65,10 +65,11 @@ int const hdstream::STREAM_ID_ID3TAG = 2;
 //	tunerprops		- Tuner device properties
 //	channelprops	- Channel properties
 //	hdprops			- HD Radio digital signal processor properties
+//	subchannel		- Multiplex subchannel number
 
 hdstream::hdstream(std::unique_ptr<rtldevice> device, struct tunerprops const& tunerprops,
-	struct channelprops const& channelprops, struct hdprops const& hdprops) :
-	m_device(std::move(device)), m_subchannel(1),
+	struct channelprops const& channelprops, struct hdprops const& hdprops, uint32_t subchannel) :
+	m_device(std::move(device)), m_subchannel((subchannel > 0) ? subchannel : 1),
 	m_muxname(""), m_pcmgain(powf(10.0f, hdprops.outputgain / 10.0f))
 {
 	// Initialize the RTL-SDR device instance
@@ -145,11 +146,12 @@ void hdstream::close(void)
 //	tunerprops		- Tunder device properties
 //	channelprops	- Channel properties
 //	hdprops			- HD Radio digital signal processor properties
+//	subchannel		- Multiplex subchannel number
 
 std::unique_ptr<hdstream> hdstream::create(std::unique_ptr<rtldevice> device, struct tunerprops const& tunerprops,
-	struct channelprops const& channelprops, struct hdprops const& hdprops)
+	struct channelprops const& channelprops, struct hdprops const& hdprops, uint32_t subchannel)
 {
-	return std::unique_ptr<hdstream>(new hdstream(std::move(device), tunerprops, channelprops, hdprops));
+	return std::unique_ptr<hdstream>(new hdstream(std::move(device), tunerprops, channelprops, hdprops, subchannel));
 }
 
 //---------------------------------------------------------------------------

@@ -278,6 +278,22 @@ msgctxt "#30318"
 msgid "Europe / Australia"
 msgstr ""
 
+msgctxt "#30319"
+msgid "Select multiplex subchannels"
+msgstr ""
+
+msgctxt "#30320"
+msgid "Select ensemble subchannels"
+msgstr ""
+
+msgctxt "#30321"
+msgid "New multiplex"
+msgstr ""
+
+msgctxt "#30322"
+msgid "New ensemble"
+msgstr ""
+
 #
 # 304XX - PVR Client implementation
 #
@@ -420,6 +436,6 @@ msgctxt "#30516"
 msgid "When set to ON new Weather Radio channels may be added and existing Weather Radio channels will be available for playback. When set to OFF, Weather Radio channels may not be added and existing Weather Radio channels will not be available for playback. This option should only be enabled when the RTL-SDR device is in the North America region."
 msgstr ""
 
-msgctxt "#30507"
+msgctxt "#30517"
 msgid "When set to ON the channel number will be prepended to the channel name when reported to Kodi."
 msgstr ""

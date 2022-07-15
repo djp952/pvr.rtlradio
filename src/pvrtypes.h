@@ -141,6 +141,11 @@ struct settings {
 	// Enables the HD Radio DSP
 	bool hdradio_enable;
 
+	// hdradio_prepend_channel_numbers
+	//
+	// Flag to include the channel number in the channel name
+	bool hdradio_prepend_channel_numbers;
+
 	// hdradio_output_gain
 	//
 	// Specifies the output gain for the HD DSP

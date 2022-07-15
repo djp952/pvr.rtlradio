@@ -94,9 +94,11 @@ addon::~addon()
 
 bool addon::channeladd_dab(struct settings const& settings, struct channelprops& channelprops) const
 {
-	std::vector<std::string>	channelnames;			// Channel names
-	std::vector<std::string>	channellabels;			// Channel labels
-	std::vector<uint32_t>		channelfrequencies;		// Channel frequencies
+	std::vector<std::string>				channelnames;			// Channel names
+	std::vector<std::string>				channellabels;			// Channel labels
+	std::vector<uint32_t>					channelfrequencies;		// Channel frequencies
+	std::vector<struct subchannelprops>		subchannelprops;		// Existing subchannels
+
 
 	// Pull a database handle out of the connection pool
 	connectionpool::handle dbhandle(m_connpool);
@@ -128,11 +130,11 @@ bool addon::channeladd_dab(struct settings const& settings, struct channelprops&
 	// Initialize enough properties for the settings dialog to work
 	channelprops.frequency = channelfrequencies[selected];
 	channelprops.modulation = modulation::dab;
-	channelprops.name = channelnames[selected];
+	channelprops.name = kodi::addon::GetLocalizedString(30322).append(" ").append(channelnames[selected]);
 
-	// If the channel already exists in the database, get the previously set properties
+	// If the channel already exists in the database, get the previously set properties and subchannels
 	bool exists = channel_exists(dbhandle, channelprops);
-	if(exists) get_channel_properties(dbhandle, channelprops.frequency, channelprops.modulation, channelprops);
+	if(exists) get_channel_properties(dbhandle, channelprops.frequency, channelprops.modulation, channelprops, subchannelprops);
 
 	// Set up the tuner device properties
 	struct tunerprops tunerprops = {};
@@ -142,14 +144,51 @@ bool addon::channeladd_dab(struct settings const& settings, struct channelprops&
 	std::unique_ptr<channelsettings> settingsdialog = channelsettings::create(create_device(settings), tunerprops, channelprops, true);
 	settingsdialog->DoModal();
 
-	if(settingsdialog->get_dialog_result() == true) {
+	if(settingsdialog->get_dialog_result()) {
 
-		// Retrieve the updated channel properties from the dialog box
+		std::vector<struct subchannelprops>	subchannels;		// Subchannel information
+
+		// Retrieve the updated channel and subchannel properties from the dialog box
 		settingsdialog->get_channel_properties(channelprops);
-				
-		// Add or update the channel in the database
-		if(!exists) add_channel(dbhandle, channelprops);
-		else update_channel(dbhandle, channelprops);
+		settingsdialog->get_subchannel_properties(subchannels);
+
+		// Prompt the user to select what subchannels they want to add for this channel, assuming all of them
+		if(subchannels.size() > 0) {
+			
+			std::vector<kodi::gui::dialogs::SSelectionEntry> entries;
+			for(auto const& subchannel : subchannels) {
+
+				// GCC 4.9 doesn't allow a push_back() on SSelectionEntry with a braced initializer list, do this the verbose way
+				kodi::gui::dialogs::SSelectionEntry entry = {};
+				entry.id = std::to_string(subchannel.number);
+				entry.name = std::string(entry.id).append(" ").append(subchannel.name);
+
+				// Pre-select the subchannel if there were no prior subchannels defined or if it matches a previously defined subchannel
+				entry.selected = ((subchannelprops.size() == 0) || 
+					(std::find_if(subchannelprops.begin(), subchannelprops.end(), [&](auto const& val) -> bool { return val.number == subchannel.number; }) != subchannelprops.end()));
+
+				entries.emplace_back(std::move(entry));
+			}
+
+			// TODO: use the existing dialog box for now; this needs a custom replacement. It seems to always toggle
+			// the first item to selected == false and has no means to determine a 'cancel'
+			if(!kodi::gui::dialogs::Select::ShowMultiSelect(kodi::addon::GetLocalizedString(30320), entries)) return false;
+			entries[0].selected = true;
+
+			// Remove any subchannels that were de-selected by the user from the vector<> of subchannels
+			for(auto const& entry : entries) {
+
+				if(entry.selected == false) {
+
+					auto found = std::find_if(subchannels.begin(), subchannels.end(), [&](auto const& val) -> bool { return std::to_string(val.number) == entry.id; });
+					if(found != subchannels.end()) subchannels.erase(found);
+				}
+			}
+		}
+
+		// Add or update the channel/subchannels in the database
+		if(!exists) add_channel(dbhandle, channelprops, subchannels);
+		else update_channel(dbhandle, channelprops, subchannels);
 
 		return true;
 	}
@@ -223,6 +262,8 @@ bool addon::channeladd_fm(struct settings const& settings, struct channelprops& 
 
 bool addon::channeladd_hd(struct settings const& settings, struct channelprops& channelprops) const
 {
+	std::vector<struct subchannelprops>		subchannelprops;		// Existing subchannels
+
 	// Create and initialize the frequency input dialog box
 	std::unique_ptr<channeladd> adddialog = channeladd::create(modulation::hd);
 	adddialog->DoModal();
@@ -234,39 +275,73 @@ bool addon::channeladd_hd(struct settings const& settings, struct channelprops& 
 		adddialog->get_channel_properties(channelprops);
 		assert(channelprops.modulation == modulation::hd);
 
-		// Generate the default channel name (xxx.x HD)
-		char name[256]{};
-		unsigned int mhz = channelprops.frequency / 1000000;
-		unsigned int hundredkhz = (channelprops.frequency % 1000000) / 100000;
-		snprintf(name, std::extent<decltype(name)>::value, "%u.%u HD", mhz, hundredkhz);
-		channelprops.name.assign(name);
+		// For HD Radio, change "New channel" to "New multiplex"
+		channelprops.name = kodi::addon::GetLocalizedString(30321);
 
 		// Pull a database handle out of the connection pool
 		connectionpool::handle dbhandle(m_connpool);
 
 		// If the channel already exists in the database, get the previously set properties
 		bool exists = channel_exists(dbhandle, channelprops);
-		if(exists) get_channel_properties(dbhandle, channelprops.frequency, channelprops.modulation, channelprops);
+		if(exists) get_channel_properties(dbhandle, channelprops.frequency, channelprops.modulation, channelprops, subchannelprops);
 
 		// Set up the tuner device properties
 		struct tunerprops tunerprops = {};
 		tunerprops.freqcorrection = settings.device_frequency_correction;
 
-		// Create and initialize the dialog box against a new signal meter instance
+		// Create and initialize a channel settings dialog instance to allow the user to fine-tune the channel
 		std::unique_ptr<channelsettings> settingsdialog = channelsettings::create(create_device(settings), tunerprops, channelprops, true);
 		settingsdialog->DoModal();
 
 		if(settingsdialog->get_dialog_result()) {
 
-			// Retrieve the updated channel properties from the dialog box
+			std::vector<struct subchannelprops>	subchannels;		// Subchannel information
+
+			// Retrieve the updated channel and subchannel properties from the dialog box
 			settingsdialog->get_channel_properties(channelprops);
+			settingsdialog->get_subchannel_properties(subchannels);
 
-			// Add or update the channel in the database
-			if(!exists) add_channel(dbhandle, channelprops);
-			else update_channel(dbhandle, channelprops);
+			// Prompt the user to select what subchannels they want to add for this channel, assuming all of them.
+			// For HD Radio, if there is only one audio stream subchannel, bypass the selection process
+			if(subchannels.size() > 1) {
+
+				std::vector<kodi::gui::dialogs::SSelectionEntry> entries;
+				for(auto const& subchannel : subchannels) {
+
+					// GCC 4.9 doesn't allow a push_back() on SSelectionEntry with a braced initializer list, do this the verbose way
+					kodi::gui::dialogs::SSelectionEntry entry = {};
+					entry.id = std::to_string(subchannel.number);
+					entry.name = subchannel.name;
+
+					// Pre-select the subchannel if there were no prior subchannels defined or if it matches a previously defined subchannel
+					entry.selected = ((subchannelprops.size() == 0) ||
+						(std::find_if(subchannelprops.begin(), subchannelprops.end(), [&](auto const& val) -> bool { return val.number == subchannel.number; }) != subchannelprops.end()));
+
+					entries.emplace_back(std::move(entry));
+				}
+
+				// TODO: use the existing dialog box for now; this needs a custom replacement. It seems to always toggle
+				// the first item to selected == false and has no means to determine a 'cancel'
+				if(!kodi::gui::dialogs::Select::ShowMultiSelect(kodi::addon::GetLocalizedString(30319), entries)) return false;
+				entries[0].selected = true;
+
+				// Remove any subchannels that were de-selected by the user from the vector<> of subchannels
+				for(auto const& entry : entries) {
+
+					if(entry.selected == false) {
+
+						auto found = std::find_if(subchannels.begin(), subchannels.end(), [&](auto const& val) -> bool { return std::to_string(val.number) == entry.id; });
+						if(found != subchannels.end()) subchannels.erase(found);
+					}
+				}
+			}
+
+			// Add or update the channel/subchannels in the database
+			if(!exists) add_channel(dbhandle, channelprops, subchannels);
+			else update_channel(dbhandle, channelprops, subchannels);
+
+			return true;
 		}
-
-		return true;
 	}
 
 	return false;
@@ -947,6 +1022,7 @@ ADDON_STATUS addon::Create(void)
 
 			// Load the HD Radio settings
 			m_settings.hdradio_enable = kodi::addon::GetSettingBoolean("hdradio_enable", false);
+			m_settings.hdradio_prepend_channel_numbers = kodi::addon::GetSettingBoolean("hdradio_prepend_channel_numbers", false);
 			m_settings.hdradio_output_gain = kodi::addon::GetSettingFloat("hdradio_output_gain", -3.0f);
 
 			// Load the DAB settings
@@ -976,6 +1052,7 @@ ADDON_STATUS addon::Create(void)
 			log_info(__func__, ": m_settings.fmradio_sample_rate               = ", m_settings.fmradio_sample_rate);
 			log_info(__func__, ": m_settings.hdradio_enable                    = ", m_settings.hdradio_enable);
 			log_info(__func__, ": m_settings.hdradio_output_gain               = ", m_settings.hdradio_output_gain);
+			log_info(__func__, ": m_settings.hdradio_prepend_channel_numbers   = ", m_settings.hdradio_prepend_channel_numbers);
 			log_info(__func__, ": m_settings.region_regioncode                 = ", regioncode_to_string(m_settings.region_regioncode));
 			log_info(__func__, ": m_settings.wxradio_enable                    = ", m_settings.wxradio_enable);
 			log_info(__func__, ": m_settings.wxradio_output_gain               = ", m_settings.wxradio_output_gain);
@@ -1249,6 +1326,8 @@ ADDON_STATUS addon::SetSetting(std::string const& settingName, kodi::addon::CSet
 		}
 	}
 
+	// hdradio_enable
+	// 
 	else if(settingName == "hdradio_enable") {
 
 		bool bvalue = settingValue.GetBoolean();
@@ -1259,6 +1338,21 @@ ADDON_STATUS addon::SetSetting(std::string const& settingName, kodi::addon::CSet
 			
 			// Trigger an update to refresh the channel groups
 			TriggerChannelGroupsUpdate();
+		}
+	}
+
+	// hdradio_prepend_channel_numbers
+	//
+	else if(settingName == "hdradio_prepend_channel_numbers") {
+
+		bool bvalue = settingValue.GetBoolean();
+		if(bvalue != m_settings.hdradio_prepend_channel_numbers) {
+
+			m_settings.hdradio_prepend_channel_numbers = bvalue;
+			log_info(__func__, ": setting hdradio_prepend_channel_numbers changed to ", bvalue);
+
+			// Trigger an update to refresh the channel names
+			TriggerChannelUpdate();
 		}
 	}
 
@@ -1446,8 +1540,22 @@ void addon::CloseLiveStream(void)
 PVR_ERROR addon::DeleteChannel(kodi::addon::PVRChannel const& channel)
 {
 	channelid channelid(channel.GetUniqueId());			// Convert UniqueID back into a channelid
+	
+	try {
 
-	try { delete_channel(connectionpool::handle(m_connpool), channelid.frequency(), channelid.modulation()); }
+		connectionpool::handle dbhandle(m_connpool);
+
+		uint32_t const frequency = channelid.frequency();
+		enum modulation const modulationtype = channelid.modulation();
+		uint32_t const subchannel = channelid.subchannel();
+	
+		// For HD Radio and DAB, if the subchannel number is set only delete the subchannel
+		if((modulationtype == modulation::hd || modulationtype == modulation::dab) && (subchannel > 0))
+			delete_subchannel(dbhandle, channelid.frequency(), channelid.modulation(), channelid.subchannel());
+
+		else delete_channel(dbhandle, frequency, modulationtype); 
+	}
+
 	catch(std::exception& ex) { return handle_stdexception(__func__, ex, PVR_ERROR::PVR_ERROR_FAILED); }
 	catch(...) { return handle_generalexception(__func__, PVR_ERROR::PVR_ERROR_FAILED); }
 
@@ -1637,7 +1745,7 @@ PVR_ERROR addon::GetChannelGroupMembers(kodi::addon::PVRChannelGroup const& grou
 		enumerator = std::bind(enumerate_fmradio_channels, std::placeholders::_1, settings.fmradio_prepend_channel_numbers, std::placeholders::_2);
 
 	else if((group.GetGroupName() == kodi::addon::GetLocalizedString(30409)) && (settings.hdradio_enable)) 
-		enumerator = enumerate_hdradio_channels;
+		enumerator = std::bind(enumerate_hdradio_channels, std::placeholders::_1, settings.hdradio_prepend_channel_numbers, std::placeholders::_2);
 
 	else if((group.GetGroupName() == kodi::addon::GetLocalizedString(30411)) && (settings.dabradio_enable))
 		enumerator = enumerate_dabradio_channels;
@@ -1739,14 +1847,13 @@ PVR_ERROR addon::GetChannels(bool radio, kodi::addon::PVRChannelsResultSet& resu
 			channel.SetSubChannelNumber(item.subchannel);
 			if(item.name != nullptr) channel.SetChannelName(item.name);
 			if(item.logourl != nullptr) channel.SetIconPath(item.logourl);
-			// TODO: Set HD/DAB "base channel" as hidden
 
 			results.Add(channel);
 		};
 
 		connectionpool::handle dbhandle(m_connpool);
 		if(settings.fmradio_enable) enumerate_fmradio_channels(dbhandle, settings.fmradio_prepend_channel_numbers, callback);
-		if(settings.hdradio_enable) enumerate_hdradio_channels(dbhandle, callback);
+		if(settings.hdradio_enable) enumerate_hdradio_channels(dbhandle, settings.hdradio_prepend_channel_numbers, callback);
 		if(settings.dabradio_enable) enumerate_dabradio_channels(dbhandle, callback);
 		if(settings.wxradio_enable) enumerate_wxradio_channels(dbhandle, callback);
 	}
@@ -2187,6 +2294,7 @@ bool addon::OpenLiveStream(kodi::addon::PVRChannel const& channel)
 
 			// Log information about the stream for diagnostic purposes
 			log_info(__func__, ": Creating hdstream for channel \"", channelprops.name, "\"");
+			log_info(__func__, ": subchannel = ", channelid.subchannel());
 			log_info(__func__, ": tunerprops.freqcorrection = ", tunerprops.freqcorrection, " PPM");
 			log_info(__func__, ": hdprops.outputgain = ", hdprops.outputgain, " dB");
 			log_info(__func__, ": channelprops.frequency = ", channelprops.frequency, " Hz");
@@ -2195,7 +2303,7 @@ bool addon::OpenLiveStream(kodi::addon::PVRChannel const& channel)
 			log_info(__func__, ": channelprops.freqcorrection = ", channelprops.freqcorrection, " PPM");
 
 			// Create the HD Radio stream
-			m_pvrstream = hdstream::create(create_device(settings), tunerprops, channelprops, hdprops);
+			m_pvrstream = hdstream::create(create_device(settings), tunerprops, channelprops, hdprops, channelid.subchannel());
 		}
 
 		// DAB
@@ -2208,6 +2316,7 @@ bool addon::OpenLiveStream(kodi::addon::PVRChannel const& channel)
 
 			// Log information about the stream for diagnostic purposes
 			log_info(__func__, ": Creating dabstream for channel \"", channelprops.name, "\"");
+			log_info(__func__, ": subchannel = ", channelid.subchannel());
 			log_info(__func__, ": tunerprops.freqcorrection = ", tunerprops.freqcorrection, " PPM");
 			log_info(__func__, ": dabrops.outputgain = ", dabprops.outputgain, " dB");
 			log_info(__func__, ": channelprops.frequency = ", channelprops.frequency, " Hz");
@@ -2216,7 +2325,7 @@ bool addon::OpenLiveStream(kodi::addon::PVRChannel const& channel)
 			log_info(__func__, ": channelprops.freqcorrection = ", channelprops.freqcorrection, " PPM");
 
 			// Create the DAB stream
-			m_pvrstream = dabstream::create(create_device(settings), tunerprops, channelprops, dabprops);
+			m_pvrstream = dabstream::create(create_device(settings), tunerprops, channelprops, dabprops, channelid.subchannel());
 		}
 
 		// Weather Radio

@@ -60,13 +60,6 @@ hdmuxscanner::hdmuxscanner(uint32_t samplerate, uint32_t frequency, callback con
 	assert((frequency >= 87900000) && (frequency <= 107900000));
 	if((frequency < 87900000) || (frequency > 107900000)) throw std::invalid_argument("frequency");
 
-	// Generate the default multiplex/subchannel name prefix (xxx.xb)
-	char prefix[256]{};
-	unsigned int mhz = frequency / 1000000;
-	unsigned int hundredkhz = (frequency % 1000000) / 100000;
-	snprintf(prefix, std::extent<decltype(prefix)>::value, "%u.%u ", mhz, hundredkhz);
-	m_prefix.assign(prefix);
-
 	// Initialize the HD Radio demodulator
 	nrsc5_open_pipe(&m_nrsc5);
 	nrsc5_set_mode(m_nrsc5, NRSC5_MODE_FM);
@@ -180,7 +173,10 @@ void hdmuxscanner::nrsc5_callback(nrsc5_event_t const* event)
 
 				assert(service->number > 0);			// Should never happen
 
-				std::string servicename = trim(m_prefix + ((service->name != nullptr) ? service->name : ""));
+				// HD Radio subchannels should always be "HDx"
+				char name[256] = {};
+				snprintf(name, std::extent<decltype(name)>::value, "HD%u", service->number);
+				std::string servicename(name);
 
 				auto found = std::find_if(m_muxdata.subchannels.begin(), m_muxdata.subchannels.end(),
 					[&](auto const& val) -> bool { return val.number == service->number; });
@@ -214,7 +210,7 @@ void hdmuxscanner::nrsc5_callback(nrsc5_event_t const* event)
 	// Station Information Service (SIS) data has been decoded
 	else if(event->event == NRSC5_EVENT_SIS) {
 
-		std::string name = trim(m_prefix + ((event->sis.name != nullptr) ? event->sis.name : ""));
+		std::string name = trim((event->sis.name != nullptr) ? event->sis.name : "");
 		if(name != m_muxdata.name) {
 
 			m_muxdata.name = name;

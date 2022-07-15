@@ -92,7 +92,6 @@ private:
 
 	nrsc5_t*				m_nrsc5;			// NRSC5 demodulator handle
 	callback const			m_callback;			// Callback function
-	std::string				m_prefix;			// Multiplex/subchannel name prefix
 	struct multiplex		m_muxdata = {};		// Multiplex data
 };
 

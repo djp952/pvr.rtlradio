@@ -71,7 +71,7 @@ public:
 	//
 	// Factory method, creates a new hdstream instance
 	static std::unique_ptr<hdstream> create(std::unique_ptr<rtldevice> device, struct tunerprops const& tunerprops,
-		struct channelprops const& channelprops, struct hdprops const& hdprops);
+		struct channelprops const& channelprops, struct hdprops const& hdprops, uint32_t subchannel);
 
 	// demuxabort
 	//
@@ -171,7 +171,7 @@ private:
 	// Instance Constructor
 	//
 	hdstream(std::unique_ptr<rtldevice> device, struct tunerprops const& tunerprops,
-		struct channelprops const& channelprops, struct hdprops const& hdprops);
+		struct channelprops const& channelprops, struct hdprops const& hdprops, uint32_t subchannel);
 
 	//-----------------------------------------------------------------------
 	// Private Type Declarations
@@ -233,7 +233,7 @@ private:
 	std::unique_ptr<rtldevice>			m_device;					// RTL-SDR device instance
 	nrsc5_t*							m_nrsc5;					// NRSC5 demodulator handle
 
-	uint32_t							m_subchannel{ 1 };			// Multiplex subchannel number
+	uint32_t const						m_subchannel;				// Multiplex subchannel number
 	std::string							m_muxname;					// Generated mux name
 	float const							m_pcmgain;					// Output gain
 	double								m_dts{ STREAM_TIME_BASE };	// Current decode time stamp

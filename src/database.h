@@ -143,6 +143,7 @@ private:
 //
 // Adds a new channel to the database
 bool add_channel(sqlite3* instance, struct channelprops const& channelprops);
+bool add_channel(sqlite3* instance, struct channelprops const& channelprops, std::vector<struct subchannelprops> const& subchannelprops);
 
 // channel_exists
 //
@@ -164,6 +165,16 @@ void close_database(sqlite3* instance);
 // Deletes a channel from the database
 void delete_channel(sqlite3* instance, uint32_t frequency, enum modulation modulation);
 
+// delete_channel
+//
+// Deletes a channel from the database
+void delete_channel(sqlite3* instance, uint32_t frequency, enum modulation modulation);
+
+// delete_subchannel
+//
+// Deletes a subchannel from the database
+void delete_subchannel(sqlite3* instance, uint32_t frequency, enum modulation modulation, uint32_t subchannel);
+
 // enumerate_dabradio_channels
 //
 // Enumerates DAB channels
@@ -177,7 +188,7 @@ void enumerate_fmradio_channels(sqlite3* instance, bool prependnumber, enumerate
 // enumerate_hdradio_channels
 //
 // Enumerates HD Radio channels
-void enumerate_hdradio_channels(sqlite3* instance, enumerate_channels_callback const& callback);
+void enumerate_hdradio_channels(sqlite3* instance, bool prependnumber, enumerate_channels_callback const& callback);
 
 // enumerate_namedchannels
 //
@@ -208,6 +219,8 @@ int get_channel_count(sqlite3* instance);
 //
 // Gets the tuning properties of a channel from the database
 bool get_channel_properties(sqlite3* instance, uint32_t frequency, enum modulation modulation, struct channelprops& channelprops);
+bool get_channel_properties(sqlite3* instance, uint32_t frequency, enum modulation modulation, struct channelprops& channelprops,
+	std::vector<struct subchannelprops>& subchannelprops);
 
 // has_rawfiles
 //
@@ -239,6 +252,7 @@ bool try_execute_non_query(sqlite3* instance, char const* sql);
 //
 // Updates the tuning properties of a channel in the database
 bool update_channel(sqlite3* instance, struct channelprops const& channelprops);
+bool update_channel(sqlite3* instance, struct channelprops const& channelprops, std::vector<struct subchannelprops> const& subchannelprops);
 
 //---------------------------------------------------------------------------
 

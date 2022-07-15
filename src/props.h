@@ -130,6 +130,16 @@ struct streamprops {
 	int				bitspersample;		// Stream bits per sample
 };
 
+// subchannelprops
+//
+// Defines properties for a radio subchannel
+struct subchannelprops {
+
+	uint32_t			number;			// Subchannel number
+	std::string			name;			// Subchannel name
+	std::string			logourl;		// Subchannel logo URL
+};
+
 // tunerprops
 //
 // Defines tuner-specific properties

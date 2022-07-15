@@ -846,6 +846,27 @@ bool channelsettings::get_dialog_result(void) const
 }
 
 //---------------------------------------------------------------------------
+// channelsettings::get_subchannel_properties
+//
+// Gets the updated subchannel properties from the dialog box
+//
+// Arguments:
+//
+//	subchannelprops		- vector<> to receive the subchannel properties
+
+void channelsettings::get_subchannel_properties(std::vector<struct subchannelprops>& subchannelprops) const
+{
+	subchannelprops.clear();			// Ensure the vector<> is empty
+
+	// Copy the known subchannel information into the output vector<>
+	for(auto const& it : m_muxdata.subchannels) subchannelprops.push_back({ it.number, it.name });
+
+	// Sort the vector<> by the subchannel number before returning
+	std::sort(subchannelprops.begin(), subchannelprops.end(), [](auto const& lhs, auto const& rhs) -> bool {
+		return lhs.number < rhs.number; });
+}
+
+//---------------------------------------------------------------------------
 // channelsettings::meter_status (private)
 //
 // Updates the state of the signal meter
