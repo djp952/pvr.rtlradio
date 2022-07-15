@@ -66,10 +66,12 @@ int const dabstream::STREAM_ID_ID3TAG = 0;
 //	tunerprops		- Tuner device properties
 //	channelprops	- Channel properties
 //	dabprops		- DAB digital signal processor properties
+//	subchannel		- DAB subchannel to decode/stream
 
 dabstream::dabstream(std::unique_ptr<rtldevice> device, struct tunerprops const& tunerprops,
-	struct channelprops const& channelprops, struct dabprops const& dabprops) : m_device(std::move(device)),
-	m_ringbuffer(RING_BUFFER_SIZE), m_subchannel(1), m_pcmgain(powf(10.0f, dabprops.outputgain / 10.0f))
+	struct channelprops const& channelprops, struct dabprops const& dabprops, uint32_t subchannel) : 
+	m_device(std::move(device)), m_ringbuffer(RING_BUFFER_SIZE), m_subchannel((subchannel > 0) ? subchannel : 1), 
+	m_pcmgain(powf(10.0f, dabprops.outputgain / 10.0f))
 {
 	// Initialize the RTL-SDR device instance
 	m_device->set_frequency_correction(tunerprops.freqcorrection + channelprops.freqcorrection);
@@ -147,11 +149,12 @@ void dabstream::close(void)
 //	tunerprops		- Tunder device properties
 //	channelprops	- Channel properties
 //	dabprops		- DAB digital signal processor properties
+//	subchannel		- DAB subchannel to decode/stream
 
 std::unique_ptr<dabstream> dabstream::create(std::unique_ptr<rtldevice> device, struct tunerprops const& tunerprops,
-	struct channelprops const& channelprops, struct dabprops const& dabprops)
+	struct channelprops const& channelprops, struct dabprops const& dabprops, uint32_t subchannel)
 {
-	return std::unique_ptr<dabstream>(new dabstream(std::move(device), tunerprops, channelprops, dabprops));
+	return std::unique_ptr<dabstream>(new dabstream(std::move(device), tunerprops, channelprops, dabprops, subchannel));
 }
 
 //---------------------------------------------------------------------------

@@ -72,7 +72,7 @@ public:
 	//
 	// Factory method, creates a new dab instance
 	static std::unique_ptr<dabstream> create(std::unique_ptr<rtldevice> device, struct tunerprops const& tunerprops,
-		struct channelprops const& channelprops, struct dabprops const& dabprops);
+		struct channelprops const& channelprops, struct dabprops const& dabprops, uint32_t subchannel);
 
 	// demuxabort
 	//
@@ -182,7 +182,7 @@ private:
 	// Instance Constructor
 	//
 	dabstream(std::unique_ptr<rtldevice> device, struct tunerprops const& tunerprops,
-		struct channelprops const& channelprops, struct dabprops const& dabprops);
+		struct channelprops const& channelprops, struct dabprops const& dabprops, uint32_t subchannel);
 
 	//-----------------------------------------------------------------------
 	// Private Type Declarations
@@ -310,7 +310,7 @@ private:
 
 	// STREAM CONTROL
 	//
-	uint32_t			m_subchannel{ 1 };					// Ensemble subchannel number
+	uint32_t const		m_subchannel;						// Ensemble subchannel number
 	float const			m_pcmgain;							// Output gain
 	std::atomic<bool>	m_streamok{ true };					// "OK" flag for the stream
 	double				m_dts{ STREAM_TIME_BASE };			// Current decode time stamp

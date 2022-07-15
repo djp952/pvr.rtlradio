@@ -199,6 +199,12 @@
           <control type="toggle"/>
         </setting>
 
+        <setting id="hdradio_prepend_channel_numbers" type="boolean" label="30117" help="30517">
+          <level>0</level>
+          <default>false</default>
+          <control type="toggle"/>
+        </setting>
+
         <setting id="hdradio_output_gain" type="number" label="30109" help="30509">
           <level>0</level>
           <default>-3.0</default>
