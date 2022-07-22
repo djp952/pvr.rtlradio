@@ -173,7 +173,7 @@ void delete_channel(sqlite3* instance, uint32_t frequency, enum modulation modul
 // delete_subchannel
 //
 // Deletes a subchannel from the database
-void delete_subchannel(sqlite3* instance, uint32_t frequency, enum modulation modulation, uint32_t subchannel);
+void delete_subchannel(sqlite3* instance, uint32_t frequency, enum modulation modulation, uint32_t number);
 
 // enumerate_dabradio_channels
 //
