@@ -180,7 +180,7 @@ bool add_channel(sqlite3* instance, struct channelprops const& channelprops, std
 		execute_non_query(instance, "drop table if exists subchannel_temp");
 		execute_non_query(instance, "create temp table subchannel_temp as select * from subchannel limit 0");
 
-		// frequency | subchannel | modulation | name | logourl
+		// frequency | number | modulation | name | logourl
 		for(auto const& it : subchannelprops) {
 
 			execute_non_query(instance, "insert into subchannel_temp values(?1, ?2, ?3, ?4, ?5)", channelprops.frequency,
@@ -201,11 +201,11 @@ bool add_channel(sqlite3* instance, struct channelprops const& channelprops, std
 
 				// Remove subchannels that no longer exist for this channel
 				execute_non_query(instance, "delete from subchannel where frequency = ?1 and modulation = ?2 "
-					"and subchannel not in (select subchannel from subchannel_temp)", channelprops.frequency, static_cast<int>(channelprops.modulation));
+					"and number not in (select number from subchannel_temp)", channelprops.frequency, static_cast<int>(channelprops.modulation));
 
 				// Use an upsert operation to insert/update the remaining subchannels, only replace the name if necessary
 				execute_non_query(instance, "insert into subchannel select * from subchannel_temp where true "
-					"on conflict(frequency, modulation, subchannel) do update set name=excluded.name");
+					"on conflict(frequency, modulation, number) do update set name=excluded.name");
 			}
 
 			// Commit the database transaction
@@ -375,9 +375,9 @@ void delete_channel(sqlite3* instance, uint32_t frequency, enum modulation modul
 //	instance	- Database instance
 //	frequency	- Frequency of the channel to be deleted
 //	modulation	- Modulation of the channel to be deleted
-//	subchannel	- Subchannel number to be deleted
+//	number		- Subchannel number to be deleted
 
-void delete_subchannel(sqlite3* instance, uint32_t frequency, enum modulation modulation, uint32_t subchannel)
+void delete_subchannel(sqlite3* instance, uint32_t frequency, enum modulation modulation, uint32_t number)
 {
 	if(instance == nullptr) throw std::invalid_argument("instance");
 
@@ -387,11 +387,11 @@ void delete_subchannel(sqlite3* instance, uint32_t frequency, enum modulation mo
 	try {
 
 		// Remove the specified subchannel
-		execute_non_query(instance, "delete from subchannel where frequency = ?1 and subchannel = ?2 and modulation = ?3",
-			frequency, subchannel, static_cast<int>(modulation));
+		execute_non_query(instance, "delete from subchannel where frequency = ?1 and number = ?2 and modulation = ?3",
+			frequency, number, static_cast<int>(modulation));
 
 		// If there are no more subchannels for this channel, delete the parent channel as well
-		if(execute_scalar_int(instance, "select count(subchannel) from subchannel where frequency = ?1 and modulation = ?2",
+		if(execute_scalar_int(instance, "select count(number) from subchannel where frequency = ?1 and modulation = ?2",
 			frequency, static_cast<int>(modulation)) == 0) {
 
 			execute_non_query(instance, "delete from channel where frequency = ?1 and modulation = ?2",
@@ -429,7 +429,7 @@ void enumerate_dabradio_channels(sqlite3* instance, enumerate_channels_callback 
 	//
 
 	// frequency | channelnumber | subchannelnumber | name | logourl
-	auto sql = "select channel.frequency as frequency, namedchannel.number as channelnumber, ifnull(subchannel.subchannel, 0) as subchannelnumber, "
+	auto sql = "select channel.frequency as frequency, namedchannel.number as channelnumber, ifnull(subchannel.number, 0) as subchannelnumber, "
 		"ifnull(subchannel.name, channel.name) as name, ifnull(subchannel.logourl, channel.logourl) as logourl "
 		"from channel inner join namedchannel on channel.frequency = namedchannel.frequency and channel.modulation = namedchannel.modulation "
 		"left outer join subchannel on channel.frequency = subchannel.frequency and channel.modulation = subchannel.modulation "
@@ -545,7 +545,7 @@ void enumerate_hdradio_channels(sqlite3* instance, bool prependnumber, enumerate
 
 	// frequency | channelnumber | subchannelnumber | name | logourl
 	auto sql = "select channel.frequency as frequency, (((channel.frequency / 100000) - 879) / 2) + 200 as channelnumber, "
-		"ifnull(subchannel.subchannel, 0) as subchannelnumber, "
+		"ifnull(subchannel.number, 0) as subchannelnumber, "
 		"case ?1 when 0 then '' else cast(channel.frequency / 1000000 as text) || '.' || cast((channel.frequency % 1000000) / 100000 as text) || ' ' end || "
 		"  channel.name || iif(subchannel.name is null, '', ' ' || subchannel.name) as name, "
 		"ifnull(subchannel.logourl, channel.logourl) as logourl "
@@ -1006,8 +1006,8 @@ bool get_channel_properties(sqlite3* instance, uint32_t frequency, enum modulati
 
 	subchannelprops.clear();						// Reset the vector<>
 
-	// subchannel | name | logourl
-	auto sql = "select subchannel, name, logourl from subchannel where frequency = ?1 and modulation = ?2 order by subchannel";
+	// number | name | logourl
+	auto sql = "select number, name, logourl from subchannel where frequency = ?1 and modulation = ?2 order by number";
 
 	result = sqlite3_prepare_v2(instance, sql, -1, &statement, nullptr);
 	if(result != SQLITE_OK) throw sqlite_exception(result, sqlite3_errmsg(instance));
@@ -1249,13 +1249,9 @@ sqlite3* open_database(char const* connstring, int flags, bool initialize)
 				//
 				// frequency(pk) | subchannel(pk) | modulation (pk) | name
 				execute_non_query(instance, "drop table if exists subchannel");
-				execute_non_query(instance, "create table subchannel(frequency integer not null, subchannel integer not null, modulation integer not null, "
-					"name text not null, logourl null, primary key(frequency, subchannel, modulation))");
+				execute_non_query(instance, "create table subchannel(frequency integer not null, number integer not null, modulation integer not null, "
+					"name text not null, logourl null, primary key(frequency, number, modulation))");
 				
-				// Automatically create .1 "HD1" subchannels for any pre-existing HD Radio multiplexes
-				execute_non_query(instance, "insert into subchannel select v2.frequency, 1, v2.modulation, 'HD1', v2.logourl from channel_v2 as v2 "
-					"where v2.modulation = 1");
-
 				execute_non_query(instance, "drop table channel_v2");
 
 				// table: rawfile
@@ -1439,11 +1435,11 @@ bool update_channel(sqlite3* instance, struct channelprops const& channelprops, 
 
 				// Remove subchannels that no longer exist for this channel
 				execute_non_query(instance, "delete from subchannel where frequency = ?1 and modulation = ?2 "
-					"and subchannel not in (select subchannel from subchannel_temp)", channelprops.frequency, static_cast<int>(channelprops.modulation));
+					"and number not in (select number from subchannel_temp)", channelprops.frequency, static_cast<int>(channelprops.modulation));
 
 				// Use an upsert operation to insert/update the remaining subchannels, only replace the name if necessary
 				execute_non_query(instance, "insert into subchannel select * from subchannel_temp where true "
-					"on conflict(frequency, modulation, subchannel) do update set name=excluded.name");
+					"on conflict(frequency, modulation, number) do update set name=excluded.name");
 			}
 
 			// Commit the database transaction
