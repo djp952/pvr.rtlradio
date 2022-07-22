@@ -101,11 +101,6 @@ struct settings {
 	// The region in which the RTL-SDR device is operating
 	enum regioncode region_regioncode;
 
-	// fmradio_enable
-	//
-	// Enables the FM DSP
-	bool fmradio_enable;
-
 	// fmradio_enable_rds
 	//
 	// Enables passing decoded RDS information to Kodi

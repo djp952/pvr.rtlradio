@@ -1012,7 +1012,6 @@ ADDON_STATUS addon::Create(void)
 			m_settings.region_regioncode = kodi::addon::GetSettingEnum("region_regioncode", regioncode::notset);
 
 			// Load the FM Radio settings
-			m_settings.fmradio_enable = kodi::addon::GetSettingBoolean("fmradio_enable", true);
 			m_settings.fmradio_enable_rds = kodi::addon::GetSettingBoolean("fmradio_enable_rds", true);
 			m_settings.fmradio_prepend_channel_numbers = kodi::addon::GetSettingBoolean("fmradio_prepend_channel_numbers", false);
 			m_settings.fmradio_sample_rate = kodi::addon::GetSettingInt("fmradio_sample_rate", (1600 KHz));
@@ -1043,7 +1042,6 @@ ADDON_STATUS addon::Create(void)
 			log_info(__func__, ": m_settings.device_connection_tcp_port        = ", m_settings.device_connection_tcp_port);
 			log_info(__func__, ": m_settings.device_connection_usb_index       = ", m_settings.device_connection_usb_index);
 			log_info(__func__, ": m_settings.device_frequency_correction       = ", m_settings.device_frequency_correction);
-			log_info(__func__, ": m_settings.fmradio_enable                    = ", m_settings.fmradio_enable);
 			log_info(__func__, ": m_settings.fmradio_downsample_quality        = ", downsample_quality_to_string(m_settings.fmradio_downsample_quality));
 			log_info(__func__, ": m_settings.fmradio_enable_rds                = ", m_settings.fmradio_enable_rds);
 			log_info(__func__, ": m_settings.fmradio_prepend_channel_numbers   = ", m_settings.fmradio_prepend_channel_numbers);
@@ -1233,21 +1231,6 @@ ADDON_STATUS addon::SetSetting(std::string const& settingName, kodi::addon::CSet
 
 			m_settings.device_frequency_correction = nvalue;
 			log_info(__func__, ": setting device_frequency_correction changed to ", m_settings.device_frequency_correction, "PPM");
-		}
-	}
-
-	// fmradio_enable
-	//
-	else if(settingName == "fmradio_enable") {
-
-		bool bvalue = settingValue.GetBoolean();
-		if(bvalue != m_settings.fmradio_enable) {
-
-			m_settings.fmradio_enable = bvalue;
-			log_info(__func__, ": setting fmradio_enable changed to ", bvalue);
-			
-			// Trigger an update to refresh the channel groups
-			TriggerChannelGroupsUpdate();
 		}
 	}
 
@@ -1741,7 +1724,7 @@ PVR_ERROR addon::GetChannelGroupMembers(kodi::addon::PVRChannelGroup const& grou
 	// Select the proper enumerator for the channel group
 	std::function<void(sqlite3*, enumerate_channels_callback)> enumerator = nullptr;
 	
-	if((group.GetGroupName() == kodi::addon::GetLocalizedString(30408)) && (settings.fmradio_enable))
+	if(group.GetGroupName() == kodi::addon::GetLocalizedString(30408))
 		enumerator = std::bind(enumerate_fmradio_channels, std::placeholders::_1, settings.fmradio_prepend_channel_numbers, std::placeholders::_2);
 
 	else if((group.GetGroupName() == kodi::addon::GetLocalizedString(30409)) && (settings.hdradio_enable)) 
@@ -1852,7 +1835,7 @@ PVR_ERROR addon::GetChannels(bool radio, kodi::addon::PVRChannelsResultSet& resu
 		};
 
 		connectionpool::handle dbhandle(m_connpool);
-		if(settings.fmradio_enable) enumerate_fmradio_channels(dbhandle, settings.fmradio_prepend_channel_numbers, callback);
+		enumerate_fmradio_channels(dbhandle, settings.fmradio_prepend_channel_numbers, callback);
 		if(settings.hdradio_enable) enumerate_hdradio_channels(dbhandle, settings.hdradio_prepend_channel_numbers, callback);
 		if(settings.dabradio_enable) enumerate_dabradio_channels(dbhandle, callback);
 		if(settings.wxradio_enable) enumerate_wxradio_channels(dbhandle, callback);
@@ -2069,11 +2052,8 @@ PVR_ERROR addon::OpenDialogChannelAdd(kodi::addon::PVRChannel const& /*channel*/
 	std::vector<std::string> channeltypes;
 	std::vector<enum modulation> modulationtypes;
 
-	if(settings.fmradio_enable) {
-
-		channeltypes.emplace_back(kodi::addon::GetLocalizedString(30414));
-		modulationtypes.emplace_back(modulation::fm);
-	}
+	channeltypes.emplace_back(kodi::addon::GetLocalizedString(30414));
+	modulationtypes.emplace_back(modulation::fm);
 
 	if(settings.hdradio_enable) {
 
