@@ -98,18 +98,9 @@
     <category id="fmradio" label="30002">
       <group id="1" label="-1">
 
-        <setting id="fmradio_enable" type="boolean" label="30113" help="30513">
-          <level>0</level>
-          <default>true</default>
-          <control type="toggle"/>
-        </setting>
-
         <setting id="fmradio_enable_rds" type="boolean" label="30106" help="30506">
           <level>0</level>
           <default>true</default>
-          <dependencies>
-            <dependency type="enable" setting="fmradio_enable">true</dependency>
-          </dependencies>
           <control type="toggle"/>
         </setting>
 
@@ -134,9 +125,6 @@
               <option label="30214">2400000</option>
             </options>
           </constraints>
-          <dependencies>
-            <dependency type="enable" setting="fmradio_enable">true</dependency>
-          </dependencies>
           <control type="spinner" format="integer"/>
         </setting>
 
@@ -150,9 +138,6 @@
               <option label="30218">2</option>
             </options>
           </constraints>
-          <dependencies>
-            <dependency type="enable" setting="fmradio_enable">true</dependency>
-          </dependencies>
           <control type="spinner" format="integer"/>
         </setting>
 
@@ -165,9 +150,6 @@
               <option label="30206">48000</option>
             </options>
           </constraints>
-          <dependencies>
-            <dependency type="enable" setting="fmradio_enable">true</dependency>
-          </dependencies>
           <control type="spinner" format="integer"/>
         </setting>
 
@@ -179,9 +161,6 @@
             <step>0.5</step>
             <maximum>0.0</maximum>
           </constraints>
-          <dependencies>
-            <dependency type="enable" setting="fmradio_enable">true</dependency>
-          </dependencies>
           <control type="slider" format="number">
             <formatlabel>14054</formatlabel>
           </control>

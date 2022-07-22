@@ -94,9 +94,7 @@ msgctxt "#30111"
 msgid "Downsample quality"
 msgstr ""
 
-msgctxt "#30113"
-msgid "Enable FM Radio"
-msgstr ""
+# 30113 can be reused
 
 msgctxt "#30114"
 msgid "Enable HD Radio"
@@ -420,9 +418,7 @@ msgctxt "#30511"
 msgid "Specifies the Digital Signal Processor (DSP) downsample quality. When set to Fast, downsampling will be optimized for system performance. When set to Maximum, downsampling will be optimized for audio quality."
 msgstr ""
 
-msgctxt "#30513"
-msgid "When set to ON new FM Radio channels may be added and existing FM Radio channels will be available for playback. When set to OFF, FM Radio channels may not be added and existing FM Radio channels will not be available for playback."
-msgstr ""
+# 30513 can be reused
 
 msgctxt "#30514"
 msgid "When set to ON new Hybrid Digital (HD) Radio channels may be added and existing HD Radio channels will be available for playback. When set to OFF, HD Radio channels may not be added and existing HD Radio channels will not be available for playback. This option should only be enabled when the RTL-SDR device is in the North America region."
