@@ -44,10 +44,11 @@
 #include "channeladd.h"
 #include "channelsettings.h"
 #include "dbtypes.h"
-#include "filedevice.h"
 #include "dabstream.h"
+#include "filedevice.h"
 #include "fmstream.h"
 #include "hdstream.h"
+#include "multiselect.h"
 #include "string_exception.h"
 #include "sqlite_exception.h"
 #include "tcpdevice.h"
@@ -1073,6 +1074,16 @@ ADDON_STATUS addon::Create(void)
 				log_error(__func__, ": unable to create/open the channels database ", databasefile, " - ", dbex.what());
 				throw;
 			}
+
+			//
+			// TESTING
+			//
+			std::vector<struct multiselect::entry> entries;
+			entries.emplace_back(multiselect::entry { 1, "TEST", false });
+			entries.emplace_back(multiselect::entry { 2, "TEST", true });
+
+			std::unique_ptr<multiselect> test = multiselect::create(entries);
+			test->DoModal();
 
 			// If the user has not specified a region code, attempt to get them to do it during startup
 			if(m_settings.region_regioncode == regioncode::notset) {

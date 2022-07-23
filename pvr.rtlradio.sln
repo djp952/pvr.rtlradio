@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.28922.388
+# Visual Studio Version 17
+VisualStudioVersion = 17.2.32630.192
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "windows", "src\windows.vcxproj", "{5B5A17F1-4312-4A64-A796-2818CE0906B4}"
 	ProjectSection(ProjectDependencies) = postProject
@@ -103,6 +103,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "xml", "xml", "{880E452A-4A3
 	ProjectSection(SolutionItems) = preProject
 		pvr.rtlradio\resources\skins\skin.estuary\xml\channeladd.xml = pvr.rtlradio\resources\skins\skin.estuary\xml\channeladd.xml
 		pvr.rtlradio\resources\skins\skin.estuary\xml\channelsettings.xml = pvr.rtlradio\resources\skins\skin.estuary\xml\channelsettings.xml
+		pvr.rtlradio\resources\skins\skin.estuary\xml\multiselect.xml = pvr.rtlradio\resources\skins\skin.estuary\xml\multiselect.xml
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "rtl_biast", "src\rtl_biast.vcxproj", "{F36BC675-E8EC-4A56-8350-3A666B0AA870}"

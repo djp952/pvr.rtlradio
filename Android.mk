@@ -184,6 +184,7 @@ LOCAL_SRC_FILES := \
 	src/id3v1tag.cpp \
 	src/id3v2tag.cpp \
 	src/libusb_exception.cpp \
+	src/multiselect.cpp \
 	src/rdsdecoder.cpp \
 	src/signalmeter.cpp \
 	src/sqlite_exception.cpp \

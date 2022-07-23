@@ -72,25 +72,25 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <OutDir>$(ProjectDir)..\out\windows-$(Platform)\$(Configuration)\</OutDir>
+    <OutDir>D:\kodi-sxs\Nexus-x64\portable_data\addons\pvr.rtlradio\</OutDir>
     <TargetName>$(RootNamespace)</TargetName>
     <IntDir>$(Configuration)\$(Platform)\$(ProjectName)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <OutDir>$(ProjectDir)..\out\windows-$(Platform)\$(Configuration)\</OutDir>
+    <OutDir>D:\kodi-sxs\Nexus-x64\portable_data\addons\pvr.rtlradio\</OutDir>
     <TargetName>$(RootNamespace)</TargetName>
     <IntDir>$(Configuration)\$(Platform)\$(ProjectName)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>$(ProjectDir)..\out\windows-$(Platform)\$(Configuration)\</OutDir>
+    <OutDir>D:\kodi-sxs\Nexus-x64\portable_data\addons\pvr.rtlradio\</OutDir>
     <TargetName>$(RootNamespace)</TargetName>
     <IntDir>$(Configuration)\$(Platform)\$(ProjectName)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>$(ProjectDir)..\out\windows-$(Platform)\$(Configuration)\</OutDir>
+    <OutDir>D:\kodi-sxs\Nexus-x64\portable_data\addons\pvr.rtlradio\</OutDir>
     <TargetName>$(RootNamespace)</TargetName>
     <IntDir>$(Configuration)\$(Platform)\$(ProjectName)\</IntDir>
   </PropertyGroup>
@@ -343,6 +343,7 @@
     <ClInclude Include="id3v1tag.h" />
     <ClInclude Include="id3v2tag.h" />
     <ClInclude Include="libusb_exception.h" />
+    <ClInclude Include="multiselect.h" />
     <ClInclude Include="muxscanner.h" />
     <ClInclude Include="props.h" />
     <ClInclude Include="pvrstream.h" />
@@ -2549,6 +2550,7 @@
       <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(ProjectDir)..\depends\libusb\src\libusb;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(ProjectDir)..\depends\libusb\src\libusb;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
+    <ClCompile Include="multiselect.cpp" />
     <ClCompile Include="rdsdecoder.cpp" />
     <ClCompile Include="signalmeter.cpp" />
     <ClCompile Include="sqlite_exception.cpp" />
