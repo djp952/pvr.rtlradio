@@ -192,7 +192,8 @@ void signalmeter::processsamples(void)
 		std::unique_ptr<int[]> plot(new int[m_plotprops.width + 1]);
 		bool overload = m_fft.GetScreenIntegerFFTData(static_cast<qint32>(m_plotprops.height), static_cast<qint32>(m_plotprops.width),
 			static_cast<TYPEREAL>(m_plotprops.maxdb), static_cast<TYPEREAL>(m_plotprops.mindb),
-			-(static_cast<int32_t>(m_signalprops.bandwidth) / 2), (static_cast<int32_t>(m_signalprops.bandwidth) / 2), &plot[0]);
+			-(static_cast<int32_t>(m_signalprops.bandwidth) / 2) - m_signalprops.offset,
+			(static_cast<int32_t>(m_signalprops.bandwidth) / 2) - m_signalprops.offset, &plot[0]);
 
 		// Determine how many Hertz are represented by each measurement in the signal plot and the center point
 		float hzper = static_cast<float>(m_plotprops.width) / static_cast<float>(m_signalprops.bandwidth);

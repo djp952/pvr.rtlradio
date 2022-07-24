@@ -686,6 +686,10 @@ channelsettings::channelsettings(std::unique_ptr<rtldevice> device, struct tuner
 		m_signalprops.bandwidth = 220 KHz;
 		m_signalprops.lowcut = -103 KHz;
 		m_signalprops.highcut = 103 KHz;
+
+		// Analog signals require a DC offset to be applied to prevent a natural
+		// spike from occurring at the center frequency on many RTL-SDR devices
+		m_signalprops.offset = (m_signalprops.samplerate / 4);
 	}
 
 	// HD Radio
@@ -696,6 +700,7 @@ channelsettings::channelsettings(std::unique_ptr<rtldevice> device, struct tuner
 		m_signalprops.bandwidth = 440 KHz;
 		m_signalprops.lowcut = -204 KHz;
 		m_signalprops.highcut = 204 KHz;
+		m_signalprops.offset = 0;
 	}
 
 	// DAB Ensemble
@@ -706,6 +711,7 @@ channelsettings::channelsettings(std::unique_ptr<rtldevice> device, struct tuner
 		m_signalprops.bandwidth = 1712 KHz;
 		m_signalprops.lowcut = -780 KHz;
 		m_signalprops.highcut = 780 KHz;
+		m_signalprops.offset = 0;
 	}
 
 	// Weather Radio
@@ -716,6 +722,10 @@ channelsettings::channelsettings(std::unique_ptr<rtldevice> device, struct tuner
 		m_signalprops.bandwidth = 200 KHz;
 		m_signalprops.lowcut = -8 KHz;
 		m_signalprops.highcut = 8 KHz;
+
+		// Analog signals require a DC offset to be applied to prevent a natural
+		// spike from occurring at the center frequency on many RTL-SDR devices
+		m_signalprops.offset = (m_signalprops.samplerate / 4);
 	}
 
 	else throw string_exception("unknown channel modulation");
@@ -724,7 +734,7 @@ channelsettings::channelsettings(std::unique_ptr<rtldevice> device, struct tuner
 	m_device->get_valid_gains(m_manualgains);
 
 	// Set the device to match the channel properties at time of construction (prior to OnCreate)
-	m_device->set_center_frequency(m_channelprops.frequency);
+	m_device->set_center_frequency(m_channelprops.frequency + m_signalprops.offset);
 	m_device->set_frequency_correction(m_tunerprops.freqcorrection + m_channelprops.freqcorrection);
 	m_device->set_sample_rate(m_signalprops.samplerate);
 	m_device->set_automatic_gain_control(m_channelprops.autogain);

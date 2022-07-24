@@ -116,6 +116,7 @@ struct signalprops {
 	uint32_t		bandwidth;			// Signal bandwidth
 	int32_t			lowcut;				// low cut from center
 	int32_t			highcut;			// high cut from center
+	uint32_t		offset;				// Signal frequency offset
 };
 
 // streamprops
