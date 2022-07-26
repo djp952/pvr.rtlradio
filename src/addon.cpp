@@ -530,15 +530,15 @@ std::string addon::device_connection_to_string(enum device_connection connection
 }
 
 //---------------------------------------------------------------------------
-// addon::is_region_rbds (private)
+// addon::is_region_northamerica (private)
 //
-// Determines if the currently set region is RBDS (North America)
+// Determines if the currently set region is North America
 //
 // Arguments:
 //
 //	settings		- Reference to the current addon settings
 
-bool addon::is_region_rbds(struct settings const& settings) const
+bool addon::is_region_northamerica(struct settings const& settings) const
 {
 	// If a region code has not been set, try to determine if the RTL-SDR device is
 	// being operated in North America based on the ISO language code
@@ -2240,7 +2240,7 @@ bool addon::OpenLiveStream(kodi::addon::PVRChannel const& channel)
 			// Set up the FM digital signal processor properties
 			struct fmprops fmprops = {};
 			fmprops.decoderds = settings.fmradio_enable_rds;
-			fmprops.isrbds = is_region_rbds(settings);
+			fmprops.isnorthamerica = is_region_northamerica(settings);
 			fmprops.samplerate = settings.fmradio_sample_rate;
 			fmprops.downsamplequality = static_cast<int>(settings.fmradio_downsample_quality);
 			fmprops.outputrate = settings.fmradio_output_samplerate;
@@ -2250,7 +2250,7 @@ bool addon::OpenLiveStream(kodi::addon::PVRChannel const& channel)
 			log_info(__func__, ": Creating fmstream for channel \"", channelprops.name, "\"");
 			log_info(__func__, ": tunerprops.freqcorrection = ", tunerprops.freqcorrection, " PPM");
 			log_info(__func__, ": fmprops.decoderds = ", (fmprops.decoderds) ? "true" : "false");
-			log_info(__func__, ": fmprops.isrbds = ", (fmprops.isrbds) ? "true" : "false");
+			log_info(__func__, ": fmprops.isnorthamerica = ", (fmprops.isnorthamerica) ? "true" : "false");
 			log_info(__func__, ": fmrops.samplerate = ", fmprops.samplerate, " Hz");
 			log_info(__func__, ": fmprops.downsamplequality = ", downsample_quality_to_string(static_cast<enum downsample_quality>(fmprops.downsamplequality)));
 			log_info(__func__, ": fmprops.outputgain = ", fmprops.outputgain, " dB");
