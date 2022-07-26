@@ -677,6 +677,8 @@ channelsettings::channelsettings(std::unique_ptr<rtldevice> device, struct tuner
 	m_device(std::move(device)), m_tunerprops(tunerprops), m_channelprops(channelprops), m_isnew(isnew)
 {
 	assert(m_device);
+
+	m_signalprops.filter = false;			// Never apply the filter here
 	
 	// Analog FM
 	//

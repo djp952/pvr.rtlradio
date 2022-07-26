@@ -73,6 +73,10 @@ signalmeter::signalmeter(struct signalprops const& signalprops, struct signalplo
 	m_fftminbytes = align::down(static_cast<size_t>(bytespersecond * (static_cast<float>(rate) / 1000.0f)),
 		static_cast<unsigned int>(m_fftsize));
 
+	// Initialize the finite impulse response filter
+	m_fir.SetupParameters(static_cast<TYPEREAL>(m_signalprops.lowcut), static_cast<TYPEREAL>(m_signalprops.highcut), 
+		-static_cast<TYPEREAL>(m_signalprops.offset), m_signalprops.samplerate);
+
 	// Initialize the fast fourier transform instance
 	m_fft.SetFFTParams(static_cast<int>(m_fftsize), false, 0.0, m_signalprops.samplerate);
 	m_fft.SetFFTAve(50);
@@ -181,8 +185,17 @@ void signalmeter::processsamples(void)
 				if(m_tail >= RING_BUFFER_SIZE) m_tail = 0;
 			}
 
+			size_t numsamples = m_fftsize;
+
+			// If specified, filter out everything but the desired bandwidth
+			if(m_signalprops.filter) {
+
+				numsamples = m_fir.ProcessData(static_cast<int>(m_fftsize), &samples[0], &samples[0]);
+				assert(numsamples == m_fftsize);
+			}
+
 			// Push the current set of samples through the fast fourier transform
-			m_fft.PutInDisplayFFT(static_cast<qint32>(m_fftsize), &samples[0]);
+			m_fft.PutInDisplayFFT(static_cast<qint32>(numsamples), &samples[0]);
 
 			// Recalculate the amount of available data in the ring buffer after the read operation
 			available = (m_tail > m_head) ? (RING_BUFFER_SIZE - m_tail) + m_head : m_head - m_tail;
