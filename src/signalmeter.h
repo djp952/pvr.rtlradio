@@ -27,6 +27,7 @@
 #include <functional>
 #include <memory>
 
+#include "fmdsp/fastfir.h"
 #include "fmdsp/fft.h"
 
 #include "props.h"
@@ -125,6 +126,7 @@ private:
 
 	// FFT
 	//
+	CFastFIR				m_fir;							// Finite impulse response filter
 	size_t					m_fftsize{ DEFAULT_FFT_SIZE };	// FFT size (bins)
 	CFft					m_fft;							// FFT instance
 	size_t					m_fftminbytes{ 0 };				// Number of bytes required to process

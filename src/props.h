@@ -117,6 +117,7 @@ struct signalprops {
 	int32_t			lowcut;				// low cut from center
 	int32_t			highcut;			// high cut from center
 	uint32_t		offset;				// Signal frequency offset
+	bool			filter;				// Flag to filter the signal
 };
 
 // streamprops
