@@ -59,7 +59,7 @@ int const fmstream::STREAM_ID_UECP = 2;
 
 fmstream::fmstream(std::unique_ptr<rtldevice> device, struct tunerprops const& tunerprops, 
 	struct channelprops const& channelprops, struct fmprops const& fmprops) :
-	m_device(std::move(device)), m_decoderds(fmprops.decoderds), m_rdsdecoder(fmprops.isrbds),
+	m_device(std::move(device)), m_decoderds(fmprops.decoderds), m_rdsdecoder(fmprops.isnorthamerica),
 	m_muxname(generate_mux_name(channelprops)), m_pcmsamplerate(fmprops.outputrate), 
 	m_pcmgain(MPOW(10.0, (fmprops.outputgain / 10.0)))
 {
@@ -87,7 +87,7 @@ fmstream::fmstream(std::unique_ptr<rtldevice> device, struct tunerprops const& t
 
 	// Initialize the wideband FM demodulator
 	m_demodulator = std::unique_ptr<CDemodulator>(new CDemodulator());
-	m_demodulator->SetUSFmVersion(fmprops.isrbds);
+	m_demodulator->SetUSFmVersion(fmprops.isnorthamerica);
 	m_demodulator->SetInputSampleRate(static_cast<TYPEREAL>(samplerate));
 	m_demodulator->SetDemod(DEMOD_WFM, demodinfo);
 	m_demodulator->SetDemodFreq(static_cast<TYPEREAL>(frequency - channelprops.frequency));

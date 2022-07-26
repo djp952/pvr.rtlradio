@@ -59,7 +59,7 @@ struct dabprops {
 struct fmprops {
 
 	bool			decoderds;			// Flag if RDS should be decoded or not
-	bool			isrbds;				// Flag if region is RBDS (North America)
+	bool			isnorthamerica;		// Flag if region is North America
 	uint32_t		samplerate;			// Input sample rate in Hertz
 	int				downsamplequality;	// Downsample quality setting
 	uint32_t		outputrate;			// Output sample rate in Hertz

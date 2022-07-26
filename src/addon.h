@@ -268,7 +268,7 @@ private:
 
 	// Regional Helpers
 	//
-	bool is_region_rbds(struct settings const& settings) const;
+	bool is_region_northamerica(struct settings const& settings) const;
 	void update_regioncode(enum regioncode code) const;
 
 	// Settings Helpers
