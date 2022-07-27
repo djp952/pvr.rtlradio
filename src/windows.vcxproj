@@ -72,25 +72,25 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <OutDir>$(ProjectDir)..\out\windows-$(Platform)\$(Configuration)\</OutDir>
+    <OutDir>D:\kodi-sxs\Nexus-x64\portable_data\addons\pvr.rtlradio\</OutDir>
     <TargetName>$(RootNamespace)</TargetName>
     <IntDir>$(Configuration)\$(Platform)\$(ProjectName)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <OutDir>$(ProjectDir)..\out\windows-$(Platform)\$(Configuration)\</OutDir>
+    <OutDir>D:\kodi-sxs\Nexus-x64\portable_data\addons\pvr.rtlradio\</OutDir>
     <TargetName>$(RootNamespace)</TargetName>
     <IntDir>$(Configuration)\$(Platform)\$(ProjectName)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>$(ProjectDir)..\out\windows-$(Platform)\$(Configuration)\</OutDir>
+    <OutDir>D:\kodi-sxs\Nexus-x64\portable_data\addons\pvr.rtlradio\</OutDir>
     <TargetName>$(RootNamespace)</TargetName>
     <IntDir>$(Configuration)\$(Platform)\$(ProjectName)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>$(ProjectDir)..\out\windows-$(Platform)\$(Configuration)\</OutDir>
+    <OutDir>D:\kodi-sxs\Nexus-x64\portable_data\addons\pvr.rtlradio\</OutDir>
     <TargetName>$(RootNamespace)</TargetName>
     <IntDir>$(Configuration)\$(Platform)\$(ProjectName)\</IntDir>
   </PropertyGroup>
@@ -318,6 +318,7 @@
     <ClInclude Include="fmdsp\iir.h" />
     <ClInclude Include="fmdsp\rbdsconstants.h" />
     <ClInclude Include="fmdsp\wfmdemod.h" />
+    <ClInclude Include="fmscanner.h" />
     <ClInclude Include="fmstream.h" />
     <ClInclude Include="hddsp\acquire.h" />
     <ClInclude Include="hddsp\bitwriter.h" />
@@ -351,6 +352,7 @@
     <ClInclude Include="renderingcontrol.h" />
     <ClInclude Include="rtldevice.h" />
     <ClInclude Include="scalar_condition.h" />
+    <ClInclude Include="scanner.h" />
     <ClInclude Include="signalmeter.h" />
     <ClInclude Include="socket_exception.h" />
     <ClInclude Include="sqlite_exception.h" />
@@ -2286,6 +2288,7 @@
       <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(IntDir)fmdsp\</ObjectFileName>
       <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(IntDir)fmdsp\</ObjectFileName>
     </ClCompile>
+    <ClCompile Include="fmscanner.cpp" />
     <ClCompile Include="fmstream.cpp" />
     <ClCompile Include="hddsp\acquire.c">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
